@@ -1,0 +1,24 @@
+Prepare
+~~~~~~~
+- Make sure that your system installed the docker engine.
+- This is a docker image for BAA application
+
+
+Quick start below
+~~~~~~~~~~~~~~~~~
+
+Use below commands to create BAA docker image:
+
+docker build --build-arg http_proxy=<your http proxy>  --build-arg https_proxy=<your https proxy> -t baa .
+
+for eg:
+
+docker build --build-arg http_proxy=http://10.158.100.6:8080 --build-arg https_proxy=http://10.158.100.6:8080 -t baa .
+
+OR
+
+docker build --build-arg http_proxy=http://135.245.173.11:8000 --build-arg https_proxy=http://135.245.173.11:8000 -t baa .
+
+OR
+
+docker build -t baa .

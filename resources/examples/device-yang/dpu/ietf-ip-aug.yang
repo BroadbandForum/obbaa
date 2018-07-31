@@ -1,0 +1,72 @@
+module ietf-ip-aug{
+    namespace "urn:ietf:params:xml:ns:yang:ietf-ip-aug";
+  	prefix mgntip;
+  	
+	import iana-if-type {
+	    prefix ianaift;
+	}
+	import ietf-interfaces {
+	    prefix if;
+	}
+
+  import ietf-ip {
+	    prefix ip;
+	}
+	/*import bbf-l2-port-types {
+	    prefix bbf-l2pt;
+	}*/
+	/*
+     * Configuration data nodes
+     */
+    augment "/if:interfaces/if:interface/ip:ipv4" {
+	  when "../if:type = 'ianaift:ipForward'" {
+      description
+        "Port type is ipForward.";
+	  }      
+
+	  container ipif-lower-layer {
+	    presence
+		  "This leaves provides the lower layer within the interface stack";
+
+		description
+		  "Link ip interface to a lower layer network-port sub-interface";
+
+	    leaf sub-interface {
+		  type if:interface-ref;
+      
+		  mandatory true;
+          description
+		    "References the lower layer interface";
+	    }
+	   // uses bbf-subif:sub-interface-ref;
+	 }
+   }
+
+    /*
+     * Operational state data nodes
+     */
+    augment "/if:interfaces-state/if:interface/ip:ipv4" {
+
+      container ipif-lower-layer {
+	    presence
+		  "This leaves provides the lower layer within the interface stack";
+
+		description
+		  "Link ip interface to a lower layer network-port sub-interface";
+
+		  leaf sub-interface {
+
+		  type if:interface-ref;
+		  
+	
+
+  
+		  mandatory true;
+          description
+		    "References the lower layer interface";
+	    }
+	    
+	  //  uses bbf-subif:sub-interface-ref;
+	  }
+  }
+}

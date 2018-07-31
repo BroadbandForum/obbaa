@@ -1,0 +1,94 @@
+// BBF Software Image Mangement Notifications YANG submodule
+
+submodule bbf-software-image-management-notifications {
+
+  belongs-to bbf-software-image-management {
+    prefix swmgmt;
+  }
+
+  import "bbf-software-image-management-yang-types" {
+    prefix swmgmt-types;
+  }
+
+  organization "Broadband Forum FTTDp";
+
+  contact
+   "Web : <https://www.broadband-forum.org/>
+    Help e-mail : TBD
+    Editor : TBD  ";
+
+  description "Software Image Mangement Notifications YANG submodule";
+
+  revision 2016-04-01 {
+     description
+      "Initial Revision";
+     reference
+      "";
+  }
+
+/* Notifications for download, activation and commit operations*/
+
+notification software-download-finished {
+    description
+      "Notification for the rpc 'download-software-image'
+       notification is sent after successful download
+       or after the last re-try for download is failed.";
+
+    leaf name {
+      type string;
+      description
+        "The name of the software image for which the download is
+         requested";
+    }
+
+    leaf  download-status {
+      type swmgmt-types:operation-status;
+      description
+       "Depicts the status of download of the software is successful
+        or not.";
+    }
+
+}
+
+notification software-activation-finished {
+    description
+      "Notification for the rpc 'activate software image'.
+       Notification is sent after the successful activation of
+       the software or after activation failure.";
+
+    leaf name {
+      type string;
+      description
+        "The name of the software image for which the
+         activation is requested.";
+     }
+
+    leaf activation-status {
+      type swmgmt-types:operation-status;
+      description
+       "Depicts the status of activation of the software is successful
+        or not.";
+    }
+ }
+
+notification software-commit-finished {
+    description
+      "Notification for the rpc 'commit software image'.
+       Notification is sent after the successful commit of
+       the software or after commit failure.";
+
+    leaf name {
+      type string;
+      description
+        "The name of the software image for which the
+         commit is requested.";
+     }
+
+    leaf commit-status {
+      type swmgmt-types:operation-status;
+      description
+       "Depicts the status of commit of the software.";
+    }
+ }
+
+}// submodule bbf-software-image-management-notifications

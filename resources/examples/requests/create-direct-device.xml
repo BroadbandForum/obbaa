@@ -1,0 +1,50 @@
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907656">
+    <edit-config>
+        <target>
+            <running />
+        </target>
+        <config>
+            <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
+                <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"  xc:operation="create">
+                    <device-name>deviceA</device-name>
+                    <device-management>
+                        <device-type>DPU</device-type>
+                        <device-software-version>1.0.0</device-software-version>
+                        <device-vendor>Huawei</device-vendor>
+                        <device-connection>
+                            <connection-model>direct</connection-model>
+                            <password-auth>
+                                <authentication>
+                                    <address>192.168.169.1</address>
+                                    <!-- ip address of the device/simulator. Replace with the right ip -->
+                                    <management-port>830</management-port>
+                                    <!-- port number of device/simulator NC server. -->
+                                    <user-name>netconf</user-name>
+                                    <!-- username of device NC server -->
+                                    <password>netconf</password>
+                                    <!-- password of device NC server -->
+                                </authentication>
+                            </password-auth>
+                        </device-connection>
+                    </device-management>
+                </device>
+            </managed-devices>
+        </config>
+    </edit-config>
+</rpc>

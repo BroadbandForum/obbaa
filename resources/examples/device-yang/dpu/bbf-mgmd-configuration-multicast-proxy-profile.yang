@@ -1,0 +1,228 @@
+submodule bbf-mgmd-configuration-multicast-proxy-profile {
+//  yang-version "1";
+
+  belongs-to bbf-mgmd {
+    prefix "igmp-config";
+  } 
+
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "An experimental YANG module for IGMP Protocol.";
+  
+  revision 2016-03-16 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  
+  grouping multicast-proxy-profile-entry {
+    description
+      ".";
+  
+    /*****************
+    must "system-last-member-query-count >= system-robustness" {
+      error-message "LastMembQueryCount is less than system robustness";
+    }
+    
+    must "(system-last-member-query-interval - system-last-member-max-response-time) >= 8" {
+      error-message "The last member interval is too short(at least LastMembMaxResponseTime + 8)";
+    }
+    ******************/
+
+      
+    leaf query-interval {
+      type uint32 {
+        range "2..3175";
+      }
+      units seconds;
+      default 125;
+
+      description
+        "The interval at which IGMP general membership queries (GMQs)
+         are transmitted (per interface). 
+         This object is applied to each IGMP channel";
+    }
+
+    leaf query-max-response-time {
+      type uint32 {
+        range "1..31744";
+      }
+      units "0.1 seconds";
+      default 100;
+
+      description
+        "The maximum query response time advertised in IGMPv2 queries
+         and IGMPv3 queries on the interface. 
+         This object is applied to each IGMP channel.
+         The object is shared between IGMPv2 and IGMPv3 but has a
+         different unit.
+
+         IGMPv2:
+           Object value <=255 sec :the time value is equal
+           to the object value (units in 100ms)
+           Object value > 255 sec :the time value is 255 sec (units in 100ms)
+        
+         IGMPv3 :
+           Object value <= 128 sec : the timevalue is equal
+           to the object value (units in 100ms)
+           Object value > 128 : the timevalue  is equal to the object value
+           with a granularity of 8 for the values 128 till 256 increasing
+           gradually (2exp) to a object value with a granularity of 1024 for
+           the last values (first initially increasing for
+           the values 26624 till 31744 .
+           Default value = 100  or 10sec";
+    }
+
+    leaf immediate-leave {
+      type enumeration {
+        enum "ENABLED" {
+//          value "0";
+          description
+            "Enabled";
+        }
+        enum "Disabled" {
+//          value "1";
+          description
+            "Disabled";
+        }      
+      }  
+      default "ENABLED";
+      description
+        ".";
+    }  
+
+    leaf robustness {
+      type uint8 {
+        range "1..10";
+      }
+      default 2;
+      description
+        "The Robustness Variable allows tuning for the expected packet
+         loss on a subnet. If a subnet is expected to be lossy, the
+         Robustness Variable may be increased. IGMP is robust to
+         (Robustness Variable-1) packet losses.
+         This object is applied to each IGMP channel.";
+    }
+
+    leaf last-member-query-interval {
+      type uint32 {
+        range "2..31744";
+      }
+      units "0.1 seconds";
+      default 10;
+
+      description
+        "This entry is the spacing between GSQs (group-specific queries.)
+         This object is applied to each IGMP channel.";
+    }
+
+    leaf last-member-query-count {
+      type uint32 {
+        range "1..10";
+      }
+      default 2;
+      description
+        "The number of unanswered group specific queries sent out
+         before it is assumed that there are no local members
+         interested in the IP multicast stream. This object is
+         applied to each IGMP channel.";
+    }
+
+    leaf last-member-max-response-time {
+      type uint32 {
+        range "1..31744";
+      }
+      units "0.1 seconds";
+      default 2;
+
+      description
+        "Allows shorter maximum response times. Allows fast channel
+         change to occur by configuring the response time inserted into
+         a leave.
+         This object is applied to each IGMP channel.
+         The object is shared between IGMPv2 and IGMPv3 but has a
+         different unit.
+         IGMPv2 :
+           Object value <=255 sec :the time value is equal to the object value
+           (units in 100ms)
+           Object value > 255 :the time value is 255 (units in 100ms)
+         IGMPv3 :
+           Object value <= 128 sec : the timevalue is equal to the object value
+           (units in 100ms)
+           Object value > 128 : the timevalue  is equal to the object value
+           with a granularity of 8 for the values 128 till 256 increasing
+           gradually (2exp) to a object value with a granularity of 1024 for
+           the last values (first initially increasing for the values
+           26624 till 31744 .";
+    }
+    
+    leaf startup-query-count {
+      type uint32 {
+        range "1..255";
+      }
+      default 2;
+      description
+        "Startup Query Count";
+    }
+    
+    leaf startup-query-interval {
+      type uint32 {
+        range "0..31744";
+      }
+//?? add a unit
+//?? add a default
+
+      description
+        "Startup Query Interval";
+    }
+  
+    leaf router-port-purge-timer {
+      type uint32;
+
+//?? add a unit
+//?? add a default
+
+      description
+        "Router Port Purge Timer";
+    }  
+  
+    leaf host-port-purge-timer {
+      type uint32;
+
+//?? add a unit
+//?? add a default
+
+      description
+        "Host Port Purge Timer";
+    }  
+  
+    leaf interface-version {
+      type enumeration {
+        enum "IGMPv2" {
+//          value "0";
+          description "V2";
+        }
+        enum "IGMPv3" {
+//          value "1";
+          description "v3";
+        }
+        enum "MLDv2" {
+//          value "2";
+          description "MLD v2";
+        }
+      }  
+
+//?? add a default
+
+      description
+        ".";
+    }
+  }
+}

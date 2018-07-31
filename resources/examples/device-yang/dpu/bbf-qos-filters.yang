@@ -1,0 +1,145 @@
+module bbf-qos-filters {
+
+  namespace "urn:broadband-forum-org:yang:" +
+            "bbf-qos-filters";  
+            
+  prefix bbf-qos-filt;
+
+  import bbf-yang-types {
+    prefix bbf;
+  }
+
+  import bbf-qos-policies{
+    prefix bbf-qos-pol;
+  }
+
+  import bbf-frame-classification {
+    prefix bbf-classif;
+  }
+
+  organization
+    "Broadband Forum Common YANG Work Area";
+
+  contact
+    "BBF:      http://www.broadband-forum.org
+               help@broadband-forum.org
+	       
+     Editor:   Ludwig Pauwels, Nokia
+     
+     Work Area Director: William Lupton, Broadband Forum
+                         Michael Shaffer, Nokia";
+
+  description 
+    "This module contains definitions of filter criteria for the 
+     purpose of qualify of service.";
+
+  revision 2016-05-30 {
+    description
+      "Initial revision";
+      
+    reference
+      "TBD";
+  }
+
+  container filters {
+    description
+      "Filters configuration.";
+      
+    list filter {
+      key "name";
+      description
+        "List of filter entries.";
+
+      leaf name {
+        type bbf:string-ascii64;
+        description
+          "Filter name.";
+      }
+
+      leaf description {
+        type bbf:string-ascii64-or-empty;
+        description
+          "Description of the class template.";
+      }
+
+      leaf filter-logical-not {
+        type boolean;
+        default false;
+        description
+          "This is logical-not operator for a filter. 
+           When true, it indicates the filter looks for non-match with 
+           a pattern defined by the filter-field. When false, it looks 
+           for a match with the pattern defined by the filter field.";
+      }
+
+      choice filter-field {
+        description 
+          "A field to be classified.";
+
+        case source-mac-address {
+          container source-mac-address {
+            uses bbf-classif:mac-address-match;
+            description
+              "Filter containing source MAC address.";
+          }
+        }
+
+        case destination-mac-address {
+          container destination-mac-address {
+            uses bbf-classif:mac-address-match;
+            description
+              "Filter containing destination MAC address.";
+          }
+        }
+      }
+    }
+  }
+
+  grouping filter-entry-ref{
+    description 
+      "A reference to a filter.";
+
+    leaf filter-name {
+      type leafref {
+        path "/bbf-qos-filt:filters" +
+             "/bbf-qos-filt:filter" +
+             "/bbf-qos-filt:name";
+      }
+      description 
+        "An absolute reference to a filter.";
+    }
+  }
+
+
+  augment "/bbf-qos-pol:classifiers" +
+          "/bbf-qos-pol:classifier-entry" +
+          "/bbf-qos-pol:filter-method" {
+    description
+      "The qos policy framework allows to configure criteria to be
+       applied to frames. The basic method allows to specify simple
+       'in-line' classifiers. Here this is extended with a more 
+       advanced classification method.";
+
+
+    case by-reference {
+      description
+        "the classifier criteria are configured in a separate list";
+
+      list filter {
+        key "name";
+
+        leaf name {
+          type bbf:string-ascii64;
+          description
+            "Classifier name.";
+        }
+
+        description
+          "filters to be matched";
+
+        uses filter-entry-ref;
+      }
+    }
+  }
+
+}

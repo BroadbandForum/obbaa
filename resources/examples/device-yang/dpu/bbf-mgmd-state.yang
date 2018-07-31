@@ -1,0 +1,218 @@
+module bbf-mgmd-state {
+
+  namespace "urn:broadband-forum-org:yang:" +
+            "igmp-mgmd-state";  
+            
+  prefix "igmp-oper"; 
+  
+  /* import */
+
+  import bbf-yang-types {
+    prefix "bbf";
+  }
+  
+  import ietf-yang-types {
+    prefix "yang";
+  }
+  
+  import ietf-inet-types {
+    prefix "inet";
+  }
+
+  
+  include bbf-mgmd-state-grouping; 
+  
+  
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "An experimental YANG module for IGMP Protocol.";
+  
+  revision 2016-03-16 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }    
+  
+  typedef multicast-subscriber-interface-ref {
+    type leafref {
+      path "/igmp-oper:multicast-state/igmp-oper:mgmd/igmp-oper:multicast-vpn/igmp-oper:multicast-subscriber-interface/igmp-oper:name";
+    }
+    description
+      "This type is used by data models that need to reference
+       configured interfaces.";
+  }
+  
+  container multicast-state {       
+    config false;
+    description
+      "Multicast-operational";
+  }
+  
+  augment "/multicast-state" {
+    description
+      ".";
+
+    container mgmd {
+      description
+        ".";
+
+      list multicast-vpn {
+        key "name";
+
+        description
+          ".";
+
+        /* Key and leafref */
+        leaf name {
+          type bbf:string-ascii64;
+          description "This object is the name associated with a multicast-vpn.";
+        } 
+
+        list multicast-subscriber-interface { 
+          key "name";                          
+
+          description
+            ".";
+
+          /* Key and leafref */
+          leaf name {
+            type bbf:string-ascii64;
+            description
+              "This object is the name associated with a user facing port.";
+          }              
+
+          leaf number-active-groups {
+            type yang:counter32;
+            description
+              "Total number of active groups";
+          }
+
+          /* Other leaves */  
+          uses multicast-grouping-entry;
+          leaf total-general-queries-rx-counter {
+            type yang:counter32;
+            description
+              "General Queries Rx Counter";
+          }  
+
+          leaf total-specific-queries-rx-counter {
+            type yang:counter32;
+            description
+              "Specific Queries Rx Counter";
+          }  
+          leaf total-general-queries-tx-counter {
+            type yang:counter32;
+            description
+              "General Queries Tx Counter";
+          }  
+
+          leaf total-specific-queries-tx-counter {
+            type yang:counter32;
+            description
+              "Specific Queries Tx Counter";
+          }                    
+        }
+
+        list multicast-network-interface {      
+          key "name";                  
+
+          description
+            ".";
+
+          /* Key and leafref */
+          leaf name {
+            type bbf:string-ascii64;
+            description
+              "This object is the name associated with a network facing port.";
+          } 
+          leaf querier-address {
+           type inet:ip-address;
+           description
+             "IP Address";
+          }  
+
+          leaf querier-uptime {
+           type yang:timeticks;
+           description
+             "Querier Uptime";
+          }       
+        }        
+
+        container multicast-proxy {
+          description
+            ".";
+          uses multicast-grouping-entry;
+
+          leaf total-general-queries-rx-counter {
+            type yang:counter32;
+            description
+              "General Queries Rx Counter";
+          }  
+
+          leaf total-specific-queries-rx-counter {
+           type yang:counter32;
+           description
+             "Specific Queries Rx Counter";
+          }  
+          leaf total-general-queries-tx-counter {
+           type yang:counter32;
+           description
+             "General Queries Tx Counter";
+          }  
+
+          leaf total-specific-queries-tx-counter {
+           type yang:counter32;
+           description
+             "Specific Queries Tx Counter";
+          }
+          leaf total-currently-active-host-counter {
+           type yang:counter32;
+           description
+             "Currently Active Host Counter.";
+          }      
+        }        
+
+        container multicast-snoop {
+          description
+            ".";
+          uses multicast-grouping-entry;      
+        }     
+        
+        
+        list active-channel {
+				description
+				 "Active Channel Data";              
+				key "name";
+				
+				leaf name {
+					type string;
+					description "multicast-channel list";
+				}
+				
+				leaf multicast-vlan {
+					type uint16 {
+						range "1..4094";
+					}
+					description "multicast vlan";
+				}
+				
+				leaf source-ip {
+					type inet:ipv4-address;
+					description "IPv4 Address";				
+				}
+				
+				leaf uptime {
+					type yang:timeticks;
+					description "time elapse since entry created";
+				}
+			} // active-channel	        
+      } // list multicast-vpn
+    } // container mgmd
+  } // container multicast-state
+} // module bbf-igmp-operational

@@ -1,0 +1,223 @@
+module bbf-dot1q-types {
+  //yang-version 1.1;
+  namespace "urn:bbf:yang:bbf-dot1q-types";
+
+  prefix bbf-dot1qt;
+
+  organization
+    "Broadband Forum <https://www.broadband-forum.org>
+     Common YANG Project Stream";
+
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      Joey Boyd, ADTRAN
+                  <mailto:joey.boyd@adtran.com>
+
+     Editor:      Ludwig Pauwels, Nokia
+                  <mailto:ludwig.pauwels@nokia.com>
+
+     PS Leader:   Michael Shaffer, Nokia
+                  <mailto:michael.shaffer@nokia.com>
+
+     PS Leader:   William Lupton, Broadband Forum
+                  <mailto:wlupton@broadband-forum.org>";
+
+  description
+    "A YANG module which defines common types for IEEE 802.1Q 
+     support.
+
+     Copyright (c) 2016, Broadband Forum
+     All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms
+     <https://www.broadband-forum.org/ipr-policy>.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-383; see
+     the TR itself for full legal notices.";
+
+  revision 2016-03-28 {
+    description
+      "Initial revision.
+       * Approval Date:    see revision date above.
+       * Publication Date: yyyy-mm-dd.";
+    reference
+      "TR-383: Common YANG Modules
+               <https://www.broadband-forum.org/technical/download/
+                        TR-383.pdf>";
+  }
+
+  identity dot1q-tag-vlan-type {
+    description
+      "Base identity from which all 802.1Q VLAN tag types are 
+       derived.";
+  }
+
+  identity c-vlan {
+    base dot1q-tag-vlan-type;
+    description
+      "An 802.1Q Customer-VLAN tag, using the 0x8100 ether-type.";
+  }
+
+  identity s-vlan {
+    base dot1q-tag-vlan-type;
+    description
+      "An 802.1Q Service-VLAN tag, using a the 0x88a8 ether-type,
+       originally introduced in 802.1ad, and incorporated into 
+       802.1Q (2011).";
+  }
+
+  typedef dot1q-tag-type {
+    type identityref {
+      base dot1q-tag-vlan-type;
+    }
+    description
+      "Identifies a specific 802.1Q tag type.";
+    reference
+      "IEEE 802.1Q (2014).";
+  }
+
+  typedef vlan-id {
+    type uint16 {
+      range "1..4094";
+    }
+    description
+      "The type uniquely identifies a VLAN. This is the
+       12-bit VLAN-ID used in the VLAN tag header. 
+       The range 1..4094 is defined by the referenced 
+       specification.";
+    reference
+      "IEEE Std 802.1Q-2014: Virtual Bridged Local Area Networks.";
+  }
+
+  typedef vlan-id-or-0 {
+    type uint16 {
+      range "0..4094";
+    }
+    description
+      "The type uniquely identifies a VLAN. This is the
+       12-bit VLAN-ID used in the VLAN tag header. 
+       The range 1..4094 is defined by the referenced specification. 
+       The value 0 allows to support priority-tagged frames.";
+    reference
+      "IEEE Std 802.1Q-2014: Virtual Bridged Local Area Networks.";
+  }
+
+  typedef vlan-id-range {
+    type string {
+      pattern '([0-9]{1,4}(-[0-9]{1,4})?(,[0-9]{1,4}(-[0-9]{1,4})?)'
+            + '*)';
+    }
+    description
+      "A list of VLAN-IDs, or non overlapping VLAN ranges, in 
+       ascending order, between 1 and 4094.
+
+       Example: 1,10-100,50,500-1000";
+  }
+
+  typedef pbit {
+    type uint8 {
+      range "0..7";
+    }
+    description
+      "Priority Code Point. PCP is a 3-bit field that refers to the
+       class of service applied to an 802.1Q VLAN tagged frame.  The
+       field specifies a priority value between 0 and 7, these values
+       can be used by quality of service (QoS) to prioritize
+       different classes of traffic.";
+    reference
+      "IEEE 802.1Q (2014).";
+  }
+
+  typedef pbit-list {
+    type string {
+      pattern '([0-7](-[0-7])?(,[0-7]+(-[0-7])?)*)';
+    }
+    description
+      "A set of p-bit values.";
+  }
+
+  typedef dei {
+    type uint8 {
+      range "0..1";
+    }
+    description
+      "Drop Eligible Indicator. DEI is a 1-bit field in the VLAN tag. 
+       May be used separately or in conjunction with PCP to indicate 
+       frames eligible to be dropped in the presence of congestion.";
+    reference
+      "IEEE 802.1Q (2014).";
+  }
+
+  typedef ether-type {
+    type uint16;
+    description
+      "The Ethernet Type (or Length) value.";
+    reference
+      "IEEE 802.3-2012 Clause 3.2.6.";
+  }
+
+  typedef ether-type-or-acronym {
+    type union {
+      type ether-type;
+      type enumeration {
+        enum "any" {
+          description
+            "Matches any ether-type value.";
+        }
+        enum "ipv4" {
+          description
+            "Matches the ether-type value 0x0800 or 0x0806 or 
+             0x8035.";
+        }
+        enum "pppoe" {
+          description
+            "Matches the ether-type value 0x8863 or 0x8864.";
+        }
+        enum "ipv6" {
+          description
+            "Matches the ether-type value 0x86DD.";
+        }
+      }
+    }
+    description
+      "This type allows to specify a value, or any value, for the 
+       ether-type as identified by related matching criteria. ";
+  }
+}

@@ -1,0 +1,72 @@
+module test {
+  namespace "urn:test";
+  prefix testprefix;
+
+  organization "TBD";
+  contact
+    "TBD";
+  description
+    "Test module";
+
+  revision 2016-02-10 {
+    description
+      "Initial revision.";
+    reference "TBD";
+  }
+
+  container interfaces-state {
+    config false;
+    leaf no-of-interfaces {
+      type string;
+    }
+    list interface {
+      key "name";
+      leaf name {
+        type string;
+      }
+      leaf admin-state {
+        type string;
+      }
+    }
+  }
+  container interfaces {
+    list interface {
+      key "name";
+      leaf name {
+        type string;
+      }
+      leaf oper-state {
+        config false;
+        type string;
+      }
+      container interfaceStateContainer {
+          config false;
+          leaf some-state {
+              type string;
+          }
+      }
+    }
+    container stateContainer {
+        config false;
+        leaf some-state {
+            type string;
+        }
+    }
+  }
+  list rootConfigList1 {
+    key "rootConfigList1Key";
+    leaf rootConfigList1Key {
+      type string;
+    }
+    leaf rootConfigListState {
+      config false;
+      type string;
+    }
+    container stateContainer {
+      config false;
+      leaf stateContainerLeaf {
+        type string;
+      }
+    }
+  }
+}

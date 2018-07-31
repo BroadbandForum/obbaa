@@ -1,0 +1,256 @@
+submodule bbf-l2-forwarding-forwarding-databases {
+  //yang-version 1.1;
+  belongs-to bbf-l2-forwarding {
+    prefix bbf-l2-fwd;
+  }
+
+  import bbf-yang-types {
+    prefix bbf-yang;
+  }
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  include bbf-l2-forwarding-base;
+  include bbf-l2-forwarding-forwarders;
+
+  organization
+    "Broadband Forum <https://www.broadband-forum.org>
+     Common YANG Project Stream";
+
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      Joey Boyd, ADTRAN
+                  <mailto:joey.boyd@adtran.com>
+
+     Editor:      Ludwig Pauwels, Nokia
+                  <mailto:ludwig.pauwels@nokia.com>
+
+     PS Leader:   Michael Shaffer, Nokia
+                  <mailto:michael.shaffer@nokia.com>
+
+     PS Leader:   William Lupton, Broadband Forum
+                  <mailto:wlupton@broadband-forum.org>";
+
+  description
+    "This submodule contains a collection of YANG definitions for 
+     managing forwarding databases.
+
+     Copyright (c) 2016, Broadband Forum
+     All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms
+     <https://www.broadband-forum.org/ipr-policy>.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-383; see
+     the TR itself for full legal notices.";
+
+  revision 2016-07-12 {
+    description
+      "Initial revision.
+       * Approval Date:    see revision date above.
+       * Publication Date: yyyy-mm-dd.";
+    reference
+      "TR-383: Common YANG Modules
+               <https://www.broadband-forum.org/technical/download/
+                        TR-383.pdf>";
+  }
+
+  feature forwarding-databases {
+    description
+      "Indicates support for forwarding databases.";
+  }
+
+  typedef forwarding-database-ref {
+    type leafref {
+      path '/bbf-l2-fwd:forwarding/bbf-l2-fwd:forwarding-databases/'
+         + 'bbf-l2-fwd:forwarding-database/bbf-l2-fwd:name';
+    }
+    description
+      "A reference to a forwarding database.";
+  }
+
+  typedef forwarding-database-state-ref {
+    type leafref {
+      path '/bbf-l2-fwd:forwarding-state/bbf-l2-fwd:forwarding-'
+         + 'databases/bbf-l2-fwd:forwarding-database/bbf-l2-fwd:'
+         + 'name';
+    }
+    description
+      "A reference to a forwarding database.";
+  }
+
+  augment '/bbf-l2-fwd:forwarding' {
+    description
+      "Augment the configuration nodes associated with layer 2 
+       forwarding with forwarding database objects.";
+
+    container forwarding-databases {
+      if-feature "forwarding-databases";
+      description
+        "Forwarding databases configuration.";
+
+      list forwarding-database {
+        key "name";
+        description
+          "The configuration of a specific forwarding database.";
+
+        leaf name {
+          type bbf-yang:string-ascii64;
+          description
+            "The name associated with the forwarding database.";
+        }
+
+        leaf max-number-mac-addresses {
+          type uint32;
+          default "4294967295";
+          description
+            "Limits the number of MAC addresses that can be stored in 
+             this forwarding database.";
+        }
+
+        leaf aging-timer {
+          type uint32;
+          units "seconds";
+          default "300";
+          description
+            "MAC addresses are learned in the forwarding database 
+             where they are assigned to a forwarder-port. When no 
+             incoming traffic on this forwarder port is received with 
+             a particular MAC-address as source MAC address for a 
+             period specified in this aging timer, then this MAC 
+             address is removed from the forwarding database.";
+        }
+
+        leaf generate-mac-learning-alarm {
+          type boolean;
+          default "false";
+          description
+            "If true, an alarm shall be generated on an attempt of an 
+             undesired MAC movement.";
+        }
+      }
+    }
+  }
+
+  augment '/bbf-l2-fwd:forwarding-state' {
+    description
+      "Augment the state data nodes associated with layer 2 
+       forwarding with forwardering database objects.";
+
+    container forwarding-databases {
+      if-feature "forwarding-databases";
+      description
+        "The following objects allow to read out the 
+         forwarding-database (FDB), i.e. the MAC addresses being 
+         learned within the system.
+         The strategy is to offer the same flexibility as in IEEE: 
+          - Allows at one extreme that each VLAN has its own FDB, 
+            this allows the same MAC address to be learned 
+            independently within different VLANs. 
+          - Allows at the other extreme that the system has one FDB 
+            shared by all VLANs, this allows the same MAC address to 
+            be learned only once over all VLANs.
+          - Allows everything in between, i.e. an FDB for a set of 
+            VLANs, a 2nd FDB for another set.
+         To support this concept it is possible to have a multiple 
+         forwarders assigned to a single FDB.";
+
+      list forwarding-database {
+        key "name";
+        description
+          "The state data of a specific forwarding database.";
+
+        leaf name {
+          type bbf-yang:string-ascii64;
+          description
+            "The name of the forwarding-database.";
+        }
+
+        container mac-addresses {
+          description
+            "MAC address data in the forwarding-database state.";
+
+          list mac-address {
+            key "mac-address";
+            description
+              "The list of MAC addresses that are stored in the 
+               forwarding-database.";
+
+            leaf mac-address {
+              type yang:mac-address;
+              description
+                "A specific MAC address that is stored in the 
+                 forwarding-database.";
+            }
+
+            container forwarder-port {
+              description
+                "Objects used to identify a specific fowarder port.";
+
+              uses forwarder-port;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  augment '/bbf-l2-fwd:forwarding-state/bbf-l2-fwd:forwarders/bbf-'
+        + 'l2-fwd:forwarder' {
+    description
+      "Augment the forwarder state data to add a reference to
+       a forwarding database.";
+
+    container forwarding-databases {
+      if-feature "forwarding-databases";
+      description
+        "Forwarder objects relative to forwarding databases.";
+
+      leaf forwarding-database {
+        type forwarding-database-state-ref;
+        description
+          "A reference to a forwarding database associated
+           with a forwarder.";
+      }
+    }
+  }
+}

@@ -1,0 +1,582 @@
+module bbf-qos-policies {
+
+  namespace "urn:broadband-forum-org:yang:" +
+            "bbf-qos-policies";  
+            
+  prefix bbf-qos-pol;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  import bbf-yang-types {
+    prefix bbf;
+  }
+
+  import bbf-dot1q-types {
+    prefix bbf-dot1qt;
+  }
+
+  import bbf-frame-classification {
+    prefix bbf-classif;
+  }
+  
+  import bbf-sub-interfaces {
+    prefix bbf-subif;
+  }
+
+  import bbf-sub-interface-tagging {
+    prefix bbf-subif-tag;
+  }
+
+  import bbf-qos-traffic-mngt {
+    prefix bbf-qostm;
+  }
+
+  organization
+    "Broadband Forum Common YANG Work Area";
+
+  contact
+    "BBF:      http://www.broadband-forum.org
+               help@broadband-forum.org
+	       
+     Editor:   Ludwig Pauwels, Nokia
+     
+     Work Area Director: William Lupton, Broadband Forum
+                         Michael Shaffer, Nokia";
+
+  description 
+    "This module contains a collection of policies applied on packets 
+     for the purpose of qualify of service.";
+
+  revision 2016-05-30 {
+    description
+      "Initial revision";
+
+    reference
+      "TBD";
+  }
+
+  typedef qos-policy-profile-ref {
+    type leafref {
+      path "/bbf-qos-pol:qos-policy-profiles" +
+           "/bbf-qos-pol:policy-profile/bbf-qos-pol:name";
+    }
+    description
+      "A reference to a QoS policy profile";
+  }
+
+  typedef qos-pbit-marking-index {
+    type uint8;
+    description
+      "An index of PBIT marking action.";
+  }
+
+  typedef qos-dei-marking-index {
+    type uint8;
+    description
+      "An index of DEI marking action.";
+  }
+
+
+  identity classifier-entry-filter-operation-type {
+    description
+      "Classifier entry filter logical operation";
+  }
+
+  identity match-any-filter {
+    base classifier-entry-filter-operation-type;
+    description
+      "Classifier entry filter logical OR operation";
+  }
+
+  identity match-all-filter {
+    base classifier-entry-filter-operation-type;
+    description
+      "Classifier entry filter logical AND operation";
+  }
+
+  identity action-type {
+    description
+      "This base identity type defines action-types";
+  }
+
+  identity pbit-marking {
+    base action-type;
+    description
+      "PBIT marking action type";
+  }
+
+  identity dei-marking {
+    base action-type;
+    description
+      "DEI marking action type";
+  }
+
+  identity scheduling-traffic-class {
+    base action-type;
+    description
+      "scheduling traffic class action type.";
+  }
+
+  identity dscp-marking {
+    base action-type;
+    description
+      "DSCP marking action type";
+  }
+
+  grouping pbit-marking {
+    list pbit-marking-list{
+      key "index";
+      description 
+        "The list defines a set of priority bits (pbit) to be written 
+         to the tags of a packet. It is a list to support packets with
+         multiple tags, hence multiple priority bits.";
+
+      leaf index {
+        type qos-pbit-marking-index ;
+        description
+          "The index within the list.";
+      }
+
+      leaf pbit-value {
+        type bbf-dot1qt:pbit;
+        description 
+          "A single pbit-value to be inserted in a tag of a packet.";
+      }
+    }
+    description
+      "PBIT marking grouping.";
+  }
+
+  grouping dei-marking {
+    list dei-marking-list {
+      key "index";
+      description
+        "the list defines a set of DEI to be written to the tags of a 
+         packet.  It is a list to support packets with multiple tags, 
+         hence multiple DEI bits.";
+
+      leaf index {
+        type qos-dei-marking-index ;
+        description
+          "The index within the list.";
+      }
+
+      leaf dei-value {
+        type bbf-dot1qt:dei;
+        description
+          "A single DEI-value to be inserted in a tag of a packet.";
+      }
+    }
+    description
+      "PBIT marking grouping.";
+  }
+
+  grouping dscp-marking {
+    leaf dscp {
+      type inet:dscp;
+      description
+        "DSCP marking.";
+    }
+    description
+      "DSCP marking grouping.";
+  }
+
+  grouping classifier-entry-inline-attr {
+    description
+      "Classifier inline attributes.";
+
+    container match-criteria {
+      description
+        "Match criteria to be applied to a packet.";
+
+      uses bbf-classif:multiple-vlan-tag-match;
+
+      uses bbf-classif:dscp-match;
+
+      uses bbf-classif:protocol-match;
+    }
+  }
+
+  grouping classifier-action-entry-cfg {
+    description
+      "List of Configuration of classifier & associated actions.";
+
+    list classifier-action-entry-cfg {
+      key "action-type";
+      ordered-by user;
+      
+      description
+        "Configuration of classifier associated actions.";
+
+      leaf action-type {
+        type identityref {
+          base action-type;
+        }
+        description
+          "This defines action type.";
+      }
+
+      choice action-cfg-params {
+        description
+          "Choice of action types";
+
+        case pbit-marking {
+          container pbit-marking-cfg {
+            when "../action-type='bbf-qos-pol:pbit-marking'"{
+              description
+                "Only applicable when the action-type is 
+                 pbit-marking.";
+            }
+            uses pbit-marking;
+            description
+              "PBIT marking configuration container.";
+          }
+        }
+
+        case dei-marking {
+          container dei-marking-cfg{
+            when "../action-type='bbf-qos-pol:dei-marking'"{
+              description
+                "Only applicable when the action-type is 
+                 dei-marking.";
+            }
+            uses dei-marking;
+            description
+              "DEI marking configuration container.";
+          }
+        }
+
+        case dscp-marking {
+          container dscp-marking-cfg {
+            when "../action-type='bbf-qos-pol:dscp-marking'"{
+              description
+                "Only applicable when the action-type is 
+                 dscp-marking.";
+            }
+            uses dscp-marking;
+            description
+              "DSCP marking configuration container.";
+          }
+        }
+
+        case scheduling-traffic-class {
+          leaf scheduling-traffic-class {
+            when "../action-type=" +
+                 "'bbf-qos-pol:scheduling-traffic-class'"{
+              description
+                "Only applicable when the action-type is 
+                 scheduling-traffic-class.";
+            }
+            type bbf-qostm:traffic-class-id;
+            description
+              "Define the traffic class for scheduling.";
+          }
+        }
+      }
+    }
+  }
+
+  container classifiers {
+    description
+      "List of classifier entries.";
+
+    list classifier-entry {
+      key "name";
+      description
+        "Classifier entry template.";
+
+      leaf name {
+        type bbf:string-ascii64;
+        description
+          "Classifier name.";
+      }
+
+      leaf description {
+        type bbf:string-ascii64-or-empty;
+        description
+          "Description of the class template.";
+      }
+
+      leaf filter-operation {
+        type identityref {
+          base classifier-entry-filter-operation-type;
+        }
+
+        default "bbf-qos-pol:match-any-filter";
+        description
+          "Filters are applicable as any or all filters.";
+      }
+
+      choice filter-method {
+        description 
+          "Choice of filter configuration way.";
+
+          case inline {
+            description 
+              "The classifier criteria are directly configured here";
+            uses classifier-entry-inline-attr;
+          }
+       }
+       uses classifier-action-entry-cfg;
+    }
+  }
+
+  grouping classifier-entry-ref {
+    description 
+      "A reference to a classifier entry.";
+
+    leaf name {
+      type leafref {
+        path "/bbf-qos-pol:classifiers" +
+	     "/bbf-qos-pol:classifier-entry" +
+	     "/bbf-qos-pol:name";
+      }
+      description 
+        "An absolute reference to a classifier entry.";
+    }
+  }
+
+  container policies {
+    description
+      "List of policy templates.";
+
+    list policy {
+      key "name";
+      description
+        "Policy template.";
+
+      leaf name {
+        type bbf:string-ascii64;
+        description
+          "Name of the policy.";
+      }
+
+      leaf description {
+        type bbf:string-ascii64-or-empty;
+        description
+          "Description of the policy.";
+      }
+
+      list classifiers {
+        key "name";
+        ordered-by user;
+        description
+          "Provides a lists of classifiers which are evaluated in 
+           order as specified by the user. 
+           When a classifier is matched, no other classifiers are
+           evaluated.";
+
+        uses classifier-entry-ref;
+      }
+    }
+  }
+
+  grouping policy-entry-ref {
+    description
+      "A reference to a policy entry.";
+
+    leaf name {
+      type leafref {
+        path "/bbf-qos-pol:policies" +
+	     "/bbf-qos-pol:policy" +
+	     "/bbf-qos-pol:name";
+      }
+      description 
+        "An absolute reference to a policy entry.";
+    }
+  }
+
+  container qos-policy-profiles {
+    description
+      "Qos-policy-profiles configuration.";
+
+    list policy-profile {
+      key "name";
+      description 
+        "A list pf policy-profiles.";
+
+      leaf name{
+        type bbf:string-ascii64;
+        description
+          "Name of the QoS policy profile";
+      }
+
+      list policy-list {
+        key "name";
+        ordered-by user;
+        description
+          "Provides ordered lists of policies for the ingress and for 
+           the egress direction.
+           The definition is that all policies are executed in the  
+           order of the list.
+           The output of one policy is used as input for the next 
+           policy.";
+
+        uses policy-entry-ref;
+      }
+    }
+  }
+
+  augment "/classifiers/classifier-entry" +
+          "/filter-method/inline/match-criteria" +
+          "/vlan-tag-match-type/vlan-tagged/tag" {
+    description
+      "Allows for the PBIT/DEI to be derived from a QoS policy
+       profile.";
+
+    leaf in-pbit-list {
+      type bbf-dot1qt:pbit-list;
+      description
+        "Filter containing a set of PBIT values in original 
+         packet or/and untag packets. An ethernet frame can 
+         contain multiple VLAN tags or no VLAN tag. If it has 
+         mutiple VLAN tags, the PBIT in the outest tag is used 
+         to be matched here. To match PBIT in other tags uses 
+         filter list.";
+    }
+
+    leaf in-dei {
+      type uint8 {
+        range "0..1";
+      }
+      description
+        "Filter containing the DEI / CFI value in original 
+         packet. An Ethernet frame can contain multiple VLAN 
+         tags, each of these tags contain a DEI. The outermost 
+         tag is used to be matched here. To define the DEI in 
+         other tags use the filter list.";
+    }
+  }
+
+  augment "/if:interfaces/if:interface" {
+    description
+       "Assigns a group of policies to an interface.";
+
+    leaf ingress-qos-policy-profile{
+      type qos-policy-profile-ref;
+      description 
+        "A reference to a qos-policy-profile. The profiles is to be 
+         applied to incoming packets.";
+    }
+
+    leaf egress-qos-policy-profile{
+      type qos-policy-profile-ref;
+      description 
+        "A reference to a qos-policy-profile. The profiles is to be 
+         applied to outgoing packets.";
+    }
+  }
+ 
+  augment "/if:interfaces/if:interface" +
+          "/bbf-subif:frame-processing" +
+          "/bbf-subif:ingress-rule/bbf-subif:rule" +
+          "/bbf-subif:ingress-rewrite/bbf-subif-tag:push-tag" +
+          "/bbf-subif-tag:dot1q-tag/bbf-subif-tag:pbit-action" {
+    description
+       "Allows for the PBIT to be derived from a QoS policy
+        profile.";
+
+    case generate-pbit-via-profile-or-0 {
+      description 
+        "The PBIT is generated via a QoS policy profile attached to 
+         the sub-interface.
+         If no PBIT is generated via the profile, then PBIT=0 is 
+         pushed in the VLAN tag of the frame.";
+      leaf pbit-action-index {
+        type qos-pbit-marking-index ;
+        description
+          "A QoS policy can generate more than one PBIT (for possible
+           usage in multiple VLAN tags). Then each of them is 
+           identified by a PBIT marking index.
+           This leaf provides the PBIT marking index from which the
+           PBIT value shall be taken to put in the VLAN tag.";
+      }
+    }
+  }
+
+  augment "/if:interfaces/if:interface" +
+          "/bbf-subif:frame-processing" +
+          "/bbf-subif:ingress-rule/bbf-subif:rule" +
+          "/bbf-subif:ingress-rewrite/bbf-subif-tag:push-tag" +
+          "/bbf-subif-tag:dot1q-tag/bbf-subif-tag:dei-action" {
+    description
+       "Allows for the DEI to be derived from a QoS policy profile.";
+
+    case generate-dei-via-profile-or-0 {
+      description 
+        "The DEI is generated via a QoS policy profile attached to 
+         the sub-interface.
+         If no DEI is generated via the profile, then DEI=0 is pushed 
+         pushed in the VLAN tag of the frame.";
+
+      leaf dei-marking-index {
+        type qos-dei-marking-index;
+        description
+          "A QoS policy can generate more than one DEI (for possible
+           usage in multiple VLAN tags). Then each of them is 
+           identified by a DEI marking index.
+           This leaf provides the DEI marking index from which the
+           DEI value shall be taken to put in the VLAN tag.";
+      }
+    }
+  }
+
+  augment "/if:interfaces/if:interface" +
+          "/bbf-subif:frame-processing" +
+          "/bbf-subif:egress-rewrite/bbf-subif-tag:push-tag" +
+          "/bbf-subif-tag:dot1q-tag/bbf-subif-tag:pbit-action" {
+    description
+       "Allows for the PBIT to be derived from a QoS policy profile.";
+
+    case generate-pbit-via-profile-or-0 {
+      description 
+        "The PBIT is generated via a QoS policy profile attached to 
+         the sub-interface.
+         If no PBIT is generated via the profile, then PBIT=0 is 
+         pushed in the VLAN tag of the frame.";
+
+      leaf pbit-action-index {
+        type qos-pbit-marking-index ;
+        description
+          "A QoS policy can generate more than one PBIT (for possible
+           usage in multiple VLAN tags). Then each of them is 
+           identified by a PBIT marking index.
+           This leaf provides the PBIT marking index from which the
+           PBIT value shall be taken to put in the VLAN tag.";
+      }
+    }
+  }
+
+  augment "/if:interfaces/if:interface" +
+          "/bbf-subif:frame-processing" +
+          "/bbf-subif:egress-rewrite/bbf-subif-tag:push-tag" +
+          "/bbf-subif-tag:dot1q-tag/bbf-subif-tag:dei-action" {
+    description
+      "Allows for the DEI to be derived from a QoS policy profile.";
+
+    case generate-dei-via-profile-or-0 {
+      description 
+        "The DEI is generated via a QoS policy profile attached to 
+         the sub-interface.
+         If no DEI is generated via the profile, then DEI=0 is pushed 
+         pushed in the VLAN tag of the frame.";
+
+      leaf dei-marking-index {
+        type qos-dei-marking-index;
+        description
+          "A QoS policy can generate more than one DEI (for possible
+           usage in multiple VLAN tags). Then each of them is 
+           identified by a DEI marking index.
+           This leaf provides the DEI marking index from which the
+           DEI value shall be taken to put in the VLAN tag.";
+      }
+    }
+  }
+
+}

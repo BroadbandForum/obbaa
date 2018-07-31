@@ -1,0 +1,8 @@
+version: '2'
+services:
+    device-simulator:
+        image: sysrepo/sysrepo-netopeer2:latest
+        container_name: direct-simulator
+        restart: always
+        ports:
+            - "2830:830"

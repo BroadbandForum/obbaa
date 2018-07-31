@@ -1,0 +1,339 @@
+/*
+ * Copyright 2018 Broadband Forum
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.broadband_forum.obbaa.aggregator.impl;
+
+import org.broadband_forum.obbaa.aggregator.api.Aggregator;
+import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
+import org.broadband_forum.obbaa.aggregator.api.DeviceManagementProcessor;
+import org.broadband_forum.obbaa.aggregator.api.DispatchException;
+import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
+import org.broadband_forum.obbaa.aggregator.api.NotificationProcessor;
+import org.broadband_forum.obbaa.aggregator.api.ProcessorCapability;
+import org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl.AggregatorRpcMessage;
+import org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl.AggregatorUtils;
+import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.api.NetworkManagerRpc;
+import org.broadband_forum.obbaa.aggregator.registrant.api.NotificationProcessorManager;
+import org.broadband_forum.obbaa.aggregator.registrant.api.RequestProcessorManager;
+import org.broadband_forum.obbaa.aggregator.registrant.impl.NotificationProcessorManagerImpl;
+import org.broadband_forum.obbaa.aggregator.registrant.impl.RequestProcessorManagerImpl;
+import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
+import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
+import javax.xml.bind.JAXBException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+public class AggregatorImpl implements Aggregator {
+    private RequestProcessorManager m_requestProcessorManager;
+    private NotificationProcessorManager m_notificationProcessorManager;
+    private DeviceManagementProcessor m_deviceManagerAdapter;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AggregatorImpl.class);
+    private static final String COMMON_REQUEST_TYPE = "System-global";
+    private static final String OPERATION_NOT_SUPPORT = "Does not support the operation.";
+
+    /**
+     * Aggregator implementation.
+     */
+    public AggregatorImpl() {
+        m_requestProcessorManager = new RequestProcessorManagerImpl();
+        m_notificationProcessorManager = new NotificationProcessorManagerImpl();
+    }
+
+    @Override
+    public String dispatchRequest(String netconfRequest) throws DispatchException {
+        LOGGER.info("Aggregator dispatch request:\n {}", netconfRequest);
+        AggregatorRpcMessage aggregatorRpcMessage = buildAggregatorRpcMessage(netconfRequest);
+
+        String response;
+        if (aggregatorRpcMessage.isNetworkManagerMessage()) {
+            response = dispatchNetworkManageRequest(aggregatorRpcMessage);
+            LOGGER.info("Network manager request response:\n {}", response);
+        } else {
+            response = dispatchGlobalRequest(aggregatorRpcMessage);
+            LOGGER.info("Global request response:\n {}", response);
+        }
+
+        return response;
+    }
+
+    @Override
+    public void publishNotification(String notificationMessage) throws DispatchException {
+        LOGGER.info("Publish global notification:\n {}", notificationMessage);
+        Set<NotificationProcessor> notificationProcessors = getNotificationProcessorManager().getProcessors();
+
+        for (NotificationProcessor notificationProcessor : notificationProcessors) {
+            LOGGER.info("Processor: {}", notificationProcessor);
+            notificationProcessor.publishNotification(notificationMessage);
+        }
+    }
+
+    @Override
+    public void publishNotification(String deviceName, String notificationMessage) throws DispatchException {
+        LOGGER.info("Publish device notification:\n {} \n {}", deviceName, notificationMessage);
+
+        String packagedNotification = AggregatorUtils.packageNotification(deviceName, notificationMessage);
+        LOGGER.info("Packaged message:\n {}", packagedNotification);
+
+        publishNotification(packagedNotification);
+    }
+
+    @Override
+    public void addProcessor(Set<ModuleIdentifier> moduleIdentifiers, GlobalRequestProcessor globalRequestProcessor)
+            throws DispatchException {
+        getRequestProcessorManager().addProcessor(moduleIdentifiers, globalRequestProcessor);
+    }
+
+    @Override
+    public void addProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers,
+                             DeviceConfigProcessor deviceConfigProcessor) throws DispatchException {
+        getRequestProcessorManager().addProcessor(deviceType, moduleIdentifiers, deviceConfigProcessor);
+    }
+
+    @Override
+    public void addProcessor(NotificationProcessor notificationProcessor) throws DispatchException {
+        getNotificationProcessorManager().addProcessor(notificationProcessor);
+    }
+
+    @Override
+    public void removeProcessor(GlobalRequestProcessor globalRequestProcessor) throws DispatchException {
+        getRequestProcessorManager().removeProcessor(globalRequestProcessor);
+    }
+
+    @Override
+    public void removeProcessor(DeviceConfigProcessor deviceConfigProcessor) throws DispatchException {
+        getRequestProcessorManager().removeProcessor(deviceConfigProcessor);
+    }
+
+    @Override
+    public void removeProcessor(NotificationProcessor notificationProcessor) throws DispatchException {
+        getNotificationProcessorManager().removeProcessor(notificationProcessor);
+    }
+
+    @Override
+    public void removeProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers,
+                                DeviceConfigProcessor deviceConfigProcessor) throws DispatchException {
+        getRequestProcessorManager().removeProcessor(deviceType, moduleIdentifiers, deviceConfigProcessor);
+    }
+
+    @Override
+    public Set<String> getSystemCapabilities() {
+        Set<String> capabilities = new HashSet<>();
+
+        //Basic capability
+        capabilities.add(NetconfResources.NETCONF_BASE_CAP_1_0);
+        capabilities.add(NetconfResources.NETCONF_BASE_CAP_1_1);
+
+        //Processor capability
+        capabilities.addAll(getRequestProcessorManager().getAllProcessorsCapability());
+        return capabilities;
+    }
+
+    @Override
+    public void registerDeviceManager(DeviceManagementProcessor deviceManagementProcessor) {
+        m_deviceManagerAdapter = deviceManagementProcessor;
+    }
+
+    @Override
+    public void unregisterDeviceManager() {
+        m_deviceManagerAdapter = null;
+    }
+
+    @Override
+    public Set<ProcessorCapability> getProcessorCapabilities() {
+        //Common processor
+        Set<ModuleIdentifier> moduleIdentifiers = NetworkManagerRpc.getNetworkManagerModuleIdentifiers();
+        moduleIdentifiers.addAll(getRequestProcessorManager().getCommonModuleIdentifiers());
+
+        //Device processor
+        Set<ProcessorCapability> processorCapabilities =
+                getRequestProcessorManager().getDeviceProcessorCapabilities();
+
+        processorCapabilities.add(new ProcessorCapabilityImpl(COMMON_REQUEST_TYPE, moduleIdentifiers));
+
+        return processorCapabilities;
+    }
+
+    @Override
+    public Set<ModuleIdentifier> getModuleIdentifiers() {
+        Set<ModuleIdentifier> moduleIdentifiers = getRequestProcessorManager().getAllModuleIdentifiers();
+        moduleIdentifiers.addAll(NetworkManagerRpc.getNetworkManagerModuleIdentifiers());
+        return moduleIdentifiers;
+    }
+
+    /**
+     * Dispatch request of network-manager YANG model.
+     *
+     * @param aggregatorRpcMessage Request
+     * @return Response
+     * @throws DispatchException Exception
+     */
+    private String dispatchNetworkManageRequest(AggregatorRpcMessage aggregatorRpcMessage) throws DispatchException {
+        String originalMessage = aggregatorRpcMessage.getOriginalMessage();
+        NetworkManagerRpc networkManagerRpc = new NetworkManagerRpc(originalMessage,
+                aggregatorRpcMessage.getNetconfRpcMessage(), aggregatorRpcMessage.getOnlyOneTopPayload());
+
+        // Device configuration is mainly used for service configuration like L2.
+        if (networkManagerRpc.isDeviceConfigRequest()) {
+            return dispatchDeviceConfigRequest(networkManagerRpc);
+        }
+
+        // Device management is mainly used for adding and deleting devices and other actions.
+        return getDeviceManagerAdapter().processRequest(aggregatorRpcMessage.getOriginalMessage());
+    }
+
+    /**
+     * Get processor of network-manager YANG request.
+     *
+     * @param singleDeviceRequest Request of mounted to one device
+     * @return Processor
+     */
+    private DeviceConfigProcessor getNetworkManagerProcessor(SingleDeviceRequest singleDeviceRequest) {
+        // Reserved for debug:
+        return getRequestProcessorManager().getAllDeviceConfigProcessors().iterator().next();
+
+        //TODO : temp deleted util all of the adapters completed.
+        //String mountedXmlns = singleDeviceRequest.getNamespace();
+        //return m_requestProcessorManager.getProcessor(singleDeviceRequest.getDeviceType(), mountedXmlns);
+    }
+
+    /**
+     * Get processor of common request like YANG library.
+     *
+     * @param xmlns YANG namespace
+     * @return Processor
+     */
+    private GlobalRequestProcessor getCommonRequestProcessor(String xmlns) {
+        return getRequestProcessorManager().getProcessor(xmlns);
+    }
+
+    /**
+     * Dispatch common request.
+     *
+     * @param aggregatorRpcMessage Request
+     * @return Response
+     * @throws DispatchException Exception
+     */
+    private String dispatchGlobalRequest(AggregatorRpcMessage aggregatorRpcMessage) throws DispatchException {
+        GlobalRequestProcessor globalRequestProcessor = getCommonRequestProcessor(aggregatorRpcMessage.getOnlyOneTopXmlns());
+        DispatchException.assertNull(globalRequestProcessor, OPERATION_NOT_SUPPORT);
+
+        return globalRequestProcessor.processRequest(aggregatorRpcMessage.getOriginalMessage());
+    }
+
+    /**
+     * Dispatch request of one device.
+     *
+     * @param singleDeviceRequest Request
+     * @return Response
+     * @throws DispatchException Exception
+     */
+    private String dispatchSingleDeviceRequest(SingleDeviceRequest singleDeviceRequest) throws DispatchException {
+        DeviceConfigProcessor deviceConfigProcessor = getNetworkManagerProcessor(singleDeviceRequest);
+        DispatchException.assertNull(deviceConfigProcessor, OPERATION_NOT_SUPPORT);
+
+        String deviceName = singleDeviceRequest.getDeviceName();
+        String request = singleDeviceRequest.getMessage();
+        LOGGER.info("Dispatch device config request:\n {} {} {}", deviceConfigProcessor, deviceName, request);
+
+        //Dispatch (can thrown exception)
+        String singleDeviceResponse = deviceConfigProcessor.processRequest(deviceName, request);
+        DispatchException.assertNull(singleDeviceResponse, String.format("Process error of device %s", deviceName));
+
+        return singleDeviceResponse;
+    }
+
+    /**
+     * Build requests for every device. It will delete the information of network-manager YANG model.
+     *
+     * @param networkManagerRpc NetworkManagerRpc
+     * @return Set of single device requests
+     * @throws DispatchException Exception
+     */
+    private Set<SingleDeviceRequest> buildSingleDeviceRequests(NetworkManagerRpc networkManagerRpc) throws DispatchException {
+        return networkManagerRpc.buildSingleDeviceRequests(getDeviceManagerAdapter(), networkManagerRpc.getOriginalMessage()
+        );
+    }
+
+    /**
+     * Dispatch request of device config.
+     *
+     * @param networkManagerRpc Request
+     * @return Response
+     * @throws DispatchException Exception
+     */
+    private String dispatchDeviceConfigRequest(NetworkManagerRpc networkManagerRpc)
+            throws DispatchException {
+        Map<Document, String> responses = new HashMap<>();
+        Set<SingleDeviceRequest> singleDeviceRequests = buildSingleDeviceRequests(networkManagerRpc);
+
+        for (SingleDeviceRequest singleDeviceRequest : singleDeviceRequests) {
+            String responseOneDevice = dispatchSingleDeviceRequest(singleDeviceRequest);
+            responses.put(AggregatorUtils.stringToDocument(responseOneDevice), singleDeviceRequest.getDeviceName());
+        }
+
+        //Response
+        return networkManagerRpc.packageResponse(responses);
+    }
+
+    /**
+     * Get processor manager of request.
+     *
+     * @return Processor
+     */
+    private RequestProcessorManager getRequestProcessorManager() {
+        return m_requestProcessorManager;
+    }
+
+    /**
+     * Get processor manager of notification.
+     *
+     * @return Processor
+     */
+    private NotificationProcessorManager getNotificationProcessorManager() {
+        return m_notificationProcessorManager;
+    }
+
+    /**
+     * Get processor of device manage.
+     *
+     * @return Device manage processor
+     */
+    private DeviceManagementProcessor getDeviceManagerAdapter() {
+        return m_deviceManagerAdapter;
+    }
+
+    /**
+     * Build AggregatorRpcMessage from request.
+     *
+     * @param netconfRequest Netconf request
+     * @return AggregatorRpcMessage
+     * @throws DispatchException Exception
+     */
+    private static AggregatorRpcMessage buildAggregatorRpcMessage(String netconfRequest) throws DispatchException {
+        try {
+            return new AggregatorRpcMessage(netconfRequest);
+        } catch (JAXBException ex) {
+            throw new DispatchException(ex);
+        }
+    }
+}

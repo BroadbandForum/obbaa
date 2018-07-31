@@ -1,0 +1,91 @@
+submodule bbf-mgmd-state-grouping {
+  belongs-to bbf-mgmd-state {
+    prefix "igmp-oper";
+  } 
+  
+  import ietf-yang-types {
+    prefix "yang";
+  }
+  
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "An experimental YANG module for IGMP Protocol.";
+  
+  revision 2016-03-16 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  
+  grouping multicast-grouping-entry {  
+    description
+      ".";
+  
+    /* Message Statistics */    
+    leaf interface-wrong-version-queries-count {
+      type yang:counter32;
+      description
+        "Wrong Interface Number";
+    }
+
+    leaf bandwidth-exceeded-counter {
+      type yang:counter32;
+      description
+        "Bandwidth Exceeded Counter."; 
+    }
+	
+    leaf total-leaves-rx-counter {
+      type yang:counter32;
+      description
+        "Leaves Rx Counter";
+    }
+	
+    leaf total-joins-rx-counter {
+      type yang:counter32;
+      description
+        "Joins Rx Counter";
+    }
+	
+    leaf total-invalid-message-rx-counter {
+      type yang:counter32;
+      description
+        "Total Invalid Message Rx Counter.";
+    }	
+	
+    leaf total-leaves-tx-counter {
+      type yang:counter32;
+      description
+        "Leaves Tx Counter";
+    }	
+
+    leaf total-joins-tx-counter {
+      type yang:counter32;
+      description
+        "Joins Rx Counter";
+    }	
+
+    leaf successful-join-request-counter {
+      type yang:counter32;
+      description
+        "This statistic is the total number of successful join requests
+         from users which includes new joins (which make a new connection)
+         and re-joins (which already have a connection).";
+    }
+
+    leaf unsuccessful-join-request-counter {
+      type yang:counter32;
+      description
+        "This statistic is the total number of unsuccessful new join
+         requests from users. The failures could be due to the following
+         reasons: permission bitmap failure, bitrate failure, lack of
+         resource or invalid group address.";
+    }	
+  }
+}

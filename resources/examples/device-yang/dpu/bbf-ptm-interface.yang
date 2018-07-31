@@ -1,0 +1,92 @@
+module bbf-ptm-interface {
+
+  //yang-version 1.1;
+
+  namespace "urn:broadband-forum-org:yang:" +
+            "bbf-ptm-interface";  
+
+  prefix bbf-ptmif;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "Define the concept of an ptm-interface.";
+  
+  revision 2016-11-29 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+
+  augment "/if:interfaces/if:interface" {
+    /*when 'derived-from-or-self(../../../if:type,
+                              "bbfift:ptm")' {
+      description
+        "data that defines the relationship between the ptm-interface and its lower layer interface.";
+    }*/
+
+    description 
+      "Add a parent interface field to interfaces that model ptm-interfaces";
+
+    container ptmif-lower-layer {
+       presence "This leaf provides the lower layer within the interface stack";
+
+      description
+        "Links the ptm-interface to a lower layer interface.";
+
+      leaf interface {
+        type if:interface-ref;
+        mandatory true;
+
+        description
+          "References the lower layer interface";
+      }
+
+    }
+  }
+
+  grouping ptm-interface-ref {
+    description "A reference to a ptm-interface.";
+    leaf ptm-interface-ref {
+        /*when 'derived-from-or-self(../../../if:type,
+                                  "bbfift:ptm")' {
+           description
+	       "ptm-interface-ref";
+        }*/
+
+      type leafref {
+        path "/if:interfaces/if:interface/if:name";
+      }
+
+      description
+        "A reference to a ptm-interface state that contains its configuration data";
+    }
+  }
+
+  grouping ptm-interface-state-ref {
+    description "A reference to a ptm-interface.";
+    leaf ptm-interface-ref {
+        /*when 'derived-from-or-self(../../../if:type,
+                                  "bbfift:ptm")' {
+           description
+	       "ptm-interface-state-ref";
+        }*/
+
+      type leafref {
+        path "/if:interfaces-state/if:interface/if:name";
+      }
+
+      description
+        "A reference to a ptm-interface state that contains its operational data";
+    }
+  }
+}

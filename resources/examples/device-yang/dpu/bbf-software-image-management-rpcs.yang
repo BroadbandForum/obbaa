@@ -1,0 +1,117 @@
+// BBF Software Image Mangement RPCs YANG submodule
+
+submodule bbf-software-image-management-rpcs {
+
+  belongs-to bbf-software-image-management {
+    prefix swmgmt;
+  }
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization "Broadband Forum FTTDp";
+
+  contact
+   "Web : <https://www.broadband-forum.org/>
+    Help e-mail : TBD
+    Editor : TBD  ";
+
+  description "Software Image Mangement RPCs YANG submodule";
+
+  revision 2016-04-01 {
+     description
+      "Initial Revision";
+     reference
+      "";
+   }
+
+   rpc download-software-image {
+    description
+     "Used for downloading the software image. The result of this
+      rpc is reported by notification.";
+
+      input {
+
+       leaf download-url {
+         type inet:uri;
+         mandatory true;
+         description
+           "url consisting of the transport protocol,server ip,
+            the software file name with path, username and the password.";
+       }
+
+       leaf name {
+         type string;
+         mandatory true;
+         description
+          "The name of the software image to be downloaded";                           }
+
+       leaf max-num-retries {
+         type uint8;
+         description
+           "Number of download attempts to be made in case of download failure";
+       }
+
+       leaf retry-interval {
+         type uint8;
+         units mins;
+         description
+           "Time interval(in minutes) between the retry attempts";
+        }
+
+     } //input
+
+  } //rpc download-software-image
+
+
+  rpc activate-software-image {
+    description
+      "Used for activating the software image. The result of this
+       rpc is reported by notification.";
+
+       input {
+
+        leaf name {
+          type string;
+          mandatory true;
+          description
+            "The name of the software image to be activated";
+         }
+
+       }// input
+
+  } //rpc activate-software-image
+
+  rpc abort-download-image {
+    description
+     "Used to abort the ongoing download of the software";
+
+      input {
+        leaf name {
+          type string;
+          mandatory true;
+          description
+            "The name of the software image to be aborted";
+        }
+
+     }//input
+
+   } //rpc abort-software-image*/
+
+   rpc commit-software-image {
+     description
+      "Used to commit the software image";
+
+       input {
+         leaf name {
+           type string;
+           mandatory true;
+           description
+             "The name of the software image to be committed";
+          }
+        }
+
+   } // rpc commit-software-image
+
+}//submodule bbf-software-image-management-rpcs

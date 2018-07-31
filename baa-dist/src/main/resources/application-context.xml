@@ -1,0 +1,392 @@
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+    <bean id="propertyPlaceholderConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <!-- SYSTEM_PROPERTIES_MODE_OVERRIDE -->
+        <property name="systemPropertiesMode" value="2"/>
+    </bean>
+
+    <security:http pattern="/securityNone" security="none"/>
+    <security:http use-expressions="true">
+        <security:intercept-url pattern="/**" access="isAuthenticated()"/>
+        <security:http-basic/>
+    </security:http>
+
+    <security:authentication-manager>
+        <security:authentication-provider>
+            <security:user-service>
+                <security:user name="${BAA_USER}" password="${BAA_USER_PASSWORD}" authorities="ROLE_USER"/>
+            </security:user-service>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <bean id="swaggerDocket" class="org.broadband_forum.obbaa.SwaggerConfig" factory-method="api"/>
+
+    <bean id="deviceAdminRest" class="org.broadband_forum.obbaa.dm.rest.DeviceManagerRestEP">
+        <constructor-arg ref="deviceManager"/>
+    </bean>
+
+    <bean id="lockService" class="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl"/>
+
+    <bean id="modelServiceDeployer" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service.StaticSchemaRegistryDeployer">
+        <constructor-arg ref="dsmRegistry"/>
+        <constructor-arg ref="modelNodeHelperRegistry"/>
+        <constructor-arg ref="subsystemRegistry"/>
+        <constructor-arg ref="rpcReqHandlerRegistry"/>
+        <constructor-arg ref="modelNodeHelperDeployer"/>
+        <constructor-arg ref="schemaRegistry"/>
+        <constructor-arg ref="lockService"/>
+        <property name="rootModelNodeAggregator" ref="rootModelNodeAggregator"/>
+        <property name="entityRegistry" ref="entityRegistry"/>
+    </bean>
+
+    <bean id="modelNodeHelperDeployer" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityModelNodeHelperDeployer">
+        <constructor-arg ref="modelNodeHelperRegistry"/>
+        <constructor-arg ref="schemaRegistry"/>
+        <constructor-arg ref="aggregatedDSM"/>
+        <constructor-arg ref="entityRegistry"/>
+        <constructor-arg ref="subsystemRegistry"/>
+    </bean>
+
+    <bean id="rpcReqHandlerRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.RpcRequestHandlerRegistryImpl"/>
+
+    <bean id="deviceAlignmentStore" class="org.broadband_forum.obbaa.store.alignment.impl.DeviceAlignmentStoreImpl" init-method="init" destroy-method="destroy">
+        <constructor-arg value="/baa/stores/deviceAlignmentStore"/>
+    </bean>
+
+    <bean id="deviceAlignmentService" class="org.broadband_forum.obbaa.pma.impl.NetconfDeviceAlignmentServiceImpl" init-method="init"
+          destroy-method="destroy">
+        <constructor-arg ref="deviceManager"/>
+        <constructor-arg ref="ncConnectionMgr"/>
+        <constructor-arg ref="deviceAlignmentStore"/>
+    </bean>
+
+    <bean id="aligmentTimer" class="org.broadband_forum.obbaa.pma.impl.AlignmentTimer" init-method="init" destroy-method="destroy">
+        <constructor-arg ref="deviceAlignmentStore"/>
+        <constructor-arg ref="pmaRegistry"/>
+        <constructor-arg ref="deviceAdminStore"/>
+        <constructor-arg ref="ncConnectionMgr"/>
+    </bean>
+
+    <bean id="deviceSubsystem" class="org.broadband_forum.obbaa.pma.impl.DeviceSubsystem">
+        <constructor-arg ref="ncConnectionMgr"/>
+        <constructor-arg ref="deviceAlignmentService"/>
+        <constructor-arg ref="schemaRegistry"/>
+    </bean>
+
+    <bean id="deviceModelDeployer" class="org.broadband_forum.obbaa.pma.impl.DeviceModelDeployerImpl" init-method="init" destroy-method="destroy">
+        <constructor-arg value="/baa/stores/deviceYangModules"/>
+        <constructor-arg ref="modelServiceDeployer"/>
+        <constructor-arg ref="aggregatedDSM"/>
+        <constructor-arg ref="deviceSubsystem"/>
+        <constructor-arg ref="schemaRegistry"/>
+        <constructor-arg ref="entityRegistry"/>
+    </bean>
+
+    <bean id="deviceManager" class="org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl">
+        <constructor-arg ref="deviceAdminStore"/>
+        <constructor-arg ref="ncConnectionMgr"/>
+    </bean>
+
+    <bean id="deviceAdminStore" class="org.broadband_forum.obbaa.store.dm.impl.DeviceAdminStoreImpl" init-method="init" destroy-method="destroy">
+        <constructor-arg value="/baa/stores/deviceAdminStore"/>
+    </bean>
+
+
+    <bean id="pmaCapabilties" class="java.util.HashSet">
+        <constructor-arg>
+            <set value-type="java.lang.String">
+                <value>urn:ietf:params:netconf:base:1.0</value>
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="trustManager" class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.DynamicX509Factory"
+          factory-method="createDynamicTrustManager">
+        <constructor-arg value="CALLHOME_TLS_TRUST_CHAIN_PATH"/>
+    </bean>
+
+    <bean id="keyManager" class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.DynamicX509Factory"
+          factory-method="createDynamicKeyManager">
+        <constructor-arg value="CALLHOME_TLS_PRIV_KEY_CERT_PATH"/>
+        <constructor-arg value="CALLHOME_TLS_PRIV_KEY_PATH"/>
+        <constructor-arg value="CALLHOME_TLS_PRIV_KEY_PASSWORD"/>
+    </bean>
+
+    <bean id="callHomeTlsConfiguration"
+          class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.NetconfClientConfigurationFactory"
+          factory-method="createCallHomeTLSClientConfiguration">
+        <constructor-arg value="9223372036854775807"/>
+        <constructor-arg ref="pmaCapabilties"/>
+        <constructor-arg>
+            <bean class="io.netty.channel.nio.NioEventLoopGroup">
+                <constructor-arg value="10"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg ref="trustManager"/>
+        <constructor-arg ref="keyManager"/>
+        <constructor-arg type="org.broadband_forum.obbaa.netconf.api.authentication.AuthenticationListener">
+            <null/>
+        </constructor-arg>
+        <constructor-arg ref="callHomeListenerComposite"/>
+    </bean>
+
+    <bean id="callHomeService" class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.CallHomeServiceImpl"
+          init-method="init" destroy-method="destroy">
+        <constructor-arg ref="callHomeTlsConfiguration"/>
+        <constructor-arg ref="ncClientDispatcher"/>
+    </bean>
+
+    <bean id="callHomePool" class="java.util.concurrent.Executors" factory-method="newWorkStealingPool"/>
+
+    <bean id="ncClientDispatcher"
+          class="org.broadband_forum.obbaa.netconf.client.dispatcher.NetconfClientDispatcherImpl">
+        <constructor-arg ref="callHomePool"/>
+        <constructor-arg ref="callHomePool"/>
+    </bean>
+
+    <bean id="callHomeListenerComposite"
+          class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.CallHomeListenerCompositeImpl"/>
+
+    <bean id="ncConnectionMgr" class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.NetconfConnectionManagerImpl" init-method="init" destroy-method="destroy">
+        <constructor-arg ref="callHomeListenerComposite"/>
+        <constructor-arg ref="deviceAdminStore"/>
+        <constructor-arg ref="clientDispatcher"/>
+    </bean>
+
+    <bean id="clientDispatcher" class="org.broadband_forum.obbaa.netconf.client.dispatcher.NetconfClientDispatcherImpl">
+        <constructor-arg>
+            <bean class="java.util.concurrent.ThreadPoolExecutor">
+                <constructor-arg value="1"/>
+                <constructor-arg value="10"/>
+                <constructor-arg value="60"/>
+                <constructor-arg>
+                    <value type="java.util.concurrent.TimeUnit">SECONDS</value>
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="java.util.concurrent.ArrayBlockingQueue">
+                        <constructor-arg value="1000"/>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="timer" class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.TimerService" init-method="init" destroy-method="destroy">
+        <constructor-arg ref="ncConnectionMgr"/>
+    </bean>
+
+    <bean id="pmaRest" class="org.broadband_forum.obbaa.pma.rest.PmaRestEP">
+        <constructor-arg ref="pmaRegistry"/>
+    </bean>
+
+    <bean id="schemaRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl">
+        <constructor-arg ref="lockService"/>
+    </bean>
+
+    <bean id="subsystemRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistryImpl"/>
+
+    <bean id="modelNodeHelperRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistryImpl">
+        <constructor-arg ref="schemaRegistry"/>
+    </bean>
+
+    <bean id="dsmRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.ThreadLocalDSMRegistry"/>
+
+    <bean id="aggregatedDSM" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.AggregatedDSM">
+        <constructor-arg ref="dsmRegistry"/>
+    </bean>
+
+    <bean id="rootAggregator" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.RootModelNodeAggregatorImpl">
+        <constructor-arg ref="schemaRegistry"/>
+        <constructor-arg ref="modelNodeHelperRegistry"/>
+        <constructor-arg ref="aggregatedDSM"/>
+        <constructor-arg ref="subsystemRegistry"/>
+    </bean>
+
+    <bean id="rootModelNodeAggregator" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.RootModelNodeAggregatorImpl">
+        <constructor-arg ref="schemaRegistry"/>
+        <constructor-arg ref="modelNodeHelperRegistry"/>
+        <constructor-arg ref="aggregatedDSM"/>
+        <constructor-arg ref="subsystemRegistry"/>
+    </bean>
+
+
+    <bean id="dataStoreIntegrityService" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.service.DataStoreIntegrityServiceImpl">
+        <constructor-arg ref="modelNodeHelperRegistry" />
+        <constructor-arg ref="schemaRegistry" />
+        <constructor-arg ref="netconfServer"/>
+    </bean>
+
+    <bean id="dataStoreValidator" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.DataStoreValidatorImpl">
+        <constructor-arg ref="schemaRegistry" />
+        <constructor-arg ref="modelNodeHelperRegistry" />
+        <constructor-arg ref="aggregatedDSM" />
+        <constructor-arg ref="dataStoreIntegrityService" />
+        <constructor-arg ref="expressionValidator" />
+    </bean>
+
+    <bean id="runningDataStore" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.DataStore">
+        <constructor-arg value="RUNNING"/>
+        <constructor-arg ref="rootModelNodeAggregator"/>
+        <constructor-arg ref="subsystemRegistry"/>
+        <constructor-arg ref="dataStoreValidator"/>
+        <property name="nbiNotificationHelper" ref="nbiNotificationHelper"/>
+    </bean>
+
+    <bean id="netconfServer" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl">
+        <constructor-arg ref="schemaRegistry"/>
+        <property name="runningDataStore" ref="runningDataStore"/>
+    </bean>
+
+    <bean id="entityRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistryImpl"/>
+
+    <bean id="pmaRegistry" class="org.broadband_forum.obbaa.pma.impl.PmaRegistryImpl">
+        <constructor-arg ref="deviceManager"/>
+        <constructor-arg ref="ncConnectionMgr"/>
+        <constructor-arg ref="deviceModelDeployer"/>
+        <constructor-arg ref="switchableFactory"/>
+    </bean>
+
+    <bean id="connectionStateProvider" class="org.broadband_forum.obbaa.pma.impl.NetconfConnectionStateProvider" init-method="init"
+          destroy-method="destroy">
+        <constructor-arg ref="deviceManager"/>
+        <constructor-arg ref="ncConnectionMgr"/>
+    </bean>
+
+    <bean id="switchableFactory" class="org.broadband_forum.obbaa.pma.impl.SwitchableFactory">
+        <constructor-arg>
+            <map>
+                <entry key="REGULAR" value-ref="pmaServerSessionFactory"/>
+                <entry key="TRANSPARENT" value-ref="transparentPmaSessionFactory"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="transparentPmaSessionFactory" class="org.broadband_forum.obbaa.pma.impl.TransparentPmaSessionFactory">
+        <constructor-arg ref="ncConnectionMgr"/>
+        <constructor-arg ref="deviceManager"/>
+    </bean>
+
+    <bean id="pmaServerSessionFactory" class="org.broadband_forum.obbaa.pma.impl.PmaServerSessionFactory" init-method="init" destroy-method="destroy">
+        <constructor-arg value="/baa/stores/deviceDataStore"/>
+        <constructor-arg ref="deviceManager"/>
+        <constructor-arg ref="netconfServer"/>
+        <constructor-arg ref="deviceAlignmentService"/>
+        <constructor-arg ref="entityRegistry"/>
+        <constructor-arg ref="schemaRegistry"/>
+        <constructor-arg ref="modelNodeHelperRegistry"/>
+        <constructor-arg ref="subsystemRegistry"/>
+        <constructor-arg ref="dsmRegistry"/>
+    </bean>
+
+    <bean id="deviceCRUDListener" class="org.broadband_forum.obbaa.pma.impl.DeviceCRUDListener" init-method="init" destroy-method="destroy">
+        <constructor-arg ref="deviceManager"/>
+        <constructor-arg ref="pmaRegistry"/>
+    </bean>
+
+    <bean id="expressionValidator"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.util.DSExpressionValidator">
+        <constructor-arg ref="schemaRegistry"/>
+        <constructor-arg ref="modelNodeHelperRegistry"/>
+    </bean>
+
+    <bean id="addDefaultDataInterceptor" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.AddDefaultDataInterceptor" init-method="init"
+          destroy-method="destroy">
+        <constructor-arg ref="modelNodeHelperRegistry"/>
+        <constructor-arg ref="schemaRegistry"/>
+        <constructor-arg ref="expressionValidator"/>
+    </bean>
+
+    <bean id="nbiNotificationHelper" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NbiNotificationHelperImpl">
+    </bean>
+
+    <bean id="aggregator" class="org.broadband_forum.obbaa.aggregator.impl.AggregatorImpl">
+    </bean>
+
+    <bean id="aggregatorSchemaMount" class="org.broadband_forum.obbaa.aggregator.processor.AggregatorSchemaMount"
+          init-method="init"
+          destroy-method="destroy">
+        <constructor-arg ref="aggregator"/>
+    </bean>
+    <bean id="ietfYangLibrary" class="org.broadband_forum.obbaa.aggregator.processor.IetfYangLibrary"
+          init-method="init"
+          destroy-method="destroy">
+        <constructor-arg ref="aggregator"/>
+    </bean>
+    <bean id="deviceManagerAdapter" class="org.broadband_forum.obbaa.aggregator.processor.DeviceManagerAdapter"
+          init-method="init"
+          destroy-method="destroy">
+        <constructor-arg ref="aggregator"/>
+        <constructor-arg ref="deviceManager"/>
+    </bean>
+    <bean id="pmaAdapter" class="org.broadband_forum.obbaa.aggregator.processor.PmaAdapter"
+          init-method="init"
+          destroy-method="destroy">
+        <constructor-arg ref="aggregator"/>
+        <constructor-arg ref="deviceManager"/>
+        <constructor-arg ref="pmaRegistry"/>
+        <constructor-arg ref="deviceModelDeployer"/>
+    </bean>
+
+    <bean id="serverDispatcher" class="org.broadband_forum.obbaa.netconf.server.dispatcher.NetconfServerDispatcherImpl">
+        <constructor-arg>
+            <bean class="java.util.concurrent.ThreadPoolExecutor">
+                <constructor-arg value="1"/>
+                <constructor-arg value="10"/>
+                <constructor-arg value="60"/>
+                <constructor-arg>
+                    <value type="java.util.concurrent.TimeUnit">SECONDS</value>
+                </constructor-arg>
+                <constructor-arg>
+                    <bean class="java.util.concurrent.ArrayBlockingQueue">
+                        <constructor-arg value="1000"/>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="nbiNetconfAuth" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiSshNetconfAuth">
+        <property name="UserName" value="${BAA_USER}" />
+        <property name="Password" value="${BAA_USER_PASSWORD}" />
+    </bean>
+
+    <bean id="nbiNetconfServerMessageListener" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiNetconfServerMessageListener">
+        <constructor-arg ref="netconfServer"/>
+        <constructor-arg ref="aggregator"/>
+    </bean>
+
+    <bean id="nbiNetconfServerCapabilityProviderImpl" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.DynamicCapabilityProviderImpl">
+        <constructor-arg ref="schemaRegistry"/>
+    </bean>
+
+    <bean id="nbiNetconfServer" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiSshNetconfServer" init-method="start" destroy-method="stop">
+        <constructor-arg ref="nbiNetconfAuth"/>
+        <constructor-arg ref="nbiNetconfServerMessageListener"/>
+        <constructor-arg ref="serverDispatcher"/>
+        <constructor-arg ref="nbiNetconfServerCapabilityProviderImpl"/>
+        <property name="Port" value="9292" />
+        <property name="ConnectionTimeout" value="2000000" />
+    </bean>
+
+
+</beans>

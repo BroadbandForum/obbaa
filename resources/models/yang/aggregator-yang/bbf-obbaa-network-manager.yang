@@ -1,0 +1,190 @@
+module bbf-obbaa-network-manager {
+  yang-version 1.1;
+  namespace "urn:bbf:yang:obbaa:network-manager";
+  prefix network-manager;
+
+  import ietf-inet-types {
+	prefix inet;
+  }
+  import ietf-yang-types {
+	prefix yang;
+  }
+  import ietf-yang-schema-mount {
+	prefix yangmnt;
+  }
+
+  organization
+	"broadband_forum";
+  contact
+	"https://www.broadband-forum.org";
+  description
+	"YANG module supporting network management.
+
+	Copyright 2018 Broadband Forum
+ 
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+ 		http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.";
+
+  revision 2018-05-07 {
+	description
+	  "Initial revision.";
+	reference "broadband_forum";
+  }
+
+  grouping connection-grouping {
+	leaf connection-model {
+	  type enumeration {
+		enum call-home;
+		enum direct;
+	  }
+	  description
+		"whether the connection is call-home or direct.";
+	}
+	choice protocol {
+	  mandatory true;
+	  container password-auth {
+		when "../connection-model = 'direct'";
+		container authentication {
+		  leaf address {
+			type inet:ip-address;
+			description
+			  "Device IP address.";
+			mandatory true;
+		  }
+		  leaf management-port {
+			type uint32;
+			description
+			  "The management port of the device.";
+		  }
+		  leaf user-name {
+			type string;
+			description
+			  "The user name of the device.";
+		  }
+		  leaf password {
+			type string;
+			description
+			  "The password of the user.";
+		  }
+		}
+	  }
+	  leaf duid {
+		description
+		  "A globally unique value for a DUID (DHCP Unique Identifier)
+		   as defined in RFC 3315.";
+		type string {
+		  length "1..128";
+		}
+		when "../connection-model = 'call-home'";
+	  }
+	}
+  }
+
+  grouping management-grouping {
+	leaf device-type {
+	  type string;
+	  description
+		"The type of device. It can be used for determining the module-set of YANG library.";
+	}
+	leaf device-software-version {
+	  type string;
+	  description
+		"The software version of device.";
+	}
+	leaf device-model {
+	  type string;
+	  description
+		"The model of device.";
+	}
+	leaf device-vendor {
+	  type string;
+	  description
+		"The vendor of device.";
+	}
+	container device-connection {
+	  uses connection-grouping;
+	}
+	container device-state {
+	  config false;
+	  leaf configuration-alignment-state {
+		type string;
+	  }
+	  container connection-state {
+		leaf connected {
+		  type boolean;
+		  description
+			"The connection state of device.";
+		}
+		leaf connection-creation-time {
+		  type yang:date-and-time;
+		}
+		leaf-list device-capability {
+		  type string;
+		}
+	  }
+	}
+  }
+
+  grouping notification-grouping {
+	notification device-state-change {
+	  description
+		"Device state changed";
+	  leaf event {
+		type enumeration {
+		  enum online;
+		  enum offline;
+		}
+	  }
+	}
+  }
+
+  container managed-devices {
+	description
+	  "The managed devices and device communication settings.";
+	list device {
+	  key "device-name";
+	  leaf device-name {
+		type string;
+		description
+		  "The name of device.";
+	  }
+	  container device-management {
+		uses management-grouping;
+	  }
+	  container device-notification {
+		uses notification-grouping;
+	  }
+	  container root {
+		yangmnt:mount-point "root";
+		description
+		  "Root for models supported per device.";
+	  }
+	}
+  }
+  container new-devices {
+	config false;
+	list new-device {
+	  key "duid";
+	  leaf duid {
+		description
+		  "A globally unique value for a DUID (DHCP Unique Identifier)
+		   as defined in RFC 3315.";
+		type string {
+		  length "1..128";
+		}
+	  }
+	}
+	leaf-list device-capability {
+	  type string;
+	}
+  }
+}

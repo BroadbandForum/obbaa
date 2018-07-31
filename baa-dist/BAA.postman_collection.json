@@ -1,0 +1,338 @@
+{
+	"id": "45c6e891-d011-078a-74f6-20e7f1507978",
+	"name": "BAA",
+	"description": "",
+	"order": [
+		"114db885-7fa0-2b01-c64d-b147a9d2fd7e",
+		"67e6d699-0bd9-4f42-a40f-e1bd821e20bc",
+		"c694f051-c554-28be-a237-f81311f0c04a",
+		"b245f7de-e87a-6778-f130-44242f6c4c43",
+		"afe0f2f5-5a09-e68c-1a28-fd8771e0dd98",
+		"59f7d828-f227-b1d6-022d-44785a7302d0",
+		"fdd22a94-7172-fa48-9966-36eb57d86928",
+		"740718a9-fbee-6595-ac1d-6d6371aa30cc",
+		"620114ed-9c81-0c33-be73-2f0a579f8e12"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 0,
+	"owner": "123733",
+	"public": false,
+	"requests": [
+		{
+			"id": "114db885-7fa0-2b01-c64d-b147a9d2fd7e",
+			"headers": "Authorization: Basic YWRtaW46cGFzc3dvcmQ=\n",
+			"headerData": [
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/pma/reloadmodel",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1526549290934,
+			"name": "Redeploy model",
+			"description": "",
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": [],
+			"rawModeData": ""
+		},
+		{
+			"id": "59f7d828-f227-b1d6-022d-44785a7302d0",
+			"headers": "Content-Type: application/xml\nAccept: application/xml\nAuthorization: Basic YWRtaW46cGFzc3dvcmQ=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/xml",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Accept",
+					"value": "application/xml",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/pma/US-South1/executeNC",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1526549308432,
+			"name": "Get On PMA",
+			"description": null,
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": [],
+			"rawModeData": "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n    <get xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n    </get>\r\n</rpc>"
+		},
+		{
+			"id": "620114ed-9c81-0c33-be73-2f0a579f8e12",
+			"headers": "Authorization: Basic YWRtaW46cGFzc3dvcmQ=\n",
+			"headerData": [
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/dm/US-South1",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "DELETE",
+			"data": [],
+			"dataMode": null,
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1526549314735,
+			"name": "Delete Device",
+			"description": "",
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": []
+		},
+		{
+			"id": "67e6d699-0bd9-4f42-a40f-e1bd821e20bc",
+			"headers": "Content-Type: application/json\nAuthorization: Basic YWRtaW46cGFzc3dvcmQ=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/dm/",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "basicAuth",
+			"helperAttributes": {
+				"id": "basic",
+				"username": "admin",
+				"password": "password",
+				"saveToRequest": true
+			},
+			"time": 1526549293844,
+			"name": "Create Device",
+			"description": "",
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": [],
+			"rawModeData": "{\n  \"key\":\"US-South1\",\n  \"deviceConnectionInfo\":\n  {\n    \"duid\":\"ASLASJ1\",\n    \"port\":\"9293\",\n    \"username\":\"DPU\",\n    \"password\":\"DPU\"\n  }\n}"
+		},
+		{
+			"id": "740718a9-fbee-6595-ac1d-6d6371aa30cc",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/dm/",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1526549312712,
+			"name": "Update Device",
+			"description": "",
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": [],
+			"rawModeData": "{\n    \"deviceConnectionInfo\": {\n        \"ip\": \"192.168.169.1\",\n        \"username\": \"DPU\",\n        \"password\": \"DPU\",\n        \"port\": 9293\n    },\n    \"connected\": false,\n    \"key\": \"US-South1\"\n}"
+		},
+		{
+			"id": "afe0f2f5-5a09-e68c-1a28-fd8771e0dd98",
+			"headers": "Content-Type: application/xml\nAccept: application/xml\nAuthorization: Basic YWRtaW46cGFzc3dvcmQ=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/xml",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Accept",
+					"value": "application/xml",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/pma/US-South1/executeNC",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1526549306674,
+			"name": "GetConfig On PMA",
+			"description": "",
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": [],
+			"rawModeData": "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n  <get-config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n    <source>\r\n    \t<running/>\r\n    </source>\r\n   </get-config>\r\n</rpc>"
+		},
+		{
+			"id": "b245f7de-e87a-6778-f130-44242f6c4c43",
+			"headers": "Content-Type: application/xml\nAccept: application/xml\nAuthorization: Basic YWRtaW46cGFzc3dvcmQ=\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/xml",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Accept",
+					"value": "application/xml",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/pma/US-South1/executeNC",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1526549303673,
+			"name": "Edit On PMA",
+			"description": "",
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": [],
+			"rawModeData": "\r\n<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n\t<edit-config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n\t\t<target>\r\n\t\t\t<running/>\r\n\t\t</target>\r\n\t\t<test-option>set</test-option>\r\n\t\t<config>\r\n\t\t\t<vdsl xmlns=\"urn:bbf:yang:bbf-vdsl\">\r\n\t\t\t\t<service>\r\n\t\t\t\t\t<downstream-data-rate-profile>\r\n\t\t\t\t\t\t<name>AN1demo2</name>\r\n\t\t\t\t\t\t<minimum-net-data-rate>9</minimum-net-data-rate>\r\n\t\t\t\t\t\t<maximum-net-data-rate>10</maximum-net-data-rate>\r\n\t\t\t\t\t</downstream-data-rate-profile>\r\n\t\t\t\t</service>\r\n\t\t\t</vdsl>\r\n\t\t</config>\r\n\t</edit-config>\r\n</rpc>"
+		},
+		{
+			"id": "c694f051-c554-28be-a237-f81311f0c04a",
+			"headers": "Authorization: Basic YWRtaW46cGFzc3dvcmQ=\n",
+			"headerData": [
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/dm/US-South1",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": [],
+			"dataMode": null,
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1526549296636,
+			"name": "Get Device",
+			"description": "",
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": []
+		},
+		{
+			"id": "fdd22a94-7172-fa48-9966-36eb57d86928",
+			"headers": "Authorization: Basic YWRtaW46cGFzc3dvcmQ=\n",
+			"headerData": [
+				{
+					"key": "Authorization",
+					"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{boxIp}}:{{baaport}}/baa/pma/US-South1/forceAlign",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1526549310820,
+			"name": "forceAlign",
+			"description": null,
+			"collectionId": "45c6e891-d011-078a-74f6-20e7f1507978",
+			"responses": [],
+			"rawModeData": ""
+		}
+	]
+}

@@ -1,0 +1,133 @@
+submodule bbf-mgmd-configuration-multicast-snoop-profile {
+//  yang-version "1";
+
+  belongs-to bbf-mgmd {
+    prefix "igmp-config";
+  } 
+
+  import ietf-yang-types {
+    prefix "yang";
+  }
+  
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "An experimental YANG module for IGMP Protocol.";
+  
+  revision 2016-03-16 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  
+  grouping multicast-snoop-profile-entry {
+    description
+      ".";
+  
+    leaf immediate-leave {
+      type enumeration {
+        enum ENABLED{   
+//          value "0";
+          description 
+            "Enabled";
+        }
+        enum DISABLED{   
+//          value "1";
+          description
+            "Disabled";
+        }    
+      }
+      default ENABLED;
+      description
+        "Immediate Leave Enabled or Disabled";
+    }
+
+    leaf last-member-query-interval {
+      type uint32 {
+        range "1..31744";
+      }
+
+// units??
+// default ??
+
+      description
+        "Last Member Query Interval";
+    }
+
+    leaf last-member-query-count {
+      type yang:counter32;
+      description
+        "Last Member Query Count";
+    }
+
+    leaf router-port-purge-timer {
+      type yang:counter32;
+      description
+        "Router Port Purge Timer.";
+    }
+
+    leaf proxy-reporting {
+      type enumeration {
+        enum ENABLED{   
+//          value "0";
+          description
+            "Enabled";
+        }
+        enum DISABLED{   
+//          value "1";
+          description
+            "Disabled";
+        }    
+      }
+      default DISABLED;
+
+      description
+        "Proxy Reporting";
+    }
+
+    leaf report-suppression {
+      type enumeration {
+        enum ENABLED{   
+//          value "0";
+          description 
+            "Enabled";
+        }
+        enum DISABLED{   
+//          value "1";
+          description
+            "Disabled";
+        }    
+      }
+      default ENABLED;
+      description
+        "Report Suppression";
+    }
+    leaf interface-version {
+      type enumeration {
+        enum "IGMPv2" {
+//          value "0";
+          description
+            "V2";
+        }
+        enum "IGMPv3" {
+//          value "1";
+          description
+            "v3";
+        }
+        enum "MLDv2" {
+//          value "2";
+          description
+            "MLD v2";
+        }
+      }  
+      description
+        ".";
+    }  
+  }
+}

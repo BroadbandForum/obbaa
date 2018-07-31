@@ -1,0 +1,172 @@
+module tailf-configuration-policy {
+  namespace "http://tail-f.com/yang/configuration-policy";
+  prefix tfcp;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  organization "Tail-f Systems";
+
+  description
+    "This module defines configuration policies.  A configuration policy
+     enforces custom validation rules on the configuration data.
+     These rules assert that the user-defined conditions are always
+     true in committed data.  If a configuration change is done such
+     that a policy rule would evaluate to false, the configuration
+     change is rejected by the system.";
+
+  revision 2010-11-04 {
+    description
+      "Initial revision.
+
+       Released as part of ConfD-3.4.";
+  }
+
+  container policy {
+
+    list rule {
+      key name;
+      ordered-by user;
+
+      leaf name {
+        type string;
+        description
+          "An arbitrary name of the policy rule.";
+      }
+
+      leaf foreach {
+        type yang:xpath1.0;
+        description
+          "An XPath 1.0 expression that is evaluated when the configuration
+           is validated, either when a validate operation is performed,
+           or at commit time.
+
+           The XPath expression must return a node set.  For each node
+           in the node set, the XPath expression defined in the 'expr'
+           leaf is evaluated.
+
+           If this leaf is not specified, the node set contains the
+           single root node of all data models, i.e., the node which
+           has the top-level nodes from all data models as children.
+
+           The XPath expression is evaluated in the following context:
+
+             o  The context node is the root of all data models,
+                i.e., the node which has the top-level nodes from all
+                data models as children.
+
+             o  The namespace declarations, variable bindings, and
+                function library are the same as for the 'expr' leaf.";
+      }
+
+      leaf expr {
+        type yang:xpath1.0;
+        mandatory true;
+        description
+          "An XPath 1.0 expression that is evaluated when the configuration
+           is validated, either when a validate operation is performed,
+           or at commit time.
+
+           The result of the expression is converted to a boolean using
+           the standard XPath rules.  If the result is 'false', validation
+           fails with an error or a warning, as specified in the 'action'
+           choice.
+
+           For example, in order to verify that no ethernet interface has
+           a MTU other than 1500, the following expression can be given:
+
+             foreach '/interfaces/interface[type = ethernet]'
+             expr 'mtu != 1500'
+             error 'Ethernet interface {name} must have MTU 1500'
+
+           Alternatively:
+
+             expr 'not(/interface[type = ethernet and mtu != 1500])'
+             error 'All ethernet interfaces must have MTU 1500'
+
+
+           The XPath expression is evaluated once for each node in the
+           node set returned by the 'foreach' expression, in the
+           following context:
+
+             o  The context node is the current node in the 'foreach'
+                node set.
+
+             o  If this leaf is set in XML (e.g., over NETCONF), the
+                set of namespace declarations are those in scope on
+                the 'expr' leaf.
+
+                Otherwise, the set of namespace declarations are all
+                available namespaces, with the prefixes defined in
+                the modules.
+
+             o  The set of variable bindings is empty.
+
+             o  The function library is the core function library and
+                the following additional function:
+
+                  Function: node-set current()
+
+                    Returns the initial context node.
+
+                  Function: node-set deref(node-set)
+
+                    The deref function follows the reference defined
+                    by the first node in document order in the
+                    argument node-set, and returns the nodes it refers
+                    to.
+
+                    If the first argument node is an
+                    instance-identifier, the function returns a
+                    node-set that contains the single node that the
+                    instance identifier refers to, if it exists. If no
+                    such node exists, an empty node-set is returned.
+
+                    If the first argument node is a leafref, the
+                    function returns a node-set that contains the
+                    nodes that the leafref refers to.
+
+                    If the first argument node is of any other type,
+                    an empty node-set is returned.";
+      }
+
+      typedef message-string {
+        type string;
+        description
+          "A string which may contain XPath expressions, enclosed in curly
+           braces, '{', '}'.  When the string printed, each such
+           XPath expression is evaluated in the same context as the
+           'expr' expression.  The result is converted to a string
+           according to the normal XPath rules, and substituted in
+           the message string.
+
+           For example:
+
+             foreach /interface[type='t1']
+             expr not(clocking) or clocking != 'internal'
+             error The T1 interface {name} must have internal clocking";
+      }
+
+      choice action {
+        mandatory true;
+
+        case error {
+          leaf error-message {
+            type message-string;
+            description
+              "If specified, expression failure is treated as an error.";
+          }
+        }
+        case warning {
+          leaf warning-message {
+            type message-string;
+            description
+              "If specified, expression failure is treated as a warning.";
+          }
+        }
+      }
+    }
+  }
+}
+

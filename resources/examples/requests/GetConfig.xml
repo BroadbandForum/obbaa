@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907656">
+<get-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <source>
+    <running/>
+  </source>
+  <filter type="subtree">
+    <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
+      <device>
+        <device-name>deviceA</device-name>
+        <root>
+          <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
+        </root>
+      </device>
+    </managed-devices>
+  </filter>
+</get-config>
+</rpc>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="152026367257">
+  <get>
+    <source>
+      <running />
+    </source>
+    <filter type="subtree">
+      <modules-state xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+        <module-set-id>all</module-set-id>
+     </modules-state>
+    </filter>
+  </get>
+</rpc>

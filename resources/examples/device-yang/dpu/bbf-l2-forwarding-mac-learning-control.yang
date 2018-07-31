@@ -1,0 +1,225 @@
+submodule bbf-l2-forwarding-mac-learning-control {
+  //yang-version 1.1;
+  belongs-to bbf-l2-forwarding {
+    prefix bbf-l2-fwd;
+  }
+
+  import bbf-yang-types {
+    prefix bbf-yang;
+  }
+
+  include bbf-l2-forwarding-base;
+  include bbf-l2-forwarding-forwarders;
+  include bbf-l2-forwarding-interface-usage-type;
+
+  organization
+    "Broadband Forum <https://www.broadband-forum.org>
+     Common YANG Project Stream";
+
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      Joey Boyd, ADTRAN
+                  <mailto:joey.boyd@adtran.com>
+
+     Editor:      Ludwig Pauwels, Nokia
+                  <mailto:ludwig.pauwels@nokia.com>
+
+     PS Leader:   Michael Shaffer, Nokia
+                  <mailto:michael.shaffer@nokia.com>
+
+     PS Leader:   William Lupton, Broadband Forum
+                  <mailto:wlupton@broadband-forum.org>";
+
+  description
+    "This submodule contains a collection of YANG definitions for 
+     managing MAC address movement.
+
+     Copyright (c) 2016, Broadband Forum
+     All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms
+     <https://www.broadband-forum.org/ipr-policy>.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-383; see
+     the TR itself for full legal notices.";
+
+  revision 2016-07-12 {
+    description
+      "Initial revision.
+       * Approval Date:    see revision date above.
+       * Publication Date: yyyy-mm-dd.";
+    reference
+      "TR-383: Common YANG Modules
+               <https://www.broadband-forum.org/technical/download/
+                        TR-383.pdf>";
+  }
+
+  feature mac-learning-control-profiles {
+    description
+      "Indicates support for MAC address learning control profiles";
+  }
+
+  typedef mac-learning-control-profile-ref {
+    type leafref {
+      path '/bbf-l2-fwd:forwarding/bbf-l2-fwd:mac-learning-control-'
+         + 'profiles/bbf-l2-fwd:mac-learning-control-profile/bbf-l2-'
+         + 'fwd:name';
+    }
+    description
+      "A reference to a MAC address learning control profile.";
+  }
+
+  augment '/bbf-l2-fwd:forwarding' {
+    description
+      "Augment the configuration nodes associated with layer 2 
+       forwarding with MAC address learning control profile objects.";
+
+    container mac-learning-control-profiles {
+      if-feature "mac-learning-control-profiles";
+      description
+        "Contains a set of mac-learning-control-profiles.";
+
+      list mac-learning-control-profile {
+        key "name";
+
+        description
+          "The configuration of a MAC address learning control 
+           profile.
+           A profile controls the MAC address learning behavior that 
+           deviates from the default MAC learning in an IEEE bridge, 
+           i.e. that behavior that deviates from 'learn on the last 
+           port on which a frame with the corresponding source MAC 
+           address is received'. This implies that the default 
+           behavior is that MAC movement is allowed from any 
+           interface to any other interface.";
+
+        leaf name {
+          type bbf-yang:string-ascii64;
+          description
+            "The name of a MAC address learning control profile.";
+        }
+	
+        list mac-learning-rule {
+          key "receiving-port-usage";
+
+          description
+            "Defines what to do when a frame is received with a 
+             particular source MAC address and this MAC address is not
+             yet learned on that port.";
+
+          leaf receiving-port-usage {
+            type bbf-l2-fwd:interface-usage;
+
+            description
+              "Defines MAC address learning rules for frames received
+               on a port for which the underlying interface is of this
+               receiving-port-usage.";
+          }
+          choice mac-learning-action {
+            description
+              "Specifies how to learn a MAC address on a port of the
+               type 'receiving-port-usage'.";
+
+            case learn-and-translate {
+              description
+                "The (source) MAC address will be learned on the port 
+                 where the frame is received, and the system will 
+                 perform (source) MAC address translation before 
+                 forwarding the frame.";
+
+              reference
+                "TR-101i2: Migration to Ethernet-Based DSL Aggregation
+                 R-111.";
+            }  
+            case learn-but-do-not-move {
+              description
+                "Without MAC address translation the MAC address is 
+                 not necesarily unique.
+                 When the MAC address is not yet learned it is clear: 
+                 it is learned on the port on which the frame with the
+                 MAC address as source MAC is received (if other 
+                 criteria such as max-number-mac-addresses allow).
+                 In case the MAC address was already learned on 
+                 another port, then MAC movement is not allowed to 
+                 ports of the specified mac-can-not-move-to list. Then
+                 a notification reporting this event can be generated
+                 MAC movement is allowed to ports not specified in 
+                 the mac-can-not-move-to list. ";
+
+              reference
+                "TR-101i2: Migration to Ethernet-Based DSL Aggregation
+                 R-112 and R-113.";
+
+              leaf-list mac-can-not-move-to {
+                type bbf-l2-fwd:interface-usage;
+
+                description
+                  "Specifies the interface-usage of the interface
+                   underlying the ports to which MAC movement
+                   is not allowed.";
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  augment '/bbf-l2-fwd:forwarding/bbf-l2-fwd:forwarders/bbf-l2-fwd:'
+        + 'forwarder' {
+    description
+      "Augment the forwarder configuration with configuration for 
+       MAC address learning control.";
+
+    container mac-learning-control {
+      if-feature "mac-learning-control-profiles";
+      description
+        "The mac-learning-control defines how the system shall act
+	 when a frame is received for which the source MAC address
+	 was not learned before.";
+
+      leaf mac-learning-control-profile {
+        type mac-learning-control-profile-ref;
+        description
+          "A reference to a MAC address learning control profile.";
+      }
+    }
+  }
+}

@@ -1,0 +1,434 @@
+module bbf-mgmd {
+
+//  yang-version 1.1;
+
+  namespace "urn:broadband-forum-org:yang:" +
+            "bbf-mgmd";  
+            
+  prefix "igmp-config";
+
+  /* import */
+  import bbf-yang-types {
+    prefix bbf;
+  }
+  
+  import ietf-interfaces {
+    prefix if;
+  }
+  
+  import ietf-inet-types {
+    prefix "inet";
+  }
+  
+  include bbf-mgmd-configuration-multicast-proxy-profile;   
+  include bbf-mgmd-configuration-multicast-snoop-profile;     
+  
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "An experimental YANG module for IGMP Protocol.";
+  
+  revision 2016-03-16 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  
+  typedef multicast-proxy-profile-ref {
+    type leafref {
+      path "/igmp-config:multicast/igmp-config:mgmd/igmp-config:multicast-proxy-profile/igmp-config:name";
+    }
+    description
+      "This type is used by data models that need to reference configured interfaces.";
+  }
+
+  typedef multicast-snoop-profile-ref {
+    type leafref {
+      path "/igmp-config:multicast/igmp-config:mgmd/igmp-config:multicast-snoop-profile/igmp-config:name";
+    }
+    description
+      "This type is used by data models that need to reference configured interfaces.";
+  }
+  
+  typedef mgmd-mode {
+    type enumeration {
+      enum "proxy" {
+//        value "0";
+        description
+          "proxy";
+      }
+      enum "snoop" {
+//        value "1";
+        description
+          "snoop";
+      }
+      enum "snoop-with-proxyreporting" {
+//        value "2";
+        description
+          "Snoop with Proxy Reporting";
+      }
+    }
+    description
+      ".";
+  }
+  
+  container multicast {  
+    description
+      "multicast-configuration";
+  }
+  
+  augment "/multicast"{
+    description
+      ".";
+  container mgmd {  
+    description
+      "multicast-configuration";
+
+    list multicast-snoop-profile {
+      key "name";
+
+      description
+        "multicast-snoop-profile";
+       
+      /* Key and leafref */
+      leaf name {
+        type bbf:string-ascii64;
+        description
+          ".";
+      }    
+      
+      uses multicast-snoop-profile-entry;
+    }    
+    
+    list multicast-proxy-profile {
+      key "name";
+
+      description
+        "multicast-proxy-profile";
+       
+      /* Key and leafref */
+      leaf name {
+        type bbf:string-ascii64;
+        description
+          ".";
+      }    
+      
+      uses multicast-proxy-profile-entry;
+    }
+      
+    list multicast-vpn {
+      key "name";
+      
+      description
+        "multicast-vpn";
+
+      /* Key and leafref */
+      leaf name {
+        type bbf:string-ascii64;
+        description
+          "This object is the name associated with a particular multicast VPN (Service Context).";
+      }
+      
+      leaf mode {
+        type mgmd-mode;
+
+// default? mandatory ??? (default=proxy?)
+
+        description
+          "IGMP Mode";
+      }
+      
+      leaf multicast-proxy-profile-name {      
+        when "../mode = 'proxy'";  
+        type multicast-proxy-profile-ref;
+
+// mandatory ???
+
+        description
+          "Point to IGMP proxy  profile";
+      }
+
+      leaf multicast-snoop-profile-name {      
+        when "../mode = 'snoop'";
+        type multicast-snoop-profile-ref;
+
+// mandatory ???
+
+        description
+          "Point to IGMP snoop  profile";
+      }      
+       
+      list multicast-subscriber-interface {
+        key "name";
+
+        unique "interface-name";
+
+        description
+          "This table contains multicast-subscriber-interface configuration";
+
+        /* Key and leafref */
+        leaf name {
+          type bbf:string-ascii64;
+          description
+            "This object is the name associated with subscriber-interface.";
+        }      
+
+        leaf interface-name {
+          type if:interface-ref;
+
+          mandatory true;
+            
+          description
+            "This object specifies the VLAN interface of user port";
+        }     
+
+        leaf max-group-number {
+          type int32 {
+            range "0..1024";
+          }
+
+// default ??? (default is 0)
+
+          description
+            "";     
+        }
+        
+        leaf-list fullview-package-list {
+          type leafref {          
+            path "/igmp-config:multicast/igmp-config:mgmd/igmp-config:multicast-vpn[name = current()/../../name]/igmp-config:igmp-package/igmp-config:name";
+          }
+          description "The purpose of this list is to indicate which packages the user is allowed to join.";
+        }
+        
+        leaf unconfigured-channel-control {
+          type enumeration {
+             enum "not-allowed" {           
+             }
+             enum "hsi-vlan" {        
+             }
+             enum "network-facing-port-value" {  
+             }
+          }
+          default "not-allowed";
+          description
+          "This object indicates the vlan if system found that the channel is un-configured;
+           not-allowed : If no match found, discard join packet.
+           hsi-vlan : If no match found, use HSI VALN to forward join packet
+           network-facing-port-value : use VLAN indicated by igmp-network-facing-port-name";      
+        } 
+        
+        leaf unconfigured-multicast-vlan {
+          type leafref {
+              path "/igmp-config:multicast/igmp-config:mgmd/igmp-config:multicast-vpn[name = current()/../../name]/igmp-config:multicast-network-interface/igmp-config:name";
+          }
+          description
+            "This object specifies the unconfigured-multicast VLAN interface .";
+        }  
+/*
+        rpc clear-subscriber-interface-stats {
+          description
+            "When this object is set to true, the statistics within this
+             table are cleared. When this object is set to false, the request is
+             ignored.";
+
+          input {
+            leaf subscriber-interface-name {
+              type string;
+              description
+                "";     
+            }
+          }
+        } */     
+      }
+      
+        
+      list multicast-network-interface {
+        key "name";
+
+        description
+          "multicast-network-interface";
+
+        /* Key and leafref */
+        leaf name {
+          type bbf:string-ascii64;
+          description "This object is the name associated with a network facing interface.";
+        }
+
+        leaf multicast-vlan {
+// note that here we want to be ready for a ring.
+// In that case it might not be a reference to a sub-interface, but to a forwarder.
+// then it is up to the forwarder to decide whether the igmp messages will be sent east or west.
+// This aspect is not worked out, but to anticipate it should be a in a choice
+
+          type if:interface-ref;
+          description
+            "This object specifies the VLAN interface in which the multicast channel is.";
+
+// mandatory ???
+
+        } 
+/*
+        action clear-network-interface-stats {
+          description
+            "When this object is set to true, the statistics within this
+             table are cleared. When this object is set to false, the request is
+             ignored.";
+
+          input {
+            leaf module-name {
+              type string;
+              description
+                ".";
+            }
+          }
+        }  */    
+      }        
+          
+        list multicast-channel {
+          key "name";
+
+          unique "group-address group-address-end source-address";
+
+          description
+            "This table contains management information of pre-configured multicast
+             source and group combination for ASM and SSM mode type operations 
+             such as source and mcastgroup IP address, network interface / VLANID,
+             traffic descriptor, etc. for each multicast source.";              
+          /* Key and leafref */       
+          leaf name {
+            type bbf:string-ascii64;
+            description
+              "This object is the name associated with a particular multicast channel";
+          }
+
+          leaf igmp-network-interface-name {
+            type leafref {
+              path "/igmp-config:multicast/igmp-config:mgmd/igmp-config:multicast-vpn[name = current()/../../name]/igmp-config:multicast-network-interface/igmp-config:name";
+            }
+
+            mandatory true;
+            
+            description
+              "This object specifies the VLAN interface in which the multicast channel is";
+          }
+
+
+          leaf group-address {
+            type inet:ipv4-address;
+
+// mandatory ???
+
+            description
+              "IPv4 Address";
+          }
+ 
+          leaf group-address-end {
+            type inet:ipv4-address;
+            default "0.0.0.0";
+            description "";
+          }
+        
+          leaf source-address {
+            type inet:ipv4-address;
+
+// mandatory ???
+
+            description
+              "IPv4 Address";
+          }    
+
+          leaf is-preview {
+            type boolean;
+
+// default ???
+
+            description
+              "Is Preview";
+          }
+
+          leaf preview-repeat-time {
+            type uint32;
+
+// units ???
+// default ???
+
+            description
+              "preview Repeat Time";
+          }
+
+          leaf preview-repeat-count {
+            type uint32;
+
+// default ???
+
+            description
+              "preview Repeat Count";
+          }
+
+          leaf preview-reset-time {
+            type uint32;
+
+// units ???
+// default ???
+
+            description
+              "preview reset time";
+          }       
+
+          leaf preview-length {
+            type uint32;
+
+// units ???
+// default ???
+
+            description
+              "preview length";
+          }       
+        }
+
+        list igmp-package {
+          key "name"; 
+
+          description
+            "Each entry contains the information related to the package.";                   
+
+          /* Key and leafref */  
+          leaf name {
+            type bbf:string-ascii64;
+            description
+              "This object is the name associated with a particular package.";
+          }
+
+          leaf-list igmp-multicast-channel-list {  
+            type leafref {
+              path "/igmp-config:multicast/igmp-config:mgmd/igmp-config:multicast-vpn[name = current()/../../name]/igmp-config:multicast-channel/igmp-config:name";
+            }
+            description
+              "The purpose of this list is to indicate which configured channel is belongs to this package.";
+          }
+        } // list igmp-package
+/*
+        action clear-vpn-stats {
+          description
+            "When this object is set to true, the statistics within this
+             table are cleared. When this object is set to false, the request is
+             ignored.";
+          input {
+            leaf multicast-vpn-name {
+              type string;
+              description
+                ".";
+            }
+          }
+
+        }   */            
+      } // list multicast-vpn    
+    } // container  mgmd
+  } // container  multicast
+} // module bbf-igmp-configuration

@@ -1,0 +1,170 @@
+//This module corresponds to BBF Software Image Management Model
+
+module bbf-software-image-management {
+
+   namespace "urn:broadband-forum-org:yang:bbf-software-image-management";
+   prefix swmgmt;
+
+   import "bbf-software-image-management-yang-types" {
+   prefix swmgmt-types;
+   }
+
+   include "bbf-software-image-management-body";
+
+   include "bbf-software-image-management-rpcs";
+
+   include "bbf-software-image-management-notifications";
+
+   organization
+      "Broadband Forum - Work Area<FTTDp>";
+
+   contact
+    "Web : <https://www.broadband-forum.org/>
+     Help e-mail : TBD
+     Editor : TBD  ";
+
+   description
+   "YANG module for management of software images.";
+
+    revision 2016-04-01 {
+      description
+      "Initial version";
+      reference
+      "";
+     }
+
+container software-management{
+
+  description
+    "Top-level container representing software packages in the system.";
+
+    container software-image-one {
+      config false;
+
+      description
+        "Provides information of the software image one.";
+
+      uses software-information;
+    } //container software-image-one
+
+
+    container software-image-two {
+      config false;
+      description
+       "Provides information of the software image two.";
+
+      uses software-information;
+
+    } //container software-image-two
+
+    container last-attempted-activation-monitor {
+      config false;
+      description
+         "Used to monitor the last attempted
+          activation of the software package triggered by
+          the rpc 'activate-software-image'.";
+
+      leaf name {
+        type string;
+        description
+         "Depicts the software version last attempted
+          for activation.";
+       }
+
+       leaf  activation-status {
+         type swmgmt-types:activation-status;
+         description
+         "Depicts the activation status of the software
+            ( i.e activation successful or activation
+            ongoing or activation failure/Rollback ).";
+       }
+
+     leaf activate-time {
+       type swmgmt-types:time-stamp;
+       description
+       "Depicts the timestamp of start of the last activation
+       attempt.";
+     }
+
+
+     leaf trouble-shooting-information {
+       type string;
+       description
+       "Depicts information on errors.";
+     }
+
+     } //last-attempted-activation-monitor
+
+   container last-attempted-download-monitor {
+     config false;
+     description
+         "Used to monitor the last attempted
+          software download triggered by the
+          rpc 'download-software-image'.";
+
+     leaf name {
+       type string;
+       description
+         "Depicts the software version last attempted for
+          download.";
+     }
+
+     leaf  download-status {
+       type swmgmt-types:download-status;
+       description
+         "Depicts the download status of the software.";
+     }
+
+
+     leaf download-time {
+       type swmgmt-types:time-stamp;
+       description
+          "Depicts the timestamp of start of the last download attempt.";
+     }
+
+     leaf trouble-shooting-information {
+       type string;
+       description
+          "Depicts information on errors.";
+     }
+
+     } //last-attempted-download-monitor
+
+   container last-attempted-commit-monitor {
+     config false;
+     description
+       "Used to monitor the last attempted
+        software commit triggered by the
+        rpc 'commit-software-image'.";
+
+     leaf name {
+       type string;
+       description
+         "Depicts the software version last attempted
+          for commit.";
+     }
+
+     leaf  commit-status {
+       type swmgmt-types:commit-status;
+       description
+         "Depicts the commit status of the software.";
+     }
+
+     leaf commit-time {
+       type swmgmt-types:time-stamp;
+       description
+         "Depicts the timestamp of start of the last commit
+            attempt.";
+     }
+
+     leaf trouble-shooting-information {
+       type string;
+       description
+          "Depicts information on errors.";
+     }
+
+   } //last-attempted-commit-monitor
+
+  }//software-management
+
+}//module bbf-software-image-management

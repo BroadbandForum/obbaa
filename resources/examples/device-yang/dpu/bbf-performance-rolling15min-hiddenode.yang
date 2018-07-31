@@ -1,0 +1,72 @@
+module bbf-performance-rolling15min-hiddenode {
+  namespace "urn:broadband-forum-org:yang:" +
+            "bbf-performance-rolling15min-hiddenode";  
+			
+  prefix bbf-pm-rolling15min-hiddenode;
+  
+  import bbf-interfaces-performance-management {
+    prefix bbf-if-pm;
+  }
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  import ietf-yang-types{
+    prefix yang;
+  }
+  
+  import tailf-common{
+    prefix tailf;
+  }
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "A collection of management objects for the Rolling Counter 
+     and 15-minute counter";
+  
+  revision 2016-03-31 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }  
+   
+  augment "/if:interfaces-state/if:interface/bbf-if-pm:performance" {
+    description 
+    "schema for hidden node";
+    container hidden-rolling15min-performance-data {
+      description
+      " ";
+      tailf:hidden hidden-performance-data;
+	  
+      container intervals-15min{        
+        description
+        "";
+
+        container prestatus {
+          description 
+          "Record the 15min counter intial status when the PM counters function
+		   is enabled and should be updated after every 15min timer run out.";
+
+          uses bbf-if-pm:interface-performance-counters;
+        }  
+      }
+      
+      leaf discontinuity-time {
+        type yang:date-and-time;
+        description
+          "The time on the most recent occasion at which any one or
+           more of this interface's counters suffered a
+           discontinuity.  If no such discontinuities have occurred
+           since the last re-initialization of the local management
+           subsystem, then this node contains the time the local
+           management subsystem re-initialized itself.";		   
+      }
+    }
+  }  
+}

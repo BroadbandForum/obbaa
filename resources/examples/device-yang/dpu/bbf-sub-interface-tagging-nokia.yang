@@ -1,0 +1,95 @@
+module bbf-sub-interface-tagging-nokia {
+
+  namespace "urn:broadband-forum-org:yang:" +
+            "bbf-sub-interface-tagging-nokia";  
+
+  prefix bbf-subif-tag-nokia;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  import bbf-sub-interfaces {
+    prefix bbf-subif;
+  }
+
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "Extend the concept of a sub-interface for VLAN tagged Ethernet 
+     interfaces. ";
+  
+  revision 2016-04-06 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+
+  augment "/if:interfaces/if:interface/bbf-subif:frame-processing" +
+          "/bbf-subif:ingress-rule/bbf-subif:rule" +
+          "/bbf-subif:flexible-match" {
+    description
+      "augment with a matching option for controling forwarding of 
+       L2CP frames. It is all of the defined frames or nothing.";
+    leaf l2cp-transparency {
+      type boolean;
+      default false;
+      description
+        "enables classifying the following untagged frames into 
+         the sub-interface:
+          - frames with destination MAC: 01-80-C2-00-00-00, 
+            i.e. STP/RSTP/MSTP frames
+          - frames with destination MAC: 01-80-C2-00-00-02, 
+            i.e. LACP/OAM/SlowProtocols frames,
+          - frames with destination MAC: 01-80-C2-00-00-03, 
+            i.e. 802.1X frames,
+          - frames with destination MAC: 01-80-C2-00-00-04 to 
+                                         01-80-C2-00-00-07,
+            which is a reserved range of addresses
+          - frames with destination MAC: 01-80-C2-00-00-08, 
+            i.e. the Provider Bridge Group Address
+          - frames with destination MAC: 01-80-C2-00-00-09 to 
+                                         01-80-C2-00-00-0C,
+            which is a reserved range of addresses
+          - frames with destination MAC: 01-80-C2-00-00-0D, 
+            i.e. the Provider Bridge GVRP Address
+          - frames with destination MAC: 01-80-C2-00-00-0E, 
+            i.e. the IEEE Std. 802.1AB Link Layer Discovery Protocol
+            multicast address
+          - frames with destination MAC: 01-80-C2-00-00-0F, 
+            which is a reserved address
+          - frames with destination MAC: 01-80-C2-00-00-10, 
+            i.e. the 'all bridges' MAC address
+          - frames with destination MAC: 01-80-C2-00-00-11 to 
+                                         01-80-C2-00-00-1F,
+            nothing mentioned in standards
+          - frames with destination MAC: 01-80-C2-00-00-20, 
+            i.e. GARP, GMRP
+          - frames with destination MAC: 01-80-C2-00-00-21, 
+            i.e. GVRP
+          - frames with destination MAC: 01-80-C2-00-00-22 to 
+                                         01-80-C2-00-00-2F, 
+            which is a reserved range of addresses
+
+         enables classifying the following tagged frames into the 
+         sub-interface
+          - frames with destination MAC: 01-80-C2-00-00-01 
+          - frames with destination MAC: 01-80-C2-00-00-03 to 
+                                         01-80-C2-00-00-0F
+          - frames with destination MAC: 01-80-C2-00-00-10 to 
+                                         01-80-C2-00-00-1F
+          - frames with destination MAC: 01-80-C2-00-00-20 to 
+                                         01-80-C2-00-00-2F
+         Note that the following frames are never forwarded, not 
+         untagged, not tagged
+          - frames with destination MAC: 01-80-C2-00-00-01, 
+            i.e. Pause frames
+         ";
+    } 
+  }
+}

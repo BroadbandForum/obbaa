@@ -1,0 +1,35 @@
+module bbf-mgmd-types {
+
+  namespace "urn:broadband-forum-org:yang:" +
+            "mgmd-types";  
+            
+  prefix "igmp-types";
+
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+
+  description 
+    "This module contains a collection of YANG definitions for
+     managing top level IGMP configuration and augmenations to
+     ietf-interfaces.";
+
+  revision 2016-03-16 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  feature igmp-proxy {
+    description
+      "Use Proxy to implementation IGMP Snooping";
+  }
+  
+  feature igmp-group-ip-range {
+    description
+      "Use group ip range feature to ";
+  }
+}

@@ -1,0 +1,158 @@
+// This module contains BBF DPU Software Image Management YANG types
+
+
+module bbf-software-image-management-yang-types{
+
+  namespace "urn:broadband-forum-org:yang:bbf-software-image-management-yang-types";
+  prefix swmgmt-types;
+
+  import "ietf-yang-types" {
+   prefix yang;
+  }
+
+  organization "Broadband Forum FTTDp";
+
+  contact
+   "Web : <https://www.broadband-forum.org/>
+    Help e-mail : TBD
+    Editor : TBD  ";
+
+  description
+   "This module contains YANG data types for the module
+    bbf-software-image-management ";
+
+  revision 2016-04-01 {
+     description
+      "Initial Revision";
+     reference
+      "";
+  }
+
+  // typedefs
+
+  typedef operation-status {
+    type enumeration {
+      enum SUCCESS {
+        description
+        "SUCCESS: Operation is successfully completed";
+      }
+      enum FAILURE {
+        description
+        "FAILURE: Operation is failed.";
+      }
+    }
+    description
+      "This attribute depicts whether the operation like
+       download, activation, abort, commit is successfully completed or
+       failed.";
+  }
+
+  typedef download-status {
+    type enumeration {
+      enum EMPTY {
+        description
+        "EMPTY: No software is attempted for download";
+      }
+      enum DOWNLOAD-SUCCESSFUL {
+        description
+        "DOWNLOAD-SUCCESSFUL: Software download is successful";
+      }
+      enum DOWNLOAD-FAILURE {
+        description
+        "DOWNLOAD-FAILURE: Software download is failed";
+      }
+      enum DOWNLOADING {
+        description
+        "DOWNLOADING: Software download is on-going";
+      }
+      enum DOWNLOADING-RETRY {
+        description
+        "DOWNLOADING-RETRY: Attempt to download the software
+                            after download failure";
+      }
+      enum ABORTED {
+        description
+        "ABORTED: Software download is stopped.";
+      }
+    }
+    description
+      "This attribute informs the operator about
+       the download status of the software package.";
+  }
+
+
+  typedef activation-status {
+    type enumeration {
+      enum SUCCESS {
+        description
+        "SUCCESS: Activation is successful";
+      }
+      enum FAILURE {
+        description
+        "FAILURE: Activation is failed.";
+      }
+      enum ON-GOING {
+        description
+        "ON-GOING: Activation is on-going";
+      }
+    }
+    description
+      "This attribute informs the operator whether
+       the related software package is currently
+       1. success - System is active with the running software
+       2. failure - Software activation is failed;
+       3. on-going - Activation of software is in-progress";
+  }
+
+  typedef commit-status {
+    type enumeration {
+      enum SUCCESS {
+        description
+        "SUCCESS: Commit operation is successful";
+      }
+      enum FAILURE {
+        description
+        "FAILURE: Commit operation failed.";
+      }
+      enum ON-GOING {
+        description
+        "ON-GOING: Commit is on-going";
+      }
+    }
+    description
+      "This attribute informs the operator whether
+       the commit status of the software package is currently
+       1. success - Commit of the software is successful
+       2. failure - Commit of the software failed
+       3. on-going - Commit of software is in-progress";
+  }
+
+  typedef time-stamp {
+    type union {
+      type yang:date-and-time;
+      type string;
+    }
+    description
+      "Depicts the recorded timestamp of the any action executed like
+       download, activation, commit, abort. If there is no time
+       recorded, it is a having string to represent that 'no time is
+       recorded'";
+  }
+
+  typedef status {
+    type enumeration {
+      enum YES {
+        description
+        "YES: operation is finished";
+      }
+      enum NO {
+        description
+        "NO: opearation is not performed.";
+      }
+    }
+    description
+      "Depicts the status of the software for operation like activation,
+       commit and download.";
+  }
+}//bbf-software-image-management-yang-types
+

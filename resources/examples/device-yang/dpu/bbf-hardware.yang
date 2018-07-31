@@ -1,0 +1,37 @@
+module bbf-hardware {
+//  yang-version 1.1; ConfD does not support v1.1
+
+  namespace "urn:broadband-forum-org:bbf-hardware";
+
+  prefix bbf-hw;
+  
+  import iana-hardware {
+	  prefix ianahw;  
+  }
+  organization
+    "Broadband Forum Common YANG Work Area";
+
+  contact
+    "bbf: http://www.broadband-forum.org
+          help@broadband-forum.org 
+
+    Editor: Jan Verbist, Nokia 
+
+    Work Area Director: William Lupton, Broadband Forum 
+                        Michael Shaffer, Nokia";
+
+  description
+    "A YANG Data model to augment the IETF-Hardware model";
+
+  revision 2017-05-05 {
+    description
+        "Initial revision.";
+  }
+
+  identity transceiver {
+    base ianahw:hardware-class;
+    description
+      "This identity is applicable if the component is a 
+       transceiver.";
+  }
+}

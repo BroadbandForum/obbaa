@@ -1,0 +1,88 @@
+module bbf-performance-hiddenode {
+  namespace "urn:broadband-forum-org:yang:" +
+            "bbf-performance-hiddenode";  
+			
+  prefix bbf-pm-hiddenode;
+  
+  import bbf-interfaces-performance-management {
+    prefix bbf-if-pm;
+  }
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  import ietf-yang-types{
+    prefix yang;
+  }
+  
+  import tailf-common{
+    prefix tailf;
+  }
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "A collection of management objects for the Rolling Counter 
+     and 15-minute counter";
+  
+  revision 2016-03-31 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }  
+   
+  augment "/if:interfaces-state/if:interface/bbf-if-pm:performance" {
+    description 
+    "schema for hidden node";
+    container hidden-performance-data {
+      description
+      " ";
+      tailf:hidden hidden-performance-data;
+      container rolling {
+        description
+        "";
+        container prestatus {
+          description 
+          "Record the rolling counter intial status when the PM counters function
+	       is enabled.";
+		  
+	      leaf time-stamp {
+            tailf:hidden timestamp;
+            type yang:date-and-time;
+            description 
+            "Reports the start time of rolling counter, it should be initialized 
+	         when the PM counter is enabled and shouldn't be updated in the future.";
+          }
+		  
+          uses bbf-if-pm:interface-performance-counters;
+		}
+      }
+
+	  
+      container intervals-15min{        
+        description
+        "";
+
+        container prestatus {
+          description 
+          "Record the 15min counter intial status when the PM counters function
+		   is enabled and should be updated after every 15min timer run out.";
+		   
+		  leaf time-stamp {
+            type yang:date-and-time;
+            description 
+            "Reports the start time of rolling counter, it should be initialized 
+	         when the PM counter is enabled and shouldn't be updated in the future.";
+          }
+
+          uses bbf-if-pm:interface-performance-counters;
+        }  
+	  }
+    }
+  }  
+}

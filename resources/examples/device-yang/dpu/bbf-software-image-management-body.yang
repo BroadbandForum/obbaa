@@ -1,0 +1,91 @@
+// YANG definitions for the module BBF Software Image Management
+
+submodule bbf-software-image-management-body {
+
+   belongs-to bbf-software-image-management{
+   prefix swmgmt;
+   }
+
+   import "bbf-software-image-management-yang-types" {
+   prefix swmgmt-types;
+   }
+
+   organization
+      "Broadband Forum - Work Area<FTTDp>";
+
+   contact
+    "Web : <https://www.broadband-forum.org/>
+     Help e-mail : TBD
+     Editor : TBD  ";
+
+   description
+    "This module contains a collection of YANG definitions for
+    the module bbf-software-image-management.";
+
+   revision 2016-04-01 {
+     description
+      "Initial Revision";
+     reference
+      "";
+    }
+
+   grouping  software-information{
+    description
+     "Provides the parameters related to software image.";
+
+    leaf name {
+      type string;
+      description
+       "Depicts the name of the software version.";
+     }
+
+     leaf release-name {
+     type string;
+     description
+     "Depicts the official software build reference.";
+     }
+
+     leaf downloaded-time {
+       type swmgmt-types:time-stamp;
+       description
+         "Depicts the timestamp of the last successful download,
+          taken after the download action is completed.";
+     }
+
+     leaf activated-time {
+       type swmgmt-types:time-stamp;
+       description
+          "Depicts the timestamp of the last successful activation,
+          taken after the activation is completed.";
+      }
+
+     leaf committed-time {
+       type swmgmt-types:time-stamp;
+       description
+          "Depicts the timestamp of the last successful commit,
+          taken after the commit action is completed.";
+      }
+
+     leaf is-active {
+       type swmgmt-types:status;
+       description
+          "Depicts whether software is active or not";
+     }
+
+     leaf is-committed {
+       type swmgmt-types:status;
+       description
+          "Depicts whether software is commited or not";
+     }
+
+     leaf is-valid {
+       type swmgmt-types:status;
+       description
+          "is-valid = yes, if software download is successful
+           is-valid = no, if software download is failed";
+     }
+
+  } //software-information
+
+}//bbf-software-image-management-body
+
