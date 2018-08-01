@@ -13,7 +13,7 @@ representation of the AN is exposed through each of the interfaces using
 access control to restrict access to parts of the AN.
 
 <p align="center">
- <img width="600px" height="400px" src="/obbaa/architecture/system_interfaces.png">
+ <img width="600px" height="400px" src="{{site.url}}/architecture/system_interfaces.png">
 </p>
 
 ANs interact with the BAA layer through the adapters of the SBI. These
@@ -31,7 +31,7 @@ A high-level software architecture is depicted below that implements the
 logical system architecture described in the previous section.
 
 <p align="center">
- <img width="600px" height="400px" src="/obbaa/architecture/system_architecture.png">
+ <img width="600px" height="400px" src="{{site.url}}/architecture/system_architecture.png">
 </p>
 
 The roles and responsibilities of each of these components are as

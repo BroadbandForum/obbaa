@@ -29,7 +29,7 @@ System Functionality
 The high level functional diagram for the BAA layer is shown in the
 figure below.
 <p align="center">
- <img width="600px" height="300px" src="/obbaa/overview/system_description.png">
+ <img width="600px" height="300px" src="{{site.url}}/overview/system_description.png">
 </p>
 
 BAA Core
@@ -154,11 +154,11 @@ agnostic way toward the management systems for the type of access node.
 release.**
 
 <p align="center">
- <img width="350px" height="275px" src="/obbaa/overview/baa_actuator.png">
+ <img width="350px" height="275px" src="{{site.url}}/overview/baa_actuator.png">
 </p>
 
 <p align="center">
- <img width="600px" height="300px" src="/obbaa/overview/system_functional.png">
+ <img width="600px" height="300px" src="{{site.url}}/overview/system_functional.png">
 </p>
 
 [<--Introduction](../)

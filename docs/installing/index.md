@@ -70,7 +70,7 @@ HDD
 #### Operating System (OS) Requirements
 
 While there isn\'t a strict requirement on the OS needed for the
-project, Ubuntu is the OS in which the core development team uses.\
+project, Ubuntu is the OS in which the core development team uses.
 For the Guest OS in a VM: 64bit Ubuntu 16.04.04 is the recommended
 either server or desktop versions are supported.
 
@@ -140,35 +140,37 @@ To install maven use the following command in a apt based system
 #### Repositories
 
 The OB-BAA code is maintained in Github within the [Broadband Forum\'s
-repositories](http://www.github.com/BroadbandForum).\
+repositories](http://www.github.com/BroadbandForum).
 The code base is split across two repositories:
 
 -   obbaa-netconf-stack - NETCONF specific client and server
-    implementations
+    implementations - <https://github.com/BroadbandForum/obbaa-netconf-stack>
 
--   obbaa - OB-BAA main repository
+-   obbaa - OB-BAA main repository - <https://github.com/BroadbandForum/obbaa>
 
 ##### Key update
 
 To clone OB-BAA code into a server, the user ssh public key need to
-updated in the user\'s bitbucket account.\
+updated under the github repository settings.
 Do the following:
 
--   Open <https://code.broadband-forum.org/account>
+-   Open each repository using one of the urls provided above
 
--   Under SSH Keys add an entry with the public ssh key of the dev
+-   Under Settings tab, click "Deploy keys" and add an entry with the public ssh key of the dev
     server
+
+-   Github does not allow the same key to be deployed across two repositories. So after cloning code from one repository, remove the key and then add it in the other repository 
 
 ##### Clone OB-BAA NETCONF stack repository
 
 ```
-  git clone -b master --single-branch ssh://git@code.broadband-forum.org:7999/ob-baa/obbaa-netconf-stack.git
+  git clone -b master --single-branch git@github.com:BroadbandForum/obbaa-netconf-stack.git
 ```
 
 ##### Clone OB-BAA obbaa repository
 
 ```
-  git clone -b master --single-branch ssh://git@code.broadband-forum.org:7999/ob-baa/obbaa.git
+  git clone -b master --single-branch git@github.com:BroadbandForum/obbaa.git
 ```
 
 ### Build OB-BAA
@@ -226,7 +228,7 @@ the url http://\<ip:port\>/swagger-ui.html on a web browser.
 See sample screenshot below
 
 <p align="center">
- <img width="600px" height="400px" src="/obbaa/installing/swagger.png">
+ <img width="600px" height="400px" src="{{site.url}}/installing/swagger.png">
 </p>
 
 **Info:** Use basic http authentication to login to the page from swagger.
@@ -253,14 +255,14 @@ can be done using following steps:
 Using Swagger to deploy model:
 
 <p align="center">
- <img width="600px" height="400px" src="/obbaa/installing/swagger_deploy.png">
+ <img width="600px" height="400px" src="{{site.url}}/installing/swagger_deploy.png">
 </p>
 
 The successful response along with imported module details is shown
 below:
 
 <p align="center">
- <img width="600px" height="400px" src="/obbaa/installing/swagger_deploy_response.png">
+ <img width="600px" height="400px" src="{{site.url}}/installing/swagger_deploy_response.png">
 </p>
 
 Setting up Simulators
@@ -347,13 +349,13 @@ setup the simulator to support a \"callhome\" device is as follows:
 	```
 
 <p align="center">
- <img width="600px" height="200px" src="/obbaa/installing/generateCertificates.jpg">
+ <img width="600px" height="200px" src="{{site.url}}/installing/generateCertificates.jpg">
 </p>
 
 > On running the script the certificates will be generated under a new folder with the provided DUID (e.g., DPU1).
 
 <p align="center">
- <img width="600px" height="200px" src="/obbaa/installing/generateCertificates.jpg">
+ <img width="600px" height="200px" src="{{site.url}}/installing/generateCertificates.jpg">
 </p>
 
 -   Start the sysrepo netopeer2 docker service as discussed in the
@@ -373,7 +375,7 @@ setup the simulator to support a \"callhome\" device is as follows:
 ```
 
 <p align="center">
- <img width="600px" height="100px" src="/obbaa/installing/deviceCerts.jpg">
+ <img width="600px" height="100px" src="{{site.url}}/installing/deviceCerts.jpg">
 </p>
 
 -   From netopeer2-cli in the sysrepo docker container connect to
@@ -383,11 +385,11 @@ setup the simulator to support a \"callhome\" device is as follows:
     netopeer2 is netconf/netconf.
 
 ```
-  connect \--ssh \--login netconf
+  connect --ssh --login netconf
 ```
 
 <p align="center">
- <img width="600px" height="100px" src="/obbaa/installing/deviceCerts.jpg">
+ <img width="600px" height="100px" src="{{site.url}}/installing/deviceCerts.jpg">
 </p>
 
 -   From netopeer2-cli in the sysrepo docker container, load the server
@@ -592,7 +594,7 @@ KBKGYUlmDh7SJaQO0x3fGwFz84IQhgZvxA==</certificate>
 openssl x509 -noout -fingerprint -sha256 -inform pem -in certchain.crt
 ```
 <p align="center">
- <img width="700px" height="40px" src="/obbaa/installing/finger-print.jpg">
+ <img width="700px" height="40px" src="{{site.url}}/installing/finger-print.jpg">
 </p>
 This is a SHA256 fingerprint and we need to specify it by prefixing 04 in the <fingerprint> leaf.
 
@@ -665,7 +667,7 @@ the Atom editor and the initial exchange with OB-BAA server is shown
 below.
 
 <p align="center">
- <img width="600px" height="400px" src="/obbaa/installing/atom_simulator.png">
+ <img width="600px" height="400px" src="{{site.url}}/installing/atom_simulator.png">
 </p>
 
 Once the connection is established, additional NETCONF commands can be
@@ -701,7 +703,7 @@ request command of each use-case into a dedicated xml file and execute
 it from Atom NETCONF editor (illustration below).
 
 <p align="center">
- <img width="200px" height="400px" src="/obbaa/installing/atom_obbaa.png">
+ <img width="200px" height="400px" src="{{site.url}}/installing/atom_obbaa.png">
 </p>
 
 ### Create Device
