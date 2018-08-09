@@ -20,4 +20,4 @@ We're excited to present the first OB-BAA release R1.0.0
 
 ##	Documentation
 Relevant documentation for Installation, Commissioning & Usage are under docs folder in this site. 
-Alternatively the user documentation can also be accessed at https://obbaa.braoadband-forum.org.
+Alternatively the user documentation can also be accessed at https://obbaa.broadband-forum.org.
