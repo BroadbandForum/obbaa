@@ -108,6 +108,7 @@ submodule bbf-l2-forwarding-mac-learning {
       "Augment the forwarder configuration to add MAC learning.";
 
     container mac-learning {
+	if-feature "forwarding-databases";
       description
         "The forwarding decision for each frame shall result in an 
          unambiguous decision on the outgoing forwarder-port(s). This 
@@ -130,7 +131,11 @@ submodule bbf-l2-forwarding-mac-learning {
          acceptable to move it to the network-port.";
 
       leaf forwarding-database {
-        type forwarding-database-ref;
+type leafref {
+          path '/bbf-l2-fwd:forwarding/bbf-l2-fwd:forwarding-'
+             + 'databases/bbf-l2-fwd:forwarding-database/bbf-l2-'
+             + 'fwd:name';
+        }
         description
           "A reference to a forwarding database.
            The absence of a reference to a forwarding-datase 

@@ -413,6 +413,7 @@ module bbf-qos-traffic-mngt {
        profile.";
 
     leaf tc-id-2-queue-id-mapping-profile-name {
+if-feature "tc-id-2-queue-id-mapping-config";
       type leafref {
         path '/bbf-qos-tm:tm-profiles'
            + '/bbf-qos-tm:tc-id-2-queue-id-mapping-profile'
