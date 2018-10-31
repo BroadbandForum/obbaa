@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0" xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.2.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
+           default-activation="eager">
+    <jpa:enable />
+    <tx:enable-annotations/>
+    <reference id="deviceManager" interface="org.broadband_forum.obbaa.dm.DeviceManager" availability="mandatory"/>
+    <reference id="ncConnectionMgr"
+               interface="org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager"
+               availability="mandatory"/>
+    <reference id="deviceDao" interface="org.broadband_forum.obbaa.dmyang.dao.DeviceDao" availability="mandatory"/>
+    <reference id="persistenceMgrUtil" interface="org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil" availability="mandatory"/>
+
+    <reference id="lockService" interface="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService" availability="mandatory"/>
+    <reference id="nonCodedAdapterService" interface="org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService" availability="mandatory"/>
+    <reference id="entityRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry" availability="mandatory"/>
+    <reference id="dsmRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDSMRegistry" availability="mandatory"/>
+    <reference id="aggregatedDSM" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager" availability="mandatory"/>
+    <reference id="adapterManager" interface="org.broadband_forum.obbaa.device.adapter.AdapterManager" availability="mandatory"/>
+
+    <bean id="schemaRegistry" class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalSchemaRegistry">
+    </bean>
+    <bean id="schemaRegistryForDeployer" class="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl">
+        <argument ref="lockService"/>
+    </bean>
+
+    <bean id="subsystemRegistry" class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalSubsystemRegistry"/>
+    <bean id="rpcReqHandlerRegistry"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.RpcRequestHandlerRegistryImpl"/>
+
+    <bean id="modelNodeHelperRegistry"
+          class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalModelNodeHelperRegistry">
+    </bean>
+
+    <bean id="modelServiceDeployer"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service.StaticSchemaRegistryDeployer">
+        <argument ref="dsmRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="subsystemRegistry"/>
+        <argument ref="rpcReqHandlerRegistry"/>
+        <argument ref="modelNodeHelperDeployer"/>
+        <argument ref="schemaRegistry"/>
+        <argument ref="lockService"/>
+        <property name="rootModelNodeAggregator" ref="rootModelNodeAggregator"/>
+        <property name="entityRegistry" ref="entityRegistry"/>
+    </bean>
+
+    <bean id="modelNodeHelperDeployer"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityModelNodeHelperDeployer">
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="schemaRegistry"/>
+        <argument ref="aggregatedDSM"/>
+        <argument ref="entityRegistry"/>
+        <argument ref="subsystemRegistry"/>
+    </bean>
+
+    <bean id="rootModelNodeAggregator"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.RootModelNodeAggregatorImpl">
+        <argument ref="schemaRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="aggregatedDSM"/>
+        <argument ref="subsystemRegistry"/>
+    </bean>
+
+    <bean id="threadLocalRootMNAggregator" class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalRootModelNodeAggregator"/>
+
+    <bean id="deviceAlignmentService" class="org.broadband_forum.obbaa.pma.impl.NetconfDeviceAlignmentServiceImpl"
+          init-method="init"
+          destroy-method="destroy">
+        <property name="txService" ref="txService"/>
+        <argument ref="deviceManager"/>
+        <argument ref="ncConnectionMgr"/>
+    </bean>
+
+    <bean id="aligmentTimer" class="org.broadband_forum.obbaa.pma.impl.AlignmentTimer" init-method="init"
+          destroy-method="destroy">
+        <property name="deviceDao" ref="deviceDao"/>
+        <property name="txService" ref="txService"/>
+        <argument ref="pmaRegistry"/>
+        <argument ref="ncConnectionMgr"/>
+    </bean>
+
+    <bean id="deviceSubsystem" class="org.broadband_forum.obbaa.pma.impl.DeviceSubsystem">
+        <argument ref="ncConnectionMgr"/>
+        <argument ref="deviceAlignmentService"/>
+        <argument ref="schemaRegistry"/>
+    </bean>
+
+    <bean id="deviceModelDeployer" class="org.broadband_forum.obbaa.pma.impl.DeviceModelDeployerImpl" init-method="init"
+          destroy-method="destroy">
+        <argument value="/baa/stores/deviceYangModules"/>
+        <argument ref="modelServiceDeployer"/>
+        <argument ref="aggregatedDSM"/>
+        <argument ref="deviceSubsystem"/>
+        <argument ref="schemaRegistryForDeployer"/>
+        <argument ref="entityRegistry"/>
+    </bean>
+
+    <bean id="pmaRegistry" class="org.broadband_forum.obbaa.pma.impl.PmaRegistryImpl">
+        <argument ref="deviceManager"/>
+        <argument ref="ncConnectionMgr"/>
+        <argument ref="deviceModelDeployer"/>
+        <argument ref="switchableFactory"/>
+    </bean>
+
+    <bean id="connectionStateProvider" class="org.broadband_forum.obbaa.pma.impl.NetconfConnectionStateProvider"
+          init-method="init"
+          destroy-method="destroy">
+        <argument ref="deviceManager"/>
+        <argument ref="ncConnectionMgr"/>
+    </bean>
+
+    <bean id="switchableFactory" class="org.broadband_forum.obbaa.pma.impl.SwitchableFactory">
+        <argument>
+            <map>
+                <entry key="REGULAR" value-ref="pmaServerSessionFactory"/>
+                <entry key="TRANSPARENT" value-ref="transparentPmaSessionFactory"/>
+            </map>
+        </argument>
+    </bean>
+
+    <bean id="transparentPmaSessionFactory" class="org.broadband_forum.obbaa.pma.impl.TransparentPmaSessionFactory">
+        <argument ref="ncConnectionMgr"/>
+        <argument ref="deviceManager"/>
+    </bean>
+
+    <bean id="pmaServerSessionFactory" class="org.broadband_forum.obbaa.pma.impl.PmaServerSessionFactory"
+          init-method="init" destroy-method="destroy">
+        <argument value="/baa/stores/deviceDataStore"/>
+        <argument ref="deviceManager"/>
+        <argument ref="netconfServer"/>
+        <argument ref="deviceAlignmentService"/>
+        <argument ref="entityRegistry"/>
+        <argument ref="schemaRegistryForDeployer"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="subsystemRegistry"/>
+        <argument ref="dsmRegistry"/>
+        <argument ref="adapterManager"/>
+    </bean>
+
+    <bean id="deviceCRUDListener" class="org.broadband_forum.obbaa.pma.impl.DeviceCRUDListener" init-method="init"
+          destroy-method="destroy">
+        <argument ref="deviceManager"/>
+        <argument ref="pmaRegistry"/>
+    </bean>
+
+    <bean id="netconfServer" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl">
+        <argument ref="schemaRegistry"/>
+        <property name="runningDataStore" ref="runningDataStore"/>
+    </bean>
+
+    <bean id="runningDataStore" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.DataStore">
+        <argument value="RUNNING"/>
+        <argument ref="threadLocalRootMNAggregator"/>
+        <argument ref="subsystemRegistry"/>
+        <argument ref="dataStoreValidator"/>
+        <property name="nbiNotificationHelper" ref="nbiNotificationHelper"/>
+    </bean>
+
+    <bean id="dataStoreValidator"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.DataStoreValidatorImpl">
+        <argument ref="schemaRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="aggregatedDSM"/>
+        <argument ref="dataStoreIntegrityService"/>
+        <argument ref="expressionValidator"/>
+    </bean>
+
+    <bean id="nbiNotificationHelper"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NbiNotificationHelperImpl">
+    </bean>
+
+    <bean id="dataStoreIntegrityService"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.service.DataStoreIntegrityServiceImpl">
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="schemaRegistry"/>
+        <argument ref="netconfServer"/>
+    </bean>
+
+    <bean id="expressionValidator"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.util.DSExpressionValidator">
+        <argument ref="schemaRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+    </bean>
+
+    <bean id="txService" class="org.broadband_forum.obbaa.dmyang.tx.TxService"/>
+
+    <bean id="adapterActionHandler" class="org.broadband_forum.obbaa.adapter.handler.DeviceAdapterActionHandlerImpl"
+          init-method="init">
+        <argument ref="nonCodedAdapterService"/>
+        <argument ref="deviceSubsystem"/>
+    </bean>
+
+    <service ref="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry"/>
+    <service ref="deviceModelDeployer" interface="org.broadband_forum.obbaa.pma.DeviceModelDeployer"/>
+    <service ref="netconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer"/>
+    <service ref="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry"/>
+    <service ref="adapterActionHandler" interface="org.broadband_forum.obbaa.adapter.handler.DeviceAdapterActionHandler"/>
+
+</blueprint>

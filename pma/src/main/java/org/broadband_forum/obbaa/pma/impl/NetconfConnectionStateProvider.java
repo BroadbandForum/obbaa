@@ -18,14 +18,15 @@ package org.broadband_forum.obbaa.pma.impl;
 
 import java.util.LinkedHashMap;
 
-import org.broadband_forum.obbaa.connectors.sbi.netconf.ConnectionState;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dm.DeviceStateProvider;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
+import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 
 public class NetconfConnectionStateProvider implements DeviceStateProvider {
     public static final String CONNECTION_STATE = "connectionState";
+    public static final String CALL_HOME = "call-home";
     private final DeviceManager m_deviceManager;
     private final NetconfConnectionManager m_cm;
 
@@ -48,9 +49,9 @@ public class NetconfConnectionStateProvider implements DeviceStateProvider {
 
     @Override
     public void deviceAdded(String deviceName) {
-        DeviceInfo device = m_deviceManager.getDevice(deviceName);
-        if (device.isCallHome()) {
-            m_cm.dropNewDeviceConnection(device.getDeviceCallHomeInfo().getDuid());
+        Device device = m_deviceManager.getDevice(deviceName);
+        if (device.getDeviceManagement().getDeviceConnection().getConnectionModel().equals(CALL_HOME)) {
+            m_cm.dropNewDeviceConnection(device.getDeviceManagement().getDeviceConnection().getDuid());
         }
     }
 

@@ -1,5 +1,5 @@
 <h1>Open Broadband: Broadband Access Abstraction (OB-BAA)</h1>
-<h4>Version 1.0.0</h4>
+<h4>Version 1.1.0</h4>
 
 **Table of Contents**
 
@@ -80,17 +80,18 @@
 
 ## Revision History
 
-### Release 1.0
+### Release 1
 
-* Release contains specification for the OB-BAA release 1.0.0.
-
+* OB-BAA release 1.0.0 (July 2018)
+* OB-BAA release 1.1.0 (October 2018)
 
 ## Participants
 
 | :---: | :---: | :---: | :---: |
-|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|
-|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|
-|![TelecomItalia](assets/img/tim.png){: width="100px" height="70px"}|![UNH-IOL](assets/img/iol.png){: width="140px" height="75px"}|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="75px"}|
+|![Altice](assets/img/altice.jpg){: width="100px" height="100px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|
+|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|
+|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|![TelecomItalia](assets/img/tim.png){: width="100px" height="70px"}|![UNH](assets/img/iol.png){: width="100px" height="45px"}|
+|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="75px"}|||
 
 How to Get Involved
 ===================
@@ -139,6 +140,15 @@ The following tools are used by the OB-BAA project
 
 | Software Name| Purpose | Vendor | Paid/Open Source | License | Details |
 | :--- | :--- | :--- | :--- |:--- | :--- |
-|Netopeer2|NetConf device simulator|CESNET|Open Source|BSD-3|<a href="https://github.com/CESNET/Netopeer2">Github Link</a>|
+|Netopeer2|NETCONF device simulator|CESNET|Open Source|BSD-3|<a href="https://github.com/CESNET/Netopeer2">Github link</a>|
+|Atom|NETCONF client text editor|Atom|Open Source|MIT|<a href="https://atom.io">Documentation link</a>|
+|atom-netconf|NETCONF package for the Atom editor|Nokia|Open Source|MIT|<a href="https://github.com/nokia/atom-netconf">Github link</a>|
+
+The following tools are used in  and delivered by the OB-BAA project
+
+| Software Name| Purpose | Vendor | Paid/Open Source | License | Details |
+| :--- | :--- | :--- | :--- |:--- | :--- |
+|HSQL DB|YANG Datastore|HyperSQL|Open Source|BSD|<a href="http://hsqldb.org/">Documentation link</a>|
+|Apache Karaf|Container|Apache|Open Source|Apache 2.0|<a href="https://karaf.apache.org/">Documentation link</a>|
 
 [Overview -->](./overview/)

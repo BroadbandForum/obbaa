@@ -98,14 +98,14 @@ public final class AggregatorUtils {
     }
 
     /**
-     * Build device-name Element.
+     * Build name Element.
      *
      * @param document Owner document
      * @param deviceName Device name
      * @return Element
      */
     public static Element buildDeviceNameElement(Document document, String deviceName) {
-        Element deviceNameNode = document.createElement("device-name");
+        Element deviceNameNode = document.createElement("name");
         if (deviceName != null) {
             deviceNameNode.setTextContent(deviceName);
         }

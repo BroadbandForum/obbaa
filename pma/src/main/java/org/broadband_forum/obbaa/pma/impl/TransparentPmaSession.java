@@ -20,13 +20,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.pma.PmaSession;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.w3c.dom.Document;
 
 /**
@@ -34,10 +34,10 @@ import org.w3c.dom.Document;
  */
 public class TransparentPmaSession implements PmaSession {
     private final NetconfConnectionManager m_connectionManager;
-    private final DeviceInfo m_deviceInfo;
+    private final Device m_device;
 
-    public TransparentPmaSession(DeviceInfo deviceInfo, NetconfConnectionManager connectionManager) {
-        m_deviceInfo = deviceInfo;
+    public TransparentPmaSession(Device device, NetconfConnectionManager connectionManager) {
+        m_device = device;
         m_connectionManager = connectionManager;
     }
 
@@ -47,13 +47,13 @@ public class TransparentPmaSession implements PmaSession {
             Document document = null;
             document = DocumentUtils.stringToDocument(netconfRequest);
             AbstractNetconfRequest request = DocumentToPojoTransformer.getRequest(document);
-            Future<NetConfResponse> responseFuture = m_connectionManager.executeNetconf(m_deviceInfo, request);
+            Future<NetConfResponse> responseFuture = m_connectionManager.executeNetconf(m_device, request);
             return responseFuture.get().responseToString();
         } catch (NetconfMessageBuilderException e) {
             throw new IllegalArgumentException(String.format("Invalid netconf request received : %s", netconfRequest), e);
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(String.format("Could not execute request %s on device %s", netconfRequest,
-                    m_deviceInfo), e);
+                m_device), e);
         }
     }
 

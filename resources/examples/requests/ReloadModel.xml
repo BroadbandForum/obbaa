@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10101">
-  <action xmlns="urn:ietf:params:xml:ns:yang:1">
-    <pma-yang-library xmlns="urn:bbf:yang:obbaa:pma-yang-library">
-        <reload/>
-    </pma-yang-library>
-  </action>
-</rpc>

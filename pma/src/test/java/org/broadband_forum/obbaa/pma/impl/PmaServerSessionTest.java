@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
@@ -32,7 +33,6 @@ import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,7 +67,7 @@ public class PmaServerSessionTest {
     @Captor
     private ArgumentCaptor<AbstractNetconfRequest> m_reqCaptor;
     @Mock
-    private DeviceInfo m_deviceInfo;
+    private Device m_device;
     @Mock
     private NetConfResponse m_response;
     @Mock
@@ -90,7 +90,7 @@ public class PmaServerSessionTest {
         m_dataContent.add(m_element2);
         when(m_response.getDataContent()).thenReturn(m_dataContent);
         when(m_server.executeNetconf(anyObject())).thenReturn(m_response);
-        m_session = new PmaServerSession(m_deviceInfo, m_server, m_das);
+        m_session = new PmaServerSession(m_device, m_server, m_das);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class PmaServerSessionTest {
                 "  </get-config>\n" +
                 "</rpc>\n", m_reqCaptor.getAllValues().get(0).requestToString());
 
-        verify(m_das).forceAlign(eq(m_deviceInfo.getKey()), (CopyConfigRequest) m_reqCaptor.capture());
+        verify(m_das).forceAlign(eq(m_device.getDeviceName()), (CopyConfigRequest) m_reqCaptor.capture());
         assertEquals("<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
                 "  <copy-config>\n" +
                 "    <target>\n" +

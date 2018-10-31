@@ -16,10 +16,14 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.ALIGNED;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.IN_ERROR;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NEVER_ALIGNED;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,46 +34,51 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
+import org.broadband_forum.obbaa.dmyang.tx.TxService;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcError;
-import org.broadband_forum.obbaa.store.alignment.DeviceAlignmentInfo;
-import org.broadband_forum.obbaa.store.alignment.DeviceAlignmentStore;
+import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
+import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class NetconfDeviceAlignmentServiceImplTest {
     public static final String EDIT_REQ_STR = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-            "  <edit-config>\n" +
-            "    <target>\n" +
-            "      <running />\n" +
-            "    </target>\n" +
-            "    <test-option>set</test-option>\n" +
-            "    <config>\n" +
-            "      <some-config xmlns=\"some:ns\"/>\n" +
-            "    </config>\n" +
-            "  </edit-config>\n" +
-            "</rpc>";
+        "  <edit-config>\n" +
+        "    <target>\n" +
+        "      <running />\n" +
+        "    </target>\n" +
+        "    <test-option>set</test-option>\n" +
+        "    <config>\n" +
+        "      <some-config xmlns=\"some:ns\"/>\n" +
+        "    </config>\n" +
+        "  </edit-config>\n" +
+        "</rpc>";
     private static final String CC_REQ_STR = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-            "  <copy-config>\n" +
-            "    <source>blah<source>\n" +
-            "\t<target>\n" +
-            "      <running />\n" +
-            "    </target>\n" +
-            "    <test-option>set</test-option>\n" +
-            "    <config>\n" +
-            "      <some-config xmlns=\"some:ns\"/>\n" +
-            "    </config>\n" +
-            "  </copy-config>\n" +
-            "</rpc>";
+        "  <copy-config>\n" +
+        "    <source>blah<source>\n" +
+        "\t<target>\n" +
+        "      <running />\n" +
+        "    </target>\n" +
+        "    <test-option>set</test-option>\n" +
+        "    <config>\n" +
+        "      <some-config xmlns=\"some:ns\"/>\n" +
+        "    </config>\n" +
+        "  </copy-config>\n" +
+        "</rpc>";
     NetconfDeviceAlignmentServiceImpl m_das;
     @Mock
     private EditConfigRequest m_edit1;
@@ -79,10 +88,6 @@ public class NetconfDeviceAlignmentServiceImplTest {
     private EditConfigRequest m_edit3;
     @Mock
     private EditConfigRequest m_edit4;
-    @Mock
-    private DeviceAlignmentInfo m_device1Info;
-    @Mock
-    private DeviceAlignmentInfo m_device2Info;
     @Mock
     private NetconfConnectionManager m_ncm;
     @Mock
@@ -96,13 +101,27 @@ public class NetconfDeviceAlignmentServiceImplTest {
     @Mock
     private CopyConfigRequest m_cc;
     @Mock
-    private DeviceAlignmentStore m_alignmentStore;
-    @Mock
     private DeviceManager m_dm;
+    private Device m_device1;
+    private Device m_device2;
+    private TxService m_txService;
+    @Mock
+    private PersistenceManagerUtil m_persistenceMgrUtil;
+    @Mock
+    private EntityDataStoreManager entityDSM;
+    @Mock
+    private EntityManager entityMgr;
+    @Mock
+    private EntityTransaction entityTx;
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
         MockitoAnnotations.initMocks(this);
+        m_txService = new TxService();
+        when(m_persistenceMgrUtil.getEntityDataStoreManager()).thenReturn(entityDSM);
+        when(entityDSM.getEntityManager()).thenReturn(entityMgr);
+        when(entityMgr.getTransaction()).thenReturn(entityTx);
+        when(entityTx.isActive()).thenReturn(true);
         when(m_edit1.requestToString()).thenReturn(EDIT_REQ_STR);
         when(m_edit2.requestToString()).thenReturn(EDIT_REQ_STR);
         when(m_edit3.requestToString()).thenReturn(EDIT_REQ_STR);
@@ -117,200 +136,218 @@ public class NetconfDeviceAlignmentServiceImplTest {
         m_notOkResponse.addError(NetconfRpcError.getApplicationError("Something went wrong"));
         m_notOkResponse.setMessageId("1");
         when(m_notOkResponseFuture.get()).thenReturn(m_notOkResponse);
-        m_das = new NetconfDeviceAlignmentServiceImpl(m_dm, m_ncm, m_alignmentStore);
-        mockNameKeyCalls(m_device1Info, "device1");
-        mockNameKeyCalls(m_device2Info, "device2");
-        when(m_alignmentStore.get("device1")).thenReturn(m_device1Info);
-        when(m_alignmentStore.get("device2")).thenReturn(m_device2Info);
-        m_das.deviceAdded(m_device1Info.getName());
-        m_das.deviceAdded(m_device2Info.getName());
-        m_das.forceAlign(m_device1Info.getName(), mock(CopyConfigRequest.class));
-        m_das.forceAlign(m_device2Info.getName(), mock(CopyConfigRequest.class));
-        m_das.queueEdit(m_device1Info.getName(), m_edit1);
-        m_das.queueEdit(m_device2Info.getName(), m_edit2);
-        m_das.queueEdit(m_device1Info.getName(), m_edit3);
-        m_das.queueEdit(m_device2Info.getName(), m_edit4);
+        m_das = new NetconfDeviceAlignmentServiceImpl(m_dm, m_ncm);
+        m_das.setTxService(m_txService);
+        m_device1 = createDevice("device1");
+        m_device2 = createDevice("device2");
+        when(m_dm.getDevice("device1")).thenReturn(m_device1);
+        when(m_dm.getDevice("device2")).thenReturn(m_device2);
+        m_das.deviceAdded(m_device1.getDeviceName());
+        m_das.deviceAdded(m_device2.getDeviceName());
+        m_das.forceAlign(m_device1.getDeviceName(), mock(CopyConfigRequest.class));
+        verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName() , ALIGNED);
+        updateAlignment(m_device1.getDeviceName(), ALIGNED);
+        m_das.forceAlign(m_device2.getDeviceName(), mock(CopyConfigRequest.class));
+        verify(m_dm).updateConfigAlignmentState(m_device2.getDeviceName() , ALIGNED);
+        updateAlignment(m_device2.getDeviceName(), ALIGNED);
+        m_das.queueEdit(m_device1.getDeviceName(), m_edit1);
+        m_das.queueEdit(m_device2.getDeviceName(), m_edit2);
+        m_das.queueEdit(m_device1.getDeviceName(), m_edit3);
+        m_das.queueEdit(m_device2.getDeviceName(), m_edit4);
     }
 
-    private void mockNameKeyCalls(DeviceAlignmentInfo deviceInfo, String deviceName) {
-        when(deviceInfo.getName()).thenReturn(deviceName);
-        when(deviceInfo.getKey()).thenReturn(deviceName);
+    private void updateAlignment(String deviceName , String verdict) {
+        m_dm.getDevice(deviceName).getDeviceManagement().getDeviceState().setConfigAlignmentState(verdict);
+    }
+
+    private Device createDevice(String device1) {
+        Device device = new Device();
+        device.setDeviceName(device1);
+        DeviceMgmt deviceMgmt = new DeviceMgmt();
+        device.setDeviceManagement(deviceMgmt);
+        return device;
     }
 
     @Test
-    public void testDASQueuesRequestsInOrder(){
+    public void testDASQueuesRequestsInOrder() {
         List<EditConfigRequest> edits = new ArrayList<>();
 
         edits.add(m_edit1);
         edits.add(m_edit3);
-        assertEquals(edits, m_das.getEditQueue(m_device1Info.getName()));
+        assertEquals(edits, m_das.getEditQueue(m_device1.getDeviceName()));
         edits.clear();
 
         edits.add(m_edit2);
         edits.add(m_edit4);
-        assertEquals(edits, m_das.getEditQueue(m_device2Info.getName()));
+        assertEquals(edits, m_das.getEditQueue(m_device2.getDeviceName()));
     }
 
     @Test
     public void testDASContactsNCMForFlushing() throws ExecutionException {
         m_das.alignAllDevices();
-        assertEquals(0, m_das.getEditQueue(m_device1Info.getName()).size());
-        assertEquals(0, m_das.getEditQueue(m_device2Info.getName()).size());
-        verify(m_ncm).executeNetconf(m_device1Info.getName(), m_edit1);
-        verify(m_ncm).executeNetconf(m_device2Info.getName(), m_edit2);
-        verify(m_ncm).executeNetconf(m_device1Info.getName(), m_edit3);
-        verify(m_ncm).executeNetconf(m_device2Info.getName(), m_edit4);
+        assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
+        assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
+        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_edit1);
+        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit2);
+        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_edit3);
+        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit4);
     }
 
     @Test
     public void makeSureErrorResponseClearsRestOfEdits() throws ExecutionException {
         makeDeviceError(m_edit1);
-        assertEquals(0, m_das.getEditQueue(m_device1Info.getName()).size());
-        assertEquals(0, m_das.getEditQueue(m_device2Info.getName()).size());
-        verify(m_ncm).executeNetconf(m_device1Info.getName(), m_edit1);
-        verify(m_ncm).executeNetconf(m_device2Info.getName(), m_edit2);
-        verify(m_ncm, never()).executeNetconf(m_device1Info.getName(), m_edit3);
-        verify(m_ncm).executeNetconf(m_device2Info.getName(), m_edit4);
+        assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
+        assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
+        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_edit1);
+        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit2);
+        verify(m_ncm, never()).executeNetconf(m_device1.getDeviceName(), m_edit3);
+        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit4);
     }
 
     @Test
     public void makeSureTimedoutResponseClearsRestOfEdits() throws ExecutionException, InterruptedException {
         makeDeviceTimeout(m_edit1);
-        assertEquals(0, m_das.getEditQueue(m_device1Info.getName()).size());
-        assertEquals(0, m_das.getEditQueue(m_device2Info.getName()).size());
-        verify(m_ncm).executeNetconf(m_device1Info.getName(), m_edit1);
-        verify(m_ncm).executeNetconf(m_device2Info.getName(), m_edit2);
-        verify(m_ncm, never()).executeNetconf(m_device1Info.getName(), m_edit3);
-        verify(m_ncm).executeNetconf(m_device2Info.getName(), m_edit4);
+        assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
+        assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
+        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_edit1);
+        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit2);
+        verify(m_ncm, never()).executeNetconf(m_device1.getDeviceName(), m_edit3);
+        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit4);
     }
 
     @Test
-    public void testDeviceState(){
-        assertEquals("2 Edit(s) Pending", m_das.getAlignmentState(m_device1Info.getName()));
-        m_das.queueEdit(m_device1Info.getName(), m_edit1);
-        assertEquals("3 Edit(s) Pending", m_das.getAlignmentState(m_device1Info.getName()));
+    public void testDeviceState() {
+        assertEquals("2 Edit(s) Pending", m_das.getAlignmentState(m_device1.getDeviceName()));
+        m_das.queueEdit(m_device1.getDeviceName(), m_edit1);
+        assertEquals("3 Edit(s) Pending", m_das.getAlignmentState(m_device1.getDeviceName()));
     }
 
     @Test
     public void testAlignedDeviceState() {
         m_das.alignAllDevices();
-        assertEquals("Aligned", m_das.getAlignmentState(m_device1Info.getName()));
+        assertEquals("Aligned", m_das.getAlignmentState(m_device1.getDeviceName()));
     }
 
     @Test
     public void testNeverAlignedDeviceState() {
-        DeviceAlignmentInfo deviceInfo = new DeviceAlignmentInfo("X");
-        when(m_alignmentStore.get("X")).thenReturn(deviceInfo);
-        m_das.deviceAdded(deviceInfo.getName());
-        Assert.assertEquals(DeviceAlignmentInfo.NEVER_ALIGNED, deviceInfo.getVerdict());
-        verify(m_alignmentStore).create(deviceInfo);
+        Device deviceX = createDevice("X");
+
+        m_das.deviceAdded(deviceX.getDeviceName());
+        Assert.assertEquals(NEVER_ALIGNED, deviceX.getDeviceManagement().getDeviceState().getConfigAlignmentState());
     }
 
     @Test
     public void testErrorDeviceState() throws ExecutionException {
         makeDeviceError(m_edit1);
-        verify(m_device1Info).setVerdict("In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-                "  <edit-config>\n" +
-                "    <target>\n" +
-                "      <running />\n" +
-                "    </target>\n" +
-                "    <test-option>set</test-option>\n" +
-                "    <config>\n" +
-                "      <some-config xmlns=\"some:ns\"/>\n" +
-                "    </config>\n" +
-                "  </edit-config>\n" +
-                "</rpc>,\n" +
-                "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                "  <rpc-error>\n" +
-                "    <error-type>application</error-type>\n" +
-                "    <error-tag>operation-failed</error-tag>\n" +
-                "    <error-severity>error</error-severity>\n" +
-                "    <error-message>Something went wrong</error-message>\n" +
-                "  </rpc-error>\n" +
-                "</rpc-reply>\n");
+        String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+            "  <edit-config>\n" +
+            "    <target>\n" +
+            "      <running />\n" +
+            "    </target>\n" +
+            "    <test-option>set</test-option>\n" +
+            "    <config>\n" +
+            "      <some-config xmlns=\"some:ns\"/>\n" +
+            "    </config>\n" +
+            "  </edit-config>\n" +
+            "</rpc>,\n" +
+            "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+            "  <rpc-error>\n" +
+            "    <error-type>application</error-type>\n" +
+            "    <error-tag>operation-failed</error-tag>\n" +
+            "    <error-severity>error</error-severity>\n" +
+            "    <error-message>Something went wrong</error-message>\n" +
+            "  </rpc-error>\n" +
+            "</rpc-reply>\n";
+        verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(),expected);
     }
 
     @Test
     public void testErrorDeviceStateDueToTimeout() throws ExecutionException, InterruptedException {
         makeDeviceTimeout(m_edit1);
-        verify(m_device1Info).setVerdict("In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-                "  <edit-config>\n" +
-                "    <target>\n" +
-                "      <running />\n" +
-                "    </target>\n" +
-                "    <test-option>set</test-option>\n" +
-                "    <config>\n" +
-                "      <some-config xmlns=\"some:ns\"/>\n" +
-                "    </config>\n" +
-                "  </edit-config>\n" +
-                "</rpc>,\n" +
-                "response received : request timed out");
+        String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+            "  <edit-config>\n" +
+            "    <target>\n" +
+            "      <running />\n" +
+            "    </target>\n" +
+            "    <test-option>set</test-option>\n" +
+            "    <config>\n" +
+            "      <some-config xmlns=\"some:ns\"/>\n" +
+            "    </config>\n" +
+            "  </edit-config>\n" +
+            "</rpc>,\n" +
+            "response received : request timed out";
+        verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(),expected);
     }
 
     @Test
     public void makeSureEditsAreNotQueuedAfterError() throws ExecutionException {
         makeDeviceError(m_edit1);
-        m_das.queueEdit(m_device1Info.getName(), m_edit5);
+        updateAlignment(m_device1.getDeviceName(),IN_ERROR);
+        m_das.queueEdit(m_device1.getDeviceName(), m_edit5);
         m_das.alignAllDevices();
-        verify(m_ncm, never()).executeNetconf(m_device1Info.getKey(), m_edit5);
+        verify(m_ncm, never()).executeNetconf(m_device1.getDeviceName(), m_edit5);
     }
 
     @Test
     public void testFullResyncExecutesCopyConfig() throws ExecutionException {
-        m_das.forceAlign(m_device1Info.getName(), m_cc);
-        verify(m_ncm).executeNetconf(m_device1Info.getKey(), m_cc);
-        assertEquals("Aligned", m_das.getAlignmentState(m_device1Info.getName()));
+        m_das.forceAlign(m_device1.getDeviceName(), m_cc);
+        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_cc);
+        assertEquals("Aligned", m_das.getAlignmentState(m_device1.getDeviceName()));
     }
 
     @Test
     public void testFullResyncError() throws ExecutionException {
         makeDeviceError(m_cc);
-        m_das.forceAlign(m_device1Info.getName(), m_cc);
-        verify(m_ncm).executeNetconf(m_device1Info.getKey(), m_cc);
-        verify(m_device1Info).setVerdict("In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-                "  <copy-config>\n" +
-                "    <source>blah<source>\n" +
-                "\t<target>\n" +
-                "      <running />\n" +
-                "    </target>\n" +
-                "    <test-option>set</test-option>\n" +
-                "    <config>\n" +
-                "      <some-config xmlns=\"some:ns\"/>\n" +
-                "    </config>\n" +
-                "  </copy-config>\n" +
-                "</rpc>,\n" +
-                "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                "  <rpc-error>\n" +
-                "    <error-type>application</error-type>\n" +
-                "    <error-tag>operation-failed</error-tag>\n" +
-                "    <error-severity>error</error-severity>\n" +
-                "    <error-message>Something went wrong</error-message>\n" +
-                "  </rpc-error>\n" +
-                "</rpc-reply>\n");
+        m_das.forceAlign(m_device1.getDeviceName(), m_cc);
+        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_cc);
+
+        String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+            "  <copy-config>\n" +
+            "    <source>blah<source>\n" +
+            "\t<target>\n" +
+            "      <running />\n" +
+            "    </target>\n" +
+            "    <test-option>set</test-option>\n" +
+            "    <config>\n" +
+            "      <some-config xmlns=\"some:ns\"/>\n" +
+            "    </config>\n" +
+            "  </copy-config>\n" +
+            "</rpc>,\n" +
+            "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+            "  <rpc-error>\n" +
+            "    <error-type>application</error-type>\n" +
+            "    <error-tag>operation-failed</error-tag>\n" +
+            "    <error-severity>error</error-severity>\n" +
+            "    <error-message>Something went wrong</error-message>\n" +
+            "  </rpc-error>\n" +
+            "</rpc-reply>\n";
+        verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(),expected);
+
     }
 
     @Test
     public void testFullResyncTimeout() throws ExecutionException, InterruptedException {
         makeDeviceTimeout(m_cc);
-        m_das.forceAlign(m_device1Info.getName(), m_cc);
-        verify(m_ncm).executeNetconf(m_device1Info.getKey(), m_cc);
-        verify(m_device1Info).setVerdict("In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-                "  <copy-config>\n" +
-                "    <source>blah<source>\n" +
-                "\t<target>\n" +
-                "      <running />\n" +
-                "    </target>\n" +
-                "    <test-option>set</test-option>\n" +
-                "    <config>\n" +
-                "      <some-config xmlns=\"some:ns\"/>\n" +
-                "    </config>\n" +
-                "  </copy-config>\n" +
-                "</rpc>,\n" +
-                "response received : request timed out");
+        m_das.forceAlign(m_device1.getDeviceName(), m_cc);
+        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_cc);
+        String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+            "  <copy-config>\n" +
+            "    <source>blah<source>\n" +
+            "\t<target>\n" +
+            "      <running />\n" +
+            "    </target>\n" +
+            "    <test-option>set</test-option>\n" +
+            "    <config>\n" +
+            "      <some-config xmlns=\"some:ns\"/>\n" +
+            "    </config>\n" +
+            "  </copy-config>\n" +
+            "</rpc>,\n" +
+            "response received : request timed out";
+        verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(), expected);
     }
 
     @Test
-    public void testInitRegisterAndDestroyUnregistersStateProvider(){
+    public void testInitRegisterAndDestroyUnregistersStateProvider() {
         verify(m_dm, never()).addDeviceStateProvider(m_das);
         verify(m_dm, never()).removeDeviceStateProvider(m_das);
 
@@ -324,26 +361,21 @@ public class NetconfDeviceAlignmentServiceImplTest {
     }
 
     @Test
-    public void testDeviceAddedAndRemoved(){
+    public void testDeviceAddedAndRemoved() {
         m_das.deviceAdded("deviceX");
-        ArgumentCaptor<DeviceAlignmentInfo> captor = ArgumentCaptor.forClass(DeviceAlignmentInfo.class);
-        verify(m_alignmentStore, atLeastOnce()).create(captor.capture());
-        assertEquals("deviceX", captor.getValue().getName());
-        Assert.assertEquals(DeviceAlignmentInfo.NEVER_ALIGNED, captor.getValue().getVerdict());
-
+        assertTrue(m_das.getQueue().containsKey("deviceX"));
         m_das.deviceRemoved("deviceX");
-        verify(m_alignmentStore).delete("deviceX");
+        assertFalse(m_das.getQueue().containsKey("deviceX"));
     }
 
     private void makeDeviceTimeout(AbstractNetconfRequest request) throws ExecutionException, InterruptedException {
-        when(m_ncm.executeNetconf(m_device1Info.getKey(), request)).thenReturn(m_notOkResponseFuture);
+        when(m_ncm.executeNetconf(m_device1.getDeviceName(), request)).thenReturn(m_notOkResponseFuture);
         when(m_notOkResponseFuture.get()).thenReturn(null);
         m_das.alignAllDevices();
     }
 
     private void makeDeviceError(AbstractNetconfRequest request) throws ExecutionException {
-        when(m_ncm.executeNetconf(m_device1Info.getKey(), request)).thenReturn(m_notOkResponseFuture);
-        when(m_device1Info.isInError()).thenReturn(true);
+        when(m_ncm.executeNetconf(m_device1.getDeviceName(), request)).thenReturn(m_notOkResponseFuture);
         m_das.alignAllDevices();
     }
 }

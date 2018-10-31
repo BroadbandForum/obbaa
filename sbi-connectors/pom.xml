@@ -20,24 +20,18 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>sbi-connectors</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/SBI Connectors</name>
     <dependencies>
-        <dependency>
-            <groupId>org.bbf.obbaa</groupId>
-            <artifactId>store</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.bbf.obbaa.netconf</groupId>
             <artifactId>netconf-client</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
@@ -60,6 +54,17 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bbf.obbaa</groupId>
+            <artifactId>device-manager-entities</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bbf.obbaa</groupId>
+            <artifactId>device-manager-entities</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>

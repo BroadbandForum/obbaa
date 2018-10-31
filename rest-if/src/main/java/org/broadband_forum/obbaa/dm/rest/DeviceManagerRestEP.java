@@ -17,23 +17,16 @@
 package org.broadband_forum.obbaa.dm.rest;
 
 import java.util.List;
-import java.util.Set;
 
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
 import org.broadband_forum.obbaa.dm.DeviceManager;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
-import org.springframework.http.HttpStatus;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,19 +45,11 @@ public class DeviceManagerRestEP {
         this.m_deviceManager = deviceManager;
     }
 
-    @ApiOperation(value = "Start managing a new device", position = 0)
-    @PUT
-    @RequestMapping(consumes = {"application/json"}, method = RequestMethod.PUT)
-    @ResponseStatus(value = HttpStatus.OK)
-    public void createDevice(@ApiParam(value = "details of the device") @RequestBody DeviceInfo deviceInfo) {
-        m_deviceManager.createDevice(deviceInfo);
-    }
-
     @ApiOperation(value = "Get details of a managed device", position = 1)
     @RequestMapping(value = "/{deviceName}", method = RequestMethod.GET)
     @ResponseBody
-    public DeviceInfo getDevice(@ApiParam(value = "unique name of the device", defaultValue = "AccessNode1")
-                                @PathVariable("deviceName") String deviceName) {
+    public Device getDevice(@ApiParam(value = "unique name of the device", defaultValue = "AccessNode1")
+                            @PathVariable("deviceName") String deviceName) {
         return m_deviceManager.getDevice(deviceName);
     }
 
@@ -80,24 +65,8 @@ public class DeviceManagerRestEP {
     @GET
     @RequestMapping(value = "/", method = RequestMethod.GET)
     @ResponseBody
-    public Set<DeviceInfo> getAllDevices() {
+    public List<Device> getAllDevices() {
         return m_deviceManager.getAllDevices();
-    }
-
-    @ApiOperation(value = "Update details of a managed device", position = 3)
-    @POST
-    @RequestMapping(consumes = {"application/json"}, method = RequestMethod.POST)
-    @ResponseStatus(value = HttpStatus.OK)
-    public void updateDevice(@ApiParam(value = "details of the device") @RequestBody DeviceInfo deviceInfo) {
-        m_deviceManager.updateDevice(deviceInfo);
-    }
-
-    @ApiOperation(value = "Stop managing a device", position = 4)
-    @DELETE
-    @RequestMapping(value = "/{deviceName}", method = RequestMethod.DELETE)
-    @ResponseStatus(value = HttpStatus.OK)
-    public void deleteDevice(@PathVariable("deviceName") String deviceName) {
-        m_deviceManager.deleteDevice(deviceName);
     }
 
 }

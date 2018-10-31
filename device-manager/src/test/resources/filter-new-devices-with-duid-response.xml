@@ -1,0 +1,8 @@
+<new-devices xmlns="urn:bbf:yang:obbaa:network-manager">
+    <new-device>
+        <duid>duid-1234</duid>
+    </new-device>
+    <new-device>
+        <duid>duid-5678</duid>
+    </new-device>
+</new-devices>

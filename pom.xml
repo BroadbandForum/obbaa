@@ -20,20 +20,22 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>baa-root-pom</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>Broadband Access Abstraction</name>
 
     <modules>
+        <module>resources</module>
         <module>sbi-connectors</module>
-        <module>store</module>
+        <module>adapter-schema-fwk</module>
+        <module>device-adapter-fwk</module>
+        <module>device-manager-entities</module>
         <module>device-manager</module>
         <module>pma</module>
-        <module>rest-if</module>
-        <module>baa-dist</module>
         <module>aggregator</module>
         <module>nbi-adapter</module>
-        <module>resources</module>
+        <module>baa-feature</module>
+        <module>baa-dist</module>
     </modules>
 
     <properties>
@@ -41,11 +43,64 @@
         <java.source.version>1.8</java.source.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
         <docker-maven-plugin.version>0.4.3</docker-maven-plugin.version>
-        <netconf-lib.version>1.0.0</netconf-lib.version>
-        <netconf-fwk.version>1.0.0</netconf-fwk.version>
+        <netconf-lib.version>1.1.0</netconf-lib.version>
+        <netconf-fwk.version>1.1.0</netconf-fwk.version>
+        <maven.install-plugin.version>2.4</maven.install-plugin.version>
         <maven-dependency-plugin.version>3.0.0</maven-dependency-plugin.version>
-        <maven-checkstyle-plugin.version>2.17</maven-checkstyle-plugin.version>
+        <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
+        <apache.karaf.version>4.0.4</apache.karaf.version>
+        <karaf.maven.plugin.version>4.0.2</karaf.maven.plugin.version>
+        <codehaus.build_helper.plugin.version>1.9</codehaus.build_helper.plugin.version>
+        <bundle.plugin.version>3.0.1</bundle.plugin.version>
+        <mapdb.version>3.0.3</mapdb.version>
+        <springfox-swagger-ui.version>2.7.0</springfox-swagger-ui.version>
+        <commons-io.version>2.5</commons-io.version>
+        <spring-boot.version>1.2.5.RELEASE</spring-boot.version>
+        <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
+        <jackson-jaxrs.version>1.9.13</jackson-jaxrs.version>
+        <commons-pool2.version>2.4.2</commons-pool2.version>
+        <log4j.version>1.2.16</log4j.version>
+        <gson.version>2.2.2</gson.version>
+        <guava.version>22.0</guava.version>
+        <junit.version>4.12</junit.version>
+        <xmlunit.version>1.5</xmlunit.version>
+        <mockito-all.version>1.10.19</mockito-all.version>
+        <netty.version>4.1.16.Final</netty.version>
+        <pax-jdbc.version>1.1.0</pax-jdbc.version>
+        <opendaylight-yangtools.version>1.2.1</opendaylight-yangtools.version>
+        <transaction.version>1.3.0</transaction.version>
+        <transaction-api.version>1.2</transaction-api.version>
+        <jpa.version>2.3.0</jpa.version>
+        <hibernate.version>4.3.6.Final</hibernate.version>
+        <pax-http-whiteboard.version>4.2.4</pax-http-whiteboard.version>
+        <kotlin.version>1.0.6</kotlin.version>
+        <eclipse-collection.version>7.1.2</eclipse-collection.version>
+        <mina.version>1.3.0</mina.version>
+        <hsql.version>2.3.3</hsql.version>
+        <spring-boot-auto-configure.version>1.2.5.RELEASE</spring-boot-auto-configure.version>
+        <org.apache.aries.blueprint.version>1.1.0</org.apache.aries.blueprint.version>
+        <aries.blueprint-api.version>1.0.1</aries.blueprint-api.version>
+        <aries.blueprint-parser.version>1.2.1</aries.blueprint-parser.version>
+        <hibernate.jpa.2.1.api.version>1.0.0.Final</hibernate.jpa.2.1.api.version>
+        <transaction.api.version>1.2</transaction.api.version>
+        <ehcache-core.version>2.4.3</ehcache-core.version>
+        <errorprone.version>2.0.18</errorprone.version>
+        <j2objc-annotations.version>1.1</j2objc-annotations.version>
+        <animal-sniffer-annotation.version>1.14</animal-sniffer-annotation.version>
+        <bouncy-castle.version>1.46</bouncy-castle.version>
+        <joda-time.version>2.8</joda-time.version>
+        <commons-io.version>2.4</commons-io.version>
+        <commons-collection.version>3.2.1</commons-collection.version>
+        <commons-beanutils.version>1.9.2</commons-beanutils.version>
+        <commons-lang3.version>3.5</commons-lang3.version>
+        <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
+        <jdom.version>1.1.3</jdom.version>
+        <commons-jxpath.version>1.3</commons-jxpath.version>
+        <apache.servicemix.bundles.aopalliance.version>1.0_6</apache.servicemix.bundles.aopalliance.version>
+        <org.apache.servicemix.specs.stax-api-1.2.version>2.5.0</org.apache.servicemix.specs.stax-api-1.2.version>
+        <org.apache.servicemix.bundles.xmlbeans.version>2.6.0_2</org.apache.servicemix.bundles.xmlbeans.version>
+        <xmlbeans.version>2.6.0</xmlbeans.version>
     </properties>
 
     <dependencyManagement>
@@ -91,86 +146,186 @@
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger2</artifactId>
-                <version>2.7.0</version>
+                <version>${springfox-swagger-ui.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
-                <version>2.7.0</version>
+                <version>${springfox-swagger-ui.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mapdb</groupId>
                 <artifactId>mapdb</artifactId>
-                <version>3.0.3</version>
+                <version>${mapdb.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.5</version>
+                <version>${commons-io.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
-                <version>1.2.5.RELEASE</version>
+                <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-security</artifactId>
-                <version>1.2.5.RELEASE</version>
+                <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
-                <version>2.0</version>
+                <version>${javax.ws.rs-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-jaxrs</artifactId>
-                <version>1.9.13</version>
+                <version>${jackson-jaxrs.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-pool2</artifactId>
-                <version>2.4.2</version>
+                <version>${commons-pool2.version}</version>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
-                <version>1.2.16</version>
+                <version>${log4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.2.2</version>
+                <version>${gson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>22.0</version>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>xmlunit</groupId>
                 <artifactId>xmlunit</artifactId>
-                <version>1.5</version>
+                <version>${xmlunit.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
-                <version>1.10.19</version>
+                <version>${mockito-all.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
+                <artifactId>framework</artifactId>
+                <type>kar</type>
+                <version>${apache.karaf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
+                <artifactId>standard</artifactId>
+                <classifier>features</classifier>
+                <version>${apache.karaf.version}</version>
+                <type>xml</type>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.log</groupId>
+                <artifactId>org.apache.karaf.log.core</artifactId>
+                <version>${apache.karaf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
+                <artifactId>enterprise</artifactId>
+                <classifier>features</classifier>
+                <type>xml</type>
+                <version>${apache.karaf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>aopalliance</groupId>
+                <artifactId>aopalliance</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.blueprint</groupId>
+                <artifactId>org.apache.aries.blueprint</artifactId>
+                <version>${org.apache.aries.blueprint.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.blueprint</groupId>
+                <artifactId>org.apache.aries.blueprint.api</artifactId>
+                <version>${aries.blueprint-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.blueprint</groupId>
+                <artifactId>blueprint-parser</artifactId>
+                <version>${aries.blueprint-parser.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>6.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.jdbc</groupId>
+                <artifactId>pax-jdbc-hsqldb</artifactId>
+                <version>1.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.xmlbeans</artifactId>
+                <version>${org.apache.servicemix.bundles.xmlbeans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.specs</groupId>
+                <artifactId>org.apache.servicemix.specs.stax-api-1.2</artifactId>
+                <version>${org.apache.servicemix.specs.stax-api-1.2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xmlbeans</groupId>
+                <artifactId>xmlbeans</artifactId>
+                <version>${xmlbeans.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${codehaus.build_helper.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-features-xml</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>attach-artifact</goal>
+                            </goals>
+                            <configuration>
+                                <artifacts>
+                                    <artifact>
+                                        <file>target/classes/features.xml</file>
+                                        <type>xml</type>
+                                        <classifier>features</classifier>
+                                    </artifact>
+                                </artifacts>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven.install-plugin.version}</version>
+                </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${maven-resources-plugin.version}</version>
@@ -184,6 +339,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>${maven-assembly-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-maven-plugin</artifactId>
+                    <version>${karaf.maven.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -219,7 +379,58 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <!-- 15mins timeout for bundle -->
+                        <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=true;blueprint.timeout:=900000</Bundle-SymbolicName>
+                    </instructions>
+                    <supportedProjectTypes>
+                        <supportedProjectType>jar</supportedProjectType>
+                        <supportedProjectType>bundle</supportedProjectType>
+                        <supportedProjectType>war</supportedProjectType>
+                    </supportedProjectTypes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>opendaylight-release</id>
+            <name>opendaylight-release</name>
+            <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.release</id>
+            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/release</url>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.external</id>
+            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/external</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>opendaylight-release</id>
+            <name>opendaylight-release</name>
+            <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>com.springsource.repository.bundles.release</id>
+            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/release</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>com.springsource.repository.bundles.external</id>
+            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/external</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
 

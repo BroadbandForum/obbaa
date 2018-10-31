@@ -16,10 +16,21 @@
 
 package org.broadband_forum.obbaa.aggregator.processor;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.broadband_forum.obbaa.adapter.handler.DeviceAdapterActionHandlerImpl;
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.impl.AggregatorImpl;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.pma.DeviceModelDeployer;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.broadband_forum.obbaa.pma.impl.DeviceModelDeployerImpl;
@@ -27,12 +38,7 @@ import org.broadband_forum.obbaa.pma.impl.PmaRegistryImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 
 public class PmaAdapterTest {
     private static PmaAdapter m_pmaAdapter;
@@ -81,7 +87,7 @@ public class PmaAdapterTest {
 
     private static String REQUEST_ALIGN = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1527307907464\">\n" +
-            "  <action>\n" +
+            "  <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\n" +
             "      <pma-device-config xmlns=\"urn:bbf:yang:obbaa:pma-device-config\">\n" +
             "        <align>\n" +
             "        </align>\n" +
@@ -91,7 +97,7 @@ public class PmaAdapterTest {
 
     private static String REQUEST_ALIGN_FORCE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1527307907464\">\n" +
-            "  <action>\n" +
+            "  <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\n" +
             "      <pma-device-config xmlns=\"urn:bbf:yang:obbaa:pma-device-config\">\n" +
             "        <align>\n" +
             "          <force>\n" +
@@ -114,6 +120,8 @@ public class PmaAdapterTest {
                     "  </filter>\n" +
                     "</get>\n" +
                     "</rpc>\n";
+    private static NetconfClientInfo m_clientInfo;
+    private static DeviceAdapterActionHandlerImpl m_actionHandler;
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -121,8 +129,10 @@ public class PmaAdapterTest {
         m_deviceManager = mock(DeviceManagerImpl.class);
         m_pmaRegistry = mock(PmaRegistryImpl.class);
         m_deviceModelDeployer = mock(DeviceModelDeployerImpl.class);
+        m_actionHandler = mock(DeviceAdapterActionHandlerImpl.class);
 
-        m_pmaAdapter = new PmaAdapter(m_aggregator, m_deviceManager, m_pmaRegistry, m_deviceModelDeployer);
+        m_pmaAdapter = new PmaAdapter(m_aggregator, m_pmaRegistry, m_deviceModelDeployer, m_actionHandler);
+        m_clientInfo = new NetconfClientInfo("UT", 1);
         m_pmaAdapter.init();
     }
 
@@ -135,7 +145,10 @@ public class PmaAdapterTest {
 
     @Test
     public void processRequestReloadYang() throws Exception {
-        String response = m_pmaAdapter.processRequest(REQUEST_RELOAD_YANG);
+        String response = m_pmaAdapter.processRequest(m_clientInfo, REQUEST_RELOAD_YANG);
+        verify(m_pmaRegistry).reloadDeviceModel();
+        Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
+        verify(m_aggregator).addProcessor("DPU", moduleIdentifiers, m_pmaAdapter);
         assertTrue(response.contains(RESPONSE_OK));
     }
 
@@ -158,4 +171,39 @@ public class PmaAdapterTest {
         String response = m_pmaAdapter.processRequest(DEVICE_NAME_A, REQUEST_ALIGN_STATE_GET);
         assertTrue(response.contains("alignment-state"));
     }
+
+    @Test
+    public void processRequestDeployAdapter() throws Exception {
+        String deployAdapter="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"10101\">\n" +
+                " <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\n" +
+                "  <deploy-adapter xmlns=\"urn:bbf:yang:obbaa:device-adapters\">\n" +
+                "   <deploy>\n" +
+                "    <adapter-archive>adapterExample.zip</adapter-archive>\n" +
+                "   </deploy>\n" +
+                "  </deploy-adapter>\n" +
+                " </action>\n" +
+                "</rpc>";
+        
+        String response = m_pmaAdapter.processRequest(m_clientInfo, deployAdapter);
+        verify(m_actionHandler).deployRpc("adapterExample.zip");
+    }
+
+    @Test
+    public void processRequestUndeployAdapter() throws Exception {
+        String undeployAdapter="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"10101\">\n" +
+                " <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\n" +
+                "  <undeploy-adapter xmlns=\"urn:bbf:yang:obbaa:device-adapters\">\n" +
+                "   <undeploy>\n" +
+                "    <adapter-archive>adapterExample.zip</adapter-archive>\n" +
+                "   </undeploy>\n" +
+                "  </undeploy-adapter>\n" +
+                " </action>\n" +
+                "</rpc>";
+
+        String response = m_pmaAdapter.processRequest(m_clientInfo, undeployAdapter);
+        verify(m_actionHandler).undeploy("adapterExample.zip");
+    }
+
 }

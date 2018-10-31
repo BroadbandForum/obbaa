@@ -30,6 +30,8 @@ import org.broadband_forum.obbaa.netconf.api.server.auth.NetconfServerAuthentica
 public class NbiSshNetconfAuth implements NetconfServerAuthenticationHandler {
 
 
+    private static final String BAA_USER = "BAA_USER";
+    private static final String BAA_USER_PASSWORD = "BAA_USER_PASSWORD";
     /**
      * User name and password are set by Sprint boot in application-context.xml file.
      */
@@ -44,6 +46,17 @@ public class NbiSshNetconfAuth implements NetconfServerAuthenticationHandler {
 
     public void setPassword(String password) {
         m_strPassword = password;
+    }
+
+    public NbiSshNetconfAuth() {
+        m_strUserName = System.getenv(BAA_USER);
+        if (m_strUserName == null || m_strUserName.isEmpty()) {
+            m_strUserName = System.getProperty(BAA_USER, "admin");
+        }
+        m_strPassword = System.getenv(BAA_USER_PASSWORD);
+        if (m_strPassword == null || m_strPassword.isEmpty()) {
+            m_strPassword = System.getProperty(BAA_USER_PASSWORD, "password");
+        }
     }
 
     /**

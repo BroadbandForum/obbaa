@@ -18,7 +18,7 @@ package org.broadband_forum.obbaa.aggregator.jaxb.pma.api;
 
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
-import org.broadband_forum.obbaa.aggregator.jaxb.pma.schema.PmaYangLibrary;
+import org.broadband_forum.obbaa.aggregator.jaxb.pma.schema.yanglibrary.PmaYangLibrary;
 import org.broadband_forum.obbaa.aggregator.jaxb.utils.JaxbUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ import java.util.List;
  * PMA Yang library rpc request.
  */
 public final class PmaYangLibraryRpc extends NetconfRpcMessage {
-    public static final String MODULE_NAME = "pma-yang-library";
+    public static final String MODULE_NAME = "bbf-obbaa-pma-yang-library";
     public static final String REVISION = "2018-06-15";
     public static final String NAMESPACE = "urn:bbf:yang:obbaa:pma-yang-library";
     private static final Logger LOGGER = LoggerFactory.getLogger(PmaYangLibraryRpc.class);

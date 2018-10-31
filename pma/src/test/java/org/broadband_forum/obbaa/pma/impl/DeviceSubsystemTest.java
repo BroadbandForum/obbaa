@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.server.NetconfQueryParams;
@@ -42,7 +43,6 @@ import org.broadband_forum.obbaa.netconf.server.RequestScope;
 import org.broadband_forum.obbaa.netconf.server.RequestTask;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -62,7 +62,7 @@ public class DeviceSubsystemTest {
     @Mock
     private NetconfConnectionManager m_dcm;
     @Mock
-    private DeviceInfo m_deviceInfo;
+    private Device m_device;
     @Captor
     private ArgumentCaptor<AbstractNetconfRequest> m_requestCaptor;
     @Mock
@@ -79,7 +79,7 @@ public class DeviceSubsystemTest {
         m_leaf1 = QName.create("urn:ietf:ns", "leaf1");
         m_leaf2 = QName.create("urn:ietf:ns", "leaf3");
         m_deviceSubsystem = new DeviceSubsystem(m_dcm, m_das, m_schemaReg);
-        PmaServer.setCurrentDevice(m_deviceInfo);
+        PmaServer.setCurrentDevice(m_device);
     }
 
     @After
@@ -92,7 +92,7 @@ public class DeviceSubsystemTest {
     public void testSubsystemSchedulesEditWithOriginalRequest(){
         RequestScope.getCurrentScope().putInCache(RequestTask.CURRENT_REQ, m_request);
         m_deviceSubsystem.notifyChanged(Collections.emptyList());
-        verify(m_das).queueEdit(m_deviceInfo.getKey(), (EditConfigRequest)m_request);
+        verify(m_das).queueEdit(m_device.getDeviceName(), (EditConfigRequest) m_request);
     }
 
     @Ignore
@@ -100,7 +100,7 @@ public class DeviceSubsystemTest {
     public void testNcSessionMgrIsContactedToRetrieveStateValues() throws GetAttributeException, ExecutionException {
         Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> attributes = getAttributes();
         m_deviceSubsystem.retrieveStateAttributes(attributes, new NetconfQueryParams(UNBOUNDED, true));
-        verify(m_dcm).executeNetconf(eq(m_deviceInfo), m_requestCaptor.capture());
+        verify(m_dcm).executeNetconf(eq(m_device.getDeviceName()), m_requestCaptor.capture());
         assertEquals("", m_requestCaptor.getValue().requestToString());
     }
 

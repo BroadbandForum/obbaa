@@ -10,7 +10,6 @@ services:
             - "9292:9292"
             - "4335:4335"
         environment:
-            - JAVA_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
             - BAA_USER=admin
             - BAA_USER_PASSWORD=password
             #Possible Values for PMA_SESSION_FACTORY_TYPE are REGULAR,TRANSPARENT, Default value is REGULAR

@@ -19,10 +19,10 @@ package org.broadband_forum.obbaa.connectors.sbi.netconf.impl;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by kbhatk on 3/10/17.
- */
+import org.apache.log4j.Logger;
+
 public class TimerService {
+    private static final Logger LOGGER = Logger.getLogger(TimerService.class);
     private final NetconfConnectionManagerImpl m_connectionManager;
     private final Timer m_timer;
 
@@ -35,7 +35,15 @@ public class TimerService {
         m_timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                m_connectionManager.auditConnections();
+                try {
+                    if (m_connectionManager.getDeviceDao() != null && m_connectionManager.getTxService() != null) {
+                        m_connectionManager.auditConnections();
+                    } else {
+                        LOGGER.error("Audit connection not running yet");
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Something wrong happened during connection audit" , e);
+                }
             }
         }, 1000L, 10000L);
     }

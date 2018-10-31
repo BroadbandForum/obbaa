@@ -1,37 +1,23 @@
-/*
- * Copyright 2018 Broadband Forum
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.broadband_forum.obbaa.aggregator.processor;
+
+import static org.junit.Assert.assertTrue;
 
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.impl.AggregatorImpl;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 public class IetfYangLibraryTest {
     private Aggregator aggregator;
     private IetfYangLibrary ietfYangLibrary;
+    private NetconfClientInfo m_clientInfo;
 
     @Before
     public void setUp() throws Exception {
         aggregator = new AggregatorImpl();
         ietfYangLibrary = new IetfYangLibrary(aggregator);
+        m_clientInfo = new NetconfClientInfo("UT", 1);
         ietfYangLibrary.init();
     }
 
@@ -53,7 +39,7 @@ public class IetfYangLibraryTest {
                 "  </get>\n" +
                 "</rpc>\n";
 
-        String response = ietfYangLibrary.processRequest(request);
+        String response = ietfYangLibrary.processRequest(m_clientInfo, request);
         assertTrue(response.contains("yang-library"));
     }
 
@@ -73,7 +59,7 @@ public class IetfYangLibraryTest {
                         "  </get>\n" +
                         "</rpc>\n";
 
-        String response = ietfYangLibrary.processRequest(request);
+        String response = ietfYangLibrary.processRequest(m_clientInfo, request);
         assertTrue(response.contains("modules-state"));
     }
 
@@ -94,7 +80,7 @@ public class IetfYangLibraryTest {
                         "  </get>\n" +
                         "</rpc>\n";
 
-        String response = ietfYangLibrary.processRequest(request);
+        String response = ietfYangLibrary.processRequest(m_clientInfo, request);
         assertTrue(response.contains("modules-state"));
     }
 
@@ -126,7 +112,7 @@ public class IetfYangLibraryTest {
                         "  </get>\n" +
                         "</rpc>\n";
 
-        String response = ietfYangLibrary.processRequest(request);
+        String response = ietfYangLibrary.processRequest(m_clientInfo, request);
         assertTrue(response.contains("yang-library"));
     }
 }

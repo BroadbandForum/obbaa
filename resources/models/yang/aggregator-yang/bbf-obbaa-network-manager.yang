@@ -4,187 +4,218 @@ module bbf-obbaa-network-manager {
   prefix network-manager;
 
   import ietf-inet-types {
-	prefix inet;
+    prefix inet;
   }
   import ietf-yang-types {
-	prefix yang;
+    prefix yang;
   }
   import ietf-yang-schema-mount {
-	prefix yangmnt;
+    prefix yangmnt;
+  }
+  import ietf-yang-library {
+    prefix yanglib;
+    revision-date 2016-06-21;
   }
 
   organization
-	"broadband_forum";
+    "broadband_forum";
   contact
-	"https://www.broadband-forum.org";
+    "https://www.broadband-forum.org";
   description
-	"YANG module supporting network management.
-
-	Copyright 2018 Broadband Forum
- 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-
- 		http://www.apache.org/licenses/LICENSE-2.0
-
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.";
+    "YANG module supporting network management.";
 
   revision 2018-05-07 {
-	description
-	  "Initial revision.";
-	reference "broadband_forum";
+    description
+      "Initial revision.";
+    reference "broadband_forum";
   }
 
   grouping connection-grouping {
-	leaf connection-model {
-	  type enumeration {
-		enum call-home;
-		enum direct;
-	  }
-	  description
-		"whether the connection is call-home or direct.";
-	}
-	choice protocol {
-	  mandatory true;
-	  container password-auth {
-		when "../connection-model = 'direct'";
-		container authentication {
-		  leaf address {
-			type inet:ip-address;
-			description
-			  "Device IP address.";
-			mandatory true;
-		  }
-		  leaf management-port {
-			type uint32;
-			description
-			  "The management port of the device.";
-		  }
-		  leaf user-name {
-			type string;
-			description
-			  "The user name of the device.";
-		  }
-		  leaf password {
-			type string;
-			description
-			  "The password of the user.";
-		  }
-		}
-	  }
-	  leaf duid {
-		description
-		  "A globally unique value for a DUID (DHCP Unique Identifier)
-		   as defined in RFC 3315.";
-		type string {
-		  length "1..128";
-		}
-		when "../connection-model = 'call-home'";
-	  }
-	}
+    leaf connection-model {
+      type enumeration {
+        enum call-home;
+        enum direct;
+      }
+      description
+        "whether the connection is call-home or direct.";
+    }
+    choice protocol {
+      mandatory true;
+      container password-auth {
+        when "../connection-model = 'direct'";
+        container authentication {
+          leaf address {
+            type inet:ip-address;
+            description
+              "Device IP address.";
+            mandatory true;
+          }
+          leaf management-port {
+            type uint32;
+            description
+              "The management port of the device.";
+          }
+          leaf user-name {
+            type string;
+            description
+              "The user name of the device.";
+          }
+          leaf password {
+            type string;
+            description
+              "The password of the user.";
+          }
+        }
+      }
+      leaf duid {
+        description
+          "A globally unique value for a DUID (DHCP Unique Identifier)
+           as defined in RFC 3315.";
+        type string {
+          length "1..128";
+        }
+        when "../connection-model = 'call-home'";
+      }
+    }
+  }
+
+  grouping device-details{
+    description
+      "These four leafs collectively determine one module-set/one adapter.";
+    leaf type {
+      type string;
+      description
+        "The type of device. Identifies the type of access node like OLT/ONT/DPU etc";
+    }
+    leaf interface-version {
+      type string;
+      description
+        "The interface version of the device , which uniquely identifies the yang-modules set & revision supported by the device";
+    }
+    leaf model {
+      type string;
+      description
+        "The model of device. Identifies the hardware variant of the device.
+         Example 4LT/8LT card numbers etc";
+    }
+    leaf vendor {
+      type string;
+      description
+        "The vendor of device.Eg Nokia/Huawei";
+    }
+    leaf push-pma-configuration-to-device {
+       type boolean;
+       default true;
+       description
+         "By default, push the PMA configuration to the device when the device connects for the first time. This is done since PMA in OB-BAA is the master of configurations. Configure this attribute as false using <edit-config> to turn-off this feature and upload device configuration to PMA.
+          When this attribute is set to false, it will be automatically reset to true after the device configuration is successfully uploaded to PMA.";
+    }
   }
 
   grouping management-grouping {
-	leaf device-type {
-	  type string;
-	  description
-		"The type of device. It can be used for determining the module-set of YANG library.";
-	}
-	leaf device-software-version {
-	  type string;
-	  description
-		"The software version of device.";
-	}
-	leaf device-model {
-	  type string;
-	  description
-		"The model of device.";
-	}
-	leaf device-vendor {
-	  type string;
-	  description
-		"The vendor of device.";
-	}
-	container device-connection {
-	  uses connection-grouping;
-	}
-	container device-state {
-	  config false;
-	  leaf configuration-alignment-state {
-		type string;
-	  }
-	  container connection-state {
-		leaf connected {
-		  type boolean;
-		  description
-			"The connection state of device.";
-		}
-		leaf connection-creation-time {
-		  type yang:date-and-time;
-		}
-		leaf-list device-capability {
-		  type string;
-		}
-	  }
-	}
+    uses device-details;
+    container device-connection {
+      uses connection-grouping;
+    }
+    container device-state {
+      config false;
+      leaf configuration-alignment-state {
+        type string;
+      }
+      container connection-state {
+        leaf connected {
+          type boolean;
+          description
+            "The connection state of device.";
+        }
+        leaf connection-creation-time {
+          type yang:date-and-time;
+        }
+        leaf-list device-capability {
+          type string;
+        }
+      }
+    }
   }
 
   grouping notification-grouping {
-	notification device-state-change {
-	  description
-		"Device state changed";
-	  leaf event {
-		type enumeration {
-		  enum online;
-		  enum offline;
-		}
-	  }
-	}
+    notification device-state-change {
+      description
+        "Device state changed";
+      leaf event {
+        type enumeration {
+          enum online;
+          enum offline;
+        }
+      }
+    }
   }
+  container network-manager {
 
-  container managed-devices {
-	description
-	  "The managed devices and device communication settings.";
-	list device {
-	  key "device-name";
-	  leaf device-name {
-		type string;
-		description
-		  "The name of device.";
-	  }
-	  container device-management {
-		uses management-grouping;
-	  }
-	  container device-notification {
-		uses notification-grouping;
-	  }
-	  container root {
-		yangmnt:mount-point "root";
-		description
-		  "Root for models supported per device.";
-	  }
-	}
-  }
-  container new-devices {
-	config false;
-	list new-device {
-	  key "duid";
-	  leaf duid {
-		description
-		  "A globally unique value for a DUID (DHCP Unique Identifier)
-		   as defined in RFC 3315.";
-		type string {
-		  length "1..128";
-		}
-	  }
-	}
-	leaf-list device-capability {
-	  type string;
-	}
-  }
+      container managed-devices {
+        description
+          "The managed devices and device communication settings.";
+        list device {
+          key "name";
+          leaf name {
+            type string;
+            description
+              "The name of device.";
+          }
+          container device-management {
+            uses management-grouping;
+          }
+          container device-notification {
+            uses notification-grouping;
+          }
+          container root {
+            yangmnt:mount-point "root";
+            description
+              "Root for models supported per device.";
+          }
+        }
+      }
+
+      container new-devices {
+        config false;
+        list new-device {
+          key "duid";
+          leaf duid {
+            description
+              "A globally unique value for a DUID (DHCP Unique Identifier)
+               as defined in RFC 3315.";
+            type string {
+              length "1..128";
+            }
+          }
+          leaf-list device-capability {
+              type string;
+          }
+        }
+      }
+
+      container device-adapters {
+        config false;
+        leaf device-adapter-count {
+          description
+           "Total number of device-adapters deployed";
+          type string;
+          config false;
+        }
+        list device-adapter {
+          key "type interface-version model vendor";
+          description
+           "List of device-adapters containing yang modules along with supported deviations and features.
+            An device-adapter is uniquely identified by its type, version, model and vendor.";
+
+          uses device-details;
+
+          container yang-modules {
+            description
+            "The list yang modules supported by the device-adapter";
+            uses yanglib:module-list;
+          }
+        }
+      }
+}
 }

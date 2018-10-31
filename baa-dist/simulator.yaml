@@ -1,7 +1,7 @@
 version: '2'
 services:
     device-simulator:
-        image: sysrepo/sysrepo-netopeer2:latest
+        image: sysrepo/sysrepo-netopeer2:v0.7.4
         container_name: direct-simulator
         restart: always
         ports:

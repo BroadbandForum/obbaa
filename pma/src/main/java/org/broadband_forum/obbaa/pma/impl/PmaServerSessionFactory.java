@@ -18,11 +18,14 @@ package org.broadband_forum.obbaa.pma.impl;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry;
@@ -39,7 +42,6 @@ import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.jetbrains.annotations.NotNull;
 
 public class PmaServerSessionFactory extends PmaSessionFactory {
@@ -52,15 +54,15 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     private final String m_deviceFileBaseDirPath;
     private final NetConfServerImpl m_netconfServer;
     private final PersistenceManagerUtil m_persistenceMgrUtil = new DummyPersistenceUtil();
-    private ConcurrentHashMap<DeviceInfo, ModelNodeDataStoreManager> m_dsms = new ConcurrentHashMap<>();
     private final NetconfDeviceAlignmentService m_das;
+    private AdapterManager m_adapterManager;
 
     public PmaServerSessionFactory(String deviceFileBaseDirPath, DeviceManager deviceManager, NetConfServerImpl
             netconfServer,
                                    NetconfDeviceAlignmentService das, EntityRegistry entityRegistry, SchemaRegistry
                                            schemaRegistry,
                                    ModelNodeHelperRegistry modelNodeHelperRegistry, SubSystemRegistry subsystemRegistry,
-                                   ModelNodeDSMRegistry modelNodeDsmRegistry) {
+                                   ModelNodeDSMRegistry modelNodeDsmRegistry, AdapterManager adapterManager) {
         m_das = das;
         m_entityRegistry = entityRegistry;
         m_schemaRegistry = schemaRegistry;
@@ -70,6 +72,7 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
         m_deviceManager = deviceManager;
         m_netconfServer = netconfServer;
         m_deviceFileBaseDirPath = deviceFileBaseDirPath;
+        m_adapterManager = adapterManager;
     }
 
     public void init() throws AnnotationAnalysisException {
@@ -89,9 +92,14 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
 
     @Override
     public PmaSession create(String key) {
-        DeviceInfo deviceInfo = m_deviceManager.getDevice(key);
-        PmaServer pmaServer = createPmaServer(deviceInfo);
-        return new PmaServerSession(deviceInfo, pmaServer, m_das);
+        Device device = m_deviceManager.getDevice(key);
+        PmaServer pmaServer = createPmaServer(device);
+        return new PmaServerSession(device, pmaServer, m_das);
+    }
+
+    @Override
+    public boolean validateObject(String key, PooledObject<PmaSession> session) {
+        return ((PmaServerSession) session.getObject()).isActive();
     }
 
     @Override
@@ -100,19 +108,23 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     }
 
     @NotNull
-    private PmaServerImpl createPmaServer(DeviceInfo deviceInfo) {
-        return new PmaServerImpl(deviceInfo, m_netconfServer, getDsm(deviceInfo));
+    private PmaServerImpl createPmaServer(Device device) {
+        return new PmaServerImpl(device, m_netconfServer, getDsm(device), getAdapterContext(device));
     }
 
-    private ModelNodeDataStoreManager getDsm(DeviceInfo deviceInfo) {
-        if (!m_dsms.containsKey(deviceInfo)) {
-            DeviceXmlStore deviceStore = new DeviceXmlStore(getDeviceStoreFilePath(deviceInfo.getKey()));
-            SingleXmlObjectDSM<DeviceXmlStore> dsm = new SingleXmlObjectDSM<>(deviceStore, m_persistenceMgrUtil,
-                    m_entityRegistry, m_schemaRegistry, m_modelNodeHelperRegistry, m_subsystemRegistry,
-                    m_modelNodeDsmRegistry);
-            m_dsms.putIfAbsent(deviceInfo, dsm);
-        }
-        return m_dsms.get(deviceInfo);
+    private ModelNodeDataStoreManager getDsm(Device device) {
+        DeviceXmlStore deviceStore = new DeviceXmlStore(getDeviceStoreFilePath(device.getDeviceName()));
+        AdapterContext adapterContext = getAdapterContext(device);
+        SingleXmlObjectDSM<DeviceXmlStore> dsm = new SingleXmlObjectDSM<>(deviceStore, m_persistenceMgrUtil,
+                m_entityRegistry, adapterContext.getSchemaRegistry(), adapterContext.getModelNodeHelperRegistry(),
+                adapterContext.getSubSystemRegistry(), adapterContext.getDsmRegistry());
+        return dsm;
+    }
+
+    private AdapterContext getAdapterContext(Device dev) {
+        return m_adapterManager.getAdapterContext(new DeviceAdapterId(dev.getDeviceManagement().getDeviceType(),
+                dev.getDeviceManagement().getDeviceInterfaceVersion(), dev.getDeviceManagement().getDeviceModel(),
+                dev.getDeviceManagement().getDeviceVendor()));
     }
 
     @NotNull
@@ -122,11 +134,7 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
 
     @Override
     public void deviceDeleted(String deviceName) {
-        DeviceInfo deviceInfo = getDsmWithDeviceName(deviceName);
         deleteStoreFile(deviceName);
-        if (deviceInfo != null) {
-            m_dsms.remove(deviceInfo);
-        }
     }
 
     private void deleteStoreFile(String deviceName) {
@@ -135,15 +143,6 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
         if (file.exists()) {
             file.delete();
         }
-    }
-
-    private DeviceInfo getDsmWithDeviceName(String deviceName) {
-        for (DeviceInfo info : m_dsms.keySet()) {
-            if (deviceName.equals(info.getKey())) {
-                return info;
-            }
-        }
-        return null;
     }
 
     private class DummyPersistenceUtil implements PersistenceManagerUtil {

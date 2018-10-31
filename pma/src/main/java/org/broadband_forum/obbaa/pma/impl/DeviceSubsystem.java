@@ -111,7 +111,7 @@ public class DeviceSubsystem extends AbstractSubSystem {
     @Override
     public void notifyChanged(List<ChangeNotification> changeNotificationList) {
         super.notifyChanged(changeNotificationList);
-        m_das.queueEdit(PmaServer.getCurrentDevice().getKey(), (EditConfigRequest) RequestScope.getCurrentScope()
+        m_das.queueEdit(PmaServer.getCurrentDevice().getDeviceName(), (EditConfigRequest) RequestScope.getCurrentScope()
                 .getFromCache(CURRENT_REQ));
     }
 }

@@ -19,16 +19,18 @@ package org.broadband_forum.obbaa.pma.impl;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import javax.transaction.Transactional;
+
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.pma.DeviceModelDeployer;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;
 import org.broadband_forum.obbaa.pma.PmaSessionTemplate;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 
 /**
  * <p>
@@ -59,9 +61,12 @@ public class PmaRegistryImpl implements PmaRegistry {
         m_pmaSessionPool.setTimeBetweenEvictionRunsMillis(10000); //evict old pmasessions every 10 secs
         m_pmaSessionPool.setMaxIdlePerKey(1);
         m_pmaSessionPool.setMinIdlePerKey(1);
+        m_pmaSessionPool.setTestOnBorrow(true);
+        m_pmaSessionPool.setTestOnReturn(true);
     }
 
     @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class,Exception.class})
     public String executeNC(String deviceName, String netconfRequest) throws IllegalArgumentException,
             IllegalStateException, ExecutionException {
         return executeWithPmaSession(deviceName, session -> {
@@ -104,8 +109,8 @@ public class PmaRegistryImpl implements PmaRegistry {
     }
 
     private PmaSession getPmaSession(String deviceName) throws IllegalArgumentException, IllegalStateException {
-        DeviceInfo deviceInfo = m_deviceManager.getDevice(deviceName);
-        if (deviceInfo == null) {
+        Device device = m_deviceManager.getDevice(deviceName);
+        if (device == null) {
             throw new IllegalArgumentException(String.format("Device not managed : %s", deviceName));
         }
 

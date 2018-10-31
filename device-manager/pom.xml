@@ -20,12 +20,12 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>device-manager</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/Device Manager</name>
     <dependencies>
         <dependency>
@@ -35,13 +35,24 @@
         </dependency>
         <dependency>
             <groupId>org.bbf.obbaa</groupId>
-            <artifactId>store</artifactId>
+            <artifactId>device-manager-entities</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.mapdb</groupId>
-            <artifactId>mapdb</artifactId>
+            <groupId>org.bbf.obbaa</groupId>
+            <artifactId>device-manager-entities</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bbf.obbaa.netconf</groupId>
+            <artifactId>netconf-server-modelnode-fwk</artifactId>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -61,7 +72,74 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bbf.obbaa</groupId>
+            <artifactId>device-adapter-fwk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
-
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>target/classes</directory>
+                <includes>
+                    <include>yangs/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/log4j.xml</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-dependencies</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>aggregator-yang</includeArtifactIds>
+                            <outputDirectory>${project.build.directory}/classes/yangs</outputDirectory>
+                            <includes>**/*.yang</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
+                        <Dynamic-Import-Package>org.hibernate.proxy, javassist.util.proxy, *</Dynamic-Import-Package>
+                        <Import-Package>org.hibernate.proxy, javassist.util.proxy, javax.persistence.metamodel, org.hibernate.jpa, *</Import-Package>
+                        <Meta-Persistence>META-INF/persistence.xml</Meta-Persistence>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 

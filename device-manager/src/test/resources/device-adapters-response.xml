@@ -1,0 +1,14 @@
+<device-adapters xmlns="urn:bbf:yang:obbaa:network-manager">
+    <device-adapter>
+        <interface-version>interface1</interface-version>
+        <model>model1</model>
+        <type>type1</type>
+        <vendor>vendor1</vendor>
+    </device-adapter>
+    <device-adapter>
+        <interface-version>interface2</interface-version>
+        <model>model2</model>
+        <type>type2</type>
+        <vendor>vendor2</vendor>
+    </device-adapter>
+</device-adapters>

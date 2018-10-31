@@ -16,12 +16,13 @@
 
 package org.broadband_forum.obbaa.aggregator.processor;
 
+import static org.junit.Assert.assertTrue;
+
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.impl.AggregatorImpl;
 import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.api.NetworkManagerRpc;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 public class AggregatorSchemaMountTest {
     private Aggregator m_aggregator;
@@ -51,14 +52,16 @@ public class AggregatorSchemaMountTest {
             "    </schema-mounts>\n" +
             "  </data>\n" +
             "</rpc-reply>\n";
+    private NetconfClientInfo m_clientInfo;
 
     @Test
     public void processRequest() throws Exception {
         m_aggregator = new AggregatorImpl();
+        m_clientInfo = new NetconfClientInfo("UT", 1);
         AggregatorSchemaMount aggregatorSchemaMount = new AggregatorSchemaMount(m_aggregator);
         aggregatorSchemaMount.init();
 
-        String response = aggregatorSchemaMount.processRequest(TEST_REQUEST);
+        String response = aggregatorSchemaMount.processRequest(m_clientInfo, TEST_REQUEST);
         assertTrue(response.contains(NetworkManagerRpc.NAMESPACE));
         assertTrue(response.contains("root"));
     }

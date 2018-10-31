@@ -1,0 +1,16 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907464">
+    <edit-config>
+        <target>
+            <running />
+        </target>
+        <config>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
+                    <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="delete">
+                        <name>deviceA</name>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </config>
+    </edit-config>
+</rpc>

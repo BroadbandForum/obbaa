@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="Obbaa-features-${project.version}">
+
+    <repository>mvn:org.opendaylight.yangtools/features-yangtools/${opendaylight-yangtools.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/enterprise/${apache.karaf.version}/xml/features</repository>
+    <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax-jdbc.version}/xml/features</repository>
+
+    <feature name="pma-feature" version="${project.version}" description="PMAA Feature">
+        <feature version="${project.version}">third-party-libs</feature>
+        <bundle>mvn:org.bbf.obbaa.netconf/netconf-api/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/netconf-client/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/auth-spi/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/netconf-persistence-app/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/stack-logging-api/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/netconf-server/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/stack-api/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/stack-logging-api/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/netconf-server-modelnode-fwk/${project.version}</bundle>
+
+        <bundle>mvn:org.bbf.obbaa/device-adapter-fwk/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa/device-manager-entities/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa/sbi-connectors/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa/device-manager/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa/pma/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa/aggregator/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa/nbi-adapter/${project.version}</bundle>
+    </feature>
+
+    <feature name="third-party-libs" version="${project.version}" description="Third party Libraries">
+        <feature version="${opendaylight-yangtools.version}">odl-yangtools-yang-parser</feature>
+        <feature version="${transaction.version}">transaction</feature>
+        <feature version="${transaction-api.version}">transaction-api</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-config</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-h2</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-pool-dbcp2</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-mariadb</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-hsqldb</feature>
+        <feature version="${jpa.version}">jpa</feature>
+        <feature version="${hibernate.version}" prerequisite="true">hibernate</feature>
+        <feature version="${pax-http-whiteboard.version}">pax-http-whiteboard</feature>
+        <feature>jndi</feature>
+        <feature>jdbc</feature>
+        <bundle><![CDATA[wrap:mvn:net.sf.ehcache/ehcache-core/${ehcache-core.version}$Bundle-SymbolicName=ehcache-core&Bundle-Version=${ehcache-core.version}&Import-Package=javax.management;resolution:=optional,javax.management.openmbean;resolution:=optional,javax.naming;resolution:=optional,javax.servlet;resolution:=optional,javax.transaction;resolution:=optional,javax.transaction.xa;resolution:=optional,javax.xml.parsers;resolution:=optional,org.hibernate,org.hibernate.cache,org.hibernate.cache.spi,org.hibernate.cache.access;resolution:=optional,org.hibernate.cfg;resolution:=optional,org.hibernate.impl;resolution:=optional,org.hibernate.stat;resolution:=optional,org.hibernate.transaction;resolution:=optional,org.slf4j;resolution:=optional,org.xml.sax;resolution:=optional,org.xml.sax.helpers;resolution:=optional]]></bundle>
+        <bundle start-level="70">mvn:org.hibernate/hibernate-ehcache/${hibernate.version}</bundle>
+
+        <bundle>mvn:org.apache.commons/commons-pool2/${commons-pool2.version}</bundle>
+        <bundle>mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle><![CDATA[wrap:mvn:com.google.errorprone/error_prone_annotations/${errorprone.version}$Bundle-SymbolicName=errorprone-annotations&Bundle-Version=${errorprone.version}]]></bundle>
+        <bundle><![CDATA[wrap:mvn:com.google.j2objc/j2objc-annotations/${j2objc-annotations.version}$Bundle-SymbolicName=j2objc-annotations&Bundle-Version=${j2objc-annotations.version}]]></bundle>
+        <bundle><![CDATA[wrap:mvn:org.codehaus.mojo/animal-sniffer-annotations/${animal-sniffer-annotation.version}$Bundle-SymbolicName=animalsniffer-annotations&Bundle-Version=${animal-sniffer-annotation.version}]]></bundle>
+        <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-resolver/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
+        <bundle>mvn:org.bouncycastle/bcprov-jdk16/${bouncy-castle.version}</bundle>
+        <bundle>mvn:joda-time/joda-time/${joda-time.version}</bundle>
+        <bundle>mvn:org.apache.sshd/sshd-core/${mina.version}</bundle>
+        <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
+        <bundle>mvn:commons-collections/commons-collections/${commons-collection.version}</bundle>
+        <bundle>mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
+        <bundle>mvn:org.apache.commons/commons-lang3/${commons-lang3.version}</bundle>
+        <bundle>mvn:javax.servlet/javax.servlet-api/${javax.servlet-api.version}</bundle>
+        <bundle><![CDATA[wrap:mvn:org.jdom/jdom/1.1.3$Bundle-SymbolicName=jdom&Bundle-Version=${jdom.version}]]></bundle>
+        <bundle>mvn:commons-jxpath/commons-jxpath/${commons-jxpath.version}</bundle>
+        <bundle>mvn:javax.ws.rs/javax.ws.rs-api/${javax.ws.rs-api.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${apache.servicemix.bundles.aopalliance.version}</bundle>
+        <bundle start-level="30" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlbeans/${org.apache.servicemix.bundles.xmlbeans.version}</bundle>
+    </feature>
+
+</features>

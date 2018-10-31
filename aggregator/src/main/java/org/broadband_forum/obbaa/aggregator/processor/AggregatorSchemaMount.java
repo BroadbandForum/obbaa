@@ -16,18 +16,19 @@
 
 package org.broadband_forum.obbaa.aggregator.processor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
 import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.api.NetworkManagerRpc;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class AggregatorSchemaMount implements GlobalRequestProcessor {
     Aggregator m_aggregator;
@@ -65,7 +66,7 @@ public class AggregatorSchemaMount implements GlobalRequestProcessor {
     }
 
     @Override
-    public String processRequest(String netconfRequest) throws DispatchException {
+    public String processRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException {
         Document document = AggregatorMessage.stringToDocument(netconfRequest);
 
         //Device name is invalid in this processor

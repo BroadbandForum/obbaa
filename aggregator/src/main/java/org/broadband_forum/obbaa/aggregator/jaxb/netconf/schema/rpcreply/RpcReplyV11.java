@@ -20,6 +20,6 @@ import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfProtocol;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = NetconfProtocol.RCP_REPLY, namespace = NetconfProtocol.VERSION_1_1)
+@XmlRootElement(name = NetconfProtocol.RPC_REPLY, namespace = NetconfProtocol.VERSION_1_1)
 public class RpcReplyV11 extends RpcReply {
 }

@@ -29,4 +29,17 @@
     <suppress files="org.broadband_forum.obbaa.aggregator.jaxb.*" checks="MemberName"/>
     <suppress files="org.broadband_forum.obbaa.aggregator.*" checks="CustomImportOrder"/>
     <suppress files="CallHomeListenerCompositeImpl.java" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.dmyang.entities.*" checks="MemberName"/>
+    <suppress files="DataStoreTransactionInterceptor.java" checks="IllegalCatch"/>
+    <suppress files="DeviceManagementSubsystem.java" checks="IllegalCatch"/>
+    <suppress files="DeviceDaoImpl.java" checks="IllegalCatch"/>
+    <suppress files="TxService.java" checks="IllegalCatch"/>
+    <suppress files="TxService.java" checks="IllegalThrows"/>
+    <suppress files="AdapterManagerImpl.java" checks="IllegalCatch"/>
+    <suppress files="DeviceAdapter.java" checks="IllegalCatch"/>
+    <suppress files="CommonFileUtil.java" checks="IllegalCatch"/>
+    <suppress files="DeviceAdapterActionHandlerImpl.java" checks="IllegalCatch"/>
+    <suppress files="PmaAdapter.java" checks="IllegalCatch"/>
+    <suppress files="TimerService.java" checks="IllegalCatch"/>
+    <suppress files="AlignmentTimer.java" checks="IllegalCatch"/>
 </suppressions>

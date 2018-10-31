@@ -17,10 +17,9 @@
 package org.broadband_forum.obbaa.dm;
 
 import java.util.List;
-import java.util.Set;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 
 /**
  * <p>
@@ -30,19 +29,22 @@ import org.broadband_forum.obbaa.store.dm.DeviceInfo;
  * Created by kbhatk on 29/9/17.
  */
 public interface DeviceManager {
-    void createDevice(DeviceInfo deviceInfo);
 
-    DeviceInfo getDevice(String deviceName);
+    Device getDevice(String deviceName);
 
-    Set<DeviceInfo> getAllDevices();
-
-    void updateDevice(DeviceInfo deviceInfo);
-
-    void deleteDevice(String deviceName);
+    List<Device> getAllDevices();
 
     void removeDeviceStateProvider(DeviceStateProvider stateProvider);
 
     void addDeviceStateProvider(DeviceStateProvider stateProvider);
 
     List<NewDeviceInfo> getNewDevices();
+
+    void deviceAdded(String deviceName);
+
+    void deviceRemoved(String deviceName);
+
+    void devicePropertyChanged(String deviceName);
+
+    void updateConfigAlignmentState(String deviceName, String verdict);
 }

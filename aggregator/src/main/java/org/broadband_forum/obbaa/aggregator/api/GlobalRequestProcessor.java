@@ -16,6 +16,8 @@
 
 package org.broadband_forum.obbaa.aggregator.api;
 
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
+
 /**
  * Implemented by some common system config component for request process.
  */
@@ -23,9 +25,11 @@ public interface GlobalRequestProcessor {
     /**
      * Provide a unified API for netconfRequest processing from Aggregator.
      *
+     *
+     * @param clientInfo Client info
      * @param netconfRequest Message of NetConf request etc
      * @return Result
      * @throws DispatchException exception
      */
-    String processRequest(String netconfRequest) throws DispatchException;
+    String processRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException;
 }

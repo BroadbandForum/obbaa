@@ -16,6 +16,13 @@
 
 package org.broadband_forum.obbaa.aggregator.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.bind.JAXBException;
+
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DeviceManagementProcessor;
@@ -30,17 +37,12 @@ import org.broadband_forum.obbaa.aggregator.registrant.api.NotificationProcessor
 import org.broadband_forum.obbaa.aggregator.registrant.api.RequestProcessorManager;
 import org.broadband_forum.obbaa.aggregator.registrant.impl.NotificationProcessorManagerImpl;
 import org.broadband_forum.obbaa.aggregator.registrant.impl.RequestProcessorManagerImpl;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
-import javax.xml.bind.JAXBException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class AggregatorImpl implements Aggregator {
     private RequestProcessorManager m_requestProcessorManager;
@@ -60,16 +62,16 @@ public class AggregatorImpl implements Aggregator {
     }
 
     @Override
-    public String dispatchRequest(String netconfRequest) throws DispatchException {
+    public String dispatchRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException {
         LOGGER.info("Aggregator dispatch request:\n {}", netconfRequest);
         AggregatorRpcMessage aggregatorRpcMessage = buildAggregatorRpcMessage(netconfRequest);
 
         String response;
         if (aggregatorRpcMessage.isNetworkManagerMessage()) {
-            response = dispatchNetworkManageRequest(aggregatorRpcMessage);
+            response = dispatchNetworkManageRequest(clientInfo, aggregatorRpcMessage);
             LOGGER.info("Network manager request response:\n {}", response);
         } else {
-            response = dispatchGlobalRequest(aggregatorRpcMessage);
+            response = dispatchGlobalRequest(clientInfo, aggregatorRpcMessage);
             LOGGER.info("Global request response:\n {}", response);
         }
 
@@ -99,7 +101,7 @@ public class AggregatorImpl implements Aggregator {
 
     @Override
     public void addProcessor(Set<ModuleIdentifier> moduleIdentifiers, GlobalRequestProcessor globalRequestProcessor)
-            throws DispatchException {
+        throws DispatchException {
         getRequestProcessorManager().addProcessor(moduleIdentifiers, globalRequestProcessor);
     }
 
@@ -166,7 +168,7 @@ public class AggregatorImpl implements Aggregator {
 
         //Device processor
         Set<ProcessorCapability> processorCapabilities =
-                getRequestProcessorManager().getDeviceProcessorCapabilities();
+            getRequestProcessorManager().getDeviceProcessorCapabilities();
 
         processorCapabilities.add(new ProcessorCapabilityImpl(COMMON_REQUEST_TYPE, moduleIdentifiers));
 
@@ -183,14 +185,16 @@ public class AggregatorImpl implements Aggregator {
     /**
      * Dispatch request of network-manager YANG model.
      *
+     * @param clientInfo Client Info
      * @param aggregatorRpcMessage Request
      * @return Response
      * @throws DispatchException Exception
      */
-    private String dispatchNetworkManageRequest(AggregatorRpcMessage aggregatorRpcMessage) throws DispatchException {
+    private String dispatchNetworkManageRequest(NetconfClientInfo clientInfo,
+                                                AggregatorRpcMessage aggregatorRpcMessage) throws DispatchException {
         String originalMessage = aggregatorRpcMessage.getOriginalMessage();
         NetworkManagerRpc networkManagerRpc = new NetworkManagerRpc(originalMessage,
-                aggregatorRpcMessage.getNetconfRpcMessage(), aggregatorRpcMessage.getOnlyOneTopPayload());
+            aggregatorRpcMessage.getNetconfRpcMessage(), aggregatorRpcMessage.getOnlyOneTopPayload());
 
         // Device configuration is mainly used for service configuration like L2.
         if (networkManagerRpc.isDeviceConfigRequest()) {
@@ -198,7 +202,7 @@ public class AggregatorImpl implements Aggregator {
         }
 
         // Device management is mainly used for adding and deleting devices and other actions.
-        return getDeviceManagerAdapter().processRequest(aggregatorRpcMessage.getOriginalMessage());
+        return getDeviceManagerAdapter().processRequest(clientInfo, aggregatorRpcMessage.getOriginalMessage());
     }
 
     /**
@@ -229,15 +233,17 @@ public class AggregatorImpl implements Aggregator {
     /**
      * Dispatch common request.
      *
+     * @param netconfClientInfo Client Info
      * @param aggregatorRpcMessage Request
      * @return Response
      * @throws DispatchException Exception
      */
-    private String dispatchGlobalRequest(AggregatorRpcMessage aggregatorRpcMessage) throws DispatchException {
+    private String dispatchGlobalRequest(NetconfClientInfo netconfClientInfo,
+                                         AggregatorRpcMessage aggregatorRpcMessage) throws DispatchException {
         GlobalRequestProcessor globalRequestProcessor = getCommonRequestProcessor(aggregatorRpcMessage.getOnlyOneTopXmlns());
         DispatchException.assertNull(globalRequestProcessor, OPERATION_NOT_SUPPORT);
 
-        return globalRequestProcessor.processRequest(aggregatorRpcMessage.getOriginalMessage());
+        return globalRequestProcessor.processRequest(netconfClientInfo, aggregatorRpcMessage.getOriginalMessage());
     }
 
     /**
@@ -282,7 +288,7 @@ public class AggregatorImpl implements Aggregator {
      * @throws DispatchException Exception
      */
     private String dispatchDeviceConfigRequest(NetworkManagerRpc networkManagerRpc)
-            throws DispatchException {
+        throws DispatchException {
         Map<Document, String> responses = new HashMap<>();
         Set<SingleDeviceRequest> singleDeviceRequests = buildSingleDeviceRequests(networkManagerRpc);
 

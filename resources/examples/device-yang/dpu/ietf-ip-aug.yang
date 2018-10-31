@@ -1,6 +1,7 @@
 module ietf-ip-aug{
     namespace "urn:ietf:params:xml:ns:yang:ietf-ip-aug";
   	prefix mgntip;
+  //	prefix nokia-ipaug;
   	
 	import iana-if-type {
 	    prefix ianaift;

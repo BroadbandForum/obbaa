@@ -16,9 +16,10 @@
 
 package org.broadband_forum.obbaa.aggregator.api;
 
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
-
 import java.util.Set;
+
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
+import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 
 /**
  * BAA Core API for NBI. It's used for message forwarding and notification listening.
@@ -29,11 +30,12 @@ public interface Aggregator {
     /**
      * Provide a unified API to NBI for request message forwarding.
      *
+     * @param clientInfo Client Info
      * @param netconfRequest Message defined with YANG from NBI.
      * @return Result
      * @throws DispatchException Dispatch exception
      */
-    String dispatchRequest(String netconfRequest) throws DispatchException;
+    String dispatchRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException;
 
     /**
      * Provide a unified API for notification publication.
@@ -71,7 +73,7 @@ public interface Aggregator {
      * @throws DispatchException Dispatch exception
      */
     void addProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers, DeviceConfigProcessor deviceConfigProcessor)
-            throws DispatchException;
+        throws DispatchException;
 
     /**
      * Provide a unified API to NAI for notification provider registry.
@@ -114,7 +116,7 @@ public interface Aggregator {
      * @throws DispatchException Dispatch exception
      */
     void removeProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers, DeviceConfigProcessor deviceConfigProcessor)
-            throws DispatchException;
+        throws DispatchException;
 
     /**
      * Register device management processor.

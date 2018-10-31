@@ -19,12 +19,17 @@ package org.broadband_forum.obbaa.pma.impl;
 import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry;
@@ -33,7 +38,6 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHe
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaSession;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,9 +66,15 @@ public class PmaServerSessionFactoryTest {
     private File m_tempFile;
     private String m_deviceKey = "ONT1";
     @Mock
-    private DeviceInfo m_deviceInfo;
+    private Device m_device;
     @Mock
     private NetconfDeviceAlignmentService m_das;
+    @Mock
+    private AdapterManager m_adapterManager;
+    @Mock
+    private DeviceMgmt m_deviceMgmt;
+    @Mock
+    private AdapterContext m_adapterContext;
 
     @Before
     public void setUp() throws Exception {
@@ -72,8 +82,14 @@ public class PmaServerSessionFactoryTest {
         m_tempDir = Files.createTempDir();
         String deviceFileBaseDir = m_tempDir.getAbsolutePath();
         m_factory = new PmaServerSessionFactory(deviceFileBaseDir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaRegistry,
-                m_modelNodeHelperRegistry, m_subsystemRegistry, m_modelNodeDsmRegistry);
-        when(m_dm.getDevice(m_deviceKey)).thenReturn(m_deviceInfo);
+                m_modelNodeHelperRegistry, m_subsystemRegistry, m_modelNodeDsmRegistry, m_adapterManager);
+        when(m_dm.getDevice(m_deviceKey)).thenReturn(m_device);
+        when(m_device.getDeviceManagement()).thenReturn(m_deviceMgmt);
+        when(m_device.getDeviceManagement().getDeviceType()).thenReturn("Adapter1");
+        when(m_device.getDeviceManagement().getDeviceInterfaceVersion()).thenReturn("1.0");
+        when(m_device.getDeviceManagement().getDeviceModel()).thenReturn("4LT");
+        when(m_device.getDeviceManagement().getDeviceVendor()).thenReturn("Vendor1");
+        when(m_adapterManager.getAdapterContext(any())).thenReturn(m_adapterContext);
     }
 
     @After
@@ -94,7 +110,7 @@ public class PmaServerSessionFactoryTest {
         String deviceFileBaseDir = m_tempFile.getAbsolutePath();
         try {
             new PmaServerSessionFactory(deviceFileBaseDir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaRegistry,
-                    m_modelNodeHelperRegistry, m_subsystemRegistry, m_modelNodeDsmRegistry).init();
+                    m_modelNodeHelperRegistry, m_subsystemRegistry, m_modelNodeDsmRegistry, m_adapterManager).init();
             fail("Expected an exception to be thrown here");
         }catch (Exception e){
             assertTrue(e instanceof RuntimeException);

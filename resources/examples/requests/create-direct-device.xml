@@ -20,31 +20,30 @@
             <running />
         </target>
         <config>
-            <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
-                <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"  xc:operation="create">
-                    <device-name>deviceA</device-name>
-                    <device-management>
-                        <device-type>DPU</device-type>
-                        <device-software-version>1.0.0</device-software-version>
-                        <device-vendor>Huawei</device-vendor>
-                        <device-connection>
-                            <connection-model>direct</connection-model>
-                            <password-auth>
-                                <authentication>
-                                    <address>192.168.169.1</address>
-                                    <!-- ip address of the device/simulator. Replace with the right ip -->
-                                    <management-port>830</management-port>
-                                    <!-- port number of device/simulator NC server. -->
-                                    <user-name>netconf</user-name>
-                                    <!-- username of device NC server -->
-                                    <password>netconf</password>
-                                    <!-- password of device NC server -->
-                                </authentication>
-                            </password-auth>
-                        </device-connection>
-                    </device-management>
-                </device>
-            </managed-devices>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                        <name>deviceA</name>
+                        <device-management>
+                            <type>DPU</type>
+                            <interface-version>1.0.0</interface-version>
+                            <vendor>Nokia</vendor>
+                            <model>4LT</model>
+                            <device-connection>
+                                <connection-model>direct</connection-model>
+                                <password-auth>
+                                    <authentication>
+                                        <address>192.168.169.1</address>
+                                        <management-port>92994</management-port>
+                                        <user-name>DPU</user-name>
+                                        <password>DPU</password>
+                                    </authentication>
+                                </password-auth>
+                            </device-connection>
+                        </device-management>
+                    </device>
+                </managed-devices>
+            </network-manager>
         </config>
     </edit-config>
 </rpc>

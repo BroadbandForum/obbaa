@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
@@ -46,9 +45,8 @@ import org.broadband_forum.obbaa.netconf.api.server.NetconfServerMessageListener
 import org.broadband_forum.obbaa.netconf.api.server.ResponseChannel;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
-import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.util.NetconfRpcErrorUtil;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -61,36 +59,36 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
 
     private static final Logger LOGGER = Logger.getLogger(NbiNetconfServerMessageListener.class);
 
-    private NetConfServerImpl m_coreNetconfServerImpl;
+    private NetconfServer m_coreNetconfServer;
 
     private Aggregator m_aggregator;
 
-    public NbiNetconfServerMessageListener(NetConfServerImpl coreNetconfServerImpl, Aggregator aggregator) {
-        m_coreNetconfServerImpl = coreNetconfServerImpl;
+    public NbiNetconfServerMessageListener(NetconfServer coreNetconfServer, Aggregator aggregator) {
+        m_coreNetconfServer = coreNetconfServer;
         m_aggregator = aggregator;
     }
 
 
-    public String executeNC(String netconfRequest) throws DispatchException {
-        return m_aggregator.dispatchRequest(netconfRequest);
+    public String executeNC(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException {
+        return m_aggregator.dispatchRequest(clientInfo, netconfRequest);
     }
 
     /**
      * Convert request to standard IF and call aggregator to process, and return the response.
      *
      */
-    public void executeRequest(AbstractNetconfRequest request, NetConfResponse response) {
+    public void executeRequest(NetconfClientInfo clientInfo, AbstractNetconfRequest request, NetConfResponse response) {
 
         try {
             // Exec Netconf  string message and get response string message
-            String responseString = executeNC(request.requestToString());
+            String responseString = executeNC(clientInfo, request.requestToString());
 
             // Convert response string message to NetconfResponse object
             Document document = DocumentUtils.stringToDocument(responseString);
             NetConfResponse netconfResponse = DocumentToPojoTransformer.getNetconfResponse(document);
 
             // Copy reponse object
-            response.setMessageId(netconfResponse.getMessageId());
+            response.setMessageId(request.getMessageId());
             response.addErrors(netconfResponse.getErrors());
             response.setOk(netconfResponse.isOk());
             if ((response instanceof NetconfRpcResponse) && (netconfResponse instanceof NetconfRpcResponse)) {
@@ -116,14 +114,14 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
         LOGGER.info(String.format("received hello rpc from %s, with capabilities %s", info, clientCaps));
         LOGGER.info(clientCaps);
 
-        m_coreNetconfServerImpl.onHello(info, clientCaps);
+        m_coreNetconfServer.onHello(info, clientCaps);
     }
 
     @Override
     public void onGet(NetconfClientInfo info, GetRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        executeRequest(req, resp);
+        executeRequest(info, req, resp);
 
         logRpcResp(info, resp);
     }
@@ -133,7 +131,7 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     public void onGetConfig(NetconfClientInfo info, GetConfigRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        executeRequest(req, resp);
+        executeRequest(info, req, resp);
 
         logRpcResp(info, resp);
     }
@@ -150,7 +148,7 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     public List<Notification> onEditConfig(NetconfClientInfo info, EditConfigRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        executeRequest(req, resp);
+        executeRequest(info, req, resp);
 
         logRpcResp(info, resp);
 
@@ -161,7 +159,7 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     public void onCopyConfig(NetconfClientInfo info, CopyConfigRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        executeRequest(req, resp);
+        executeRequest(info, req, resp);
 
         logRpcResp(info, resp);
     }
@@ -170,7 +168,7 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     public void onDeleteConfig(NetconfClientInfo info, DeleteConfigRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        executeRequest(req, resp);
+        executeRequest(info, req, resp);
 
         logRpcResp(info, resp);
     }
@@ -179,7 +177,7 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     public void onLock(NetconfClientInfo info, LockRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        m_coreNetconfServerImpl.onLock(info, req, resp);
+        m_coreNetconfServer.onLock(info, req, resp);
 
         logRpcResp(info, resp);
     }
@@ -188,7 +186,7 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     public void onUnlock(NetconfClientInfo info, UnLockRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        m_coreNetconfServerImpl.onUnlock(info, req, resp);
+        m_coreNetconfServer.onUnlock(info, req, resp);
 
         logRpcResp(info, resp);
     }
@@ -197,7 +195,7 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     public void onCloseSession(NetconfClientInfo info, CloseSessionRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        m_coreNetconfServerImpl.onCloseSession(info, req, resp);
+        m_coreNetconfServer.onCloseSession(info, req, resp);
 
         logRpcResp(info, resp);
     }
@@ -206,14 +204,14 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     public void onKillSession(NetconfClientInfo info, KillSessionRequest req, NetConfResponse resp) {
         logRpc(info, req);
 
-        m_coreNetconfServerImpl.onKillSession(info, req, resp);
+        m_coreNetconfServer.onKillSession(info, req, resp);
 
         logRpcResp(info, resp);
     }
 
     @Override
     public void onInvalidRequest(NetconfClientInfo info, Document req, NetConfResponse resp) {
-        m_coreNetconfServerImpl.onInvalidRequest(info, req, resp);
+        m_coreNetconfServer.onInvalidRequest(info, req, resp);
 
         logRpcResp(info, resp);
     }
@@ -221,14 +219,14 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     @Override
     public void sessionClosed(String arg0, int sessionId) {
 
-        m_coreNetconfServerImpl.sessionClosed(arg0, sessionId);
+        m_coreNetconfServer.sessionClosed(arg0, sessionId);
     }
 
     @Override
     public List<Notification> onRpc(NetconfClientInfo info, NetconfRpcRequest rpcRequest, NetconfRpcResponse response) {
         logRpc(info, rpcRequest);
 
-        executeRequest(rpcRequest, response);
+        executeRequest(info, rpcRequest, response);
 
         logRpcResp(info, response);
 
@@ -237,14 +235,14 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
 
     @Override
     public void onCreateSubscription(NetconfClientInfo info, NetconfRpcRequest req, ResponseChannel responseChannel) {
-        m_coreNetconfServerImpl.onCreateSubscription(info, req, responseChannel);
+        m_coreNetconfServer.onCreateSubscription(info, req, responseChannel);
     }
 
     @Override
     public void onAction(NetconfClientInfo info, ActionRequest req, ActionResponse resp) {
         logRpc(info, req);
 
-        executeRequest(req, resp);
+        executeRequest(info, req, resp);
 
         logRpcResp(info, resp);
     }

@@ -1,0 +1,73 @@
+module itf-private-ro {
+
+	namespace "urn:ietf:params:xml:ns:yang:datasharing";
+	prefix ipr;
+		
+	description
+	"itf-propagate-oper-state is used for Interface OperState
+	Propagation. itf-data-sharing is used for Data Sharing Table. 
+	Application designers can update the parameters in itf-data-sharing 		by themselves";
+	
+	container itf-propagate-oper-state {
+		config false;
+		list interface {
+			key "obj-type obj-index";
+			leaf obj-type {
+				type uint16;
+			}
+			leaf obj-index{
+				type uint32 {
+					range "1..4294967295";
+				}
+			}
+			leaf oper-status {
+				type enumeration {
+					enum up {
+						value 1;
+					}
+					enum down {
+						value 2;
+					}
+				}
+				mandatory true;       
+			}      
+			leaf reason{
+				type enumeration{
+					enum up {
+						value 1;
+					}
+					enum admin-down {
+						value 2;
+					}
+					enum oper-down {
+						value 3;
+					}
+					enum lower_layer_down{
+						value 4;
+					}
+				}
+				mandatory true;
+			}              
+		}
+	}
+	container itf-data-sharing {
+		config false;
+		list interface {
+			key "obj-type obj-index";
+			leaf obj-type {
+				type uint16;
+			}
+			leaf obj-index {
+				type uint32;
+			}
+			leaf parameter1 {
+				type string;
+				default "This is parameter1";
+			}
+			leaf parameter2 {
+				type uint8;
+				default 255;
+			}
+		}
+	}
+}

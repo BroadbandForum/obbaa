@@ -29,9 +29,9 @@ Developers should be able to understand:
 
 -   The pre-requisites needed for a development environment
 
--   How to obtain and synchronize code base
+-   How to obtain and synchronize the code base
 
--   How to build code base in order to generate a deployable image
+-   How to build the code base in order to generate a deployable image
 
 Users should be able to understand:
 
@@ -54,8 +54,7 @@ Minimum resource requirement of server would be: 4 cores, 16 GB RAM and
 
 ##### VM based
 
-No specific requirement on Hyper-visor. It could be a Virtual Box or
-VMWare or any others.
+No specific requirement on Hyper-visor. It could be a Virtual Box, VMWare or any others.
 
 ###### Production
 
@@ -70,16 +69,16 @@ HDD
 #### Operating System (OS) Requirements
 
 While there isn\'t a strict requirement on the OS needed for the
-project, Ubuntu is the OS in which the core development team uses.
+project, Ubuntu is the OS in which the core development team uses.\
 For the Guest OS in a VM: 64bit Ubuntu 16.04.04 is the recommended
-either server or desktop versions are supported.
+and either server or desktop versions are supported.
 
 #### Network Requirements
 
 Build and deployment of OB-BAA pulls several artifacts (including source
 code) from public network. So access to Internet is mandatory.
 
-**Warning:** This document assumes that the server is directly connected to internet with no network proxy. If proxies are part of your network then appropriate proxy settings need to be made for artifact access, docker & maven (instructions available in internet).
+**Warning:** This document assumes that the server is directly connected to Internet with no network proxy. If proxies are part of your network then appropriate proxy settings need to be made for artifact access, docker & maven (instructions available in Internet).
 
 **Info:** Shell commands used in this page are in bash syntax. If you are using other shells, specific adaption in command would be required.
 
@@ -113,7 +112,7 @@ above
 OB-BAA is realized as a micro service under a docker engine.
 
 ```
-  Install docker:
+Install docker:
   apt-get install -y curl
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
@@ -121,7 +120,7 @@ OB-BAA is realized as a micro service under a docker engine.
   apt-cache policy docker-ce
   sudo apt-get install -y docker-ce
   sudo usermod -aG docker ${USER}
-  Install Docker Compose:
+Install Docker Compose:
   sudo apt-get install docker-compose
 ```
 
@@ -140,47 +139,45 @@ To install maven use the following command in a apt based system
 #### Repositories
 
 The OB-BAA code is maintained in Github within the [Broadband Forum\'s
-repositories](http://www.github.com/BroadbandForum).
+repositories](http://www.github.com/BroadbandForum).\
 The code base is split across two repositories:
 
 -   obbaa-netconf-stack - NETCONF specific client and server
-    implementations - <https://github.com/BroadbandForum/obbaa-netconf-stack>
+    implementations
 
--   obbaa - OB-BAA main repository - <https://github.com/BroadbandForum/obbaa>
+-   obbaa - OB-BAA main repository
 
 ##### Key update
 
-To clone OB-BAA code into a server, the user ssh public key need to
-updated under the github repository settings.
+To clone OB-BAA code into a server, the user ssh public key needs to
+be updated in the user\'s bitbucket account.\
 Do the following:
 
--   Open each repository using one of the urls provided above
+-   Open <https://code.broadband-forum.org/account>
 
--   Under Settings tab, click "Deploy keys" and add an entry with the public ssh key of the dev
+-   Under SSH Keys add an entry with the public ssh key of the dev
     server
-
--   Github does not allow the same key to be deployed across two repositories. So after cloning code from one repository, remove the key and then add it in the other repository 
 
 ##### Clone OB-BAA NETCONF stack repository
 
 ```
-  git clone -b master --single-branch git@github.com:BroadbandForum/obbaa-netconf-stack.git
+  git clone -b develop --single-branch ssh://git@code.broadband-forum.org:7999/ob-baa/obbaa-netconf-stack.git
 ```
 
 ##### Clone OB-BAA obbaa repository
 
 ```
-  git clone -b master --single-branch git@github.com:BroadbandForum/obbaa.git
+  git clone -b develop --single-branch ssh://git@code.broadband-forum.org:7999/ob-baa/obbaa.git
 ```
 
 ### Build OB-BAA
 
-Building OB-BAA to generate docker image along with its compose file is
+Building OB-BAA to generate the docker image along with its compose file is
 done in two steps:
 
--   Compilation of Code to generate necessary jars.
+-   Compilation of Code to generate necessary jars
 
--   Build a docker image out of the jars.
+-   Build a docker image out of the jars
 
 #### Compilation:
 
@@ -188,18 +185,18 @@ For compilation the sequence is to first compile the NETCONF stack and
 then obbaa.
 
 ```
-  Build NetConf stack
+Build NetConf stack
   Change directory to obbaa-netconf-stack
   mvn clean install -DskipTests
 
-  Build OBBAA
+Build OBBAA
   Change directory obbaa
   mvn clean install -DskipTests
 ```
 
 #### Build docker image:
 
-Next steps is to build docker image from the generated jars.
+The next step is to build docker image from the generated jars.
 
 ```
   cd obbaa/baa-dist
@@ -208,62 +205,18 @@ Next steps is to build docker image from the generated jars.
 
 ### Run BAA
 
-Now BAA is ready to be started. Pre-requisite is that docker daemon
+Now BAA is ready to be started. The pre-requisite is that docker daemon
 should be running (ps -ef\|grep dockerd should return a valid process).
 
 ```
   cd obbaa/baa-dist
   docker-compose -f docker-compose.yml up -d
 
-  Following commands can be used to check the status of baa container:
-  docker ps //This should have an entry of active baa container
-  docker logs -f baa //shows the logs of baa service
+The following commands displays the BAA application logs:
+   docker exec -it baa bash
+   cd /baa/baa-dist/data/log
+   tail -f karaf.log (the file is moved to ".1" extension after reaching certain size and a new file is created)
 ```
-
-### Access BAA Swagger interface
-
-Once successfuLly launched, one can launch BAA\'s swagger API guide using
-the url http://\<ip:port\>/swagger-ui.html on a web browser.
-
-See sample screenshot below
-
-<p align="center">
- <img width="600px" height="400px" src="{{site.url}}/installing/swagger.png">
-</p>
-
-**Info:** Use basic http authentication to login to the page from swagger.
-By default username is admin and password is password.
-**Warning:** The username and password should be changed in the docker compose
-file that was used to launch OB-BAA.
-
-
-### Deploying YANG Modules in BAA
-
-Before attempting to configure managed devices using BAA, first step is
-to import YANG modules supported by the managed device into BAA. This
-can be done using following steps:
-
-1.  Ensure \"baa\" micro service is running in your service (check via
-    \"docker ps\")
-
-2.  Copy all the device YANG modules needed by the managed device to the
-    baa store for YANG modules ( /baa/stores/deviceYangModules) (e.g. cp
-    \$HOME/DPU/\*.yang /baa/stores/deviceYangModules)
-
-3.  Open Swagger and trigger reloadModel API as shown below
-
-Using Swagger to deploy model:
-
-<p align="center">
- <img width="600px" height="400px" src="{{site.url}}/installing/swagger_deploy.png">
-</p>
-
-The successful response along with imported module details is shown
-below:
-
-<p align="center">
- <img width="600px" height="400px" src="{{site.url}}/installing/swagger_deploy_response.png">
-</p>
 
 Setting up Simulators
 ---------------------
@@ -288,56 +241,86 @@ Netopeer2 is used as NETCONF device simulator for OB-BAA project
 
 #### System Requirements
 
-For lab setup and trials Netopeer2 device simulator that require one
-device simulator, the device simulator can be installed into the same
-virtual machine as the OB-BAA project\'s baa docker container. If there
-are multiple device simulators used in the lab or trial each device
-simulators has the requirement of 1 (vCPU), 1 GB RAM and 5 GB HDD.
+For lab setup and trials that require one device simulator, the device 
+simulator can be installed into the same virtual machine as the OB-BAA project\'s baa docker container.
+If there are multiple device simulators used in the lab or trial each device
+simulator has the requirement of 1 (vCPU), 1 GB RAM and 5 GB HDD.
 
 #### Installation and Execution
 
 The docker based netopeer2 distribution is available for easy
 installation.
 
--   Follow the instructions below for pulling and running the docker
-    image of netopeer2
+Follow the instructions below for pulling and running the docker image of netopeer2
 
 ```
 docker run -it --network="baadist_default" --name sysrepo -v "/tmp/fastyangs:/yang" -p 830:830 --rm sysrepo/sysrepo-netopeer2:v0.7.4
 
     - baadist_default: the sysrepo container will use the network bridge of the baa docker container
 
-    - sysrepo : docker service name
+    - sysrepo: docker service name
 
-    - /tmp/fastyangs : directory in host machine containing simulated device YANG modules.
+    - /tmp/fastyangs: directory in host machine containing simulated device YANG modules.
 
-    - /yang : mapped mount point for the sysrepo service. Sysrepo will use /yang to refer to the /tmp/fastyangs directory in the host machine.
+    - /yang: mapped mount point for the sysrepo service. Sysrepo will use /yang to refer to the /tmp/fastyangs directory in the host machine.
 
-    - 830 : indicates the TCP port where the simulator will be listening
+    - 830: indicates the TCP port where the simulator will be listening
 ```
 
--   Install the modules for the type of device that you want to test by installing the modules and then setting up a subscription for change notifications for the modules in sysrepo. Finally check that the modules were installed.
+Install the modules for the type of device that you want to test by installing the modules and then setting up a subscription for change notifications for the modules in sysrepo.
+YANG modules for supported by the device simulator can be installed by executing a shell script or manually one at a time.
 
+##### Installing YANG modules using a shell script
+Installing YANG modules using the "simulatorYangInstall.sh" shell script provided in the BAA layer distribution uses the following procedure:
 ```
+1. Copy the script "obbaa/baa-dist/simulatorYangInstall.sh" from the obbaa server to target simulator server if the simulator and obbaa are running in different servers.
+2. Modify the shell scripts permissions to allow it to be executed with the following syntax chmod +x simulatorYangInstall.sh
+3. Execute the script with following syntax "./simulatorYangInstall.sh [docker_name] [yangModelFilePathInDocker]"
+   For example: ./simulatorYangInstall.sh sysrepo /yang
+```
+
+##### Installing YANG modules manually
+Installing YANG modules using netopeer2 operations to install YANG modules one at a time with the following procedure:
+```
+# Open a shell in the device simulator's environment and navigate to the examples directory
 docker exec -it sysrepo /bin/bash
 cd /opt/dev/sysrepo/build/examples
 
+# For each module to be installed execute the following
+# /yang/ietf-interfaces.yang: could be any YANG module file. In this case the ietf-interfaces module will be installed into simulator and then subscribed for changes.
+# root:root: owner:group of the sysrepo service in the server. Should match the owner in the deployed server.
+
 sysrepoctl --install --yang=/yang/ietf-interfaces.yang --owner=root:root --permissions=666
-nohup ./application_example ietf_interfaces&
+nohup ./application_example ietf_interfaces &
 
+# List the modules to ensure they were installed
 sysrepoctl -l
-```
-
-   - /yang/ietf-interfaces.yang : could be any YANG module file. In this case the ietf-interfaces module will be installed into simulator and then subscribed for changes.
-
-   - root:root : owner:group of the sysrepo service in the server. Should match the owner in the deployed server.
 ```
 
 #### Setting up a Device Simulator for callhome
 
 The Device simulator can be configured to be as a device that supports
-the \"callhome\" connection method for the BAA layer. The procedure to
-setup the simulator to support a \"callhome\" device is as follows:
+the \"callhome\" connection method for the BAA layer.
+
+
+**Info:** To determine which devices have completed the callhome procedure can be obtained by sending the following:
+
+```
+<rpc message-id="10101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <get>
+        <filter type="subtree">
+          <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <new-devices xmlns="urn:bbf:yang:obbaa:network-manager"/>
+          </network-manager>
+        </filter>
+     </get>
+</rpc>
+```
+
+The procedure to setup the simulator to support a \"callhome\" device is as follows:
+
+**Warning:** The instructions in this section use sample certificates and private keys and are used for testing only. These files are included in the distribution of OB-BAA
+and can easily be compromised if used in real deployments. Do not use these certificates and private keys in actual deployments.
 
 -   Create TLS certificates
 
@@ -385,7 +368,7 @@ setup the simulator to support a \"callhome\" device is as follows:
     netopeer2 is netconf/netconf.
 
 ```
-  connect --ssh --login netconf
+  connect \--ssh \--login netconf
 ```
 
 <p align="center">
@@ -548,7 +531,7 @@ KBKGYUlmDh7SJaQO0x3fGwFz84IQhgZvxA==</certificate>
 </keystore>
 ```
 
--   Enable callhome by performing an edit-config (explained in earlier
+-   Enable callhome by performing an edit-config (explained in an earlier
     step) and executing code-snippet sample below:
 
 ```
@@ -591,7 +574,7 @@ KBKGYUlmDh7SJaQO0x3fGwFz84IQhgZvxA==</certificate>
 - Obtain the fingerprint of obbaa certificate by using openssl command
 
 ```
-openssl x509 -noout -fingerprint -sha256 -inform pem -in certchain.crt
+openssl x509 -noout -fingerprint -sha256 -inform pem -in /obbaa/baa-dist/src/main/assembly/conf/tls/certchain.crt
 ```
 <p align="center">
  <img width="700px" height="40px" src="{{site.url}}/installing/finger-print.jpg">
@@ -638,8 +621,67 @@ This is a SHA256 fingerprint and we need to specify it by prefixing 04 in the <f
 </netconf-server>
 ```
 
-Once these steps are complete - The device simulator will then begin its
-callhome procedure and will appear in the BAA layer.
+Once these steps are complete - The device will then begin its
+callhome procedure and will appear in the BAA layer as a new device.
+
+To check if the device has successfully completed the callhome procedure:
+
+```
+<rpc message-id="10101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <get>
+        <filter type="subtree">
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <new-devices xmlns="urn:bbf:yang:obbaa:network-manager"/>
+            </network-manager>
+        </filter>
+    </get>
+</rpc>
+```
+
+Example response:
+```
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10101">
+  <data>
+    <network-manager:network-manager xmlns:network-manager="urn:bbf:yang:obbaa:network-manager">
+      <new-devices xmlns="urn:bbf:yang:obbaa:network-manager">
+        <new-device>
+          <duid>DPU1</duid>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-netconf-acm?module=ietf-netconf-acm&amp;revision=2012-02-22</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults?module=ietf-netconf-with-defaults&amp;revision=2011-06-01</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=explicit&amp;also-supported=report-all,report-all-tagged,trim,explicit</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:iana-crypt-hash?module=iana-crypt-hash&amp;revision=2014-08-06</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:1?module=yang&amp;revision=2017-02-20</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-interfaces?module=ietf-interfaces&amp;revision=2014-05-08</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:iana-if-type?module=iana-if-type&amp;revision=2014-05-08</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-yang-library?revision=2018-01-17&amp;module-set-id=25</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</device-capability>
+          <device-capability>http://example.net/turing-machine?module=turing-machine&amp;revision=2013-12-27</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:xpath:1.0</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:startup:1.0</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-x509-cert-to-name?module=ietf-x509-cert-to-name&amp;revision=2014-12-10</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-yang-metadata?module=ietf-yang-metadata&amp;revision=2016-08-05</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:writable-running:1.0</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-ip?module=ietf-ip&amp;revision=2014-06-16</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:interleave:1.0</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-netconf-notifications?module=ietf-netconf-notifications&amp;revision=2012-02-06</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&amp;revision=2011-06-01&amp;features=writable-running,candidate,rollback-on-error,validate,startup,xpath</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:netconf:notification:1.0?module=notifications&amp;revision=2008-07-14</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:netmod:notification?module=nc-notifications&amp;revision=2008-07-14</device-capability>
+          <device-capability>urn:ietf:params:netconf:base:1.1</device-capability>
+          <device-capability>urn:ietf:params:netconf:base:1.0</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2013-07-15</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:notification:1.0</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:validate:1.1</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-system?module=ietf-system&amp;revision=2014-08-06&amp;features=,authentication,local-users</device-capability>
+          <device-capability>urn:ietf:params:netconf:capability:candidate:1.0</device-capability>
+          <device-capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2013-07-15</device-capability>
+        </new-device>
+      </new-devices>
+    </network-manager:network-manager>
+  </data>
+</rpc-reply>
+```
 
 ### Controller Simulator
 
@@ -729,37 +771,41 @@ should be modified if used in environments than local lab testing.
 Request:
 
 ```
+<?xml version="1.0" encoding="UTF-8"?>
 <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907656">
     <edit-config>
         <target>
             <running />
         </target>
         <config>
-            <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
-                <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"  xc:operation="create">
-                    <device-name>deviceA</device-name>
-                    <device-management>
-                        <device-type>DPU</device-type>
-                        <device-software-version>1.0.0</device-software-version>
-                        <device-vendor>Huawei</device-vendor>
-                        <device-connection>
-                            <connection-model>direct</connection-model>
-                            <password-auth>
-                                <authentication>
-                                    <address>192.168.169.1</address>
-                                    <!-- ip address of the device/simulator. Replace with the right ip -->
-                                    <management-port>830</management-port>
-                                    <!-- port number of device/simulator NC server. -->
-                                    <user-name>netconf</user-name>
-                                    <!-- username of device NC server -->
-                                    <password>netconf</password>
-                                    <!-- password of device NC server -->
-                                </authentication>
-                            </password-auth>
-                        </device-connection>
-                    </device-management>
-                </device>
-            </managed-devices>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                        <name>deviceA</name>
+                        <device-management>
+                            <type>DPU</type>
+                            <interface-version>1.0.0</interface-version>
+                            <vendor>Nokia</vendor>
+                            <model>4LT</model>
+                            <device-connection>
+                                <connection-model>direct</connection-model>
+                                <password-auth>
+                                    <authentication>
+                                        <address>192.168.169.1</address>
+                                        <!-- ip address of the device/simulator. Replace with the right ip -->
+                                        <management-port>830</management-port>
+                                        <!-- port number of device/simulator NC server. -->
+                                        <user-name>netconf</user-name>
+                                        <!-- username of device NC server -->
+                                        <password>netconf</password>
+                                        <!-- password of device NC server -->
+                                    </authentication>
+                                </password-auth>
+                            </device-connection>
+                        </device-management>
+                    </device>
+                </managed-devices>
+            </network-manager>
         </config>
     </edit-config>
 </rpc>
@@ -784,11 +830,11 @@ Request:
         <config>
             <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
                 <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
-                    <device-name>Bangalore-Mayata-E2</device-name>
+                    <name>Bangalore-Mayata-E2</name>
                     <device-management>
-                        <device-type>DPU</device-type>
-                        <device-software-version>1.0.0</device-software-version>
-                        <device-vendor>Nokia</device-vendor>
+                        <type>DPU</type>
+                        <interface-version>1.0.0</interface-version>
+                        <vendor>Nokia</vendor>
                         <device-connection>
                             <connection-model>call-home</connection-model>
                             <duid>DPU1</duid>
@@ -814,16 +860,17 @@ Request:
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <rpc message-id="10101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-<get-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <source>
-    <running/>
-  </source>
-  <filter type="subtree">
-    <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
-      <device/>
-    </managed-devices>
-  </filter>
-</get-config>
+    <get>
+        <filter type="subtree">
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device>
+                        <name>deviceA</name>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </filter>
+    </get>
 </rpc>
 ```
 
@@ -832,33 +879,38 @@ Response:
 ```
 <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="10101">
   <data>
-    <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
-      <device>
-        <device-name>deviceA</device-name>
-        <device-state>
-          <configuration-alignment-state>Never Aligned</configuration-alignment-state>
-          <connection-state>
-            <connected>false</connected>
-            <connection-creation-time>1970-01-01T00:00:00</connection-creation-time>
-          </connection-state>
-        </device-state>
-        <device-management>
-          <device-type>DPU</device-type>
-          <device-software-version>1.0.0</device-software-version>
-          <device-vendor>Nokia</device-vendor>
-          <device-connection>
-            <connection-model>direct</connection-model>
-            <password-auth>
-              <address>192.168.169.1</address>
-              <management-port>830</management-port>
-              <user-name>netconf</user-name>
-              <password>netconf</password>
-            </password-auth>
-          </device-connection>
-        </device-management>
-      </device>
-    </managed-devices>
-    <new-devices xmlns="urn:bbf:yang:obbaa:network-manager"/>
+    <network-manager:network-manager xmlns:network-manager="urn:bbf:yang:obbaa:network-manager">
+      <network-manager:managed-devices>
+        <network-manager:device>
+          <network-manager:name>deviceA</network-manager:name>
+          <network-manager:device-management>
+            <device-state xmlns="urn:bbf:yang:obbaa:network-manager">
+              <configuration-alignment-state>Never Aligned</configuration-alignment-state>
+              <connection-state>
+                <connected>false</connected>
+                <connection-creation-time>1970-01-01T00:00:00+00:00</connection-creation-time>
+              </connection-state>
+            </device-state>
+            <network-manager:interface-version>1.0.0</network-manager:interface-version>
+            <network-manager:model>4LT</network-manager:model>
+            <network-manager:push-pma-configuration-to-device>true</network-manager:push-pma-configuration-to-device>
+            <network-manager:type>DPU</network-manager:type>
+            <network-manager:vendor>Nokia</network-manager:vendor>
+            <network-manager:device-connection>
+              <network-manager:connection-model>direct</network-manager:connection-model>
+              <network-manager:password-auth>
+                <network-manager:authentication>
+                  <network-manager:address>192.168.169.1</network-manager:address>
+                  <network-manager:management-port>830</network-manager:management-port>
+                  <network-manager:password>netconf</network-manager:password>
+                  <network-manager:user-name>netconf</network-manager:user-name>
+                </network-manager:authentication>
+              </network-manager:password-auth>
+            </network-manager:device-connection>
+          </network-manager:device-management>
+        </network-manager:device>
+      </network-manager:managed-devices>
+    </network-manager:network-manager>
   </data>
 </rpc-reply>
 ```
@@ -875,28 +927,29 @@ instructions on this page.
 Request:
 
 ```
-<?xml version="1.0" encoding="UTF-8"?>
 <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907169">
-<edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <target>
-    <running/>
-  </target>
-  <config>
-    <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
-      <device>
-        <device-name>deviceA</device-name>
-        <root>
-          <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-            <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
-              <if:name>interfaceB</if:name>
-              <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</if:type>
-            </if:interface>
-          </if:interfaces>
-        </root>
-      </device>
-    </managed-devices>
-  </config>
-</edit-config>
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device>
+                        <name>deviceA</name>
+                        <root>
+                            <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                                    <if:name>interfaceB</if:name>
+                                    <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</if:type>
+                                </if:interface>
+                            </if:interfaces>
+                        </root>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </config>
+    </edit-config>
 </rpc>
 ```
 
@@ -915,28 +968,30 @@ Request:
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907656">
-<get-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <source>
-    <running/>
-  </source>
-  <filter type="subtree">
-    <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
-      <device>
-        <device-name>deviceA</device-name>
-        <root>
-          <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
-        </root>
-      </device>
-    </managed-devices>
-  </filter>
-</get-config>
+    <get-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <source>
+            <running/>
+        </source>
+        <filter type="subtree">
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device>
+                        <name>deviceA</name>
+                        <root>
+                            <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
+                        </root>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </filter>
+    </get-config>
 </rpc>
 ```
 
 Response:
 
 ```
-<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> 
 	<managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
 		<device>     
 			<device-name>deviceA</device-name>    
@@ -959,20 +1014,21 @@ Response:
 Request:
 
 ```
-<?xml version="1.0" encoding="UTF-8"?>
 <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907464">
-  <edit-config>
-    <target>
-      <running />
-    </target>
-    <config>
-      <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager"  xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
-        <device xc:operation="delete">
-          <device-name>deviceA</device-name>
-        </device>
-      </managed-devices>
-    </config>
-  </edit-config>
+    <edit-config>
+        <target>
+            <running />
+        </target>
+        <config>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="delete">
+                        <name>deviceA</name>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </config>
+    </edit-config>
 </rpc>
 ```
 

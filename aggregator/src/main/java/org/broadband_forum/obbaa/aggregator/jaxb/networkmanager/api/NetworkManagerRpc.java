@@ -23,6 +23,7 @@ import org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl.AggregatorUtils;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc.RpcOperationType;
 import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.Device;
+import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.NetworkManager;
 import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.ManagedDevices;
 import org.broadband_forum.obbaa.aggregator.jaxb.utils.JaxbUtils;
 import org.broadband_forum.obbaa.aggregator.processor.AggregatorMessage;
@@ -49,7 +50,7 @@ public class NetworkManagerRpc {
     public static final String NAMESPACE = "urn:bbf:yang:obbaa:network-manager";
 
     private String originalMessage;
-    private ManagedDevices managedDevices;
+    private NetworkManager m_networkManager;
     private NetconfRpcMessage netconfRpcMessage;
 
     private NetworkManagerRpc() {
@@ -67,7 +68,7 @@ public class NetworkManagerRpc {
             throws DispatchException {
         this.originalMessage = originalMessage;
         this.netconfRpcMessage = netconfRpcMessage;
-        managedDevices = unmarshal(rpcPayload);
+        m_networkManager = unmarshal(rpcPayload);
     }
 
     /**
@@ -104,13 +105,13 @@ public class NetworkManagerRpc {
     /**
      * Unmarshal message.
      *
-     * @param manageDevicesNode manage-devices document
-     * @return ManagedDevices
+     * @param networkManagerNode network-manager document
+     * @return NetworkManager
      * @throws DispatchException Exception
      */
-    public static ManagedDevices unmarshal(Node manageDevicesNode) throws DispatchException {
+    public static NetworkManager unmarshal(Node networkManagerNode) throws DispatchException {
         try {
-            return JaxbUtils.unmarshal(manageDevicesNode, ManagedDevices.class);
+            return JaxbUtils.unmarshal(networkManagerNode, NetworkManager.class);
         } catch (JAXBException ex) {
             throw new DispatchException(ex);
         }
@@ -122,7 +123,7 @@ public class NetworkManagerRpc {
      * @return Devices
      */
     public List<Device> getDevices() {
-        return getManagedDevices().getDevices();
+        return getNetworkManager().getManagedDevices().getDevices();
     }
 
     /**
@@ -130,8 +131,8 @@ public class NetworkManagerRpc {
      *
      * @return Managed devices information
      */
-    public ManagedDevices getManagedDevices() {
-        return managedDevices;
+    public NetworkManager getNetworkManager() {
+        return m_networkManager;
     }
 
     /**
@@ -140,15 +141,15 @@ public class NetworkManagerRpc {
      * @param document Request
      * @return Node of managed-devices
      */
-    private Node getManagedDevicesNode(Document document) {
-        NodeList managedDevicesList = document.getElementsByTagName("managed-devices");
+    private Node getDeviceManagerNode(Document document) {
+        NodeList deviceManagerList = document.getElementsByTagName("network-manager");
 
         //Must be one managed-devices node
-        if ((managedDevicesList == null) || (managedDevicesList.getLength() != 1)) {
+        if ((deviceManagerList == null) || (deviceManagerList.getLength() != 1)) {
             return null;
         }
 
-        return managedDevicesList.item(0);
+        return deviceManagerList.item(0);
     }
 
     /**
@@ -160,9 +161,9 @@ public class NetworkManagerRpc {
      */
     private Node buildRpcFramework(String rpcMessage) throws DispatchException {
         Document document = AggregatorUtils.stringToDocument(rpcMessage);
-        Node managedDevicesNode = getManagedDevicesNode(document);
-        Node parentNode = managedDevicesNode.getParentNode();
-        parentNode.removeChild(managedDevicesNode);
+        Node deviceManagerNode = getDeviceManagerNode(document);
+        Node parentNode = deviceManagerNode.getParentNode();
+        parentNode.removeChild(deviceManagerNode);
 
         return parentNode;
     }
@@ -199,6 +200,10 @@ public class NetworkManagerRpc {
             appendChilds(parentDocument, frameworkParent, childDocument);
         }
 
+        if ((device.getRoot().getDocuments().size() == 0) && (frameworkParent.getLocalName().equals("filter"))) {
+            frameworkParent.getParentNode().removeChild(frameworkParent);
+        }
+
         String deviceName = device.getDeviceName();
         String deviceType = getDeviceType(deviceManagementProcessor, deviceName);
 
@@ -232,7 +237,7 @@ public class NetworkManagerRpc {
      */
     public Set<SingleDeviceRequest> buildSingleDeviceRequests(DeviceManagementProcessor deviceManagementProcessor,
                                                               String rpcMessage) throws DispatchException {
-        List<Device> devices = getManagedDevices().getDevices();
+        List<Device> devices = getNetworkManager().getManagedDevices().getDevices();
         Set<SingleDeviceRequest> singleDeviceRequests = new HashSet<>();
 
         for (Device device : devices) {
@@ -323,14 +328,14 @@ public class NetworkManagerRpc {
     }
 
     /**
-     * Build a element of device-name.
+     * Build a element of name.
      *
      * @param document   Current document
      * @param deviceName Device name
      * @return Element
      */
     private static Element buildDeviceNameElement(Document document, String deviceName) {
-        Element deviceNameNode = document.createElement("device-name");
+        Element deviceNameNode = document.createElement("name");
         if (deviceName != null) {
             deviceNameNode.setTextContent(deviceName);
         }

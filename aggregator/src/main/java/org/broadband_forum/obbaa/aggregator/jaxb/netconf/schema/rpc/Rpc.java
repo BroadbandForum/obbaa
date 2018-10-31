@@ -16,16 +16,11 @@
 
 package org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc;
 
-import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.common.MessageBase;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement
+import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.common.MessageBase;
+
 public class Rpc extends MessageBase {
     private Action action;
     private Get get;
@@ -36,7 +31,7 @@ public class Rpc extends MessageBase {
 
     private RpcOperationType rpcOperationType;
 
-    @XmlElement
+    @XmlElement(name = "action", namespace = "urn:ietf:params:xml:ns:yang:1")
     public Action getAction() {
         return action;
     }

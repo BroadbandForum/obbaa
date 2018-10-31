@@ -25,7 +25,7 @@ public class Device {
     private DeviceManagement deviceManagement;
     private Root root;
 
-    @XmlElement(name = "device-name")
+    @XmlElement(name = "name")
     public String getDeviceName() {
         return deviceName;
     }

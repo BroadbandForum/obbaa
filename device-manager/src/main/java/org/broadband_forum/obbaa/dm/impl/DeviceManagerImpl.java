@@ -16,86 +16,80 @@
 
 package org.broadband_forum.obbaa.dm.impl;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import javax.transaction.Transactional;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dm.DeviceStateProvider;
-import org.broadband_forum.obbaa.store.dm.DeviceAdminStore;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
+import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 
 /**
  * Created by kbhatk on 29/9/17.
  */
 public class DeviceManagerImpl implements DeviceManager {
-    private final DeviceAdminStore m_dms;
+    private DeviceDao m_deviceDao;
     private Set<DeviceStateProvider> m_deviceStateProviders = new LinkedHashSet<>();
     private final NetconfConnectionManager m_cm;
 
-    public DeviceManagerImpl(DeviceAdminStore dms, NetconfConnectionManager cm) {
-        m_dms = dms;
+    public DeviceManagerImpl(NetconfConnectionManager cm) {
         m_cm = cm;
     }
 
-    public void createDevice(DeviceInfo deviceInfo) {
-        m_dms.create(deviceInfo);
-        callDeviceAdded(deviceInfo.getKey());
+    public DeviceDao getDeviceDao() {
+        return m_deviceDao;
     }
 
-    private void callDeviceAdded(String deviceName) {
+    public void setDeviceDao(DeviceDao deviceDao) {
+        m_deviceDao = deviceDao;
+    }
+
+    @Override
+    public void deviceAdded(String deviceName) {
         for (DeviceStateProvider provider : m_deviceStateProviders) {
             provider.deviceAdded(deviceName);
         }
     }
 
-    public DeviceInfo getDevice(String deviceName) {
-        DeviceInfo deviceInfo = m_dms.get(deviceName);
-        if (deviceInfo == null) {
+    @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
+    public Device getDevice(String deviceName) {
+        Device device = m_deviceDao.getDeviceByName(deviceName);
+        if (device == null) {
             throw new IllegalArgumentException("Device " + deviceName + " does not exist");
         }
-        populateDeviceStateFromProvider(deviceInfo);
-        return deviceInfo;
+        return device;
     }
 
-    private void populateDeviceStateFromProvider(DeviceInfo deviceInfo) {
+    @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
+    public List<Device> getAllDevices() {
+        List<Device> allDevices = m_deviceDao.findAllDevices();
+        return allDevices;
+    }
+
+    @Override
+    public void deviceRemoved(String deviceName) {
         for (DeviceStateProvider provider : m_deviceStateProviders) {
-            Map<String, Object> stateInfo = provider.getState(deviceInfo.getKey());
-            deviceInfo.getDeviceState().putAll(stateInfo);
+            provider.deviceRemoved(deviceName);
         }
     }
 
     @Override
-    public Set<DeviceInfo> getAllDevices() {
-        //non performant code
-        Set<DeviceInfo> allDevices = m_dms.getAllEntries();
-        Set<DeviceInfo> returnValue = new HashSet<>();
-        for (DeviceInfo info : allDevices) {
-            returnValue.add(getDevice(info.getKey()));
-        }
-        return returnValue;
+    public void devicePropertyChanged(String deviceName) {
+        deviceRemoved(deviceName);
+        deviceAdded(deviceName);
     }
 
-    public void updateDevice(DeviceInfo deviceInfo) {
-        String deviceName = deviceInfo.getKey();
-        m_dms.update(deviceInfo);
-        callDeviceRemoved(deviceName);
-        callDeviceAdded(deviceName);
-    }
-
-    public void deleteDevice(String deviceName) {
-        m_dms.delete(deviceName);
-        callDeviceRemoved(deviceName);
-    }
-
-    private void callDeviceRemoved(String deviceName) {
-        for (DeviceStateProvider provider : m_deviceStateProviders) {
-            provider.deviceRemoved(deviceName);
-        }
+    @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
+    public void updateConfigAlignmentState(String deviceName, String verdict) {
+        m_deviceDao.updateDeviceAlignmentState(deviceName, verdict);
     }
 
     @Override

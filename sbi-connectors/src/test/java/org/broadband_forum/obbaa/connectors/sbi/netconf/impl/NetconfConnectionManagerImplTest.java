@@ -28,6 +28,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -37,19 +38,31 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.EntityTransaction;
+
 import org.broadband_forum.obbaa.connectors.sbi.netconf.CallHomeListenerComposite;
-import org.broadband_forum.obbaa.connectors.sbi.netconf.ConnectionState;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfTemplate;
+import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
+import org.broadband_forum.obbaa.dmyang.entities.Authentication;
+import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceConnection;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
+import org.broadband_forum.obbaa.dmyang.entities.PasswordAuth;
+import org.broadband_forum.obbaa.dmyang.tx.TxService;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientConfiguration;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientDispatcher;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientDispatcherException;
@@ -60,10 +73,8 @@ import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.transport.SshNetconfTransport;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
-import org.broadband_forum.obbaa.store.dm.CallHomeInfo;
-import org.broadband_forum.obbaa.store.dm.DeviceAdminStore;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
-import org.broadband_forum.obbaa.store.dm.SshConnectionInfo;
+import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
+import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -77,8 +88,8 @@ public class NetconfConnectionManagerImplTest {
 
     private NetconfConnectionManagerImpl m_cm;
     @Mock
-    private DeviceAdminStore m_das;
-    private Set<DeviceInfo> m_devices;
+    private DeviceDao m_deviceDao;
+    private List<Device> m_devices;
     @Mock
     private NetconfClientDispatcher m_dispatcher;
     private Map<String, NetconfClientSession> m_sessions;
@@ -91,11 +102,25 @@ public class NetconfConnectionManagerImplTest {
     private NetconfLoginProvider m_netconfLoginProvider;
     private X509Certificate m_deviceCert;
     private InetSocketAddress m_remoteAddress;
+    private TxService m_txService;
+    @Mock
+    private PersistenceManagerUtil m_persistenceMgrUtil;
+    @Mock
+    private EntityDataStoreManager entityDSM;
+    @Mock
+    private EntityManager entityMgr;
+    @Mock
+    private EntityTransaction entityTx;
 
     @Before
     public void setUp() throws NetconfClientDispatcherException, CertificateException {
         MockitoAnnotations.initMocks(this);
-        m_devices = new HashSet<>();
+        m_txService = new TxService();
+        when(m_persistenceMgrUtil.getEntityDataStoreManager()).thenReturn(entityDSM);
+        when(entityDSM.getEntityManager()).thenReturn(entityMgr);
+        when(entityMgr.getTransaction()).thenReturn(entityTx);
+        when(entityTx.isActive()).thenReturn(true);
+        m_devices = new ArrayList<>();
         m_deviceCert = getX509Certificates(getByteArrayCertificates(stripDelimiters(certificateStringsFromFile(
                 new File(getClass().getResource("/netconfconnectionmanagerimpltest/deviceCert.crt").getPath())))))
                 .get(0);
@@ -103,13 +128,12 @@ public class NetconfConnectionManagerImplTest {
         when(m_callhomeSession.getRemoteAddress()).thenReturn(m_remoteAddress);
         when(m_callhomeSession.isOpen()).thenReturn(true);
         when(m_callhomeSession.getCreationTime()).thenReturn(m_time);
-        m_devices.add(createDevice("1"));
-        m_devices.add(createDevice("2"));
-        m_devices.add(createDevice("3"));
-        DeviceInfo callHomeDevice = createCallHomeDevice("CallHomeDevice-1");
+        m_devices.add(createDirectDevice("1"));
+        m_devices.add(createDirectDevice("2"));
+        m_devices.add(createDirectDevice("3"));
+        Device callHomeDevice = createCallHomeDevice("CallHomeDevice-1");
         m_devices.add(callHomeDevice);
-        when(m_das.getAllEntries()).thenReturn(m_devices);
-        when(m_das.getCallHomeDeviceWithDuid("OLT1.ONT2")).thenReturn(callHomeDevice);
+        when(m_deviceDao.findAllDevices()).thenReturn(m_devices);
         m_sessions = new HashMap<>();
         when(m_dispatcher.createClient(anyObject())).thenAnswer(invocation -> {
             Future future = mock(Future.class);
@@ -122,8 +146,9 @@ public class NetconfConnectionManagerImplTest {
             when(future.get()).thenReturn(session);
             return future;
         });
-
-        m_cm = new NetconfConnectionManagerImpl(m_callHomeListenerComposite, m_das, m_dispatcher);
+        m_cm = new NetconfConnectionManagerImpl(m_callHomeListenerComposite, m_dispatcher);
+        m_cm.setTxService(m_txService);
+        m_cm.setDeviceDao(m_deviceDao);
     }
 
     @Test
@@ -153,6 +178,33 @@ public class NetconfConnectionManagerImplTest {
     }
 
     @Test
+    public void testConnMgrClosesConnectionToDeletedDevices() {
+        m_cm.auditConnections();
+        assertEquals(3, m_cm.getAllSessions().entrySet().size());
+
+        Device removedDevice  = m_devices.remove(0);
+
+        verify(m_sessions.get(getIp(removedDevice.getDeviceName())), never()).closeAsync();
+        m_cm.auditConnections();
+        verify(m_sessions.get(getIp(removedDevice.getDeviceName()))).closeAsync();
+    }
+
+    @Test
+    public void testConnMgrClosesConnectionToDeletedDevices1() throws NetconfClientDispatcherException {
+        List<Device> devicePresent = new ArrayList<>();
+        Device nokia = spy(createDirectDevice("5"));
+        doThrow(new EntityNotFoundException("Entity Not Found")).when(nokia).toString();
+        devicePresent.add(nokia);
+        when(m_deviceDao.findAllDevices()).thenReturn(devicePresent);
+        try {
+            m_cm.auditConnections();
+            fail();
+        } catch (Exception e) {
+            assertEquals("Entity Not Found" , e.getMessage());
+        }
+    }
+
+    @Test
     public void testManagerDoesNotSetupConnectionToAlreadyConnectedDevices() throws Exception {
         //make all devices connected,
         m_cm.auditConnections();
@@ -177,8 +229,8 @@ public class NetconfConnectionManagerImplTest {
         //make all devices connected,
         m_cm.auditConnections();
         assertEquals(3, m_cm.getAllSessions().entrySet().size());
-        DeviceInfo deviceInfo = new DeviceInfo("1", new SshConnectionInfo(getIp("1"), 1234, "user", "pass"));
-        when(m_das.getAllEntries()).thenReturn(new HashSet<>(Arrays.asList(deviceInfo)));
+        Device device = createDirectDevice("4");
+        when(m_deviceDao.findAllDevices()).thenReturn(Arrays.asList(device));
 
         //make them connected again
         m_cm.auditConnections();
@@ -213,9 +265,14 @@ public class NetconfConnectionManagerImplTest {
         Future<NetConfResponse> future = mock(Future.class);
         NetconfClientSession session1 = m_sessions.get(getIp("1"));
         when(session1.sendRpc(request)).thenReturn(future);
-        Future<NetConfResponse> responseFuture = m_cm.executeNetconf(createDevice("1"), request);
+        Device device = getDevice("1");
+        Future<NetConfResponse> responseFuture = m_cm.executeNetconf(device, request);
         verify(session1).sendRpc(request);
         assertTrue(responseFuture instanceof NetconfConnectionManagerImpl.LoggingFuture);
+    }
+
+    private Device getDevice(String deviceName) {
+        return m_deviceDao.getDeviceByName(deviceName);
     }
 
     @Test
@@ -226,7 +283,7 @@ public class NetconfConnectionManagerImplTest {
         Future<NetConfResponse> future = mock(Future.class);
         NetconfClientSession session1 = m_sessions.get(getIp("1"));
         when(session1.sendRpc(request)).thenReturn(future);
-        Future<NetConfResponse> responseFuture = m_cm.executeWithSession(createDevice("1"), new
+        Future<NetConfResponse> responseFuture = m_cm.executeWithSession(getDevice("1"), new
                 NetconfTemplate<Future<NetConfResponse>>() {
                     @Override
                     public Future<NetConfResponse> execute(NetconfClientSession session) {
@@ -246,7 +303,7 @@ public class NetconfConnectionManagerImplTest {
     public void testExecuteNetconfTemplateThrowsIllegalStateException() throws Exception {
         AbstractNetconfRequest request = mock(AbstractNetconfRequest.class);
         try {
-            m_cm.executeWithSession(createDevice("1"), session -> {
+            m_cm.executeWithSession(createDirectDevice("1"), session -> {
                 try {
                     return session.sendRpc(request);
                 } catch (NetconfMessageBuilderException e) {
@@ -262,15 +319,16 @@ public class NetconfConnectionManagerImplTest {
 
     @Test
     public void testConnectionStateGetsUpdated() {
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDevice("1").getKey()));
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDevice("2").getKey()));
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDevice("3").getKey()));
+
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("1").getDeviceName()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("2").getDeviceName()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("3").getDeviceName()));
 
         m_cm.auditConnections();
 
-        assertEquals(getConnectedState(), m_cm.getConnectionState(createDevice("1").getKey()));
-        assertEquals(getConnectedState(), m_cm.getConnectionState(createDevice("2").getKey()));
-        assertEquals(getConnectedState(), m_cm.getConnectionState(createDevice("3").getKey()));
+        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("1").getDeviceName()));
+        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("2").getDeviceName()));
+        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("3").getDeviceName()));
 
     }
 
@@ -292,31 +350,31 @@ public class NetconfConnectionManagerImplTest {
 
     @Test
     public void testCallHomeDeviceConnectionIsNotSetup() {
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDevice("CallHomeDevice-1").getKey()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDirectDevice("CallHomeDevice-1").getDeviceName()));
         m_cm.auditConnections();
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDevice("CallHomeDevice-1").getKey()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDirectDevice("CallHomeDevice-1").getDeviceName()));
     }
 
     @Test
     public void testCallHomeDeviceConnectionIsAvailableWhenDeviceCallsHome() {
         assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createCallHomeDevice
-                ("CallHomeDevice-1").getKey()));
+            ("CallHomeDevice-1").getDeviceName()));
 
         m_cm.connectionEstablished(m_callhomeSession, m_netconfLoginProvider, m_deviceCert, false);
 
-        assertEquals(getConnectedState(), m_cm.getConnectionState(createCallHomeDevice("CallHomeDevice-1")
-                .getKey()));
+        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("CallHomeDevice-1")
+            .getDeviceName()));
     }
 
     @Test
     public void testCallHomeFromUnknownDeviceIsHandledCorrectly() {
         //make it as if the device was unknown
-        when(m_das.getCallHomeDeviceWithDuid(anyString())).thenReturn(null);
+        when(m_deviceDao.findDeviceWithDuid(anyString())).thenReturn(null);
 
         m_cm.connectionEstablished(m_callhomeSession, m_netconfLoginProvider, m_deviceCert, false);
 
         assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createCallHomeDevice("CallHomeDevice-1")
-                .getKey()));
+            .getDeviceName()));
 
         assertEquals(1, m_cm.getNewDevices().size());
     }
@@ -324,7 +382,7 @@ public class NetconfConnectionManagerImplTest {
     private ConnectionState getConnectedState() {
         ConnectionState connectionState = new ConnectionState();
         connectionState.setConnected(true);
-        connectionState.setCreationTime(new Date(m_time));
+        connectionState.setConnectionCreationTime(new Date(m_time));
         return connectionState;
     }
 
@@ -342,20 +400,42 @@ public class NetconfConnectionManagerImplTest {
     }
 
 
-    private DeviceInfo createDevice(String deviceName) {
-        DeviceInfo deviceInfo = new DeviceInfo(deviceName, new SshConnectionInfo(getIp(deviceName), 1234, "user",
-                "pass"));
-        return setUpDASToAnswer(deviceName, deviceInfo);
+    private Device createDirectDevice(String deviceName) {
+        Device device = new Device();
+        device.setDeviceName(deviceName);
+        DeviceMgmt deviceMgmt = new DeviceMgmt();
+        DeviceConnection deviceConn = new DeviceConnection();
+        deviceConn.setConnectionModel("direct");
+        PasswordAuth passAuth = new PasswordAuth();
+        Authentication auth = new Authentication();
+        auth.setAddress(getIp(deviceName));
+        auth.setManagementPort("1234");
+        auth.setUsername("user");
+        auth.setPassword("pass");
+        passAuth.setAuthentication(auth);
+        deviceConn.setPasswordAuth(passAuth);
+        deviceMgmt.setDeviceConnection(deviceConn);
+        device.setDeviceManagement(deviceMgmt);
+        return setUpDaoToAnswer(deviceName, device);
     }
 
-    private DeviceInfo createCallHomeDevice(String deviceName) {
-        DeviceInfo deviceInfo = new DeviceInfo(deviceName, new CallHomeInfo("OLT1.ONT2"));
-        return setUpDASToAnswer(deviceName, deviceInfo);
+    private Device createCallHomeDevice(String deviceName) {
+        Device device = new Device();
+        device.setDeviceName(deviceName);
+        DeviceMgmt deviceMgmt = new DeviceMgmt();
+        DeviceConnection devConn = new DeviceConnection();
+        devConn.setConnectionModel("call-home");
+        devConn.setDuid("OLT1.ONT2");
+        deviceMgmt.setDeviceConnection(devConn);
+        device.setDeviceManagement(deviceMgmt);
+        when(m_deviceDao.findDeviceWithDuid(devConn.getDuid())).thenReturn(device);
+        when(m_deviceDao.getDeviceByName(deviceName)).thenReturn(device);
+        return device;
     }
 
-    private DeviceInfo setUpDASToAnswer(String deviceName, DeviceInfo deviceInfo) {
-        when(m_das.get(deviceName)).thenReturn(deviceInfo);
-        return deviceInfo;
+    private Device setUpDaoToAnswer(String deviceName, Device device) {
+        when(getDevice(deviceName)).thenReturn(device);
+        return device;
     }
 
     private String getIp(String deviceName) {

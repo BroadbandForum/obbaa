@@ -34,8 +34,8 @@ public class SingleDeviceRequestTest {
                     "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"101\">\r\n" +
                             "  <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\r\n" +
                             "    <system xmlns=\"urn:ietf:params:xml:ns:yang:ietf-system\">\r\n" +
-                            "      <device-name>A</device-name>\r\n" +
-                            "      <device-type>AA</device-type>\r\n" +
+                            "      <name>A</name>\r\n" +
+                            "      <type>AA</type>\r\n" +
                             "      <restart/>\r\n" +
                             "    </system>\r\n" +
                             "  </action>\r\n" +
@@ -75,6 +75,6 @@ public class SingleDeviceRequestTest {
     @Test
     public void toStringTest() throws Exception {
         String message = m_singleDeviceRequest.toString();
-        assertTrue(message.contains("device-name"));
+        assertTrue(message.contains("name"));
     }
 }

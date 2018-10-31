@@ -99,14 +99,14 @@ submodule bbf-l2-forwarding-forwarding-databases {
       "Indicates support for forwarding databases.";
   }
 
-  typedef forwarding-database-ref {
-    type leafref {
-      path '/bbf-l2-fwd:forwarding/bbf-l2-fwd:forwarding-databases/'
-         + 'bbf-l2-fwd:forwarding-database/bbf-l2-fwd:name';
-    }
-    description
-      "A reference to a forwarding database.";
-  }
+//  typedef forwarding-database-ref {
+ //   type leafref {
+  //    path '/bbf-l2-fwd:forwarding/bbf-l2-fwd:forwarding-databases/'
+   //      + 'bbf-l2-fwd:forwarding-database/bbf-l2-fwd:name';
+//    }
+//    description
+//      "A reference to a forwarding database.";
+//  }
 
   typedef forwarding-database-state-ref {
     type leafref {

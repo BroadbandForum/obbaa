@@ -1,0 +1,36 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907656">
+    <edit-config>
+        <target>
+            <running />
+        </target>
+        <config>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
+                    <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"  xc:operation="create">
+                        <name>deviceA</name>
+                        <device-management>
+                            <type>DPU</type>
+                            <interface-version>1.0.0</interface-version>
+                            <vendor>Nokia</vendor>
+                            <device-connection>
+                                <connection-model>direct</connection-model>
+                                <password-auth>
+                                    <authentication>
+                                        <address>192.168.169.1</address>
+                                        <!-- ip address of the device/simulator. Replace with the right ip -->
+                                        <management-port>92994</management-port>
+                                        <!-- port number of device/simulator NC server. -->
+                                        <user-name>DPU</user-name>
+                                        <!-- username of device NC server -->
+                                        <password>DPU</password>
+                                        <!-- password of device NC server -->
+                                    </authentication>
+                                </password-auth>
+                            </device-connection>
+                        </device-management>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </config>
+    </edit-config>
+</rpc>

@@ -16,6 +16,9 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.ALIGNED;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.IN_ERROR;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -29,15 +32,15 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.tx.TXTemplate;
+import org.broadband_forum.obbaa.dmyang.tx.TxService;
 import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
-import org.broadband_forum.obbaa.store.alignment.DeviceAlignmentInfo;
-import org.broadband_forum.obbaa.store.alignment.DeviceAlignmentStore;
 
 public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignmentService {
-    private static final Logger LOGGER = Logger.getLogger(NetconfDeviceAlignmentServiceImpl.class);
     public static final String EDITS_PENDING = "%s Edit(s) Pending";
     public static final String REQUEST_TIMED_OUT = "request timed out";
     public static final String LINE_SEPARATOR = System.lineSeparator();
@@ -45,15 +48,15 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
     public static final String REQUEST_SENT = "request sent : ";
     public static final String COMMA = ",";
     public static final String ALIGNMENT_STATE = "alignmentState";
+    private static final Logger LOGGER = Logger.getLogger(NetconfDeviceAlignmentServiceImpl.class);
     private final NetconfConnectionManager m_ncm;
-    private final DeviceAlignmentStore m_alignmentStore;
     private final DeviceManager m_dm;
+    private TxService m_txService;
     private ConcurrentHashMap<String, List<EditConfigRequest>> m_queue = new ConcurrentHashMap<>();
 
-    public NetconfDeviceAlignmentServiceImpl(DeviceManager dm, NetconfConnectionManager ncm, DeviceAlignmentStore alignmentStore) {
+    public NetconfDeviceAlignmentServiceImpl(DeviceManager dm, NetconfConnectionManager ncm) {
         m_dm = dm;
         m_ncm = ncm;
-        m_alignmentStore = alignmentStore;
     }
 
     public void init() {
@@ -64,31 +67,45 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
         m_dm.removeDeviceStateProvider(this);
     }
 
+    public TxService getTxService() {
+        return m_txService;
+    }
+
+    public void setTxService(TxService txService) {
+        m_txService = txService;
+    }
+
     @Override
     public void queueEdit(String deviceName, EditConfigRequest request) {
-        DeviceAlignmentInfo deviceInfo = getAlignmentInfo(deviceName);
-        if (deviceInfo.isNeverAligned()) {
-            LOGGER.info(String.format("Device %s is never aligned, new edit requests wont be queued to be sent to the device,"
-                    + " please execute a full re-sync", deviceInfo));
-            return;
-        }
-        if (deviceInfo.isInError()) {
-            LOGGER.info(String.format("Device %s is in error, new edit requests wont be queued to be sent to the device,"
-                    + " please execute a full re-sync", deviceInfo));
-            return;
-        }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Queueing edit request %s for device %s", request.requestToString(), deviceInfo));
-        }
-        new WithSynchronousDeviceQueue<Void>() {
+        m_txService.executeWithTx(new TXTemplate<Void>() {
             @Override
-            Void execute(DeviceAlignmentInfo info, List<EditConfigRequest> deviceQueue) {
-                deviceQueue.add(request);
-                setDeviceAlignmentState(info, getAlignmentState(deviceName));
+            public Void execute() {
+                Device device = m_dm.getDevice(deviceName);
+                if (device.isNeverAligned()) {
+                    LOGGER.info(String.format("Device %s is never aligned, new edit requests wont be queued to be sent to the device,"
+                        + " please execute a full re-sync", device));
+                    return null;
+                }
+                if (device.isInError()) {
+                    LOGGER.info(String.format("Device %s is in error, new edit requests wont be queued to be sent to the device,"
+                        + " please execute a full re-sync", device));
+                    return null;
+                }
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug(String.format("Queueing edit request %s for device %s", request.requestToString(), device));
+                }
+                new WithSynchronousDeviceQueue<Void>() {
+                    @Override
+                    Void execute(String deviceName, List<EditConfigRequest> deviceQueue) {
+                        deviceQueue.add(request);
+                        setDeviceAlignmentState(deviceName, getAlignmentState(deviceName));
+                        return null;
+                    }
+                }.execute(deviceName);
                 return null;
             }
-        }.execute(deviceName);
+        });
     }
 
     private List<EditConfigRequest> getQueueForDevice(String deviceName) {
@@ -104,7 +121,7 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
     public List<EditConfigRequest> getEditQueue(String deviceName) {
         return new WithSynchronousDeviceQueue<List<EditConfigRequest>>() {
             @Override
-            List<EditConfigRequest> execute(DeviceAlignmentInfo info, List<EditConfigRequest> deviceQueue) {
+            List<EditConfigRequest> execute(String info, List<EditConfigRequest> deviceQueue) {
                 return Collections.unmodifiableList(deviceQueue);
             }
         }.execute(deviceName);
@@ -116,78 +133,80 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
         }
     }
 
-    private DeviceAlignmentInfo getAlignmentInfo(String deviceName) {
-        return m_alignmentStore.get(deviceName);
-    }
-
     @Override
     public String getAlignmentState(String deviceName) {
         List<EditConfigRequest> queue = getEditQueue(deviceName);
         int numOfEdits = queue.size();
         if (numOfEdits == 0) {
-            return DeviceAlignmentInfo.ALIGNED;
+            return ALIGNED;
         }
         return String.format(EDITS_PENDING, numOfEdits);
     }
 
     @Override
     public LinkedHashMap<String, Object> getState(String deviceName) {
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put(ALIGNMENT_STATE, getAlignmentInfo(deviceName));
-        return map;
+        return m_txService.executeWithTx(new TXTemplate<LinkedHashMap<String, Object>>() {
+            @Override
+            public LinkedHashMap<String, Object> execute() {
+                LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+                map.put(ALIGNMENT_STATE, m_dm.getDevice(deviceName).getDeviceManagement().getDeviceState().getConfigAlignmentState());
+                return map;
+            }
+        });
+    }
+
+    protected ConcurrentHashMap<String, List<EditConfigRequest>> getQueue() {
+        return m_queue;
     }
 
     @Override
     public void deviceAdded(String deviceName) {
         m_queue.put(deviceName, new ArrayList<>());
-        createAlignmentInfo(deviceName);
-    }
-
-    private void createAlignmentInfo(String deviceName) {
-        DeviceAlignmentInfo info = new DeviceAlignmentInfo(deviceName);
-        m_alignmentStore.create(info);
     }
 
     @Override
     public void deviceRemoved(String deviceName) {
         m_queue.remove(deviceName);
-        m_alignmentStore.delete(deviceName);
     }
 
     @Override
     public void forceAlign(String deviceName, CopyConfigRequest request) {
-        new WithSynchronousDeviceQueue<Void>() {
+        m_txService.executeWithTx(new TXTemplate<Void>() {
             @Override
-            Void execute(DeviceAlignmentInfo info, List<EditConfigRequest> deviceQueue) throws RuntimeException {
-                try {
-                    deviceQueue.clear();
-                    Future<NetConfResponse> responseFuture = m_ncm.executeNetconf(info.getKey(), request);
-                    NetConfResponse response = null;
+            public Void execute() {
+                new WithSynchronousDeviceQueue<Void>() {
+                    @Override
+                    Void execute(String info, List<EditConfigRequest> deviceQueue) throws RuntimeException {
+                        try {
+                            deviceQueue.clear();
+                            Future<NetConfResponse> responseFuture = m_ncm.executeNetconf(info, request);
+                            NetConfResponse response = null;
 
-                    response = responseFuture.get();
-                    if (response == null || !response.isOk()) {
-                        markDeviceInError(info, deviceQueue, request.requestToString(), response);
-                    } else {
-                        markDeviceAligned(info);
+                            response = responseFuture.get();
+                            if (response == null || !response.isOk()) {
+                                markDeviceInError(info, deviceQueue, request.requestToString(), response);
+                            } else {
+                                markDeviceAligned(info);
+                            }
+
+                        } catch (ExecutionException | InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        return null;
                     }
-
-                } catch (ExecutionException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-
+                }.execute(deviceName);
                 return null;
             }
-        }.execute(deviceName);
+        });
     }
 
-    private void markDeviceAligned(DeviceAlignmentInfo info) {
-        setDeviceAlignmentState(info, DeviceAlignmentInfo.ALIGNED);
+    private void markDeviceAligned(String deviceName) {
+        setDeviceAlignmentState(deviceName, ALIGNED);
     }
 
-    private void setDeviceAlignmentState(DeviceAlignmentInfo alignmentInfo, String verdict) {
-        DeviceAlignmentInfo info = getAlignmentInfo(alignmentInfo.getKey());
-        info.setVerdict(verdict);
-        m_alignmentStore.update(info);
+    private void setDeviceAlignmentState(String deviceName, String verdict) {
+        m_dm.updateConfigAlignmentState(deviceName, verdict);
     }
 
     private String getErrorDetails(String request, NetConfResponse errorResponse) {
@@ -209,23 +228,24 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
         LOGGER.debug("Trying to flush changes to the device " + deviceName);
         WithSynchronousDeviceQueue alignTemplate = new WithSynchronousDeviceQueue<Void>() {
             @Override
-            public Void execute(DeviceAlignmentInfo info, List queueForDevice) {
+            public Void execute(String deviceName, List queueForDevice) {
                 Iterator<EditConfigRequest> iterator = queueForDevice.iterator();
                 while (iterator.hasNext()) {
                     EditConfigRequest request = iterator.next();
                     try {
                         if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug(String.format("Trying to send edit %s to device %s", request.requestToString(), deviceName));
+                            LOGGER.debug(String.format("Trying to send edit %s to device %s",
+                                request.requestToString(), deviceName));
                         }
-                        Future<NetConfResponse> future = m_ncm.executeNetconf(info.getKey(), request);
+                        Future<NetConfResponse> future = m_ncm.executeNetconf(deviceName, request);
                         NetConfResponse response = future.get();
                         if (response == null || !response.isOk()) {
-                            markDeviceInError(info, queueForDevice, request.requestToString(), response);
+                            markDeviceInError(deviceName, queueForDevice, request.requestToString(), response);
                             break;
                         } else {
                             if (LOGGER.isDebugEnabled()) {
                                 LOGGER.debug(String.format("Successfully sent edit %s to device %s", request.requestToString(),
-                                        deviceName));
+                                    deviceName));
                             }
                             iterator.remove();
                         }
@@ -235,22 +255,22 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
                         LOGGER.error(String.format("Error while aligning configuration with the device %s", deviceName), e);
                     }
                 }
-                if (queueForDevice.isEmpty() && !getAlignmentInfo(deviceName).isInError()) {
-                    markDeviceAligned(info);
+                if (queueForDevice.isEmpty() && !m_dm.getDevice(deviceName).isInError()) {
+                    markDeviceAligned(deviceName);
                 }
 
                 return null;
             }
         };
-
         alignTemplate.execute(deviceName);
+
     }
 
-    private void markDeviceInError(DeviceAlignmentInfo deviceInfo, List queueForDevice, String request, NetConfResponse response) {
+    private void markDeviceInError(String deviceInfo, List queueForDevice, String request, NetConfResponse response) {
         LOGGER.error(String.format("Edit failure/timeout on device %s, edit request %s , response %s, remaining requests "
-                + "won't be sent to the device", deviceInfo, request, getResponseString(response)));
+            + "won't be sent to the device", deviceInfo, request, getResponseString(response)));
         queueForDevice.clear();
-        setDeviceAlignmentState(deviceInfo, String.format(DeviceAlignmentInfo.IN_ERROR + ", %s", getErrorDetails(request, response)));
+        setDeviceAlignmentState(deviceInfo, String.format(IN_ERROR + ", %s", getErrorDetails(request, response)));
     }
 
     private String getResponseString(NetConfResponse response) {
@@ -261,18 +281,15 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
     }
 
     private abstract class WithSynchronousDeviceQueue<T> {
-        abstract T execute(DeviceAlignmentInfo info, List<EditConfigRequest> deviceQueue);
+        abstract T execute(String deviceName, List<EditConfigRequest> deviceQueue);
 
         T execute(String deviceName) {
-            DeviceAlignmentInfo info = getAlignmentInfo(deviceName);
             List<EditConfigRequest> queue = getQueueForDevice(deviceName);
             T result;
             synchronized (queue) {
-                result = execute(info, queue);
+                result = execute(deviceName, queue);
             }
             return result;
         }
-
-        ;
     }
 }

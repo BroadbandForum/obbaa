@@ -49,23 +49,23 @@ public class AggregatorMessageTest {
                     "<get xmlns=\"urn:ietf:params:xml:ns:yang:1\">" +
                     "<managed-devices xmlns=\"urn:bbf:yang:obbaa:network-manager\">" +
                         "<device>" +
-                        "<device-name>deviceA</device-name>" +
-                        "<device-type>DPU</device-type>" +
+                        "<name>deviceA</name>" +
+                        "<type>DPU</type>" +
                         "<root>" +
                             "<system xmlns=\"urn:ietf:params:xml:ns:yang:ietf-system\">" +
-                            "<device-name>A</device-name>" +
-                            "<device-type>AA</device-type>" +
+                            "<name>A</name>" +
+                            "<type>AA</type>" +
                             "<restart/>" +
                             "</system>" +
                         "</root>" +
                         "</device>" +
                         "<device>" +
-                        "<device-name>deviceB</device-name>" +
-                        "<device-type>DPU</device-type>" +
+                        "<name>deviceB</name>" +
+                        "<type>DPU</type>" +
                         "<root>" +
                             "<system xmlns=\"urn:ietf:params:xml:ns:yang:ietf-vlan\">" +
-                            "<device-name>B</device-name>" +
-                            "<device-type>BB</device-type>" +
+                            "<name>B</name>" +
+                            "<type>BB</type>" +
                             "<restart/>" +
                             "</system>" +
                         "</root>" +

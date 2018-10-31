@@ -28,10 +28,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.pma.PmaServer;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -48,9 +48,9 @@ public class TransparentPmaSessionTest {
     public static final String REQ_STR = "<rpc message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
             "  <get>\n" +
             "    <filter>\n" +
-            "      <device-manager xmlns=\"http://www.test.com/management-solutions\" " +
+            "      <network-manager xmlns=\"http://www.test.com/management-solutions\" " +
             "xmlns:xc=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-            "      </device-manager>\n" +
+            "      </network-manager>\n" +
             "    </filter>\n" +
             "  </get>\n" +
             "</rpc>\n";
@@ -58,7 +58,7 @@ public class TransparentPmaSessionTest {
     @Mock
     private NetconfConnectionManager m_cm;
     @Mock
-    private DeviceInfo m_device1Meta;
+    private Device m_device1Meta;
     @Mock
     private PmaServer m_pmaServer;
 
@@ -70,7 +70,7 @@ public class TransparentPmaSessionTest {
         when(m_cm.isConnected(m_device1Meta)).thenReturn(true);
         Future<NetConfResponse> futureObject = mock(Future.class);
         when(futureObject.get()).thenReturn(m_response);
-        when(m_cm.executeNetconf((DeviceInfo) anyObject(), anyObject())).thenReturn(futureObject);
+        when(m_cm.executeNetconf((Device) anyObject(), anyObject())).thenReturn(futureObject);
         m_pmaSession = new TransparentPmaSession(m_device1Meta, m_cm);
 
     }

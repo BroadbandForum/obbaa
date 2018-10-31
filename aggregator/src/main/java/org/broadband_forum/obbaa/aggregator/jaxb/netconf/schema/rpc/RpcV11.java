@@ -23,6 +23,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = NetconfProtocol.RCP, namespace = NetconfProtocol.VERSION_1_1)
+@XmlRootElement(name = NetconfProtocol.RPC, namespace = NetconfProtocol.VERSION_1_1)
 public class RpcV11 extends Rpc {
 }

@@ -20,7 +20,7 @@ import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcReplyMessage;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfVersionManager;
-import org.broadband_forum.obbaa.aggregator.jaxb.pma.schema.PmaDeviceConfig;
+import org.broadband_forum.obbaa.aggregator.jaxb.pma.schema.deviceconfig.PmaDeviceConfig;
 import org.broadband_forum.obbaa.aggregator.jaxb.utils.JaxbUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import java.util.List;
  * PMA device config rpc request.
  */
 public final class PmaDeviceConfigRpc extends NetconfRpcMessage {
-    public static final String MODULE_NAME = "bbf-pma-device-configuration";
+    public static final String MODULE_NAME = "bbf-obbaa-pma-device-config";
     public static final String REVISION = "2018-06-15";
     public static final String NAMESPACE = "urn:bbf:yang:obbaa:pma-device-config";
     private static final Logger LOGGER = LoggerFactory.getLogger(PmaDeviceConfigRpc.class);

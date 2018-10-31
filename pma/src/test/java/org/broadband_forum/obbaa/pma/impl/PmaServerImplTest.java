@@ -23,12 +23,13 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,18 +43,20 @@ public class PmaServerImplTest {
     @Mock
     private NetconfServer m_netconfServer;
     @Mock
-    private DeviceInfo m_deviceInfo;
+    private Device m_device;
     @Mock
     private ModelNodeDataStoreManager m_dsm;
     @Captor
     private ArgumentCaptor<NetConfResponse> m_responseCaptor;
+    @Mock
+    private AdapterContext m_adapterContext;
 
     @Before
     public void setUp() {
         m_request = new GetRequest();
         m_request.setMessageId("1");
         MockitoAnnotations.initMocks(this);
-        m_pmaServer = new PmaServerImpl(m_deviceInfo, m_netconfServer, m_dsm);
+        m_pmaServer = new PmaServerImpl(m_device, m_netconfServer, m_dsm, m_adapterContext);
         doAnswer(invocation -> {
             NetConfResponse response = (NetConfResponse) invocation.getArguments()[2];
             response.addDataContent(DocumentUtils.stringToDocument("<if:interfaces\n" +
@@ -70,7 +73,7 @@ public class PmaServerImplTest {
 
     @Test
     public void testDeviceInfoIsSet(){
-        assertEquals(m_deviceInfo, m_pmaServer.getDeviceInfo());
+        assertEquals(m_device, m_pmaServer.getDevice());
     }
 
     @Test

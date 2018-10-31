@@ -5,24 +5,24 @@ Aggregator Component
 
 The \"Aggregator\" software component provides the interface between the
 request processing components in the BAA Core and the NBI Adapters. The
-exposed by the Aggregator toward the NBI Adpaters is a java interface.
+interface exposed by the Aggregator toward the NBI Adapters is a java interface.
 By providing this interface, the Aggregator adds architectural value by:
 
 -   Masking the differences in various protocols within the NBI layer.
-    Decoupling the Northbound protocol from the BAA Core.
+    Decoupling the Northbound protocol from the BAA Core
 
 -   Hiding the specific implementation of the BAA Core processing
-    components.
+    components
 
 -   Assisting in improving the availability of BAA Core processing
-    components.
+    components
 
 The functionality provided by the Aggregator includes the ability to:
 
 1.  Redirect requests coming from the NBI Adapter to appropriate request
-    processing component within the BAA Core.
+    processing component within the BAA Core
 
-2.  Forward notifications to SDN-C/OSS elements via the NBI Adapter.
+2.  Forward notifications to SDN-C/OSS elements via the NBI Adapter
 
 **Tip:** Requests and notifications that are directed to the BAA Core layer for administration of the BAA layer and management and control of devices use the YANG module \"bbf-obbaa-network-manager.yang\". When manipulating the managed device, requests and notifications use the mount point \"yangmnt:mount-point managed-device\" named \"root\" for that managed device.
 
@@ -32,7 +32,7 @@ High-Level Request and Notification Flows
 ### Request Flows
 
 1.  The NBI Adpater forwards user requests by calling the Aggregator
-    interface(**dispatchRequest**). The Aggregator is by nature uses
+    interface(**dispatchRequest**). The Aggregator, by nature, uses
     NETCONF primitives but isn\'t a NETCONF server.
 
     a.  The NBI Adapter needs to translate their requests into NETCONF
@@ -67,11 +67,10 @@ High-Level Request and Notification Flows
 
     f.  When the request includes the mount-point of the managed device
         (yangmnt:mount-point \"root\"), the Aggregator extracts the
-        requests from the mount-point - creating using the extracted
-        data as a request and fowards the extracted request to the
-        request processor component that provides that capability. When
-        the component that processes the request returns the result, the
-        Aggregator packages the result to the mount point.
+        requests from the mount-point - creating, using the extracted data,
+        a request and fowards the extracted request to the request processor 
+        component that provides that capability. When the component that processes 
+        the request returns the result, the Aggregator packages the result to the mount point.
 
 ### Notification Flows
 
@@ -94,12 +93,12 @@ High-Level Request and Notification Flows
     b.  The Aggregator forwards the notification to one or more
         registered NBI Adapters using the unified
         interface(**NotificationProcessor**) implemented by the NBI
-        Adaptor.
+        Adapter.
 
-3.  The Aggregator provide a registration interface(**AddProcessor**) in
+3.  The Aggregator provides a registration interface(**AddProcessor**) in
     order to forward notifications to the NBI Adapter component.
 
-    a.  NBI Adapter needs to register itself to the Aggregator at when
+    a.  NBI Adapter needs to register itself to the Aggregator when
         the NBI Adapter is started.
 
     b.  When a NBI Adapter is destroyed, the destruction flow needs to
@@ -144,9 +143,10 @@ The following is the high level interface of the Aggregator component.
 
 package org.broadband_forum.obbaa.aggregator.api;
 
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
-
 import java.util.Set;
+
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
+import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 
 /**
  * BAA Core API for NBI. It's used for message forwarding and notification listening.
@@ -157,11 +157,12 @@ public interface Aggregator {
     /**
      * Provide a unified API to NBI for request message forwarding.
      *
+     * @param clientInfo Client Info
      * @param netconfRequest Message defined with YANG from NBI.
      * @return Result
      * @throws DispatchException Dispatch exception
      */
-    String dispatchRequest(String netconfRequest) throws DispatchException;
+    String dispatchRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException;
 
     /**
      * Provide a unified API for notification publication.
@@ -199,7 +200,7 @@ public interface Aggregator {
      * @throws DispatchException Dispatch exception
      */
     void addProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers, DeviceConfigProcessor deviceConfigProcessor)
-            throws DispatchException;
+        throws DispatchException;
 
     /**
      * Provide a unified API to NAI for notification provider registry.
@@ -242,7 +243,7 @@ public interface Aggregator {
      * @throws DispatchException Dispatch exception
      */
     void removeProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers, DeviceConfigProcessor deviceConfigProcessor)
-            throws DispatchException;
+        throws DispatchException;
 
     /**
      * Register device management processor.
@@ -277,15 +278,13 @@ public interface Aggregator {
      */
     Set<String> getSystemCapabilities();
 }
-
 ```
 
 Requests and notifications are sent within the context of the mounted
-schema for the BAA layer. The BAA layer\'s schema is defined by the
-defined in the YANG module \"bbf-obbaa-network-manager.yang\".
+schema for the BAA layer. The BAA layer\'s schema is defined in the YANG module 
+\"bbf-obbaa-network-manager.yang\".
 
 ```
-
 <schema-mounts xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-schema-mount">
   <mount-point>
     <module>bbf-obbaa-network-manager</module>
@@ -311,30 +310,32 @@ Dispatching Requests
 --------------------
 
 The interface **dispatchRequest** is used to forward messages received
-from the NBI Adaptor to registered request processing components (e.g.,
+from the NBI Adapter to registered request processing components (e.g.,
 DM, PMA).
 
-The Device Management and PMA components are started, they register the
+When the Device Management and PMA components are started, they register the
 request processor by calling the Aggregator\'s **addProcessor** API
 where the request processing components register their capabilities by
-schema path of YANG model. Aggregator forwards the request to the DM or
+schema path of YANG model. The Aggregator forwards the request to the DM or
 PMA through the \"**xmlns**\" attributes in the request message.
 
 Request message example:
 ```
 <rpc message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <action">
-    <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
-      <device>
-        <name>deviceA</name>
-        <root>
-          <system xmlns="urn:ietf:params:xml:ns:yang:ietf-system">
-            <restart/>
-          </system>
-        </root>
-      </device>
-    </managed-devices>
-  </action>
+	<action">
+		<network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+			<managed-devices>
+				<device>
+					<name>deviceA</name>
+					<root>
+						<system xmlns="urn:ietf:params:xml:ns:yang:ietf-system">
+							<restart/>
+						</system>
+					</root>
+				</device>
+			</managed-devices>
+		</network-manager>
+	</action>
 </rpc>
 ```
 
@@ -384,18 +385,20 @@ Response message example:
 <!-- Query -->
 <rpc message-id="101"
      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <action xmlns="urn:ietf:params:xml:ns:yang:1">
-    <managed-devices xmlns="urn:bbf:yang:obbaa:network-manager">
-      <device>
-        <name>device1</name>
-        <root>
-          <system xmlns="urn:ietf:params:xml:ns:yang:ietf-system">
-            <address>2001:db8::3</address>
-          </system>
-        </root>
-      </device>
-    </managed-devices>
-  </action>
+	<action xmlns="urn:ietf:params:xml:ns:yang:1">
+		<network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+			<managed-devices>
+				<device>
+					<name>device1</name>
+					<root>
+						<system xmlns="urn:ietf:params:xml:ns:yang:ietf-system">
+							<address>2001:db8::3</address>
+						</system>
+					</root>
+				</device>
+			</managed-devices>
+		</network-manager>
+	</action>
 </rpc>
 ```
 
@@ -443,10 +446,8 @@ public interface DeviceManagementProcessor extends GlobalRequestProcessor {
 }
 ```
 
-The following is the interface that the PMA component exposes toward the
-Aggregator:
-
-**Info:** The PMA component provides a capabilities specific to a managed device. As such the interface exposed by the PMA processor includes an attribute for the managed device to be passed by the Aggregator.
+The following is the interface that the PMA component exposes toward the Aggregator:
+**Tip:** The PMA component provides a capabilities specific to a managed device. As such the interface exposed by the PMA processor includes an attribute for the managed device to be passed by the Aggregator.
 
 ```
 /*
@@ -484,8 +485,7 @@ public interface DeviceConfigProcessor {
 }
 ```
 
-All request processing component\'s interface is subclassed from the
-GlobalRequestProcessor which is defined below:
+All request processing component's interface is subclassed from the GlobalRequestProcessor which is defined below:
 
 ```
 /*
@@ -506,6 +506,8 @@ GlobalRequestProcessor which is defined below:
 
 package org.broadband_forum.obbaa.aggregator.api;
 
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
+
 /**
  * Implemented by some common system config component for request process.
  */
@@ -513,11 +515,13 @@ public interface GlobalRequestProcessor {
     /**
      * Provide a unified API for netconfRequest processing from Aggregator.
      *
+     *
+     * @param clientInfo Client info
      * @param netconfRequest Message of NetConf request etc
      * @return Result
      * @throws DispatchException exception
      */
-    String processRequest(String netconfRequest) throws DispatchException;
+    String processRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException;
 }
 ```
 
@@ -528,10 +532,10 @@ The Aggregator component supports publishing the notification message to
 the NBI Adapters using the from components who call the Aggregator\'s
 **publishNotification** API. Once the Aggregator component receives a
 notification it forwards the notification to NBI Adapters that have
-registered with the Aggregator using the NBI Adaptor\'s
+registered with the Aggregator using the NBI Adapter\'s
 **publishNotification** API.
 
-The following is the interface that NBI Adaptor\'s implement to receive
+The following is the interface that NBI Adapter\'s implement to receive
 notifications:
 
 ```
@@ -581,6 +585,7 @@ the device\'s data model represented as \"root\" mount-point for that
 managed device in the list.
 
 ```
+
 module bbf-obbaa-network-manager {
   yang-version 1.1;
   namespace "urn:bbf:yang:obbaa:network-manager";
@@ -594,6 +599,10 @@ module bbf-obbaa-network-manager {
   }
   import ietf-yang-schema-mount {
     prefix yangmnt;
+  }
+  import ietf-yang-library {
+    prefix yanglib;
+    revision-date 2016-06-21;
   }
 
   organization
@@ -658,27 +667,41 @@ module bbf-obbaa-network-manager {
     }
   }
 
+  grouping device-details{
+    description
+      "These four leafs collectively determine one module-set/one adapter.";
+    leaf type {
+      type string;
+      description
+        "The type of device. Identifies the type of access node like OLT/ONT/DPU etc";
+    }
+    leaf interface-version {
+      type string;
+      description
+        "The interface version of the device , which uniquely identifies the yang-modules set & revision supported by the device";
+    }
+    leaf model {
+      type string;
+      description
+        "The model of device. Identifies the hardware variant of the device.
+         Example 4LT/8LT card numbers etc";
+    }
+    leaf vendor {
+      type string;
+      description
+        "The vendor of device.Eg Nokia/Huawei";
+    }
+    leaf push-pma-configuration-to-device {
+       type boolean;
+       default true;
+       description
+         "By default, push the PMA configuration to the device when the device connects for the first time. This is done since PMA in OB-BAA is the master of configurations. Configure this attribute as false using <edit-config> to turn-off this feature and upload device configuration to PMA.
+          When this attribute is set to false, it will be automatically reset to true after the device configuration is successfully uploaded to PMA.";
+    }
+  }
+
   grouping management-grouping {
-    leaf device-type {
-      type string;
-      description
-        "The type of device. It can be used for determining the module-set of YANG library.";
-    }
-    leaf device-software-version {
-      type string;
-      description
-        "The software version of device.";
-    }
-    leaf device-model {
-      type string;
-      description
-        "The model of device.";
-    }
-    leaf device-vendor {
-      type string;
-      description
-        "The vendor of device.";
-    }
+    uses device-details;
     container device-connection {
       uses connection-grouping;
     }
@@ -715,49 +738,80 @@ module bbf-obbaa-network-manager {
       }
     }
   }
+  container network-manager {
 
-  container managed-devices {
-    description
-      "The managed devices and device communication settings.";
-    list device {
-      key "device-name";
-      leaf device-name {
-        type string;
+      container managed-devices {
         description
-          "The name of device.";
+          "The managed devices and device communication settings.";
+        list device {
+          key "name";
+          leaf name {
+            type string;
+            description
+              "The name of device.";
+          }
+          container device-management {
+            uses management-grouping;
+          }
+          container device-notification {
+            uses notification-grouping;
+          }
+          container root {
+            yangmnt:mount-point "root";
+            description
+              "Root for models supported per device.";
+          }
+        }
       }
-      container device-management {
-        uses management-grouping;
+
+      container new-devices {
+        config false;
+        list new-device {
+          key "duid";
+          leaf duid {
+            description
+              "A globally unique value for a DUID (DHCP Unique Identifier)
+               as defined in RFC 3315.";
+            type string {
+              length "1..128";
+            }
+          }
+          leaf-list device-capability {
+              type string;
+          }
+        }
       }
-      container device-notification {
-        uses notification-grouping;
+
+      container device-adapters {
+        config false;
+        leaf device-adapter-count {
+          description
+           "Total number of device-adapters deployed";
+          type string;
+          config false;
+        }
+        list device-adapter {
+          key "type interface-version model vendor";
+          description
+           "List of device-adapters containing yang modules along with supported deviations and features.
+            An device-adapter is uniquely identified by its type, version, model and vendor.";
+
+          uses device-details;
+
+          container yang-modules {
+            description
+            "The list yang modules supported by the device-adapter";
+            uses yanglib:module-list;
+          }
+        }
       }
-      container root {
-        yangmnt:mount-point "root";
-        description
-          "Root for models supported per device.";
-      }
-    }
-  }
-  container new-devices {
-    config false;
-    list new-device {
-      key "duid";
-    }
-    leaf-list device-capability {
-      type string;
-    }
-  }
 }
+}
+
 ```
 
 Note:
-
-1.  In the current version, only one device configuration is supported
-    at a time because error return and other related specifications have
-    not been installed yet.
-
-2.  The current version does not support device management and service
+1.  The current version does not support device management and service
     configuration in the same message at the same time.
 
 ietf-yang-schema-mount
@@ -1036,10 +1090,6 @@ module ietf-yang-schema-mount {
 ietf-yang-library
 -----------------
 
-In the \"root\" mount-point for a managed device, the YANG modules are
-exposed to SDN M&C elements through the mount-point\'s module-list.
-
-```
 module ietf-yang-library {
      namespace "urn:ietf:params:xml:ns:yang:ietf-yang-library";
      prefix "yanglib";
@@ -1305,7 +1355,7 @@ The following is the class diagram for classes relevant (implemented or
 uses) to the Aggregator component.
 
 <p align="center">
- <img width="400px" height="400px" src="{{site.url}}/aggregator/aggregator_class.png">
+ <img width="800px" height="800px" src="{{site.url}}/aggregator/aggregator_class.png">
 </p>
 
 Sequence diagram
@@ -1315,7 +1365,7 @@ The following is a sequence diagram that describes the important
 interactions of the Aggregator component.
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/aggregator/aggregator_seq.png">
+ <img width="1000px" height="700px" src="{{site.url}}/aggregator/aggregator_seq.png">
 </p>
 
 Adaptation of request processors
@@ -1333,17 +1383,45 @@ the \'bbf-obbaa-network-manager\' YANG module.
 Code example:
 
 ```
+/*
+ * Copyright 2018 Broadband Forum
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.broadband_forum.obbaa.aggregator.processor;
 
-public class DeviceManagerAdapter implements DeviceManagerProcessor {
-    Aggregator m_aggregator;
-    DeviceManager m_deviceManager;
-    Map<String, DeviceAdptInfo> m_deviceTypeMap;
+import java.util.HashMap;
+import java.util.Map;
 
-    public DeviceManagerAdapter(Aggregator aggregator, DeviceManager deviceManager) {
+import org.broadband_forum.obbaa.aggregator.api.Aggregator;
+import org.broadband_forum.obbaa.aggregator.api.DeviceManagementProcessor;
+import org.broadband_forum.obbaa.aggregator.api.DispatchException;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
+import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
+import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
+import org.w3c.dom.Document;
+
+public class DeviceManagerAdapter implements DeviceManagementProcessor {
+    Aggregator m_aggregator;
+    NetconfServer m_dmNetconfServer;
+    Map<String, DeviceAdapterInfo> m_deviceTypeMap;
+
+    public DeviceManagerAdapter(Aggregator aggregator) {
         m_aggregator = aggregator;
-        m_deviceManager = deviceManager;
         m_deviceTypeMap = new HashMap<>();
     }
 
@@ -1351,21 +1429,90 @@ public class DeviceManagerAdapter implements DeviceManagerProcessor {
         m_aggregator.registerDeviceManager(this);
     }
 
-    @Override
-    public String processRequest(String netconfRequest) throws DispatchException {
-        Document document = AggregatorMessage.stringToDocument(netconfRequest);
+    public void destroy() {
+        m_aggregator.unregisterDeviceManager();
+    }
 
-        return deviceManagement(document);
+    public NetconfServer getDmNetconfServer() {
+        return m_dmNetconfServer;
+    }
+
+    public void setDmNetconfServer(NetconfServer dmNetconfServer) {
+        m_dmNetconfServer = dmNetconfServer;
     }
 
     @Override
-    public String getDeviceTypeByDeviceName(String deviceName) throws DispatchException {
-        DeviceAdptInfo deviceAdptInfo = getDeviceAdptInfo(deviceName);
-        if (deviceAdptInfo == null) {
+    public String processRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException {
+        Document document = AggregatorMessage.stringToDocument(netconfRequest);
+        String messageId = NetconfMessageUtil.getMessageIdFromRpcDocument(document);
+        NetConfResponse response = deviceManagement(clientInfo, document);
+        response.setMessageId(messageId);
+
+        //Device name is invalid in this processor
+        return response.responseToString();
+    }
+
+    private NetConfResponse deviceManagement(NetconfClientInfo netconfClientInfo, Document document) throws DispatchException {
+        String typeOfNetconfRequest = NetconfMessageUtil.getTypeOfNetconfRequest(document);
+        NetConfResponse response = new NetConfResponse();
+
+        try {
+            switch (typeOfNetconfRequest) {
+                case NetconfResources.DELETE_CONFIG:
+                    m_dmNetconfServer.onDeleteConfig(netconfClientInfo, DocumentToPojoTransformer.getDeleteConfig(document), response);
+                    break;
+
+                case NetconfResources.EDIT_CONFIG:
+                    m_dmNetconfServer.onEditConfig(netconfClientInfo, DocumentToPojoTransformer.getEditConfig(document), response);
+                    break;
+
+                case NetconfResources.GET:
+                    m_dmNetconfServer.onGet(netconfClientInfo, DocumentToPojoTransformer.getGet(document), response);
+                    break;
+
+                case NetconfResources.GET_CONFIG:
+                    m_dmNetconfServer.onGetConfig(netconfClientInfo, DocumentToPojoTransformer.getGetConfig(document), response);
+                    break;
+
+                default:
+                    // Does not support
+                    throw new DispatchException("Does not support the operation.");
+            }
+        } catch (NetconfMessageBuilderException ex) {
+            throw new DispatchException(ex);
+        }
+        return response;
+    }
+
+    public void removeDeviceAdptInfo(String deviceName) {
+        m_deviceTypeMap.remove(deviceName);
+    }
+
+    public void updateDeviceAdptInfo(String deviceName, DeviceAdapterInfo deviceAdapterInfo) {
+        if (m_deviceTypeMap.get(deviceName) == null) {
+            m_deviceTypeMap.put(deviceName, deviceAdapterInfo);
+            return;
+        }
+
+        m_deviceTypeMap.replace(deviceName, deviceAdapterInfo);
+    }
+
+    private DeviceAdapterInfo getDeviceAdptInfo(String deviceName) {
+        try {
+            return m_deviceTypeMap.get(deviceName);
+        } catch (NullPointerException | ClassCastException ex) {
+            return new DeviceAdapterInfo();
+        }
+    }
+
+    @Override
+    public String getDeviceTypeByDeviceName(String deviceName) {
+        DeviceAdapterInfo deviceAdapterInfo = getDeviceAdptInfo(deviceName);
+        if (deviceAdapterInfo == null) {
             return null;
         }
 
-        return deviceAdptInfo.getType();
+        return deviceAdapterInfo.getType();
     }
 }
 ```
@@ -1380,16 +1527,16 @@ YANG module.
 PMA adapter implements the follow functions:
 
 1.  Registering the capability (based on the YANG model of device
-    configuration) of the PMA component to Aggregator
+    configuration) of the PMA component to the Aggregator
 
-2.  Forwarding the request from the Aggregator to PMA component
+2.  Forwarding the request from the Aggregator to the PMA component
 
 3.  Exposing functionality to manipulate the YANG library and managing
     the state of a managed device. The interface includes:
 
-    a.  Load YANG library
+    a.  Deploy device-adapter
 
-    b.  Redeploy YANG library
+    b.  Undeploy device-adapter
 
     c.  Force align the NETCONF configuration of a device
 
@@ -1398,18 +1545,18 @@ PMA adapter implements the follow functions:
 4.  Send notification of YANG library change
 
 Based on these features, it is recommended to implement the following
-YANG module:
+YANG modules:
 
 ```
 module bbf-obbaa-pma-yang-library {
     yang-version 1.1;
     namespace "urn:bbf:yang:obbaa:pma-yang-library";
     prefix pma-yang-library;
-
+    
     import ietf-inet-types {
         prefix inet;
     }
-
+   
     organization
         "broadband_forum";
 
@@ -1425,10 +1572,10 @@ module bbf-obbaa-pma-yang-library {
         reference
             "broadband_forum";
     }
-
+    
     container pma-yang-library {
         description "YANG library of PMA.";
-
+        
         action reload {
             description "Reload the YANG library of PMA.";
         }
@@ -1436,15 +1583,59 @@ module bbf-obbaa-pma-yang-library {
 }
 ```
 
+YANG module for the device adapters:
+
+```
+module bbf-obbaa-device-adapters {
+  yang-version 1.1;
+  namespace "urn:bbf:yang:obbaa:device-adapters";
+  prefix device-adapters;
+
+  organization
+     "broadband_forum";
+   contact
+     "https://www.broadband-forum.org";
+   description
+     "YANG module supporting device adapters for OB-BAA.";
+
+  revision 2018-08-31 {
+   description
+     "Initial revision.";
+   reference "broadband_forum";
+  }
+
+  container deploy-adapter {
+     action deploy {
+         input {
+             leaf adapter-archive {
+                 type string;
+             }
+         }
+     }
+  }
+
+  container undeploy-adapter {
+       action undeploy {
+           input {
+               leaf adapter-archive {
+                   type string;
+               }
+           }
+       }
+    }
+}
+``` 
+
 The PMA adapter installs the following YANG module to the
 network-manager in order to force the alignment of a managed device.
 
 ```
+
 module bbf-obbaa-pma-device-config {
     yang-version 1.1;
     namespace "urn:bbf:yang:obbaa:pma-device-config";
     prefix pma-align;
-
+    
     import ietf-inet-types {
         prefix inet;
     }
@@ -1464,17 +1655,17 @@ module bbf-obbaa-pma-device-config {
         reference
             "broadband_forum";
     }
-
+    
     identity align-type {
         description "Type of align requested of the component.";
     }
 
     container pma-device-config {
         description "Device configuration of PMA.";
-
+        
         action align {
             description "Align device configuration of PMA.";
-
+        
             input {
                 leaf force {
                     type identityref {
@@ -1484,7 +1675,7 @@ module bbf-obbaa-pma-device-config {
                 }
             }
         }
-
+    
         leaf alignment-state {
             type enumeration {
                 enum aligned;
@@ -1501,51 +1692,380 @@ module bbf-obbaa-pma-device-config {
 Code example:
 
 ```
+/*
+ * Copyright 2018 Broadband Forum
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.broadband_forum.obbaa.aggregator.processor;
 
-public class PmaAdapter implements DeviceConfigProcessor, GlobalProcessor {
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
+import org.broadband_forum.obbaa.adapter.handler.DeviceAdapterActionHandler;
+import org.broadband_forum.obbaa.aggregator.api.Aggregator;
+import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
+import org.broadband_forum.obbaa.aggregator.api.DispatchException;
+import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
+import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
+import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc.RpcOperationType;
+import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.DeployAdapterRpc;
+import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.PmaDeviceConfigRpc;
+import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.PmaYangLibraryRpc;
+import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.UndeployAdapterRpc;
+import org.broadband_forum.obbaa.aggregator.jaxb.pma.schema.deviceconfig.PmaDeviceConfigAlign;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
+import org.broadband_forum.obbaa.pma.DeviceModelDeployer;
+import org.broadband_forum.obbaa.pma.PmaRegistry;
+import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * PMA Adapter.
+ */
+public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor {
+
+    private static final String DEVICE_DPU = "DPU";
+    private static final Logger LOGGER = LoggerFactory.getLogger(PmaAdapter.class);
+
     Aggregator m_aggregator;
-    DeviceManager m_deviceManager;
     PmaRegistry m_pmaRegistry;
     DeviceModelDeployer m_deviceModelDeployer;
+    DeviceAdapterActionHandler m_deviceAdapterActionHandler;
 
-    public PmaAdapter(Aggregator aggregator, DeviceManager deviceManager, PmaRegistry pmaRegistry,
-                      DeviceModelDeployer deviceModelDeployer) {
+    /**
+     * PMA dependents Aggregator for message dispatch.
+     *
+     * @param aggregator          Aggregator component
+     * @param actionHandler       Device Adapter Action Handler
+     * @param pmaRegistry         PMA Registry
+     * @param deviceModelDeployer PMA Model deploy
+     */
+    public PmaAdapter(Aggregator aggregator, PmaRegistry pmaRegistry,
+                      DeviceModelDeployer deviceModelDeployer, DeviceAdapterActionHandler actionHandler) {
         m_aggregator = aggregator;
         m_pmaRegistry = pmaRegistry;
-        m_deviceManager = deviceManager;
         m_deviceModelDeployer = deviceModelDeployer;
+        m_deviceAdapterActionHandler = actionHandler;
     }
 
+    /**
+     * Initialize the PMA Adapter.
+     */
     public void init() {
-        //Register capability or do Schema-mount
-        Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
+        registerGlobalProcessors();
+        registerDeviceConfigProcessor();
+    }
 
-        ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier("yang:ietf-interfaces",
-                "urn:ietf:params:xml:ns:yang:ietf-interfaces","2017-05-07");
-        moduleIdentifiers.add(moduleIdentifier);
-
+    /**
+     * Destroy resource of PMA Adapter.
+     */
+    public void destroy() {
         try {
-            m_aggregator.addProcessor("DPU", moduleIdentifiers, this);
+            getAggregator().removeProcessor((GlobalRequestProcessor) this);
+            getAggregator().removeProcessor((DeviceConfigProcessor) this);
         }
         catch (DispatchException ex) {
-            //Ignore
+            LOGGER.error(ex.getMessage());
         }
     }
 
-    @Override
-    public String processRequest(String netconfRequest) throws DispatchException {
-        return null;
+    /**
+     * Register global processor which functions supported by PMA.
+     */
+    private void registerGlobalProcessors() {
+        try {
+            getAggregator().addProcessor(buildGlobalProcessor(), this);
+        }
+        catch (DispatchException ex) {
+            LOGGER.error(ex.getMessage());
+        }
+    }
+
+    /**
+     * Build module identifiers as a global processor of PMA.
+     *
+     * @return Module identifiers
+     */
+    private Set<ModuleIdentifier> buildGlobalProcessor() {
+        Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
+        moduleIdentifiers.addAll(buildPmaYangLibraryModules());
+        moduleIdentifiers.addAll(buildDeployAdapterYangModules());
+
+        return moduleIdentifiers;
+    }
+
+    /**
+     * Build PMA Action modules.
+     *
+     * @return Module identifiers
+     */
+    private Set<ModuleIdentifier> buildPmaYangLibraryModules() {
+        Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
+
+        ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier(PmaYangLibraryRpc.MODULE_NAME,
+                PmaYangLibraryRpc.NAMESPACE, PmaYangLibraryRpc.REVISION);
+        moduleIdentifiers.add(moduleIdentifier);
+
+        return moduleIdentifiers;
+    }
+
+    private Set<ModuleIdentifier> buildDeployAdapterYangModules() {
+        Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
+
+        ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier(DeployAdapterRpc.MODULE_NAME,
+                DeployAdapterRpc.NAMESPACE, DeployAdapterRpc.REVISION);
+        moduleIdentifiers.add(moduleIdentifier);
+
+        return moduleIdentifiers;
+    }
+
+    /**
+     * Build PMA device config YANG modules.
+     *
+     * @return Module identifiers
+     */
+    private Set<ModuleIdentifier> buildPmaDeviceConfigModules() {
+        Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
+
+        ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier(PmaDeviceConfigRpc.MODULE_NAME,
+                PmaDeviceConfigRpc.NAMESPACE, PmaDeviceConfigRpc.REVISION);
+        moduleIdentifiers.add(moduleIdentifier);
+
+        return moduleIdentifiers;
+    }
+
+    /**
+     * Register device config processor which functions supported by PMA.
+     */
+    private void registerDeviceConfigProcessor() {
+        try {
+            Set<ModuleIdentifier> moduleIdentifiers = getDeviceModelDeployer().getAllModuleIdentifiers();
+            moduleIdentifiers.addAll(buildPmaDeviceConfigModules());
+            getAggregator().addProcessor(DEVICE_DPU, moduleIdentifiers, this);
+        }
+        catch (DispatchException ex) {
+            LOGGER.error(ex.getMessage());
+        }
     }
 
     @Override
     public String processRequest(String deviceName, String netconfRequest) throws DispatchException {
         try {
-            return m_pmaRegistry.executeNC(deviceName, netconfRequest);
+            NetconfRpcMessage netconfRpcMessage = NetconfRpcMessage.getInstance(netconfRequest);
+            if (netconfRpcMessage.getOnlyOneTopXmlns().equals(PmaDeviceConfigRpc.NAMESPACE)) {
+                return processPmaDeviceConfigRequest(deviceName, netconfRpcMessage);
+            }
+
+            return getPmaRegistry().executeNC(deviceName, netconfRequest);
         }
         catch (IllegalArgumentException | IllegalStateException | ExecutionException ex) {
-            throw new DispatchException(ex.getMessage());
+            throw new DispatchException(ex);
         }
+    }
+
+    @Override
+    public String processRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException {
+        NetconfRpcMessage netconfRpcMessage = NetconfRpcMessage.getInstance(netconfRequest);
+        if (netconfRpcMessage.getOnlyOneTopXmlns().equals(PmaYangLibraryRpc.NAMESPACE)) {
+            return processPmaYangLibraryRequest(netconfRpcMessage);
+        } else if (netconfRpcMessage.getOnlyOneTopXmlns().equals(DeployAdapterRpc.NAMESPACE)) {
+            return processDeployOrUndeployAdapterRequest(netconfRpcMessage);
+        }
+
+        throw DispatchException.buildNotSupport();
+    }
+
+    private String processDeployOrUndeployAdapterRequest(NetconfRpcMessage netconfRpcMessage) throws DispatchException {
+        if (!netconfRpcMessage.getRpc().getRpcOperationType().equals(RpcOperationType.ACTION)) {
+            return netconfRpcMessage.buildRpcReplyError(DispatchException.NOT_SUPPORT);
+        }
+        DeployAdapterRpc deployAdapterRpc = DeployAdapterRpc.getInstance(netconfRpcMessage.getOriginalMessage());
+        if (deployAdapterRpc.getDeployAdapter() != null) {
+            deployAdapter(deployAdapterRpc);
+        }
+        UndeployAdapterRpc undeployAdapterRpc = UndeployAdapterRpc.getInstance(netconfRpcMessage.getOriginalMessage());
+        if (undeployAdapterRpc.getUndeployAdapter() != null) {
+            undeployAdapter(undeployAdapterRpc);
+        }
+
+        return netconfRpcMessage.buildRpcReplyOk();
+    }
+
+    private void deployAdapter(DeployAdapterRpc deployAdapterRpc) throws DispatchException {
+        try {
+            m_deviceAdapterActionHandler.deployRpc(deployAdapterRpc.getDeployAdapter().getDeploy().getAdapterArchive());
+        } catch (Exception e) {
+            throw new DispatchException(e);
+        }
+    }
+
+    private void undeployAdapter(UndeployAdapterRpc deployAdapterRpc) throws DispatchException {
+        try {
+            m_deviceAdapterActionHandler.undeploy(deployAdapterRpc.getUndeployAdapter().getUndeploy().getAdapterArchive());
+        } catch (Exception e) {
+            throw new DispatchException(e);
+        }
+    }
+
+    /**
+     * Process the request of YANG module reloading.
+     *
+     * @param netconfRpcMessage Request
+     * @return Response message
+     */
+    private String processPmaYangLibraryRequest(NetconfRpcMessage netconfRpcMessage) throws DispatchException {
+        if (!netconfRpcMessage.getRpc().getRpcOperationType().equals(RpcOperationType.ACTION)) {
+            return netconfRpcMessage.buildRpcReplyError(DispatchException.NOT_SUPPORT);
+        }
+
+        PmaYangLibraryRpc pmaYangLibraryRpc = PmaYangLibraryRpc.getInstance(netconfRpcMessage.getOriginalMessage());
+        reloadYangLibrary(pmaYangLibraryRpc);
+
+        return netconfRpcMessage.buildRpcReplyOk();
+    }
+
+    /**
+     * Reload YANG library of PMA.
+     *
+     * @param pmaYangLibraryRpc Request
+     */
+    private void reloadYangLibrary(PmaYangLibraryRpc pmaYangLibraryRpc) throws DispatchException {
+        if (pmaYangLibraryRpc.getPmaYangLibrary().getReload() == null) {
+            return;
+        }
+
+        //Just support reload YANG library
+        List<String> responses = getPmaRegistry().reloadDeviceModel();
+        for (String response : responses) {
+            LOGGER.info("reloadYangLibrary: {}", response);
+        }
+
+        redeployYangLibrary();
+    }
+
+    /**
+     * Redeploy YANG library of PMA.
+     *
+     * @throws DispatchException Exception
+     */
+    private void redeployYangLibrary() throws DispatchException {
+        Set<ModuleIdentifier> moduleIdentifiers = getDeviceModelDeployer().getAllModuleIdentifiers();
+        getAggregator().addProcessor("DPU", moduleIdentifiers, this);
+    }
+
+    /**
+     * Process the request of configuration align in PMA.
+     *
+     * @param deviceName        Device name
+     * @param netconfRpcMessage Request
+     * @return Response message
+     * @throws DispatchException Exception
+     */
+    private String processPmaDeviceConfigRequest(String deviceName, NetconfRpcMessage netconfRpcMessage)
+            throws DispatchException {
+        PmaDeviceConfigRpc pmaDeviceConfigRpc = PmaDeviceConfigRpc.getInstance(netconfRpcMessage.getOriginalMessage());
+
+        switch (netconfRpcMessage.getRpc().getRpcOperationType()) {
+            case GET:
+                return processPmaDeviceConfigGet(deviceName, pmaDeviceConfigRpc);
+            case ACTION:
+                return processPmaDeviceConfigAction(deviceName, pmaDeviceConfigRpc);
+            default:
+                throw DispatchException.buildNotSupport();
+        }
+    }
+
+    /**
+     * Process request of alignment state for a device.
+     *
+     * @param deviceName         Device name
+     * @param pmaDeviceConfigRpc Request
+     * @return Response
+     * @throws DispatchException Exception
+     */
+    private String processPmaDeviceConfigGet(String deviceName, PmaDeviceConfigRpc pmaDeviceConfigRpc)
+            throws DispatchException {
+        //TODO : there is no api of PMA to query the state
+        pmaDeviceConfigRpc.getPmaDeviceConfig().setAlignmentState("aligned");
+
+        return pmaDeviceConfigRpc.buildRpcReplyDataResponse();
+    }
+
+    /**
+     * Process request of device config for a device.
+     *
+     * @param deviceName         Device name
+     * @param pmaDeviceConfigRpc Request
+     * @return Response
+     * @throws DispatchException Exception
+     */
+    private String processPmaDeviceConfigAction(String deviceName, PmaDeviceConfigRpc pmaDeviceConfigRpc)
+            throws DispatchException {
+        try {
+            PmaDeviceConfigAlign align = pmaDeviceConfigRpc.getPmaDeviceConfig().getPmaDeviceConfigAlign();
+            if ((align != null) && (align.getForce() != null)) {
+                getPmaRegistry().forceAlign(deviceName);
+            } else {
+                getPmaRegistry().align(deviceName);
+            }
+            return pmaDeviceConfigRpc.buildRpcReplyOk();
+        }
+        catch (ExecutionException ex) {
+            throw new DispatchException(ex);
+        }
+    }
+
+    /**
+     * Get namespace of the request.
+     *
+     * @param netconfRpcMessage Request
+     * @return Namespace
+     * @throws DispatchException Exception
+     */
+    private String getRequestNamespace(NetconfRpcMessage netconfRpcMessage) throws DispatchException {
+        return netconfRpcMessage.getOnlyOneTopXmlns();
+    }
+
+    /**
+     * Get Aggregator component.
+     *
+     * @return Aggregator
+     */
+    public Aggregator getAggregator() {
+        return m_aggregator;
+    }
+
+    /**
+     * Get PMA registry component.
+     *
+     * @return Component
+     */
+    public PmaRegistry getPmaRegistry() {
+        return m_pmaRegistry;
+    }
+
+    /**
+     * Get component of PMA device model deployer.
+     *
+     * @return Component
+     */
+    public DeviceModelDeployer getDeviceModelDeployer() {
+        return m_deviceModelDeployer;
     }
 }
 ```

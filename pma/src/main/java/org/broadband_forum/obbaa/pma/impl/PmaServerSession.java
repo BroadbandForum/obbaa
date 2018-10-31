@@ -16,6 +16,7 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
@@ -27,16 +28,15 @@ import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
 import org.broadband_forum.obbaa.pma.PmaSession;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.w3c.dom.Document;
 
 public class PmaServerSession implements PmaSession {
     private final PmaServer m_pmaServer;
-    private final DeviceInfo m_deviceInfo;
+    private final Device m_device;
     private final NetconfDeviceAlignmentService m_das;
 
-    public PmaServerSession(DeviceInfo deviceInfo, PmaServer pmaServer, NetconfDeviceAlignmentService das) {
-        m_deviceInfo = deviceInfo;
+    public PmaServerSession(Device device, PmaServer pmaServer, NetconfDeviceAlignmentService das) {
+        m_device = device;
         m_pmaServer = pmaServer;
         m_das = das;
     }
@@ -44,14 +44,14 @@ public class PmaServerSession implements PmaSession {
     @Override
     public String executeNC(String netconfRequest) {
         try {
-            PmaServer.setCurrentDevice(m_deviceInfo);
+            PmaServer.setCurrentDevice(m_device);
             Document document = null;
             document = DocumentUtils.stringToDocument(netconfRequest);
             AbstractNetconfRequest request = DocumentToPojoTransformer.getRequest(document);
             return m_pmaServer.executeNetconf(request).responseToString();
         } catch (NetconfMessageBuilderException e) {
             throw new IllegalArgumentException(String.format("Invalid netconf request received : %s for device %s",
-                    netconfRequest, m_deviceInfo), e);
+                netconfRequest, m_device), e);
         } finally {
             PmaServer.clearCurrentDevice();
         }
@@ -60,7 +60,7 @@ public class PmaServerSession implements PmaSession {
     @Override
     public void forceAlign() {
         try {
-            PmaServer.setCurrentDevice(m_deviceInfo);
+            PmaServer.setCurrentDevice(m_device);
             GetConfigRequest getConfig = new GetConfigRequest();
             getConfig.setSourceRunning();
             getConfig.setMessageId("internal");
@@ -70,7 +70,7 @@ public class PmaServerSession implements PmaSession {
             config.setConfigElementContents(response.getDataContent());
             ccRequest.setSourceConfigElement(config.getXmlElement());
             ccRequest.setTargetRunning();
-            m_das.forceAlign(m_deviceInfo.getKey(), ccRequest);
+            m_das.forceAlign(m_device.getDeviceName(), ccRequest);
         } catch (NetconfMessageBuilderException e) {
             throw new RuntimeException("Could not do forceAlign", e);
         } finally {
@@ -80,6 +80,10 @@ public class PmaServerSession implements PmaSession {
 
     @Override
     public void align() {
-        m_das.align(m_deviceInfo.getKey());
+        m_das.align(m_device.getDeviceName());
+    }
+
+    public boolean isActive() {
+        return m_pmaServer.isActive();
     }
 }

@@ -20,13 +20,13 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>aggregator</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/Aggregator</name>
 
     <dependencies>
@@ -53,6 +53,13 @@
             <groupId>org.bbf.obbaa</groupId>
             <artifactId>device-manager</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bbf.obbaa</groupId>
+            <artifactId>device-manager</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.bbf.obbaa.netconf</groupId>
@@ -82,14 +89,14 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>unpack-dependencies</id>
+                        <id>unpack-yangs</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
                             <includeArtifactIds>aggregator-yang</includeArtifactIds>
-                            <outputDirectory>${project.build.directory}/yangs/</outputDirectory>
+                            <outputDirectory>${project.build.directory}/classes/yangs/</outputDirectory>
                             <includes>**/*.yang</includes>
                         </configuration>
                     </execution>

@@ -14,16 +14,16 @@ authorized to perform within the BAA layer.
 Modelling a type of Access Node (AN)
 ===================================
 
-In the BAA layer, each type of AN (e.g., DPU, OLT, ONU, ONT) supported
+In the BAA layer, each type of AN (e.g., DPU, OLT) supported
 in the BAA layer is defined and maintained through the administration
 interface of OB-BAA. In OB-BAA each type of AN that is defined is
-associated with a set of YANG modules defined for that type of DPU. In
+associated with a set of YANG modules defined for that type of AN. In
 addition, compatible SBI Adapters are associated with AN type. The YANG
 modules that are supported by an AN type is determined by administrator
 of the BAA layer.
 
 Modules for a type of AN are exposed to SDN M&C elements using the
-"schema mount" mechanism defined in the "draft-ietf-netmod-schema-mount"
+"inline schema mount" mechanism defined in the "draft-ietf-netmod-schema-mount"
 where each mount point defines the modules that comprise the type of AN.
 ```
 <schema-mounts xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-schema-mount">
@@ -44,14 +44,13 @@ where each mount point defines the modules that comprise the type of AN.
       </module-set>
     </use-schema>
   </mount-point>
-</schema-mounts
+</schema-mounts>
+
 ```
 
-**Warning:** In this release, OB-BAA utilizes a "shared" schema mount approach to identifying the modules supported by a type of AN. What this means in this release DPUs will use the same SBI and the same set of modules without variation.
-In the next release, OB-BAA will switch to using the "inline" schema mount approach in order to allow for differing vendor implementations for each type of AN this allows for vendors to have different adapters and expose, if needed any vendor specific adaptations.
 
 **Info:** Example requests for a SDN M&C element to retrieve the YANG modules
-provided by an AN type is provided in the source code \"/resources/examples/requests\"
+provided by an AN type is provided in the source code \"examples/yang\"
 directory.
 
 Creating and Maintaining an Access Node Instance
@@ -73,7 +72,7 @@ layer needs to have enough information to:
 "modules" directory.
 
 **Info:** Example requests for a SDN M&C element to create, update, delete and
-retrieve AN instances is provided in the source code \"resources/examples/requests\"
+retrieve AN instances is provided in the source code \"example requests\"
 directory.
 
 

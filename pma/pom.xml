@@ -20,12 +20,12 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>pma</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/Persistence Management Agent</name>
     <dependencies>
         <dependency>
@@ -37,7 +37,6 @@
             <groupId>org.bbf.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -62,7 +61,26 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.bbf.obbaa</groupId>
+            <artifactId>device-adapter-fwk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>target/generated-resources</directory>
+                <excludes>
+                    <exclude>**/*-tests.jar</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 
 </project>
 

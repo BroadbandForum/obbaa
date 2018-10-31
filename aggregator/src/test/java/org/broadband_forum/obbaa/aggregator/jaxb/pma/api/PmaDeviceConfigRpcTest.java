@@ -23,17 +23,16 @@ import static org.junit.Assert.assertTrue;
 public class PmaDeviceConfigRpcTest {
     private static String REQUEST_ALIGN = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"10101\">\n" +
-            "  <action>\n" +
+            "  <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\n" +
             "      <pma-device-config xmlns=\"urn:bbf:yang:obbaa:pma-device-config\">\n" +
-            "        <align>\n" +
-            "        </align>\n" +
+            "        <align/>\n" +
             "      </pma-device-config>\n" +
             "  </action>\n" +
             "</rpc>";
 
     private static String REQUEST_ALIGN_FORCE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"10101\">\n" +
-            "  <action>\n" +
+            "  <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\n" +
             "      <pma-device-config xmlns=\"urn:bbf:yang:obbaa:pma-device-config\">\n" +
             "        <align>\n" +
             "          <force>\n" +

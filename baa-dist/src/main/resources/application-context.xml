@@ -69,21 +69,14 @@
 
     <bean id="rpcReqHandlerRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.RpcRequestHandlerRegistryImpl"/>
 
-    <bean id="deviceAlignmentStore" class="org.broadband_forum.obbaa.store.alignment.impl.DeviceAlignmentStoreImpl" init-method="init" destroy-method="destroy">
-        <constructor-arg value="/baa/stores/deviceAlignmentStore"/>
-    </bean>
-
     <bean id="deviceAlignmentService" class="org.broadband_forum.obbaa.pma.impl.NetconfDeviceAlignmentServiceImpl" init-method="init"
           destroy-method="destroy">
         <constructor-arg ref="deviceManager"/>
         <constructor-arg ref="ncConnectionMgr"/>
-        <constructor-arg ref="deviceAlignmentStore"/>
     </bean>
 
     <bean id="aligmentTimer" class="org.broadband_forum.obbaa.pma.impl.AlignmentTimer" init-method="init" destroy-method="destroy">
-        <constructor-arg ref="deviceAlignmentStore"/>
         <constructor-arg ref="pmaRegistry"/>
-        <constructor-arg ref="deviceAdminStore"/>
         <constructor-arg ref="ncConnectionMgr"/>
     </bean>
 
@@ -103,14 +96,8 @@
     </bean>
 
     <bean id="deviceManager" class="org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl">
-        <constructor-arg ref="deviceAdminStore"/>
         <constructor-arg ref="ncConnectionMgr"/>
     </bean>
-
-    <bean id="deviceAdminStore" class="org.broadband_forum.obbaa.store.dm.impl.DeviceAdminStoreImpl" init-method="init" destroy-method="destroy">
-        <constructor-arg value="/baa/stores/deviceAdminStore"/>
-    </bean>
-
 
     <bean id="pmaCapabilties" class="java.util.HashSet">
         <constructor-arg>
@@ -169,7 +156,6 @@
 
     <bean id="ncConnectionMgr" class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.NetconfConnectionManagerImpl" init-method="init" destroy-method="destroy">
         <constructor-arg ref="callHomeListenerComposite"/>
-        <constructor-arg ref="deviceAdminStore"/>
         <constructor-arg ref="clientDispatcher"/>
     </bean>
 
@@ -254,7 +240,19 @@
 
     <bean id="netconfServer" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl">
         <constructor-arg ref="schemaRegistry"/>
-        <property name="runningDataStore" ref="runningDataStore"/>
+        <property name="runningDataStore" ref="runningDataStoreProx"/>
+    </bean>
+
+    <bean id="dataStoreTransactionInterceptor" class="org.broadband_forum.obbaa.dmyang.interceptor.DataStoreTransactionInterceptor">
+    </bean>
+
+    <bean id="runningDataStoreProx" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="runningDataStore" />
+        <property name="interceptorNames">
+            <list>
+                <value>dataStoreTransactionInterceptor</value>
+            </list>
+        </property>
     </bean>
 
     <bean id="entityRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistryImpl"/>
@@ -336,7 +334,6 @@
           init-method="init"
           destroy-method="destroy">
         <constructor-arg ref="aggregator"/>
-        <constructor-arg ref="deviceManager"/>
     </bean>
     <bean id="pmaAdapter" class="org.broadband_forum.obbaa.aggregator.processor.PmaAdapter"
           init-method="init"

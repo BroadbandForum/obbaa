@@ -1,0 +1,186 @@
+module ietf-ip-dev {
+
+  namespace
+     "urn:xxxxx-org:yang:ietf-ip-dev";
+
+  prefix  ipdev;
+
+  import ietf-interfaces {
+	    prefix if;
+	}
+
+  import ietf-ip {
+	  prefix ip;
+	}
+
+  import iana-if-type { 
+          prefix "ianaift"; 
+	}
+
+  import bbf-if-type {
+    prefix bbfift;
+  }
+
+  import ietf-ip-aug {
+    prefix mgntip;
+  }
+
+  import bbf-sub-interfaces {
+    prefix bbf-subif;
+  }
+
+ import bbf-l2-forwarding {
+    prefix bbf-l2-fwd;
+  }
+
+
+ import bbf-sub-interface-tagging {
+    prefix bbf-subif-tag;
+ }
+ 
+
+  organization
+    "Nokia";
+
+  contact
+    "isam.yang@nokia.com";
+
+  description
+    "The NOKIA IETF/IP YANG module supporting
+     deviations on top of standard.";
+
+
+
+/* revision */
+
+  revision 2016-11-16 {
+    description
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+
+/**********************************************/
+/* definitions which should always be present */
+/**********************************************/
+
+/********************************************************/
+/* multicast/broadcast address is not valid address     */
+/* The inband and outband ip address can not be same.   */
+/* IPv4 addess defined in ietf-ip.yang                  */
+/********************************************************/
+
+  deviation "/if:interfaces/if:interface/ip:ipv4/ip:address/ip:ip"  {
+
+   /* multicast address is not valid address  */
+    deviate add {
+       must "not((substring-before(.,'.') >= 224)
+             and (substring-before(.,'.') < 240))"{
+             error-message "224.0.0.0~239.255.255.255 are not valid";
+      }
+    }
+
+    /* multicast/broadcast address is not valid address  */
+    deviate add {
+       must "current() != '255.255.255.255'"{
+             error-message "255.255.255.255 is not valid";
+      }
+    }
+
+   /* The inband and outband ip address can not be same.  */
+   deviate add {
+// WORKAROUND FNMS-17404
+       must "not(count(../../../../if:interface/ip:ipv4/ip:address[ip:ip = current()]) >=2)"{
+             error-message "IP address can not be same";
+      }
+    }
+
+   /* IP interface type can not be modified */
+    deviate add {
+        must "(../../../if:type = 'ianaift:ipForward')" {
+        error-message "IP interface type should be ipForward.";
+      }
+    }
+
+
+ /* Only one IP address can  be in confiugred */
+    deviate add {
+        must "count(../../ip:address) <= 1" {
+        error-message "Only one IP address can  be  confiugred on one interface.";
+      }
+    }  
+    
+    
+ }
+
+
+
+/****************************************************************************/
+/* Not allow low layer subinterface attached to a forwarder                 */
+/* Only One IP-interface can be created on one uplink port.                 */
+/* Any sub-interface is attached to a forwarder on the second uplink port.  */
+/* management ip interface can only reference to network-port sub-interface */
+/********************************************888888**************************/
+
+
+/* low layer interface defined in nokia-ietf-ip-aug.yang */
+
+  deviation "/if:interfaces/if:interface/ip:ipv4/mgntip:ipif-lower-layer/mgntip:sub-interface"  {
+
+  /* The low layer sub-interface is attached to a forwarder.*/
+// WORKAROUND FNMS-17404
+//    deviate add {
+//       must "not(count(/bbf-l2-fwd:forwarding/bbf-l2-fwd:forwarders/bbf-l2-fwd:forwarder[bbf-l2-fwd:ports/bbf-l2-fwd:port/bbf-l2-fwd:sub-interface = current()]) >= 1) "{
+//             error-message "The lower layer interface is attached to a forwarder";
+//      }
+//    }
+
+  /* management ip interface can only reference to network-port sub-interface */
+    deviate add {
+      must "((/if:interfaces/if:interface[if:name=current()]/if:type = 'bbfift:vlan-sub-interface') and (/if:interfaces/if:interface[if:name=current()]/bbf-l2-fwd:interface-usage/bbf-l2-fwd:interface-usage = 'network-port')) " {
+        error-message "management ip interface can only reference to network-port sub-interface.";
+      }
+    }
+
+   /* Any sub-interface is attached to a forwarder on the second uplink port.  */
+// WORKAROUND FNMS-17404
+//    deviate add {
+//       must "((../../../if:name = 'inband') or (count(/bbf-l2-fwd:forwarding/bbf-l2-fwd:forwarders/bbf-l2-fwd:forwarder[bbf-l2-fwd:ports/bbf-l2-fwd:port/bbf-l2-fwd:sub-interface =  /if:interfaces/if:interface[bbf-subif:subif-lower-layer/bbf-subif:interface = /if:interfaces/if:interface[if:name = current()]/bbf-subif:subif-lower-layer/bbf-subif:interface]/if:name]) = 0)) "{
+//       error-message "This uplink port had been attached one outband interface, Please delete the outband interface firstly";
+//      }
+//    }
+
+  /* Only One IP-interface can be created on one uplink port.                 */
+// WORKAROUND FNMS-17404
+//     deviate add {
+//       must "count(/if:interfaces/if:interface[ip:ipv4/mgntip:ipif-lower-layer/mgntip:sub-interface =  /if:interfaces/if:interface[bbf-subif:subif-lower-layer/bbf-subif:interface = /if:interfaces/if:interface[if:name = current()]/bbf-subif:subif-lower-layer/bbf-subif:interface]/if:name]) <= 1 "{
+//       error-message "Only One IP-interface can be created on one uplink port";
+//      }
+//    }
+
+
+
+    /* IP interface type can not be modified */
+    deviate add {
+        must "(../../../if:type = 'ianaift:ipForward')" {
+        error-message "IP interface type should be ipForward.";
+      }
+    }
+
+
+  /* management vlan can not be same */
+// WORKAROUND FNMS-17404
+//    deviate add {
+//      must "count(/if:interfaces/if:interface[if:name = /if:interfaces/if:interface[if:type = 'ianaift:ipForward']/ip:ipv4/mgntip:ipif-lower-layer/mgntip:sub-interface and bbf-subif:frame-processing/bbf-subif:ingress-rule/bbf-subif:rule[1]/bbf-subif:flexible-match/bbf-subif-tag:match-criteria/bbf-subif-tag:tag[bbf-subif-tag:index = 0]/bbf-subif-tag:dot1q-tag/bbf-subif-tag:vlan-id = /if:interfaces/if:interface[if:name = current()]/bbf-subif:frame-processing/bbf-subif:ingress-rule/bbf-subif:rule[1]/bbf-subif:flexible-match/bbf-subif-tag:match-criteria/bbf-subif-tag:tag[bbf-subif-tag:index = 0]/bbf-subif-tag:dot1q-tag/bbf-subif-tag:vlan-id]) <=1 " {
+//         error-message "Management VLAN can not be same.";
+//      }
+//    
+//    }
+
+
+
+
+	}
+
+
+}

@@ -16,24 +16,37 @@
 
 package org.broadband_forum.obbaa.nbiadapter.netconf;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
-import org.broadband_forum.obbaa.netconf.api.messages.*;
+import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.ActionResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.CloseSessionRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.KillSessionRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.LockRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.UnLockRequest;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-
-
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class NbiNetconfServerMessageListenerTest {
 
@@ -51,14 +64,14 @@ public class NbiNetconfServerMessageListenerTest {
         client = new NetconfClientInfo("test", 1);
         resp = new NetConfResponse();
 
-        when(aggregator.dispatchRequest(anyObject())).thenReturn("<ok/>");
+        when(aggregator.dispatchRequest(eq(client), anyObject())).thenReturn("<ok/>");
     }
 
     @Test
     public void executeRequest() {
         GetRequest req = new GetRequest();
 
-        listener.executeRequest(req, resp);
+        listener.executeRequest(client, req, resp);
 
         assertTrue(resp.isOk());
     }

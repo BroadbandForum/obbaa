@@ -29,7 +29,7 @@ public class DeviceManagement {
 
     private DeviceConnection deviceConnection;
 
-    @XmlElement(name = "device-type")
+    @XmlElement(name = "type")
     public String getDeviceType() {
         return deviceType;
     }
@@ -38,7 +38,7 @@ public class DeviceManagement {
         this.deviceType = deviceType;
     }
 
-    @XmlElement(name = "device-software-version")
+    @XmlElement(name = "interface-version")
     public String getDeviceSoftwareVersion() {
         return deviceSoftwareVersion;
     }
@@ -47,7 +47,7 @@ public class DeviceManagement {
         this.deviceSoftwareVersion = deviceSoftwareVersion;
     }
 
-    @XmlElement(name = "device-model")
+    @XmlElement(name = "model")
     public String getDeviceModel() {
         return deviceModel;
     }
@@ -56,7 +56,7 @@ public class DeviceManagement {
         this.deviceModel = deviceModel;
     }
 
-    @XmlElement(name = "device-vendor")
+    @XmlElement(name = "vendor")
     public String getDeviceVendor() {
         return deviceVendor;
     }

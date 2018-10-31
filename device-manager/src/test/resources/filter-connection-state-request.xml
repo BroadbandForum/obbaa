@@ -1,0 +1,5 @@
+<device-state xmlns="urn:bbf:yang:obbaa:network-manager">
+    <connection-state>
+        <connected>true</connected>
+    </connection-state>
+</device-state>

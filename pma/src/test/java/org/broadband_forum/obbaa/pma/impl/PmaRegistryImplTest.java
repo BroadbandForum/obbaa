@@ -18,57 +18,101 @@ package org.broadband_forum.obbaa.pma.impl;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDSMRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
 import org.broadband_forum.obbaa.pma.DeviceModelDeployer;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
+import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-/**
- * Created by kbhatk on 8/10/17.
- */
+import com.google.common.io.Files;
+
 public class PmaRegistryImplTest {
-    private static final String OK_RESPONSE = "<rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-            "  <ok/>\n" +
-            "</rpc-reply>\n";
+
     private PmaRegistryImpl m_pmaRegistry;
     @Mock
     private NetconfConnectionManager m_cm;
     @Mock
     private DeviceManager m_dm;
     @Mock
-    private DeviceInfo m_device1Meta;
+    private Device m_device1Meta;
     @Mock
     private List<String> m_moduleList;
     @Mock
     private DeviceModelDeployer m_modelDeployer;
     private NetConfResponse m_response = new NetConfResponse().setOk(true).setMessageId("1");
+    @Mock
+    private AdapterManager m_adapterManager;
+    @Mock
+    private NetConfServerImpl m_netconfServer;
+    @Mock
+    private NetconfDeviceAlignmentService m_das;
+    @Mock
+    private EntityRegistry m_entityRegistry;
+    @Mock
+    private SchemaRegistry m_schemaReg;
+    @Mock
+    private ModelNodeHelperRegistry m_modelNodeHelperReg;
+    @Mock
+    private SubSystemRegistry m_subsystemReg;
+    @Mock
+    private ModelNodeDSMRegistry m_modelNodeDsmReg;
+    @Mock
+    private AdapterContext m_adapterContext;
+    @Mock
+    private DeviceMgmt m_devMgmt;
+    private PmaRegistryImpl m_pmaRegistryTransparentSF;
+    private File m_tempDir;
+    private String m_dir;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        m_tempDir = Files.createTempDir();
+        m_dir = m_tempDir.getAbsolutePath();
         m_pmaRegistry = new PmaRegistryImpl(m_dm, m_cm,
-                m_modelDeployer, new TransparentPmaSessionFactory(m_cm, m_dm));
+                m_modelDeployer, new PmaServerSessionFactory(m_dir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaReg,
+                m_modelNodeHelperReg, m_subsystemReg, m_modelNodeDsmReg, m_adapterManager));
+        m_pmaRegistryTransparentSF = new PmaRegistryImpl(m_dm, m_cm, m_modelDeployer, new TransparentPmaSessionFactory(m_cm, m_dm));
         when(m_cm.isConnected(m_device1Meta)).thenReturn(true);
         when(m_dm.getDevice("device1")).thenReturn(m_device1Meta);
+        when(m_device1Meta.getDeviceManagement()).thenReturn(m_devMgmt);
+        when(m_device1Meta.getDeviceName()).thenReturn("device1");
+        when(m_devMgmt.getDeviceInterfaceVersion()).thenReturn("1.0");
+        when(m_devMgmt.getDeviceVendor()).thenReturn("vendor1");
+        when(m_devMgmt.getDeviceModel()).thenReturn("model1");
+        when(m_devMgmt.getDeviceType()).thenReturn("type1");
         Future<NetConfResponse> futureObject = mock(Future.class);
         when(futureObject.get()).thenReturn(m_response);
-        when(m_cm.executeNetconf((DeviceInfo) anyObject(), anyObject())).thenReturn(futureObject);
+        when(m_cm.executeNetconf((Device) anyObject(), anyObject())).thenReturn(futureObject);
         when(m_modelDeployer.redeploy()).thenReturn(m_moduleList);
+        when(m_adapterManager.getAdapterContext(any())).thenReturn(m_adapterContext);
     }
 
     @Test
@@ -99,15 +143,55 @@ public class PmaRegistryImplTest {
         assertEquals("response", response);
     }
 
+    @Test
+    public void testExecuteWithPmaSessionException() throws ExecutionException {
+        when(m_adapterManager.getAdapterContext(any())).thenReturn(null);
+        try {
+            m_pmaRegistry.executeWithPmaSession("device1", session -> "response");
+        } catch (RuntimeException e){
+            assertEquals("Could not get session to Pma device1", e.getMessage());
+        }
+    }
+
     @Test(expected = UnsupportedOperationException.class)
+    public void testFullResyncContactsDASTransparentSessionFactory() throws ExecutionException {
+        m_pmaRegistryTransparentSF.forceAlign("device1");
+    }
+
+    @Test
     public void testFullResyncContactsDAS() throws ExecutionException {
         m_pmaRegistry.forceAlign("device1");
+        verify(m_das).forceAlign(any(), any());
+    }
+
+    @Test
+    public void testsyncContactsDAS() throws ExecutionException {
+        m_pmaRegistry.align("device1");
+        verify(m_das).align("device1");
     }
 
     @Test
     public void testDeviceModelReloadContactsDeviceModelDeployer(){
         assertEquals(m_moduleList, m_pmaRegistry.reloadDeviceModel());
         verify(m_modelDeployer).redeploy();
+    }
+
+    @Test
+    public void testDeviceRemoved() throws ExecutionException {
+        m_pmaRegistry.deviceRemoved("device1");
+        m_pmaRegistry.executeWithPmaSession("device1", session -> "response");
+
+    }
+
+    @After
+    public void teardown() throws Exception{
+        deleteIfExists(m_tempDir);
+    }
+
+    private void deleteIfExists(File file) {
+        if(file != null && file.exists()){
+            file.delete();
+        }
     }
 
 }

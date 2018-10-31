@@ -88,7 +88,7 @@ public class AggregatorMessage {
 
     private String getDeviceNameFromDeviceNode(Node device) throws DispatchException {
         Node deviceNameNode = device.getFirstChild();
-        if (!deviceNameNode.getNodeName().equals("device-name")) {
+        if (!deviceNameNode.getNodeName().equals("name")) {
             throw new DispatchException("The request format is error.");
         }
 
@@ -244,7 +244,7 @@ public class AggregatorMessage {
     }
 
     private static Element buildDeviceNameElement(Document document, String deviceName) {
-        Element deviceNameNode = document.createElement("device-name");
+        Element deviceNameNode = document.createElement("name");
         if (deviceName != null) {
             deviceNameNode.setTextContent(deviceName);
         }

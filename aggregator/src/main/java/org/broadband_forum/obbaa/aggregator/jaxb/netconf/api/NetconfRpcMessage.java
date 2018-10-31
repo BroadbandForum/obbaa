@@ -16,6 +16,11 @@
 
 package org.broadband_forum.obbaa.aggregator.jaxb.netconf.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.JAXBException;
+
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc.Rpc;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc.RpcV10;
@@ -25,9 +30,6 @@ import org.broadband_forum.obbaa.aggregator.jaxb.utils.JaxbUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
-import javax.xml.bind.JAXBException;
-import java.util.List;
 
 /**
  * Netconf rpc message.
@@ -70,6 +72,7 @@ public class NetconfRpcMessage extends NetconfPayload {
             throw new DispatchException(ex);
         }
     }
+
     /**
      * Get payloads of rpc message.
      *
@@ -89,7 +92,13 @@ public class NetconfRpcMessage extends NetconfPayload {
      * @return Payloads
      */
     public static List<Object> getRpcPayloadObjects(Rpc rpc) throws JAXBException {
-        return rpc.getPayloadObjects();
+        try {
+            return rpc.getPayloadObjects();
+        }
+        catch (JAXBException ex) {
+            LOGGER.info("Payload is null");
+            return new ArrayList<>();
+        }
     }
 
     /**

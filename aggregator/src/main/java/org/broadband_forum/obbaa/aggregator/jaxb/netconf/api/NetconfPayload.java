@@ -60,8 +60,8 @@ public abstract class NetconfPayload {
             return getPayloadDocuments().get(0).getFirstChild().getNamespaceURI();
         }
         catch (NoSuchElementException | IndexOutOfBoundsException ex) {
-            LOGGER.error("getOnlyOneTopXmlns : {}", ex);
-            throw new DispatchException("Error message about namespace.");
+            LOGGER.info("getOnlyOneTopXmlns : {}", ex);
+            return "";
         }
     }
 

@@ -23,8 +23,8 @@ public final class NetconfProtocol {
         //Hide
     }
 
-    public static final String RCP = "rpc";
-    public static final String RCP_REPLY = "rpc-reply";
+    public static final String RPC = "rpc";
+    public static final String RPC_REPLY = "rpc-reply";
 
     public static final String VERSION_1_0 = "urn:ietf:params:xml:ns:netconf:base:1.0";
     public static final String VERSION_1_1 = "urn:ietf:params:xml:ns:netconf:base:1.1";

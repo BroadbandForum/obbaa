@@ -16,26 +16,28 @@
 
 package org.broadband_forum.obbaa.pma;
 
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 
 public interface PmaServer {
-    ThreadLocal<DeviceInfo> CURRENT_DEVICE = new ThreadLocal<>();
+    ThreadLocal<Device> CURRENT_DEVICE = new ThreadLocal<>();
     NetconfClientInfo PMA_USER = new NetconfClientInfo("PMA_USER", 1);
 
     NetConfResponse executeNetconf(AbstractNetconfRequest request);
 
-    static void setCurrentDevice(DeviceInfo deviceInfo) {
-        CURRENT_DEVICE.set(deviceInfo);
+    static void setCurrentDevice(Device device) {
+        CURRENT_DEVICE.set(device);
     }
 
     static void clearCurrentDevice() {
         CURRENT_DEVICE.remove();
     }
 
-    static DeviceInfo getCurrentDevice() {
+    static Device getCurrentDevice() {
         return CURRENT_DEVICE.get();
     }
+
+    boolean isActive();
 }

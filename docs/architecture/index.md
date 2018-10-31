@@ -31,7 +31,7 @@ A high-level software architecture is depicted below that implements the
 logical system architecture described in the previous section.
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/system_architecture.png">
+ <img width="1000px" height="700px" src="{{site.url}}/architecture/system_architecture.png">
 </p>
 
 The roles and responsibilities of each of these components are as
@@ -239,6 +239,8 @@ component.
     notifications and events to the data model supported by the BAA
     layer\'s SAI component for that type of device and then forwards the
     notification and event to the PAM Registry component
+
+[For more information on the Device Adapter Component](../device_adapter/)
 
 #### L1 Engine
 

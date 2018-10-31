@@ -16,12 +16,10 @@
 
 package org.broadband_forum.obbaa.dm.rest;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import org.broadband_forum.obbaa.dm.DeviceManager;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -43,22 +41,12 @@ public class DeviceManagerRestEPTest {
     }
     @Test
     public void testThatEPDeligatesOnAllMethods(){
-        DeviceInfo device = mock(DeviceInfo.class);
-        m_dm.createDevice(device);
-        verify(m_managerInternal).createDevice(device);
-
-        m_dm.deleteDevice("device 1");
-        verify(m_managerInternal).deleteDevice("device 1");
 
         m_dm.getDevice("device 2");
         verify(m_managerInternal).getDevice("device 2");
 
-        m_dm.updateDevice(device);
-        verify(m_managerInternal).updateDevice(device);
-
         m_dm.getAllDevices();
         verify(m_managerInternal).getAllDevices();
-
     }
 
 }

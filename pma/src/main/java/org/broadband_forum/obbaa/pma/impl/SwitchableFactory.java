@@ -57,6 +57,11 @@ public class SwitchableFactory extends PmaSessionFactory {
     }
 
     @Override
+    public boolean validateObject(String key, PooledObject<PmaSession> session) {
+        return m_currentFactory.validateObject(key, session);
+    }
+
+    @Override
     public void deviceDeleted(String deviceName) {
         m_currentFactory.deviceDeleted(deviceName);
     }

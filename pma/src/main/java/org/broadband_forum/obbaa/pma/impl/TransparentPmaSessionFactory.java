@@ -20,9 +20,9 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 
 public class TransparentPmaSessionFactory extends PmaSessionFactory {
     private final NetconfConnectionManager m_connectionManager;
@@ -35,8 +35,8 @@ public class TransparentPmaSessionFactory extends PmaSessionFactory {
 
     @Override
     public PmaSession create(String key) throws Exception {
-        DeviceInfo deviceInfo = m_deviceManager.getDevice(key);
-        return new TransparentPmaSession(deviceInfo, m_connectionManager);
+        Device device = m_deviceManager.getDevice(key);
+        return new TransparentPmaSession(device, m_connectionManager);
     }
 
     @Override

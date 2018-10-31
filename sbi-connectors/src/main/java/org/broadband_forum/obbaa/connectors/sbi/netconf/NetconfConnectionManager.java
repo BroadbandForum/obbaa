@@ -20,9 +20,10 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
 
 /**
  * <p/>
@@ -35,13 +36,13 @@ public interface NetconfConnectionManager {
     /**
      * Executes the given Netconf request on the specified device and returns a Future object to get the response.
      *
-     * @param deviceInfo - MetaData of the device.
+     * @param device - Target device.
      * @param request    - Request to be executed.
      * @return - Future object to retrieve the result of execution.
      * @throws IllegalStateException - If the device is not already connected.
      * @throws ExecutionException    - If there are exceptions during execution.
      */
-    Future<NetConfResponse> executeNetconf(DeviceInfo deviceInfo, AbstractNetconfRequest request)
+    Future<NetConfResponse> executeNetconf(Device device, AbstractNetconfRequest request)
             throws IllegalStateException, ExecutionException;
 
     /**
@@ -59,23 +60,23 @@ public interface NetconfConnectionManager {
     /**
      * Executes the given Netconf template on the specified device.
      *
-     * @param deviceInfo      - MetaData of the device.
+     * @param device      - MetaData of the device.
      * @param netconfTemplate - Template to be executed with session on the device,
      * @param <RT>            - Type of the result.
      * @return - Result of execution.
      * @throws IllegalStateException - If the device is not already connected.
      * @throws ExecutionException    - If there are exceptions during execution.
      */
-    <RT> RT executeWithSession(DeviceInfo deviceInfo, NetconfTemplate<RT> netconfTemplate)
+    <RT> RT executeWithSession(Device device, NetconfTemplate<RT> netconfTemplate)
             throws IllegalStateException, ExecutionException;
 
     /**
      * Gives the current connection state of the device.
      *
-     * @param deviceInfo - MetaData of the device.
+     * @param device - MetaData of the device.
      * @return - true if the device is connected, false otherwise.
      */
-    boolean isConnected(DeviceInfo deviceInfo);
+    boolean isConnected(Device device);
 
     /**
      * Returns the details of the existing connection to the device.

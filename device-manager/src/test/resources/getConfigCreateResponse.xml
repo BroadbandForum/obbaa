@@ -1,0 +1,28 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <data>
+    <network-manager:network-manager xmlns:network-manager="urn:bbf:yang:obbaa:network-manager">
+      <network-manager:managed-devices>
+        <network-manager:device>
+          <network-manager:name>deviceA</network-manager:name>
+          <network-manager:device-management>
+            <network-manager:interface-version>1.0.0</network-manager:interface-version>
+            <network-manager:push-pma-configuration-to-device>true</network-manager:push-pma-configuration-to-device>
+            <network-manager:type>DPU</network-manager:type>
+            <network-manager:vendor>Nokia</network-manager:vendor>
+            <network-manager:device-connection>
+              <network-manager:connection-model>direct</network-manager:connection-model>
+              <network-manager:password-auth>
+                <network-manager:authentication>
+                  <network-manager:address>192.168.169.1</network-manager:address>
+                  <network-manager:management-port>92994</network-manager:management-port>
+                  <network-manager:password>DPU</network-manager:password>
+                  <network-manager:user-name>DPU</network-manager:user-name>
+                </network-manager:authentication>
+              </network-manager:password-auth>
+            </network-manager:device-connection>
+          </network-manager:device-management>
+        </network-manager:device>
+      </network-manager:managed-devices>
+    </network-manager:network-manager>
+  </data>
+</rpc-reply>

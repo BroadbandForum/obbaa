@@ -24,11 +24,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashMap;
 
-import org.broadband_forum.obbaa.connectors.sbi.netconf.ConnectionState;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
-import org.broadband_forum.obbaa.store.dm.CallHomeInfo;
-import org.broadband_forum.obbaa.store.dm.DeviceInfo;
+import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceConnection;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -79,8 +80,15 @@ public class NetconfConnectionStateProviderTest {
         verify(m_cm).dropNewDeviceConnection("callHomeDevice-1");
     }
 
-    private DeviceInfo createCallHomeDevice(String deviceName) {
-        DeviceInfo deviceInfo = new DeviceInfo(deviceName, new CallHomeInfo(deviceName));
-        return deviceInfo;
+    private Device createCallHomeDevice(String deviceName) {
+        Device device = new Device();
+        device.setDeviceName(deviceName);
+        DeviceMgmt deviceMgmt = new DeviceMgmt();
+        DeviceConnection deviceConnection = new DeviceConnection();
+        deviceConnection.setConnectionModel("call-home");
+        deviceConnection.setDuid("callHomeDevice-1");
+        deviceMgmt.setDeviceConnection(deviceConnection);
+        device.setDeviceManagement(deviceMgmt);
+        return device;
     }
 }
