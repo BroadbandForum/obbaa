@@ -159,13 +159,13 @@ create an adaptor-plug.zip device adapter.
 to easily identify what devices the adapter supports.
 
 <p align="center">
- <img width="400px" height="200px" src="{{site.url}}/device_adapter/da_plugin.png">
+ <img width="450px" height="200px" src="{{site.url}}/device_adapter/da_plugin.png">
 </p>
 
 The created zip file has the following structure:
 
 <p align="center">
- <img width="200px" height="300px" src="{{site.url}}/device_adapter/da_structure.png">
+ <img width="400px" height="300px" src="{{site.url}}/device_adapter/da_structure.png">
 </p>
 
 Managing a Device Adapter
