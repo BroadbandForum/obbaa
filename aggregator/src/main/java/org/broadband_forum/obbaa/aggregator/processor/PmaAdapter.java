@@ -18,10 +18,11 @@ package org.broadband_forum.obbaa.aggregator.processor;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import org.broadband_forum.obbaa.adapter.handler.DeviceAdapterActionHandler;
+import org.broadband_forum.obbaa.adapter.AdapterDeployer;
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
@@ -30,13 +31,13 @@ import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc.RpcOperationType;
 import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.DeployAdapterRpc;
 import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.PmaDeviceConfigRpc;
-import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.PmaYangLibraryRpc;
 import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.UndeployAdapterRpc;
 import org.broadband_forum.obbaa.aggregator.jaxb.pma.schema.deviceconfig.PmaDeviceConfigAlign;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
-import org.broadband_forum.obbaa.pma.DeviceModelDeployer;
+import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,22 +51,19 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
 
     Aggregator m_aggregator;
     PmaRegistry m_pmaRegistry;
-    DeviceModelDeployer m_deviceModelDeployer;
-    DeviceAdapterActionHandler m_deviceAdapterActionHandler;
+    AdapterDeployer m_deviceAdapterActionHandler;
 
     /**
      * PMA dependents Aggregator for message dispatch.
      *
-     * @param aggregator          Aggregator component
-     * @param actionHandler       Device Adapter Action Handler
-     * @param pmaRegistry         PMA Registry
-     * @param deviceModelDeployer PMA Model deploy
+     * @param aggregator    Aggregator component
+     * @param pmaRegistry   PMA Registry
+     * @param actionHandler Device Adapter Action Handler
      */
     public PmaAdapter(Aggregator aggregator, PmaRegistry pmaRegistry,
-                      DeviceModelDeployer deviceModelDeployer, DeviceAdapterActionHandler actionHandler) {
+                      AdapterDeployer actionHandler) {
         m_aggregator = aggregator;
         m_pmaRegistry = pmaRegistry;
-        m_deviceModelDeployer = deviceModelDeployer;
         m_deviceAdapterActionHandler = actionHandler;
     }
 
@@ -84,8 +82,7 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
         try {
             getAggregator().removeProcessor((GlobalRequestProcessor) this);
             getAggregator().removeProcessor((DeviceConfigProcessor) this);
-        }
-        catch (DispatchException ex) {
+        } catch (DispatchException ex) {
             LOGGER.error(ex.getMessage());
         }
     }
@@ -96,8 +93,7 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
     private void registerGlobalProcessors() {
         try {
             getAggregator().addProcessor(buildGlobalProcessor(), this);
-        }
-        catch (DispatchException ex) {
+        } catch (DispatchException ex) {
             LOGGER.error(ex.getMessage());
         }
     }
@@ -109,23 +105,7 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
      */
     private Set<ModuleIdentifier> buildGlobalProcessor() {
         Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
-        moduleIdentifiers.addAll(buildPmaYangLibraryModules());
         moduleIdentifiers.addAll(buildDeployAdapterYangModules());
-
-        return moduleIdentifiers;
-    }
-
-    /**
-     * Build PMA Action modules.
-     *
-     * @return Module identifiers
-     */
-    private Set<ModuleIdentifier> buildPmaYangLibraryModules() {
-        Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
-
-        ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier(PmaYangLibraryRpc.MODULE_NAME,
-                PmaYangLibraryRpc.NAMESPACE, PmaYangLibraryRpc.REVISION);
-        moduleIdentifiers.add(moduleIdentifier);
 
         return moduleIdentifiers;
     }
@@ -160,11 +140,10 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
      */
     private void registerDeviceConfigProcessor() {
         try {
-            Set<ModuleIdentifier> moduleIdentifiers = getDeviceModelDeployer().getAllModuleIdentifiers();
+            Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
             moduleIdentifiers.addAll(buildPmaDeviceConfigModules());
             getAggregator().addProcessor(DEVICE_DPU, moduleIdentifiers, this);
-        }
-        catch (DispatchException ex) {
+        } catch (DispatchException ex) {
             LOGGER.error(ex.getMessage());
         }
     }
@@ -176,10 +155,17 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
             if (netconfRpcMessage.getOnlyOneTopXmlns().equals(PmaDeviceConfigRpc.NAMESPACE)) {
                 return processPmaDeviceConfigRequest(deviceName, netconfRpcMessage);
             }
-
-            return getPmaRegistry().executeNC(deviceName, netconfRequest);
-        }
-        catch (IllegalArgumentException | IllegalStateException | ExecutionException ex) {
+            Map<NetConfResponse, List<Notification>> netConfResponseListMap = getPmaRegistry().executeNC(deviceName,
+                    netconfRequest);
+            Map.Entry<NetConfResponse, List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
+            List<Notification> notificationList = entry.getValue();
+            if ((notificationList != null) && (!notificationList.isEmpty())) {
+                for (Notification notification : notificationList) {
+                    m_aggregator.publishNotification(deviceName, notification);
+                }
+            }
+            return entry.getKey().responseToString();
+        } catch (IllegalArgumentException | IllegalStateException | ExecutionException ex) {
             throw new DispatchException(ex);
         }
     }
@@ -187,9 +173,7 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
     @Override
     public String processRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException {
         NetconfRpcMessage netconfRpcMessage = NetconfRpcMessage.getInstance(netconfRequest);
-        if (netconfRpcMessage.getOnlyOneTopXmlns().equals(PmaYangLibraryRpc.NAMESPACE)) {
-            return processPmaYangLibraryRequest(netconfRpcMessage);
-        } else if (netconfRpcMessage.getOnlyOneTopXmlns().equals(DeployAdapterRpc.NAMESPACE)) {
+        if (netconfRpcMessage.getOnlyOneTopXmlns().equals(DeployAdapterRpc.NAMESPACE)) {
             return processDeployOrUndeployAdapterRequest(netconfRpcMessage);
         }
 
@@ -214,7 +198,7 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
 
     private void deployAdapter(DeployAdapterRpc deployAdapterRpc) throws DispatchException {
         try {
-            m_deviceAdapterActionHandler.deployRpc(deployAdapterRpc.getDeployAdapter().getDeploy().getAdapterArchive());
+            m_deviceAdapterActionHandler.deployAdapter(deployAdapterRpc.getDeployAdapter().getDeploy().getAdapterArchive());
         } catch (Exception e) {
             throw new DispatchException(e);
         }
@@ -222,56 +206,10 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
 
     private void undeployAdapter(UndeployAdapterRpc deployAdapterRpc) throws DispatchException {
         try {
-            m_deviceAdapterActionHandler.undeploy(deployAdapterRpc.getUndeployAdapter().getUndeploy().getAdapterArchive());
+            m_deviceAdapterActionHandler.undeployAdapter(deployAdapterRpc.getUndeployAdapter().getUndeploy().getAdapterArchive());
         } catch (Exception e) {
             throw new DispatchException(e);
         }
-    }
-
-    /**
-     * Process the request of YANG module reloading.
-     *
-     * @param netconfRpcMessage Request
-     * @return Response message
-     */
-    private String processPmaYangLibraryRequest(NetconfRpcMessage netconfRpcMessage) throws DispatchException {
-        if (!netconfRpcMessage.getRpc().getRpcOperationType().equals(RpcOperationType.ACTION)) {
-            return netconfRpcMessage.buildRpcReplyError(DispatchException.NOT_SUPPORT);
-        }
-
-        PmaYangLibraryRpc pmaYangLibraryRpc = PmaYangLibraryRpc.getInstance(netconfRpcMessage.getOriginalMessage());
-        reloadYangLibrary(pmaYangLibraryRpc);
-
-        return netconfRpcMessage.buildRpcReplyOk();
-    }
-
-    /**
-     * Reload YANG library of PMA.
-     *
-     * @param pmaYangLibraryRpc Request
-     */
-    private void reloadYangLibrary(PmaYangLibraryRpc pmaYangLibraryRpc) throws DispatchException {
-        if (pmaYangLibraryRpc.getPmaYangLibrary().getReload() == null) {
-            return;
-        }
-
-        //Just support reload YANG library
-        List<String> responses = getPmaRegistry().reloadDeviceModel();
-        for (String response : responses) {
-            LOGGER.info("reloadYangLibrary: {}", response);
-        }
-
-        redeployYangLibrary();
-    }
-
-    /**
-     * Redeploy YANG library of PMA.
-     *
-     * @throws DispatchException Exception
-     */
-    private void redeployYangLibrary() throws DispatchException {
-        Set<ModuleIdentifier> moduleIdentifiers = getDeviceModelDeployer().getAllModuleIdentifiers();
-        getAggregator().addProcessor("DPU", moduleIdentifiers, this);
     }
 
     /**
@@ -330,8 +268,7 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
                 getPmaRegistry().align(deviceName);
             }
             return pmaDeviceConfigRpc.buildRpcReplyOk();
-        }
-        catch (ExecutionException ex) {
+        } catch (ExecutionException ex) {
             throw new DispatchException(ex);
         }
     }
@@ -365,12 +302,4 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
         return m_pmaRegistry;
     }
 
-    /**
-     * Get component of PMA device model deployer.
-     *
-     * @return Component
-     */
-    public DeviceModelDeployer getDeviceModelDeployer() {
-        return m_deviceModelDeployer;
-    }
 }

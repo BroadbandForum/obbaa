@@ -17,7 +17,7 @@
 package org.broadband_forum.obbaa.aggregator.processor;
 
 import org.junit.Test;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.w3c.dom.Document;
 
 import static junit.framework.TestCase.assertEquals;

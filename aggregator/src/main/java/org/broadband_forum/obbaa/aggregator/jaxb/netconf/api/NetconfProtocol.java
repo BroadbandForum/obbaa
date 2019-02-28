@@ -16,7 +16,7 @@
 
 package org.broadband_forum.obbaa.aggregator.jaxb.netconf.api;
 
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 
 public final class NetconfProtocol {
     private NetconfProtocol() {
@@ -72,6 +72,6 @@ public final class NetconfProtocol {
      */
     public static String buildCapability(ModuleIdentifier moduleIdentifier) {
         return String.format("%s?module=%s&revision=%s", moduleIdentifier.getNamespace(),
-                moduleIdentifier.getName(), moduleIdentifier.getQNameModule().getFormattedRevision());
+                moduleIdentifier.getName(), moduleIdentifier.getQNameModule().getRevision().toString());
     }
 }

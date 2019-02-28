@@ -18,11 +18,28 @@ package org.broadband_forum.obbaa.device.adapter;
 
 public interface AdapterSpecificConstants {
 
-    String ADAPTER_XML_PATH = "/model/adapter.xml";
+    String ADAPTER_XML_PATH = "/model/device-adapter.xml";
     String YANG_PATH = "/yang";
 
     String UNABLE_TO_GET_ADAPTER_DETAILS_TYPE = "Unable to get type, interface-version, model and vendor in specified "
             + "device adapter definition archive";
     String ADAPTER_DEFINITION_ARCHIVE_NOT_FOUND_ERROR = "Device adapter definition archive not found in the staging area";
     String DASH = "-";
+    String YANG_EXTN = ".yang";
+    String FINAL_FOLDER = "final";          // in target dir (target/generated-resources)
+    String YANG_LIB_FILE = "model/yang-library.xml";
+    String VARIANTS = "variants";
+    String MODEL = "model";
+    String YANG = "yang";
+    String SUPPORTED_FEATURES_FILE = "supported-features.txt";
+    String SUPPORTED_DEVIATIONS_FILE = "supported-deviations.txt";
+    String SLASH = "/";
+    String DEFAULT_FEATURES_PATH = "/model/supported-features.txt";
+    String DEFAULT_DEVIATIONS_PATH = "/model/supported-deviations.txt";
+    String COMMA = ",";
+    String DPU = "DPU";
+    String OLT = "OLT";
+    String STANDARD = "standard";
+    String BBF = "BBF";
+    String STD_ADAPTER_VERSION = "1.0";
 }

@@ -30,7 +30,8 @@
         <class>org.broadband_forum.obbaa.dmyang.entities.DeviceState</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.ManagedDevices</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.PasswordAuth</class>
-        <class>org.broadband_forum.obbaa.netconf.persistence.DbVersion</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.DbVersion</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.Netconf</class>
 
         <properties>
             <!-- Configuring JDBC properties -->

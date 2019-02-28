@@ -86,15 +86,6 @@
         <constructor-arg ref="schemaRegistry"/>
     </bean>
 
-    <bean id="deviceModelDeployer" class="org.broadband_forum.obbaa.pma.impl.DeviceModelDeployerImpl" init-method="init" destroy-method="destroy">
-        <constructor-arg value="/baa/stores/deviceYangModules"/>
-        <constructor-arg ref="modelServiceDeployer"/>
-        <constructor-arg ref="aggregatedDSM"/>
-        <constructor-arg ref="deviceSubsystem"/>
-        <constructor-arg ref="schemaRegistry"/>
-        <constructor-arg ref="entityRegistry"/>
-    </bean>
-
     <bean id="deviceManager" class="org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl">
         <constructor-arg ref="ncConnectionMgr"/>
     </bean>

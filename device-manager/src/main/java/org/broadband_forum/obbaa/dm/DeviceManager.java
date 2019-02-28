@@ -18,7 +18,6 @@ package org.broadband_forum.obbaa.dm;
 
 import java.util.List;
 
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 
 /**
@@ -37,8 +36,6 @@ public interface DeviceManager {
     void removeDeviceStateProvider(DeviceStateProvider stateProvider);
 
     void addDeviceStateProvider(DeviceStateProvider stateProvider);
-
-    List<NewDeviceInfo> getNewDevices();
 
     void deviceAdded(String deviceName);
 

@@ -1,17 +1,17 @@
 <h1>Open Broadband: Broadband Access Abstraction (OB-BAA)</h1>
-<h4>Version 1.1.0</h4>
+<h4>Version 2.0.0</h4>
 
 **Table of Contents**
 
 1. [Introduction](#introduction)
-2. [Overview](./overview/)
-3. [Architecture](./architecture/)
-4. [Installing OB-BAA](./installing/)
-5. [Using OB-BAA](./using/)
-
-# Introduction
+2. [Overview](./overview/index.md#overview)
+3. [Architecture](./architecture/index.md#architecture)
+4. [Installing OB-BAA](./installing/index.md#installing)
+5. [Using OB-BAA](./using/index.md#using)
 
 <a id="introduction" />
+
+# Introduction
 
 ## Legal Notice
 
@@ -80,6 +80,10 @@
 
 ## Revision History
 
+### Release 2
+
+* OB-BAA release 2.0.0 (February 2019)
+
 ### Release 1
 
 * OB-BAA release 1.0.0 (July 2018)
@@ -88,10 +92,10 @@
 ## Participants
 
 | :---: | :---: | :---: | :---: |
-|![Altice](assets/img/altice.jpg){: width="100px" height="100px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|
-|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|
-|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|![TelecomItalia](assets/img/tim.png){: width="100px" height="70px"}|![UNH](assets/img/iol.png){: width="100px" height="45px"}|
-|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="75px"}|||
+|![Altice](assets/img/altice.jpg){: width="100px" height="80px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|
+|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|
+|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|![TelecomItalia](assets/img/tim.png){: width="100px" height="60px"}|
+|![UNH](assets/img/iol.png){: width="100px" height="45px"}|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="60px"}||
 
 How to Get Involved
 ===================
@@ -150,5 +154,6 @@ The following tools are used in  and delivered by the OB-BAA project
 | :--- | :--- | :--- | :--- |:--- | :--- |
 |HSQL DB|YANG Datastore|HyperSQL|Open Source|BSD|<a href="http://hsqldb.org/">Documentation link</a>|
 |Apache Karaf|Container|Apache|Open Source|Apache 2.0|<a href="https://karaf.apache.org/">Documentation link</a>|
+|JSch|Simple adapter|JCraft|Open Source|BSD|<a href="http://www.jcraft.com/jsch/">Documentation link</a>|
 
-[Overview -->](./overview/)
+[Overview -->](./overview/index.md#overview)

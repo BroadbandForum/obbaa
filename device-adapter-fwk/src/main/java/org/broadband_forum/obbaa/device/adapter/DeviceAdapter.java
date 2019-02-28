@@ -21,79 +21,61 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.xmlbeans.XmlOptions;
 import org.bbf.obbaa.schemas.adapter.x10.Adapter;
 import org.bbf.obbaa.schemas.adapter.x10.AdapterDocument;
 import org.broadband_forum.obbaa.netconf.api.parser.YangParserUtil;
+import org.joda.time.DateTime;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DeviceAdapter implements Serializable {
 
-    public static final String DEVICE_ADAPTERS = "device-adapters";
-    public static final String DEVICE_ADAPTER = "device-adapter";
-    public static final String DEVICE_ADAPTER_COUNT = "device-adapter-count";
-
-    private String m_type;
-    private String m_interfaceVersion;
-    private String m_model;
-    private String m_vendor;
+    private Map<QName, Set<QName>> m_supportedDeviations = new HashMap<>();
+    private DeviceAdapterId m_deviceAdapterId;
     private List<String> m_capabilities;
     private Map<URL, InputStream> m_moduleStream = new HashMap<URL, InputStream>();
     private InputStream m_deviceXml;
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceAdapter.class);
+    private Set<QName> m_supportedFeatures = Collections.emptySet();
+    private String m_lastUpdateTime;
+    private String m_developer;
+    private List<Date> m_revisions = new ArrayList<>();
+    private Boolean m_isNetconf = true;
 
-    public DeviceAdapter(String type, String interfaceVersion, String model, String vendor,
-                         List<String> capabilities,
-                         InputStream deviceXml, Map<URL, InputStream> moduleStream) {
-        m_type = type;
-        m_interfaceVersion = interfaceVersion;
-        m_model = model;
-        m_vendor = vendor;
+    private static final String ADAPT_LAST_UPDATE_TIME_KEY_POSTFIX = ":last-update-time";
+
+    protected DeviceAdapter(DeviceAdapterId deviceAdapterId, List<String> capabilities,
+                            InputStream deviceXml, Set<QName> supportedFeatures, Map<QName, Set<QName>> supportedDeviations,
+                            Map<URL, InputStream> moduleStream) {
+        m_deviceAdapterId = deviceAdapterId;
         m_capabilities = capabilities;
         m_moduleStream = moduleStream;
         m_deviceXml = deviceXml;
+        m_supportedFeatures = supportedFeatures;
+        m_supportedDeviations = supportedDeviations;
     }
 
     public void init() {
         processDeviceXmlFile(m_deviceXml);
     }
 
-    public String getType() {
-        return m_type;
+    public DeviceAdapterId getDeviceAdapterId() {
+        return m_deviceAdapterId;
     }
 
-    public void setType(String type) {
-        m_type = type;
-    }
-
-    public String getInterfaceVersion() {
-        return m_interfaceVersion;
-    }
-
-    public void setInterfaceVersion(String interfaceVersion) {
-        m_interfaceVersion = interfaceVersion;
-    }
-
-    public String getModel() {
-        return m_model;
-    }
-
-    public void setModel(String model) {
-        m_model = model;
-    }
-
-    public String getVendor() {
-        return m_vendor;
-    }
-
-    public void setVendor(String vendor) {
-        m_vendor = vendor;
+    public void setDeviceAdapterId(DeviceAdapterId deviceAdapterId) {
+        m_deviceAdapterId = deviceAdapterId;
     }
 
     public List<String> getCapabilities() {
@@ -112,6 +94,46 @@ public class DeviceAdapter implements Serializable {
         m_moduleStream = moduleStream;
     }
 
+    public InputStream getDeviceXml() {
+        return m_deviceXml;
+    }
+
+    public void setDeviceXml(InputStream deviceXml) {
+        m_deviceXml = deviceXml;
+    }
+
+    public String getType() {
+        return m_deviceAdapterId.getType();
+    }
+
+    public String getInterfaceVersion() {
+        return m_deviceAdapterId.getInterfaceVersion();
+    }
+
+    public String getModel() {
+        return m_deviceAdapterId.getModel();
+    }
+
+    public String getVendor() {
+        return m_deviceAdapterId.getVendor();
+    }
+
+    public Set<QName> getSupportedFeatures() {
+        return m_supportedFeatures;
+    }
+
+    public void setSupportedFeatures(Set<QName> supportedFeatures) {
+        m_supportedFeatures = supportedFeatures;
+    }
+
+    public Map<QName, Set<QName>> getSupportedDevations() {
+        return m_supportedDeviations;
+    }
+
+    public void setSupportedDevations(Map<QName, Set<QName>> supportedDeviations) {
+        this.m_supportedDeviations = supportedDeviations;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -121,45 +143,37 @@ public class DeviceAdapter implements Serializable {
             return false;
         }
 
-        final DeviceAdapter that = (DeviceAdapter) other;
+        DeviceAdapter adapter = (DeviceAdapter) other;
 
-        if (!m_type.equals(that.m_type)) {
+        if (m_deviceAdapterId != null ? !m_deviceAdapterId.equals(adapter.m_deviceAdapterId) : adapter.m_deviceAdapterId != null) {
             return false;
         }
-        if (!m_interfaceVersion.equals(that.m_interfaceVersion)) {
+        if (m_capabilities != null ? !m_capabilities.equals(adapter.m_capabilities) : adapter.m_capabilities != null) {
             return false;
         }
-        if (!m_model.equals(that.m_model)) {
+        if (m_moduleStream != null ? !m_moduleStream.equals(adapter.m_moduleStream) : adapter.m_moduleStream != null) {
             return false;
         }
-        if (!m_vendor.equals(that.m_vendor)) {
+        if (m_deviceXml != null ? !m_deviceXml.equals(adapter.m_deviceXml) : adapter.m_deviceXml != null) {
             return false;
         }
-        return m_capabilities.equals(that.m_capabilities);
+        if (m_supportedDeviations != null ? !m_supportedDeviations.equals(adapter.m_supportedDeviations) :
+                adapter.m_supportedDeviations != null) {
+            return false;
+        }
+        return m_supportedFeatures != null ? m_supportedFeatures.equals(adapter.m_supportedFeatures) : adapter.m_supportedFeatures == null;
+
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = m_type != null ? m_type.hashCode() : 0;
-        result = prime * result + (m_interfaceVersion != null ? m_interfaceVersion.hashCode() : 0);
-        result = prime * result + (m_model != null ? m_model.hashCode() : 0);
-        result = prime * result + (m_vendor != null ? m_vendor.hashCode() : 0);
-        result = prime * result + (m_capabilities != null ? m_capabilities.hashCode() : 0);
-        result = prime * result + (m_moduleStream != null ? m_moduleStream.hashCode() : 0);
+        int result = m_deviceAdapterId != null ? m_deviceAdapterId.hashCode() : 0;
+        result = 31 * result + (m_capabilities != null ? m_capabilities.hashCode() : 0);
+        result = 31 * result + (m_moduleStream != null ? m_moduleStream.hashCode() : 0);
+        result = 31 * result + (m_deviceXml != null ? m_deviceXml.hashCode() : 0);
+        result = 31 * result + (m_supportedFeatures != null ? m_supportedFeatures.hashCode() : 0);
+        result = 31 * result + (m_supportedDeviations != null ? m_supportedDeviations.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "DeviceAdapter{"
-                + "m_type='" + m_type
-                + ", m_interfaceVersion='" + m_interfaceVersion
-                + ", m_model='" + m_model
-                + ", m_vendor='" + m_vendor
-                + ", m_capabilities=" + m_capabilities
-                + '}';
     }
 
     private void processDeviceXmlFile(InputStream deviceXml) {
@@ -174,13 +188,22 @@ public class DeviceAdapter implements Serializable {
             AdapterDocument adapterDocument = AdapterDocument.Factory.parse(deviceXml, options);
             checkValidity(adapterDocument);
             Adapter adapter = adapterDocument.getAdapter();
-            setType(adapter.getType());
-            setInterfaceVersion(adapter.getInterfaceVersion());
-            setModel(adapter.getModel());
-            setVendor(adapter.getVendor());
+            m_deviceAdapterId.setType(adapter.getType());
+            m_deviceAdapterId.setInterfaceVersion(adapter.getInterfaceVersion());
+            m_deviceAdapterId.setModel(adapter.getModel());
+            m_deviceAdapterId.setVendor(adapter.getVendor());
             setCapabilities(adapter.getCapabilities().getValueList());
+            if (adapter.xgetDeveloper() != null) {
+                setDeveloper(adapter.getDeveloper());
+            }
+            if (adapter.getRevisions() != null) {
+                setRevisions(adapter.getRevisions().getRevisionList());
+            }
+            if (adapter.xgetIsNetconf() != null) {
+                setNetconf(adapter.getIsNetconf());
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Error loading adaper", e);
+            throw new RuntimeException("Error loading device-adapter.xml", e);
         }
     }
 
@@ -189,7 +212,7 @@ public class DeviceAdapter implements Serializable {
         List errorList = new ArrayList();
         options.setErrorListener(errorList);
         if (!adapterDocument.validate(options)) {
-            String message = "Error loading device.xml: " + errorList;
+            String message = "Error loading device-adapter.xml: " + errorList;
             LOGGER.error(message);
             throw new RuntimeException(message);
         }
@@ -213,6 +236,45 @@ public class DeviceAdapter implements Serializable {
             byteSources.add(YangParserUtil.getYangSource(url, m_moduleStream.get(url)));
         }
         return byteSources;
+    }
+
+    public String getLastUpdateTime() {
+        return m_lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(DateTime lastUpdateTime) {
+        m_lastUpdateTime = AdapterUtils.updateAdapterLastUpdateTime(genAdapterLastUpdateTimeKey(), lastUpdateTime);
+    }
+
+    public void setDeveloper(String developer) {
+        m_developer = developer;
+    }
+
+    public String getDeveloper() {
+        return m_developer;
+    }
+
+    public void setRevisions(List<Calendar> revisions) {
+        for (Calendar revision : revisions) {
+            m_revisions.add(revision.getTime());
+        }
+    }
+
+    public List<Date> getRevisions() {
+        return m_revisions;
+    }
+
+    public String genAdapterLastUpdateTimeKey() {
+        return new StringBuilder(getModel()).append(getInterfaceVersion()).append(getVendor()).append(getType())
+                .append(ADAPT_LAST_UPDATE_TIME_KEY_POSTFIX).toString();
+    }
+
+    public Boolean getNetconf() {
+        return m_isNetconf;
+    }
+
+    public void setNetconf(Boolean netconf) {
+        m_isNetconf = netconf;
     }
 }
 

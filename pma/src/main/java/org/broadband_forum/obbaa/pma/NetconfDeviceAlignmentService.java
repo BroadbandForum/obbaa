@@ -18,16 +18,17 @@ package org.broadband_forum.obbaa.pma;
 
 import java.util.List;
 
-import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 
 public interface NetconfDeviceAlignmentService extends DeviceAlignmentService {
     void queueEdit(String deviceName, EditConfigRequest request);
 
     List<EditConfigRequest> getEditQueue(String deviceName);
 
-    void align(String deviceName);
+    void align(Device device);
 
-    void forceAlign(String deviceName, CopyConfigRequest request);
+    void forceAlign(Device device, NetConfResponse getConfigResponse);
 
 }

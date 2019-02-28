@@ -1,0 +1,81 @@
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<device-adapters xmlns="urn:bbf:yang:obbaa:network-manager">
+	<device-adapter>
+		<type>type1</type>
+		<interface-version>interface1</interface-version>
+		<model>model1</model>
+		<vendor>vendor1</vendor>
+		<is-netconf>false</is-netconf>
+		<yang-modules>
+			<module>
+				<name>bbf-obbaa-device-adapters</name>
+				<revision>2018-08-31</revision>
+			</module>
+			<module>
+				<name>bbf-obbaa-module-library-check</name>
+				<revision>2018-11-07</revision>
+			</module>
+			<module>
+				<name>bbf-obbaa-netconf-stack</name>
+				<revision>2019-01-29</revision>
+			</module>
+			<module>
+				<name>bbf-obbaa-network-manager</name>
+				<revision>2018-05-07</revision>
+			</module>
+			<module>
+				<name>bbf-obbaa-pma-device-config</name>
+				<revision>2018-06-15</revision>
+			</module>
+			<module>
+				<name>ietf-datastores</name>
+				<revision>2017-08-17</revision>
+			</module>
+			<module>
+				<name>ietf-inet-types</name>
+				<revision>2013-07-15</revision>
+			</module>
+			<module>
+				<name>ietf-netconf</name>
+				<revision>2011-06-01</revision>
+			</module>
+			<module>
+				<name>ietf-netconf-notifications</name>
+				<revision>2012-02-06</revision>
+			</module>
+			<module>
+				<name>ietf-yang-library</name>
+				<revision>2016-06-21</revision>
+			</module>
+			<module>
+				<name>ietf-yang-schema-mount</name>
+				<revision>2017-10-09</revision>
+			</module>
+			<module>
+				<name>ietf-yang-types</name>
+				<revision>2013-07-15</revision>
+			</module>
+		</yang-modules>
+		<description>This is an adapter for model1.type1 provided by vendor1</description>
+		<in-use>true</in-use>
+		<devices-related>
+			<device-count>1</device-count>
+			<device>DeviceA(BasedAdapter1)</device>
+		</devices-related>
+	</device-adapter>
+</device-adapters>

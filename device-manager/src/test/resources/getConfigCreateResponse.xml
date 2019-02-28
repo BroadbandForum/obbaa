@@ -1,28 +1,28 @@
 <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
   <data>
-    <network-manager:network-manager xmlns:network-manager="urn:bbf:yang:obbaa:network-manager">
-      <network-manager:managed-devices>
-        <network-manager:device>
-          <network-manager:name>deviceA</network-manager:name>
-          <network-manager:device-management>
-            <network-manager:interface-version>1.0.0</network-manager:interface-version>
-            <network-manager:push-pma-configuration-to-device>true</network-manager:push-pma-configuration-to-device>
-            <network-manager:type>DPU</network-manager:type>
-            <network-manager:vendor>Nokia</network-manager:vendor>
-            <network-manager:device-connection>
-              <network-manager:connection-model>direct</network-manager:connection-model>
-              <network-manager:password-auth>
-                <network-manager:authentication>
-                  <network-manager:address>192.168.169.1</network-manager:address>
-                  <network-manager:management-port>92994</network-manager:management-port>
-                  <network-manager:password>DPU</network-manager:password>
-                  <network-manager:user-name>DPU</network-manager:user-name>
-                </network-manager:authentication>
-              </network-manager:password-auth>
-            </network-manager:device-connection>
-          </network-manager:device-management>
-        </network-manager:device>
-      </network-manager:managed-devices>
-    </network-manager:network-manager>
+    <baa-network-manager:network-manager xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager">
+      <baa-network-manager:managed-devices>
+        <baa-network-manager:device>
+          <baa-network-manager:name>deviceA</baa-network-manager:name>
+          <baa-network-manager:device-management>
+            <baa-network-manager:interface-version>1.0.0</baa-network-manager:interface-version>
+            <baa-network-manager:push-pma-configuration-to-device>true</baa-network-manager:push-pma-configuration-to-device>
+            <baa-network-manager:type>DPU</baa-network-manager:type>
+            <baa-network-manager:vendor>Nokia</baa-network-manager:vendor>
+            <baa-network-manager:device-connection>
+              <baa-network-manager:connection-model>direct</baa-network-manager:connection-model>
+              <baa-network-manager:password-auth>
+                <baa-network-manager:authentication>
+                  <baa-network-manager:address>192.168.169.1</baa-network-manager:address>
+                  <baa-network-manager:management-port>92994</baa-network-manager:management-port>
+                  <baa-network-manager:password>DPU</baa-network-manager:password>
+                  <baa-network-manager:user-name>DPU</baa-network-manager:user-name>
+                </baa-network-manager:authentication>
+              </baa-network-manager:password-auth>
+            </baa-network-manager:device-connection>
+          </baa-network-manager:device-management>
+        </baa-network-manager:device>
+      </baa-network-manager:managed-devices>
+    </baa-network-manager:network-manager>
   </data>
 </rpc-reply>

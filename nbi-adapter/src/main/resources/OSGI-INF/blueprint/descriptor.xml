@@ -15,12 +15,16 @@
   ~ limitations under the License.
   -->
 
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0" xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.2.0"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0"
+           xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.2.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
            default-activation="eager">
-    <jpa:enable />
+    <jpa:enable/>
     <tx:enable-annotations/>
-    <reference id="netconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer" availability="mandatory"/>
+    <reference id="netconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer"
+               availability="mandatory" filter="component=dm">
+    </reference>
     <reference id="aggregator" interface="org.broadband_forum.obbaa.aggregator.api.Aggregator" availability="mandatory"/>
     <reference id="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry" availability="mandatory"/>
 
@@ -32,13 +36,14 @@
         <argument ref="aggregator"/>
     </bean>
 
-    <bean id="nbiNetconfServer" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiSshNetconfServer" init-method="start" destroy-method="stop">
+    <bean id="nbiNetconfServer" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiSshNetconfServer" init-method="start"
+          destroy-method="stop">
         <argument ref="nbiNetconfAuth"/>
         <argument ref="nbiNetconfServerMessageListener"/>
         <argument ref="serverDispatcher"/>
         <argument ref="nbiNetconfServerCapabilityProviderImpl"/>
-        <property name="port" value="9292" />
-        <property name="connectionTimeout" value="2000000" />
+        <property name="port" value="9292"/>
+        <property name="connectionTimeout" value="2000000"/>
     </bean>
 
     <bean id="serverDispatcher" class="org.broadband_forum.obbaa.netconf.server.dispatcher.NetconfServerDispatcherImpl">
@@ -59,7 +64,17 @@
         </argument>
     </bean>
 
-    <bean id="nbiNetconfServerCapabilityProviderImpl" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.DynamicCapabilityProviderImpl">
+    <bean id="nbiNetconfServerCapabilityProviderImpl"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.CapabilityProviderFactory" factory-method="getProvider">
         <argument ref="schemaRegistry"/>
+        <argument>
+            <set>
+                <value type="java.lang.String">urn:ietf:params:netconf:base:1.0</value>
+                <value type="java.lang.String">urn:ietf:params:netconf:capability:writable-running:1.0</value>
+                <value type="java.lang.String">urn:ietf:params:netconf:capability:rollback-on-error:1.0</value>
+                <value type="java.lang.String">urn:ietf:params:netconf:capability:notification:1.0</value>
+                <value type="java.lang.String">urn:ietf:params:netconf:capability:interleave:1.0</value>
+            </set>
+        </argument>
     </bean>
 </blueprint>

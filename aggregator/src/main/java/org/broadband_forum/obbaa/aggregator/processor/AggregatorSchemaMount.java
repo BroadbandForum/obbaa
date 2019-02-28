@@ -26,7 +26,7 @@ import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.api.NetworkManag
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

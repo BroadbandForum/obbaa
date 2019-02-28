@@ -25,9 +25,9 @@
                         <name>Bangalore-Manyata-E2</name>
                         <device-management>
                             <type>DPU</type>
-                            <interface-version>1.0.0</interface-version>
-                            <vendor>Nokia</vendor>
-                            <model>4LT</model>
+                            <interface-version>1.0</interface-version>
+                            <vendor>BBF</vendor>
+                            <model>standard</model>
                             <device-connection>
                                 <connection-model>call-home</connection-model>
                                 <duid>DPU1</duid>

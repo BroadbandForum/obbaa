@@ -39,8 +39,9 @@ public class AdapterContext {
     private ModelNodeHelperRegistryImpl m_modelNodeHelperRegistry;
     private RootModelNodeAggregatorImpl m_rootModelNodeAggregator;
     private List<AdapterListener> m_contextListeners = new ArrayList<>();
+    private DeviceInterface m_deviceInterface;
 
-    public AdapterContext(ReadWriteLockService readWriteLockService) {
+    public AdapterContext(ReadWriteLockService readWriteLockService, DeviceInterface deviceInterface) {
         m_readWriteLockService = readWriteLockService;
         m_subSystemRegistry = new SubSystemRegistryImpl();
         try {
@@ -51,6 +52,7 @@ public class AdapterContext {
         }
         m_dsmRegistry = new ModelNodeDSMRegistryImpl();
         m_modelNodeHelperRegistry = createModelNodeHelperRegistry();
+        m_deviceInterface = deviceInterface;
     }
 
     public SubSystemRegistryImpl getSubSystemRegistry() {
@@ -71,7 +73,7 @@ public class AdapterContext {
 
     public ModelNodeHelperRegistryImpl createModelNodeHelperRegistry() {
         m_modelNodeHelperRegistry = new ModelNodeHelperRegistryImpl(getSchemaRegistry());
-        DSExpressionValidator validator = new DSExpressionValidator(getSchemaRegistry(), m_modelNodeHelperRegistry);
+        DSExpressionValidator validator = new DSExpressionValidator(getSchemaRegistry(), m_modelNodeHelperRegistry , m_subSystemRegistry);
         AddDefaultDataInterceptor interceptor = new AddDefaultDataInterceptor(m_modelNodeHelperRegistry,
                 getSchemaRegistry(), validator);
         interceptor.init();
@@ -94,5 +96,13 @@ public class AdapterContext {
 
     public void addListener(AdapterListener listener) {
         m_contextListeners.add(listener);
+    }
+
+    public DeviceInterface getDeviceInterface() {
+        return m_deviceInterface;
+    }
+
+    public void setDeviceInterface(DeviceInterface deviceInterface) {
+        m_deviceInterface = deviceInterface;
     }
 }

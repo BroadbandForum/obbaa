@@ -22,41 +22,69 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.netconf.api.util.Pair;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.DataStore;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
+import org.broadband_forum.obbaa.pma.DeviceXmlStore;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.google.common.io.Files;
+
 public class PmaServerImplTest {
     PmaServerImpl m_pmaServer;
-    private GetRequest m_request;
+    private GetRequest m_getRequest;
+    private EditConfigRequest m_editRequest;
     @Mock
     private NetconfServer m_netconfServer;
     @Mock
     private Device m_device;
     @Mock
-    private ModelNodeDataStoreManager m_dsm;
-    @Captor
-    private ArgumentCaptor<NetConfResponse> m_responseCaptor;
+    private Pair<ModelNodeDataStoreManager, DeviceXmlStore> m_dsmXmlPair;
     @Mock
     private AdapterContext m_adapterContext;
+    @Mock
+    private AdapterContext m_stdAdapter;
+    @Mock
+    private DataStore m_dataStore;
+    private File m_tempDir;
+    @Mock
+    private DeviceXmlStore m_deviceDataStore;
+
 
     @Before
     public void setUp() {
-        m_request = new GetRequest();
-        m_request.setMessageId("1");
+        m_getRequest = new GetRequest();
+        m_getRequest.setMessageId("1");
+        m_editRequest = new EditConfigRequest();
+        m_editRequest.setMessageId("2");
+        EditConfigElement element = new EditConfigElement();
+        m_editRequest.setConfigElement(element);
         MockitoAnnotations.initMocks(this);
-        m_pmaServer = new PmaServerImpl(m_device, m_netconfServer, m_dsm, m_adapterContext);
+        m_tempDir = Files.createTempDir();
+        String deviceFileBaseDir = m_tempDir.getAbsolutePath();
+        when(m_netconfServer.getDataStore("running")).thenReturn(m_dataStore);
+        when(m_dsmXmlPair.getSecond()).thenReturn(m_deviceDataStore);
+        when(m_deviceDataStore.getDeviceXml()).thenReturn("<test-xml/>");
+        m_pmaServer = new PmaServerImpl(m_device, m_netconfServer, m_dsmXmlPair, m_adapterContext, m_stdAdapter, deviceFileBaseDir);
         doAnswer(invocation -> {
             NetConfResponse response = (NetConfResponse) invocation.getArguments()[2];
             response.addDataContent(DocumentUtils.stringToDocument("<if:interfaces\n" +
@@ -68,18 +96,26 @@ public class PmaServerImplTest {
                     "    </if:interface>\n" +
                     "</if:interfaces>").getDocumentElement());
             return null;
-        }).when(m_netconfServer).onGet(eq(PMA_USER), eq(m_request), anyObject());
+        }).when(m_netconfServer).onGet(eq(PMA_USER), eq(m_getRequest), anyObject());
+        doAnswer(invocation -> {
+            NetConfResponse response = (NetConfResponse) invocation.getArguments()[2];
+            response.addDataContent(DocumentUtils.stringToDocument("<ok xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"/>"
+                    ).getDocumentElement());
+            return null;
+        }).when(m_netconfServer).onEditConfig(eq(PMA_USER), eq(m_editRequest), anyObject());
     }
 
     @Test
-    public void testDeviceInfoIsSet(){
+    public void testDeviceInfoIsSet() {
         assertEquals(m_device, m_pmaServer.getDevice());
     }
 
     @Test
     public void testPmaServerContactsServerMessageListener() {
-        NetConfResponse response = m_pmaServer.executeNetconf(m_request);
-        verify(m_netconfServer).onGet(eq(PMA_USER), eq(m_request), anyObject());
+        Map<NetConfResponse, List<Notification>> netConfResponseListMap = m_pmaServer.executeNetconf(m_getRequest);
+        Map.Entry<NetConfResponse, List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
+        NetConfResponse response = entry.getKey();
+        verify(m_netconfServer).onGet(eq(PMA_USER), eq(m_getRequest), anyObject());
         assertEquals("<rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
                 "  <data>\n" +
                 "    <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\n" +
@@ -90,5 +126,20 @@ public class PmaServerImplTest {
                 "</if:interfaces>\n" +
                 "  </data>\n" +
                 "</rpc-reply>\n", response.responseToString());
+        verifyZeroInteractions(m_deviceDataStore);
+    }
+
+    @Test
+    public void testPmaServerContactsServerMessageListenerOnEdit() {
+        Map<NetConfResponse, List<Notification>> netConfResponseListMap = m_pmaServer.executeNetconf(m_editRequest);
+        Map.Entry<NetConfResponse, List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
+        NetConfResponse response = entry.getKey();
+        verify(m_netconfServer).onEditConfig(eq(PMA_USER), eq(m_editRequest), anyObject());
+        assertEquals("<rpc-reply message-id=\"2\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+                "  <data>\n" +
+                "    <ok/>\n" +
+                "  </data>\n" +
+                "</rpc-reply>", response.responseToString().trim());
+        verify(m_deviceDataStore).getDeviceXml();
     }
 }

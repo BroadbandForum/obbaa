@@ -1,0 +1,100 @@
+<!--
+   ~ Copyright 2018 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="34566755">
+   <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <target>
+         <running />
+      </target>
+      <config>
+         <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+               <device>
+                  <name>deviceB</name>
+                  <root>
+                     <bbf-qos-cls:classifiers xmlns:bbf-qos-cls="urn:bbf:yang:bbf-qos-classifiers">
+                        <bbf-qos-cls:classifier-entry>
+                           <bbf-qos-cls:name>ex2-classifier-dscp-tc0</bbf-qos-cls:name>
+                           <bbf-qos-cls:filter-operation>bbf-qos-cls:match-any-filter</bbf-qos-cls:filter-operation>
+                           <bbf-qos-cls:match-criteria>
+                              <bbf-qos-cls:dscp-range>0-30</bbf-qos-cls:dscp-range>
+                           </bbf-qos-cls:match-criteria>
+                           <bbf-qos-cls:classifier-action-entry-cfg>
+                              <bbf-qos-cls:action-type>bbf-qos-cls:pbit-marking</bbf-qos-cls:action-type>
+                              <bbf-qos-cls:pbit-marking-cfg>
+                                 <bbf-qos-cls:pbit-marking-list>
+                                    <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                    <bbf-qos-cls:pbit-value>0</bbf-qos-cls:pbit-value>
+                                 </bbf-qos-cls:pbit-marking-list>
+                              </bbf-qos-cls:pbit-marking-cfg>
+                           </bbf-qos-cls:classifier-action-entry-cfg>
+                           <bbf-qos-cls:classifier-action-entry-cfg>
+                              <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                              <bbf-qos-cls:scheduling-traffic-class>0</bbf-qos-cls:scheduling-traffic-class>
+                           </bbf-qos-cls:classifier-action-entry-cfg>
+                        </bbf-qos-cls:classifier-entry>
+
+                        <bbf-qos-cls:classifier-entry>
+                           <bbf-qos-cls:name>ex2-classifier-dscp-tc1</bbf-qos-cls:name>
+                           <bbf-qos-cls:filter-operation>bbf-qos-cls:match-any-filter</bbf-qos-cls:filter-operation>
+                           <bbf-qos-cls:match-criteria>
+                              <bbf-qos-cls:dscp-range>31-63</bbf-qos-cls:dscp-range>
+                           </bbf-qos-cls:match-criteria>
+                           <bbf-qos-cls:classifier-action-entry-cfg>
+                              <bbf-qos-cls:action-type>bbf-qos-cls:pbit-marking</bbf-qos-cls:action-type>
+                              <bbf-qos-cls:pbit-marking-cfg>
+                                 <bbf-qos-cls:pbit-marking-list>
+                                    <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                    <bbf-qos-cls:pbit-value>1</bbf-qos-cls:pbit-value>
+                                 </bbf-qos-cls:pbit-marking-list>
+                              </bbf-qos-cls:pbit-marking-cfg>
+                           </bbf-qos-cls:classifier-action-entry-cfg>
+                           <bbf-qos-cls:classifier-action-entry-cfg>
+                              <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                              <bbf-qos-cls:scheduling-traffic-class>0</bbf-qos-cls:scheduling-traffic-class>
+                           </bbf-qos-cls:classifier-action-entry-cfg>
+                        </bbf-qos-cls:classifier-entry>
+
+                     </bbf-qos-cls:classifiers>
+
+                     <bbf-qos-pol:policies xmlns:bbf-qos-pol="urn:bbf:yang:bbf-qos-policies">
+                        <bbf-qos-pol:policy>
+                           <bbf-qos-pol:name>ex2-policy-dscp</bbf-qos-pol:name>
+                           <bbf-qos-pol:description>Example policy</bbf-qos-pol:description>
+                           <bbf-qos-pol:classifiers>
+                              <bbf-qos-pol:name>ex2-classifier-dscp-tc0</bbf-qos-pol:name>
+                           </bbf-qos-pol:classifiers>
+                           <bbf-qos-pol:classifiers>
+                              <bbf-qos-pol:name>ex2-classifier-dscp-tc1</bbf-qos-pol:name>
+                           </bbf-qos-pol:classifiers>
+                        </bbf-qos-pol:policy>
+                     </bbf-qos-pol:policies>
+
+                     <bbf-qos-pol:qos-policy-profiles xmlns:bbf-qos-pol="urn:bbf:yang:bbf-qos-policies">
+                        <bbf-qos-pol:policy-profile>
+                           <bbf-qos-pol:name>ex2-qos-policy-profile</bbf-qos-pol:name>
+                           <bbf-qos-pol:policy-list>
+                              <bbf-qos-pol:name>ex2-policy-dscp</bbf-qos-pol:name>
+                           </bbf-qos-pol:policy-list>
+                        </bbf-qos-pol:policy-profile>
+                     </bbf-qos-pol:qos-policy-profiles>
+                  </root>
+               </device>
+            </managed-devices>
+         </network-manager>
+      </config>
+   </edit-config>
+</rpc>

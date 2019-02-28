@@ -21,8 +21,7 @@
     <jpa:enable />
     <tx:enable-annotations/>
 
-    <!--<bean id="osgiEDSM" class="org.broadband_forum.obbaa.dmyang.persistence.jpa.BaaOsgiEntityDataStoreManager"/>-->
-    <bean id="osgiEDSM" class="org.broadband_forum.obbaa.netconf.persistence.jpa.OsgiEntityDataStoreManager"/>
+    <bean id="osgiEDSM" class="org.broadband_forum.obbaa.dmyang.persistence.jpa.BaaOsgiEntityDataStoreManager"/>
 
     <bean id="persistenceMgrUtil" class="org.broadband_forum.obbaa.netconf.persistence.jpa.OsgiPersistenceManagerUtil">
         <property name="entityDataStoreManager" ref="osgiEDSM" />

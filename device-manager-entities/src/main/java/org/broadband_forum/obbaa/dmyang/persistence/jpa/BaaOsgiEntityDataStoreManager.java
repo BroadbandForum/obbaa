@@ -18,9 +18,12 @@ package org.broadband_forum.obbaa.dmyang.persistence.jpa;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.metamodel.Metamodel;
+import javax.transaction.Transactional;
 
 import org.broadband_forum.obbaa.netconf.persistence.jpa.AbstractEntityDataStoreManager;
 
+@Transactional
 public class BaaOsgiEntityDataStoreManager extends AbstractEntityDataStoreManager {
 
     @PersistenceContext(unitName = "baa")
@@ -56,4 +59,10 @@ public class BaaOsgiEntityDataStoreManager extends AbstractEntityDataStoreManage
     protected void setEntityManager(EntityManager entityManager) {
         m_entityManager = entityManager;
     }
+
+    @Override
+    public Metamodel getMetaModel() {
+        return m_entityManager.getMetamodel();
+    }
+
 }

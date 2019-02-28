@@ -27,8 +27,8 @@
                         <device-management>
                             <type>DPU</type>
                             <interface-version>1.0.0</interface-version>
-                            <vendor>Nokia</vendor>
-                            <model>4LT</model>
+                            <vendor>BBF</vendor>
+                            <model>standard</model>
                             <device-connection>
                                 <connection-model>direct</connection-model>
                                 <password-auth>

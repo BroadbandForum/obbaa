@@ -22,13 +22,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
+import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfFilter;
+import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.AbstractSubSystem;
@@ -36,23 +42,27 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ChangeNotification;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.FilterNode;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.FilterUtil;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ModelNodeId;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemValidationException;
 import org.broadband_forum.obbaa.netconf.server.RequestScope;
+import org.broadband_forum.obbaa.pma.DeviceXmlStore;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class DeviceSubsystem extends AbstractSubSystem {
     private static final Logger LOGGER = Logger.getLogger(DeviceSubsystem.class);
-    private final NetconfConnectionManager m_dcm;
     private SchemaRegistry m_schemaRegistry;
     private final NetconfDeviceAlignmentService m_das;
     private final DeviceSubsystemResponseUtil m_util;
+    private AdapterManager m_adapterManager;
 
-    public DeviceSubsystem(NetconfConnectionManager dcm, NetconfDeviceAlignmentService das, SchemaRegistry schemaRegistry) {
-        m_dcm = dcm;
+    public DeviceSubsystem(NetconfDeviceAlignmentService das, SchemaRegistry schemaRegistry,
+                           AdapterManager adapterManager) {
         m_das = das;
         m_schemaRegistry = schemaRegistry;
+        m_adapterManager = adapterManager;
         m_util = new DeviceSubsystemResponseUtil(m_schemaRegistry);
     }
 
@@ -60,7 +70,10 @@ public class DeviceSubsystem extends AbstractSubSystem {
     protected Map<ModelNodeId, List<Element>> retrieveStateAttributes(Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> attributes) {
         GetRequest getRequest = prepareRequest(attributes);
         try {
-            NetConfResponse response = m_dcm.executeNetconf(PmaServer.getCurrentDevice(), getRequest).get();
+            Device device = PmaServer.getCurrentDevice();
+            DeviceInterface deviceInterface = AdapterUtils.getAdapterContext(device, m_adapterManager).getDeviceInterface();
+            Future<NetConfResponse> future = deviceInterface.get(device, getRequest);
+            NetConfResponse response = future.get();
             if (response != null) {
                 return m_util.getStateResponse(attributes, response.getData());
             }
@@ -113,5 +126,28 @@ public class DeviceSubsystem extends AbstractSubSystem {
         super.notifyChanged(changeNotificationList);
         m_das.queueEdit(PmaServer.getCurrentDevice().getDeviceName(), (EditConfigRequest) RequestScope.getCurrentScope()
                 .getFromCache(CURRENT_REQ));
+    }
+
+    @Override
+    public void notifyPreCommitChange(List<ChangeNotification> changeNotificationList) throws
+            SubSystemValidationException {
+        Device device = PmaServer.getCurrentDevice();
+        DeviceXmlStore deviceStore = PmaServer.getCurrentDeviceXmlStore();
+        Document document;
+        try {
+            document = DocumentUtils.stringToDocument(deviceStore.getDeviceXml());
+        } catch (NetconfMessageBuilderException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        DeviceInterface deviceInterface = AdapterUtils.getAdapterContext(device, m_adapterManager).getDeviceInterface();
+        try {
+            deviceInterface.veto(device, (EditConfigRequest) RequestScope.getCurrentScope().getFromCache(CURRENT_REQ),
+                    document);
+        } catch (SubSystemValidationException e) {
+            deviceStore.setDeviceXml(PmaServer.getBackupDeviceXmlStore().getDeviceXml());
+            throw e;
+
+        }
+
     }
 }

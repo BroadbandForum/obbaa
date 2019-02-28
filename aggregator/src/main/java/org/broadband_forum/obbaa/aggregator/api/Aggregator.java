@@ -19,7 +19,8 @@ package org.broadband_forum.obbaa.aggregator.api;
 import java.util.Set;
 
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 
 /**
  * BAA Core API for NBI. It's used for message forwarding and notification listening.
@@ -30,7 +31,7 @@ public interface Aggregator {
     /**
      * Provide a unified API to NBI for request message forwarding.
      *
-     * @param clientInfo Client Info
+     * @param clientInfo     Client Info
      * @param netconfRequest Message defined with YANG from NBI.
      * @return Result
      * @throws DispatchException Dispatch exception
@@ -40,19 +41,19 @@ public interface Aggregator {
     /**
      * Provide a unified API for notification publication.
      *
-     * @param notificationMessage Notification message
+     * @param notification Notification
      * @throws DispatchException Dispatch exception
      */
-    void publishNotification(String notificationMessage) throws DispatchException;
+    void publishNotification(Notification notification) throws DispatchException;
 
     /**
      * Provide a unified API to PMA/DM for notification publish.
      *
      * @param deviceName          Device name
-     * @param notificationMessage Notification message
+     * @param notificationMessage Notification
      * @throws DispatchException Dispatch exception
      */
-    void publishNotification(String deviceName, String notificationMessage) throws DispatchException;
+    void publishNotification(String deviceName, Notification notificationMessage) throws DispatchException;
 
     /**
      * Provide a unified API to message processor(YANG library...) register themselves.
@@ -73,7 +74,7 @@ public interface Aggregator {
      * @throws DispatchException Dispatch exception
      */
     void addProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers, DeviceConfigProcessor deviceConfigProcessor)
-        throws DispatchException;
+            throws DispatchException;
 
     /**
      * Provide a unified API to NAI for notification provider registry.
@@ -116,7 +117,7 @@ public interface Aggregator {
      * @throws DispatchException Dispatch exception
      */
     void removeProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers, DeviceConfigProcessor deviceConfigProcessor)
-        throws DispatchException;
+            throws DispatchException;
 
     /**
      * Register device management processor.

@@ -17,16 +17,17 @@
 package org.broadband_forum.obbaa.pma.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.transaction.Transactional;
 
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.apache.log4j.Logger;
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
-import org.broadband_forum.obbaa.pma.DeviceModelDeployer;
+import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;
@@ -44,14 +45,12 @@ public class PmaRegistryImpl implements PmaRegistry {
     private static final Logger LOGGER = Logger.getLogger(PmaRegistryImpl.class);
     public static final String COMPONENT_ID = "pma";
     private final DeviceManager m_deviceManager;
-    private final DeviceModelDeployer m_dmd;
     private GenericKeyedObjectPool<String, PmaSession> m_pmaSessionPool;
     private PmaSessionFactory m_factory;
 
-    public PmaRegistryImpl(DeviceManager deviceManager, NetconfConnectionManager connectionManager,
-                           DeviceModelDeployer dmd, PmaSessionFactory factory) {
+    public PmaRegistryImpl(DeviceManager deviceManager,
+                           PmaSessionFactory factory) {
         m_deviceManager = deviceManager;
-        m_dmd = dmd;
         m_factory = factory;
         setupPmaSessionPool();
     }
@@ -66,12 +65,10 @@ public class PmaRegistryImpl implements PmaRegistry {
     }
 
     @Override
-    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class,Exception.class})
-    public String executeNC(String deviceName, String netconfRequest) throws IllegalArgumentException,
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class, Exception.class})
+    public Map<NetConfResponse, List<Notification>> executeNC(String deviceName, String netconfRequest) throws IllegalArgumentException,
             IllegalStateException, ExecutionException {
-        return executeWithPmaSession(deviceName, session -> {
-            return session.executeNC(netconfRequest);
-        });
+        return executeWithPmaSession(deviceName, session -> session.executeNC(netconfRequest));
     }
 
     @Override
@@ -103,11 +100,6 @@ public class PmaRegistryImpl implements PmaRegistry {
         });
     }
 
-    @Override
-    public List<String> reloadDeviceModel() {
-        return m_dmd.redeploy();
-    }
-
     private PmaSession getPmaSession(String deviceName) throws IllegalArgumentException, IllegalStateException {
         Device device = m_deviceManager.getDevice(deviceName);
         if (device == null) {
@@ -130,5 +122,10 @@ public class PmaRegistryImpl implements PmaRegistry {
     public void deviceRemoved(String deviceName) {
         m_pmaSessionPool.clear(deviceName);
         m_factory.deviceDeleted(deviceName);
+    }
+
+    @Override
+    public NetConfResponse getAllPersistCfg(String deviceName) throws ExecutionException {
+        return executeWithPmaSession(deviceName, PmaSession::getAllPersistCfg);
     }
 }

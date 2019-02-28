@@ -19,8 +19,19 @@
 
     <bean id="lockService" class="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl"/>
 
+    <bean id="schemaMountRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.schema.support.SchemaMountRegistryImpl" />
     <bean id="schemaRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl">
+        <constructor-arg>
+            <list/>
+        </constructor-arg>
+        <constructor-arg>
+            <set/>
+        </constructor-arg>
+        <constructor-arg>
+            <map/>
+        </constructor-arg>
         <constructor-arg ref="lockService"/>
+        <property name="schemaMountRegistry" ref="schemaMountRegistry" />
     </bean>
 
     <bean id="modelNodeHelperRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistryImpl">
@@ -54,6 +65,7 @@
           class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.util.DSExpressionValidator">
         <constructor-arg ref="schemaRegistry"/>
         <constructor-arg ref="modelNodeHelperRegistry"/>
+        <constructor-arg ref="subsystemRegistry"/>
     </bean>
 
     <bean id="nbiNotificationHelper" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NbiNotificationHelperImpl">
@@ -93,8 +105,6 @@
     </bean>
 
     <bean id="dataStoreIntegrityService" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.service.DataStoreIntegrityServiceImpl">
-        <constructor-arg ref="modelNodeHelperRegistry" />
-        <constructor-arg ref="schemaRegistry" />
         <constructor-arg ref="netconfServer"/>
     </bean>
 
@@ -117,10 +127,10 @@
     <bean id="persistenceMgrUtil" class="org.broadband_forum.obbaa.netconf.persistence.jpa.ThreadLocalPersistenceManagerUtil">
         <constructor-arg ref="emFactory"/>
     </bean>
-    <bean id="dbMetaDao" class="org.broadband_forum.obbaa.netconf.persistence.jpa.dao.DbVersionDao">
+    <bean id="dbMetaDao" class="org.broadband_forum.obbaa.dmyang.persistence.jpa.DbVersionDao">
         <constructor-arg ref="persistenceMgrUtil"/>
     </bean>
-    <bean id="dataStoreMetaProvider" class="org.broadband_forum.obbaa.netconf.persistence.DefaultDataStoreMetaProvider">
+    <bean id="dataStoreMetaProvider" class="org.broadband_forum.obbaa.dmyang.persistence.jpa.DefaultDataStoreMetaProvider">
         <constructor-arg ref="dbMetaDao"/>
     </bean>
     <bean id="jpaModelServiceDeployer" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service.ModelServiceDeployerImpl">

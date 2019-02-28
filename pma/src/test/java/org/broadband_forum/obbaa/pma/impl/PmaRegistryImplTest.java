@@ -25,24 +25,24 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.DataStore;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDSMRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
-import org.broadband_forum.obbaa.pma.DeviceModelDeployer;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.junit.After;
 import org.junit.Before;
@@ -62,10 +62,7 @@ public class PmaRegistryImplTest {
     private DeviceManager m_dm;
     @Mock
     private Device m_device1Meta;
-    @Mock
-    private List<String> m_moduleList;
-    @Mock
-    private DeviceModelDeployer m_modelDeployer;
+
     private NetConfResponse m_response = new NetConfResponse().setOk(true).setMessageId("1");
     @Mock
     private AdapterManager m_adapterManager;
@@ -87,19 +84,23 @@ public class PmaRegistryImplTest {
     private AdapterContext m_adapterContext;
     @Mock
     private DeviceMgmt m_devMgmt;
+    @Mock
+    private DataStore m_dataStore;
+    @Mock
+    private DeviceAdapter m_deviceAdapter;
     private PmaRegistryImpl m_pmaRegistryTransparentSF;
     private File m_tempDir;
     private String m_dir;
+
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         m_tempDir = Files.createTempDir();
         m_dir = m_tempDir.getAbsolutePath();
-        m_pmaRegistry = new PmaRegistryImpl(m_dm, m_cm,
-                m_modelDeployer, new PmaServerSessionFactory(m_dir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaReg,
-                m_modelNodeHelperReg, m_subsystemReg, m_modelNodeDsmReg, m_adapterManager));
-        m_pmaRegistryTransparentSF = new PmaRegistryImpl(m_dm, m_cm, m_modelDeployer, new TransparentPmaSessionFactory(m_cm, m_dm));
+        m_pmaRegistry = new PmaRegistryImpl(m_dm, new PmaServerSessionFactory(m_dir, m_dm, m_netconfServer, m_das, m_entityRegistry,
+                m_schemaReg, m_modelNodeDsmReg, m_adapterManager));
+        m_pmaRegistryTransparentSF = new PmaRegistryImpl(m_dm, new TransparentPmaSessionFactory(m_cm, m_dm));
         when(m_cm.isConnected(m_device1Meta)).thenReturn(true);
         when(m_dm.getDevice("device1")).thenReturn(m_device1Meta);
         when(m_device1Meta.getDeviceManagement()).thenReturn(m_devMgmt);
@@ -107,12 +108,13 @@ public class PmaRegistryImplTest {
         when(m_devMgmt.getDeviceInterfaceVersion()).thenReturn("1.0");
         when(m_devMgmt.getDeviceVendor()).thenReturn("vendor1");
         when(m_devMgmt.getDeviceModel()).thenReturn("model1");
-        when(m_devMgmt.getDeviceType()).thenReturn("type1");
+        when(m_devMgmt.getDeviceType()).thenReturn("dpu");
         Future<NetConfResponse> futureObject = mock(Future.class);
         when(futureObject.get()).thenReturn(m_response);
         when(m_cm.executeNetconf((Device) anyObject(), anyObject())).thenReturn(futureObject);
-        when(m_modelDeployer.redeploy()).thenReturn(m_moduleList);
         when(m_adapterManager.getAdapterContext(any())).thenReturn(m_adapterContext);
+        when(m_adapterManager.getDeviceAdapter(any())).thenReturn(m_deviceAdapter);
+        when(m_netconfServer.getDataStore("running")).thenReturn(m_dataStore);
     }
 
     @Test
@@ -167,13 +169,7 @@ public class PmaRegistryImplTest {
     @Test
     public void testsyncContactsDAS() throws ExecutionException {
         m_pmaRegistry.align("device1");
-        verify(m_das).align("device1");
-    }
-
-    @Test
-    public void testDeviceModelReloadContactsDeviceModelDeployer(){
-        assertEquals(m_moduleList, m_pmaRegistry.reloadDeviceModel());
-        verify(m_modelDeployer).redeploy();
+        verify(m_das).align(m_device1Meta);
     }
 
     @Test

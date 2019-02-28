@@ -16,16 +16,24 @@
 
 package org.broadband_forum.obbaa.pma;
 
+import java.util.List;
+import java.util.Map;
+
+import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
+
 /**
  * <p>
- *     Represents a session to a PMA corresponding to a device.
- *     Provides APIs to perform operation on the PMA.
+ * Represents a session to a PMA corresponding to a device.
+ * Provides APIs to perform operation on the PMA.
  * </p>
  */
 public interface PmaSession {
-    String executeNC(String netconfRequest);
+    Map<NetConfResponse, List<Notification>> executeNC(String netconfRequest);
 
     void forceAlign();
 
     void align();
+
+    NetConfResponse getAllPersistCfg();
 }

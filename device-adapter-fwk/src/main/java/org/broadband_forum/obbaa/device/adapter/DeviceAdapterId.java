@@ -32,6 +32,9 @@ public class DeviceAdapterId implements Serializable {
         m_vendor = vendor;
     }
 
+    public DeviceAdapterId() {
+    }
+
     public String getType() {
         return m_type;
     }

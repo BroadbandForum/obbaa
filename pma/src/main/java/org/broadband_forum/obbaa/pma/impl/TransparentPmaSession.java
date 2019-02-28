@@ -16,6 +16,10 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -24,6 +28,7 @@ import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.pma.PmaSession;
@@ -42,18 +47,20 @@ public class TransparentPmaSession implements PmaSession {
     }
 
     @Override
-    public String executeNC(String netconfRequest) {
+    public Map<NetConfResponse, List<Notification>> executeNC(String netconfRequest) {
         try {
             Document document = null;
             document = DocumentUtils.stringToDocument(netconfRequest);
             AbstractNetconfRequest request = DocumentToPojoTransformer.getRequest(document);
             Future<NetConfResponse> responseFuture = m_connectionManager.executeNetconf(m_device, request);
-            return responseFuture.get().responseToString();
+            Map<NetConfResponse, List<Notification>> map = new HashMap<>();
+            map.put(responseFuture.get(), Collections.emptyList());
+            return map;
         } catch (NetconfMessageBuilderException e) {
             throw new IllegalArgumentException(String.format("Invalid netconf request received : %s", netconfRequest), e);
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(String.format("Could not execute request %s on device %s", netconfRequest,
-                m_device), e);
+                    m_device), e);
         }
     }
 
@@ -65,5 +72,10 @@ public class TransparentPmaSession implements PmaSession {
     @Override
     public void align() {
         throw new UnsupportedOperationException("Full resync is not supported in transparent mode");
+    }
+
+    @Override
+    public NetConfResponse getAllPersistCfg() {
+        throw new UnsupportedOperationException("getAllPersistCfg is not supported in transparent mode");
     }
 }

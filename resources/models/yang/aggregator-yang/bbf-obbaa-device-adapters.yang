@@ -1,38 +1,66 @@
 module bbf-obbaa-device-adapters {
-  yang-version 1.1;
-  namespace "urn:bbf:yang:obbaa:device-adapters";
-  prefix device-adapters;
+    yang-version 1.1;
+    namespace "urn:bbf:yang:obbaa:device-adapters";
+    prefix baa-device-adapters;
 
-  organization
-     "broadband_forum";
-   contact
-     "https://www.broadband-forum.org";
-   description
-     "YANG module supporting device adapters for OB-BAA.";
+    organization
+      "Broadband Forum <https://www.broadband-forum.org>";
 
-  revision 2018-08-31 {
-   description
-     "Initial revision.";
-   reference "broadband_forum";
-  }
+    contact
+      "Comments or questions about this Broadband Forum YANG module
+       should be directed to <mailto:obbaa-leaders@broadband-forum.org>.
+      ";
 
-  container deploy-adapter {
-     action deploy {
-         input {
-             leaf adapter-archive {
-                 type string;
-             }
-         }
-     }
-  }
+    description
+      "This module contains a collection of YANG definitions for YANG module 
+       supporting device adapters for OB-BAA.
+       
+       Copyright 2018-2019 Broadband Forum
+       
+       Licensed under the Apache License, Version 2.0 (the \"License\");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+       
+       http://www.apache.org/licenses/LICENSE-2.0
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an \"AS IS\" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+      ";
 
-  container undeploy-adapter {
-       action undeploy {
-           input {
-               leaf adapter-archive {
-                   type string;
-               }
-           }
-       }
+    revision 2018-08-31 {
+        description
+          "Initial revision.";
+        reference
+          "broadband_forum";
+    }
+
+    container deploy-adapter {
+        description
+            "An deploy action with the adapter name to load";
+        action deploy {
+            input {
+                leaf adapter-archive {
+                    type string;
+                    description
+                        "name of the adapter";
+                }
+            }
+        }
+    }
+
+    container undeploy-adapter {
+        description
+            "An undeploy action with the adapter name to unload";
+        action undeploy {
+            input {
+                leaf adapter-archive {
+                    type string;
+                    description
+                        "name of the adapter";
+                }
+            }
+        }
     }
 }

@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -54,6 +55,8 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.CallHomeListenerComposite;
+import org.broadband_forum.obbaa.connectors.sbi.netconf.ConnectionListener;
+import org.broadband_forum.obbaa.connectors.sbi.netconf.LoggingFuture;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfTemplate;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Authentication;
@@ -111,6 +114,8 @@ public class NetconfConnectionManagerImplTest {
     private EntityManager entityMgr;
     @Mock
     private EntityTransaction entityTx;
+    @Mock
+    private ConnectionListener m_connectionListener;
 
     @Before
     public void setUp() throws NetconfClientDispatcherException, CertificateException {
@@ -147,6 +152,7 @@ public class NetconfConnectionManagerImplTest {
             return future;
         });
         m_cm = new NetconfConnectionManagerImpl(m_callHomeListenerComposite, m_dispatcher);
+        m_cm.registerDeviceConnectionListener(m_connectionListener);
         m_cm.setTxService(m_txService);
         m_cm.setDeviceDao(m_deviceDao);
     }
@@ -182,7 +188,7 @@ public class NetconfConnectionManagerImplTest {
         m_cm.auditConnections();
         assertEquals(3, m_cm.getAllSessions().entrySet().size());
 
-        Device removedDevice  = m_devices.remove(0);
+        Device removedDevice = m_devices.remove(0);
 
         verify(m_sessions.get(getIp(removedDevice.getDeviceName())), never()).closeAsync();
         m_cm.auditConnections();
@@ -200,7 +206,7 @@ public class NetconfConnectionManagerImplTest {
             m_cm.auditConnections();
             fail();
         } catch (Exception e) {
-            assertEquals("Entity Not Found" , e.getMessage());
+            assertEquals("Entity Not Found", e.getMessage());
         }
     }
 
@@ -221,6 +227,9 @@ public class NetconfConnectionManagerImplTest {
         //make the second device connection go bad
         when(m_sessions.get(getIp("2")).isOpen()).thenReturn(false);
         m_cm.auditConnections();
+        verify(m_connectionListener).deviceConnected(m_devices.get(0), m_sessions.get(getIp("1")));
+        verify(m_connectionListener).deviceConnected(m_devices.get(1), m_sessions.get(getIp("2")));
+        verify(m_connectionListener).deviceConnected(m_devices.get(2), m_sessions.get(getIp("3")));
         verify(m_dispatcher, times(4)).createClient(anyObject());
     }
 
@@ -250,10 +259,12 @@ public class NetconfConnectionManagerImplTest {
         //fire session closed
         captor.getValue().sessionClosed(2);
         assertEquals(2, m_cm.getAllSessions().entrySet().size());
+        verify(m_connectionListener).deviceDisConnected(getDevice("2"), m_sessions.get(getIp("2")));
 
         //make them connected again
         m_cm.auditConnections();
         assertEquals(3, m_cm.getAllSessions().entrySet().size());
+        verify(m_connectionListener).deviceConnected(getDevice("2"), m_sessions.get(getIp("2")));
     }
 
     @Test
@@ -262,13 +273,13 @@ public class NetconfConnectionManagerImplTest {
         //make all devices connected,
         m_cm.auditConnections();
         AbstractNetconfRequest request = mock(AbstractNetconfRequest.class);
-        Future<NetConfResponse> future = mock(Future.class);
+        CompletableFuture<NetConfResponse> future = mock(CompletableFuture.class);
         NetconfClientSession session1 = m_sessions.get(getIp("1"));
         when(session1.sendRpc(request)).thenReturn(future);
         Device device = getDevice("1");
         Future<NetConfResponse> responseFuture = m_cm.executeNetconf(device, request);
         verify(session1).sendRpc(request);
-        assertTrue(responseFuture instanceof NetconfConnectionManagerImpl.LoggingFuture);
+        assertTrue(responseFuture instanceof LoggingFuture);
     }
 
     private Device getDevice(String deviceName) {
@@ -280,7 +291,7 @@ public class NetconfConnectionManagerImplTest {
         //make all devices connected,
         m_cm.auditConnections();
         AbstractNetconfRequest request = mock(AbstractNetconfRequest.class);
-        Future<NetConfResponse> future = mock(Future.class);
+        CompletableFuture<NetConfResponse> future = mock(CompletableFuture.class);
         NetconfClientSession session1 = m_sessions.get(getIp("1"));
         when(session1.sendRpc(request)).thenReturn(future);
         Future<NetConfResponse> responseFuture = m_cm.executeWithSession(getDevice("1"), new
@@ -320,15 +331,15 @@ public class NetconfConnectionManagerImplTest {
     @Test
     public void testConnectionStateGetsUpdated() {
 
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("1").getDeviceName()));
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("2").getDeviceName()));
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("3").getDeviceName()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("1")));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("2")));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(getDevice("3")));
 
         m_cm.auditConnections();
 
-        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("1").getDeviceName()));
-        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("2").getDeviceName()));
-        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("3").getDeviceName()));
+        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("1")));
+        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("2")));
+        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("3")));
 
     }
 
@@ -350,20 +361,38 @@ public class NetconfConnectionManagerImplTest {
 
     @Test
     public void testCallHomeDeviceConnectionIsNotSetup() {
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDirectDevice("CallHomeDevice-1").getDeviceName()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDirectDevice("CallHomeDevice-1")));
         m_cm.auditConnections();
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDirectDevice("CallHomeDevice-1").getDeviceName()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createDirectDevice("CallHomeDevice-1")));
     }
 
     @Test
     public void testCallHomeDeviceConnectionIsAvailableWhenDeviceCallsHome() {
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createCallHomeDevice
-            ("CallHomeDevice-1").getDeviceName()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createCallHomeDevice("CallHomeDevice-1")));
 
         m_cm.connectionEstablished(m_callhomeSession, m_netconfLoginProvider, m_deviceCert, false);
+        Device callHomeDevice1 = getDevice("CallHomeDevice-1");
+        verify(m_connectionListener).deviceConnected(callHomeDevice1, m_callhomeSession);
+        verify(m_connectionListener, never()).deviceDisConnected(callHomeDevice1, m_callhomeSession);
+        assertEquals(getConnectedState(), m_cm.getConnectionState(callHomeDevice1));
+    }
 
-        assertEquals(getConnectedState(), m_cm.getConnectionState(getDevice("CallHomeDevice-1")
-            .getDeviceName()));
+    @Test
+    public void testCallHomeDeviceDisConnection() {
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createCallHomeDevice("CallHomeDevice-1")));
+
+        ArgumentCaptor<NetconfClientSessionListener> captor = ArgumentCaptor.forClass(NetconfClientSessionListener.class);
+
+        m_cm.connectionEstablished(m_callhomeSession, m_netconfLoginProvider, m_deviceCert, false);
+        Device callHomeDevice1 = getDevice("CallHomeDevice-1");
+        verify(m_connectionListener).deviceConnected(callHomeDevice1, m_callhomeSession);
+        verify(m_connectionListener, never()).deviceDisConnected(callHomeDevice1, m_callhomeSession);
+        assertEquals(getConnectedState(), m_cm.getConnectionState(callHomeDevice1));
+        verify(m_callhomeSession).addSessionListener(captor.capture());
+
+        captor.getValue().sessionClosed(m_callhomeSession.getSessionId());
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(callHomeDevice1));
+        verify(m_connectionListener).deviceDisConnected(callHomeDevice1, m_callhomeSession);
     }
 
     @Test
@@ -372,11 +401,26 @@ public class NetconfConnectionManagerImplTest {
         when(m_deviceDao.findDeviceWithDuid(anyString())).thenReturn(null);
 
         m_cm.connectionEstablished(m_callhomeSession, m_netconfLoginProvider, m_deviceCert, false);
+        Device callHomeDevice1 = createCallHomeDevice("CallHomeDevice-1");
+        verify(m_connectionListener, never()).deviceConnected(callHomeDevice1, m_callhomeSession);
+        verify(m_connectionListener, never()).deviceDisConnected(callHomeDevice1, m_callhomeSession);
 
-        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createCallHomeDevice("CallHomeDevice-1")
-            .getDeviceName()));
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(createCallHomeDevice("CallHomeDevice-1")));
 
+        assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(callHomeDevice1));
         assertEquals(1, m_cm.getNewDevices().size());
+    }
+
+    @Test
+    public void testDirectConnectionForNotNetconfDevice() throws NetconfClientDispatcherException {
+        List<Device> devices = new ArrayList<>();
+        Device device = createDirectDevice("4");
+        device.getDeviceManagement().setNetconf(false);
+        devices.add(device);
+        when(m_deviceDao.findAllDevices()).thenReturn(devices);
+        m_cm.auditConnections();
+        ArgumentCaptor<NetconfClientConfiguration> captor = ArgumentCaptor.forClass(NetconfClientConfiguration.class);
+        verify(m_dispatcher, never()).createClient(captor.capture());
     }
 
     private ConnectionState getConnectedState() {

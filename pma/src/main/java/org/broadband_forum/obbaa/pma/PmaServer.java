@@ -16,16 +16,22 @@
 
 package org.broadband_forum.obbaa.pma;
 
+import java.util.List;
+import java.util.Map;
+
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 
 public interface PmaServer {
     ThreadLocal<Device> CURRENT_DEVICE = new ThreadLocal<>();
+    ThreadLocal<DeviceXmlStore> CURRENT_DEVICE_XML_STORE = new ThreadLocal<>();
+    ThreadLocal<DeviceXmlStore> BACKUP_DEVICE_XML_STORE = new ThreadLocal<>();
     NetconfClientInfo PMA_USER = new NetconfClientInfo("PMA_USER", 1);
 
-    NetConfResponse executeNetconf(AbstractNetconfRequest request);
+    Map<NetConfResponse, List<Notification>> executeNetconf(AbstractNetconfRequest request);
 
     static void setCurrentDevice(Device device) {
         CURRENT_DEVICE.set(device);
@@ -37,6 +43,30 @@ public interface PmaServer {
 
     static Device getCurrentDevice() {
         return CURRENT_DEVICE.get();
+    }
+
+    static void setCurrentDeviceXmlStore(DeviceXmlStore deviceXmlStore) {
+        CURRENT_DEVICE_XML_STORE.set(deviceXmlStore);
+    }
+
+    static void clearCurrentDeviceXmlStore() {
+        CURRENT_DEVICE_XML_STORE.remove();
+    }
+
+    static DeviceXmlStore getCurrentDeviceXmlStore() {
+        return CURRENT_DEVICE_XML_STORE.get();
+    }
+
+    static void setBackupDeviceXmlStore(DeviceXmlStore deviceXmlStore) {
+        BACKUP_DEVICE_XML_STORE.set(deviceXmlStore);
+    }
+
+    static void clearBackupDeviceXmlStore() {
+        BACKUP_DEVICE_XML_STORE.remove();
+    }
+
+    static DeviceXmlStore getBackupDeviceXmlStore() {
+        return BACKUP_DEVICE_XML_STORE.get();
     }
 
     boolean isActive();

@@ -15,17 +15,23 @@
   ~ limitations under the License.
   -->
 
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0" xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.2.0"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0"
+           xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.2.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
            default-activation="eager">
-    <jpa:enable />
-    <tx:enable-annotations />
+    <jpa:enable/>
+    <tx:enable-annotations/>
 
     <reference id="deviceManager" interface="org.broadband_forum.obbaa.dm.DeviceManager" availability="mandatory"/>
     <reference id="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry" availability="mandatory"/>
-    <reference id="deviceModelDeployer" interface="org.broadband_forum.obbaa.pma.DeviceModelDeployer" availability="mandatory"/>
-    <reference id="dmNetconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer" availability="mandatory"/>
-    <reference id="adapterActionHandler" interface="org.broadband_forum.obbaa.adapter.handler.DeviceAdapterActionHandler" availability="mandatory"/>
+    <reference id="dmNetconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer"
+               availability="mandatory"/>
+    <reference id="adapterActionHandler" interface="org.broadband_forum.obbaa.adapter.AdapterDeployer"
+               availability="mandatory"/>
+    <reference id="libConsultMgr" interface="org.broadband_forum.obbaa.libconsult.LibConsultMgr" availability="mandatory"/>
+    <reference id="notificationService" interface="org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService"
+               availability="mandatory"/>
 
     <bean id="aggregator" class="org.broadband_forum.obbaa.aggregator.impl.AggregatorImpl">
     </bean>
@@ -40,19 +46,41 @@
           destroy-method="destroy">
         <argument ref="aggregator"/>
     </bean>
+
+    <bean id="notificationForwarder" class="org.broadband_forum.obbaa.aggregator.processor.NotificationForwarder"
+          init-method="init"
+          destroy-method="destroy">
+        <argument ref="aggregator"/>
+        <argument ref="notificationService"/>
+    </bean>
+
     <bean id="deviceManagerAdapter" class="org.broadband_forum.obbaa.aggregator.processor.DeviceManagerAdapter"
           init-method="init"
           destroy-method="destroy">
         <property name="dmNetconfServer" ref="dmNetconfServer"/>
         <argument ref="aggregator"/>
     </bean>
+
+    <bean id="notificationAdapter" class="org.broadband_forum.obbaa.aggregator.processor.NotificationAdapter"
+          init-method="init"
+          destroy-method="destroy">
+        <argument ref="aggregator"/>
+        <argument ref="dmNetconfServer"/>
+    </bean>
+
     <bean id="pmaAdapter" class="org.broadband_forum.obbaa.aggregator.processor.PmaAdapter"
           init-method="init"
           destroy-method="destroy">
         <argument ref="aggregator"/>
         <argument ref="pmaRegistry"/>
-        <argument ref="deviceModelDeployer"/>
         <argument ref="adapterActionHandler"/>
+    </bean>
+
+    <bean id="LibraryConsultAdapter" class="org.broadband_forum.obbaa.aggregator.processor.LibraryConsultAdapter"
+          init-method="init"
+          destroy-method="destroy">
+        <argument ref="aggregator"/>
+        <argument ref="libConsultMgr"/>
     </bean>
 
     <service ref="aggregator" interface="org.broadband_forum.obbaa.aggregator.api.Aggregator"/>

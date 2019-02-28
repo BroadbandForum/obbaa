@@ -32,6 +32,7 @@
         <bundle>mvn:org.bbf.obbaa.netconf/stack-api/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa.netconf/stack-logging-api/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa.netconf/netconf-server-modelnode-fwk/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa.netconf/netconf-notification-app/${project.version}</bundle>
 
         <bundle>mvn:org.bbf.obbaa/device-adapter-fwk/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa/device-manager-entities/${project.version}</bundle>
@@ -40,10 +41,11 @@
         <bundle>mvn:org.bbf.obbaa/pma/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa/aggregator/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa/nbi-adapter/${project.version}</bundle>
+        <bundle>mvn:org.bbf.obbaa/library-consult/${project.version}</bundle>
     </feature>
 
     <feature name="third-party-libs" version="${project.version}" description="Third party Libraries">
-        <feature version="${opendaylight-yangtools.version}">odl-yangtools-yang-parser</feature>
+        <feature version="${opendaylight-yangtools.version}">odl-yangtools-parser</feature>
         <feature version="${transaction.version}">transaction</feature>
         <feature version="${transaction-api.version}">transaction-api</feature>
         <feature version="${pax-jdbc.version}">pax-jdbc-config</feature>
@@ -74,6 +76,7 @@
         <bundle>mvn:joda-time/joda-time/${joda-time.version}</bundle>
         <bundle>mvn:org.apache.sshd/sshd-core/${mina.version}</bundle>
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
+        <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
         <bundle>mvn:commons-collections/commons-collections/${commons-collection.version}</bundle>
         <bundle>mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
         <bundle>mvn:org.apache.commons/commons-lang3/${commons-lang3.version}</bundle>

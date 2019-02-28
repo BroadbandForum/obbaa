@@ -20,6 +20,7 @@ import static org.broadband_forum.obbaa.netconf.server.util.TestUtil.assertXMLEq
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +108,7 @@ public class DeviceSubsystemResponseUtilTest {
     @Before
     public void setUp() throws SchemaBuildException {
         m_schemaRegistry = new SchemaRegistryImpl(TestUtil.getByteSources(Arrays.asList("/devicesubsystemresponseutiltest/test.yang")),
-                new NoLockService());
+                Collections.emptySet(),Collections.emptyMap(),new NoLockService());
         m_util = new DeviceSubsystemResponseUtil(m_schemaRegistry);
     }
 

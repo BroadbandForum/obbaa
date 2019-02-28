@@ -77,6 +77,8 @@ public class DeviceMgmt {
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
     private DeviceState deviceState = new DeviceState();
 
+    public Boolean isNetconf = true;
+
     public String getParentId() {
         return parentId;
     }
@@ -148,6 +150,14 @@ public class DeviceMgmt {
 
     public void setDeviceState(DeviceState deviceState) {
         this.deviceState = deviceState;
+    }
+
+    public boolean isNetconf() {
+        return isNetconf;
+    }
+
+    public void setNetconf(boolean netconf) {
+        isNetconf = netconf;
     }
 
     @Override

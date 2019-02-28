@@ -1,0 +1,79 @@
+<!--
+   ~ Copyright 2018 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="34566754">
+   <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <target>
+         <running />
+      </target>
+      <config>
+         <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+               <device>
+                  <name>deviceB</name>
+                  <root>
+                     <bbf-xpon:xpon xmlns:bbf-xpon="urn:bbf:yang:bbf-xpon">
+                        <bbf-xpon:wavelength-profiles>
+                           <bbf-xpon:wavelength-profile>
+                              <bbf-xpon:name>wavelengthprofile.A</bbf-xpon:name>
+                              <bbf-xpon:upstream-channel-id>0</bbf-xpon:upstream-channel-id>
+                              <bbf-xpon:downstream-channel-id>0</bbf-xpon:downstream-channel-id>
+                           </bbf-xpon:wavelength-profile>
+                        </bbf-xpon:wavelength-profiles>
+                     </bbf-xpon:xpon>
+                     <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                        <if:interface>
+                           <if:name>channelgroup.1</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:channel-group</if:type>
+                           <bbf-xpon:channel-group xmlns:bbf-xpon="urn:bbf:yang:bbf-xpon" />
+                        </if:interface>
+                        <if:interface>
+                           <if:name>channelpartion.1</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:channel-partition</if:type>
+                           <bbf-xpon:channel-partition xmlns:bbf-xpon="urn:bbf:yang:bbf-xpon">
+                              <bbf-xpon:channel-group-ref>channelgroup.1</bbf-xpon:channel-group-ref>
+                              <bbf-xpon:channel-partition-index>0</bbf-xpon:channel-partition-index>
+                              <bbf-xpon:closest-onu-distance>0</bbf-xpon:closest-onu-distance>
+                              <bbf-xpon:maximum-differential-xpon-distance>20</bbf-xpon:maximum-differential-xpon-distance>
+                              <bbf-xpon:authentication-method>serial-number</bbf-xpon:authentication-method>
+                           </bbf-xpon:channel-partition>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>channelpair.1</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:channel-pair</if:type>
+                           <bbf-xpon:channel-pair xmlns:bbf-xpon="urn:bbf:yang:bbf-xpon">
+                              <bbf-xpon:channel-partition-ref>channelpartion.1</bbf-xpon:channel-partition-ref>
+                              <bbf-xpon:channel-group-ref>channelgroup.1</bbf-xpon:channel-group-ref>
+                              <!-- <bbf-xpon:wavelength-prof-ref>wavelengthprofile.A</bbf-xpon:wavelength-prof-ref> -->
+                              <bbf-xpon:channel-pair-type xmlns:bbf-xpon-types="urn:bbf:yang:bbf-xpon-types">bbf-xpon-types:xgs</bbf-xpon:channel-pair-type>
+                           </bbf-xpon:channel-pair>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>channeltermination.1</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:channel-termination</if:type>
+                           <bbf-xpon:channel-termination xmlns:bbf-xpon="urn:bbf:yang:bbf-xpon">
+                              <bbf-xpon:channel-pair-ref>channelpair.1</bbf-xpon:channel-pair-ref>
+                              <bbf-xpon:xgs-pon-id>1</bbf-xpon:xgs-pon-id>
+                           </bbf-xpon:channel-termination>
+                        </if:interface>
+                     </if:interfaces>
+                  </root>
+               </device>
+            </managed-devices>
+         </network-manager>
+      </config>
+   </edit-config>
+</rpc>

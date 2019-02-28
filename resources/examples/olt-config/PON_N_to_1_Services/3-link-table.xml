@@ -1,0 +1,55 @@
+<!--
+   ~ Copyright 2018 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="34566754">
+   <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <target>
+         <running />
+      </target>
+      <config>
+         <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+               <device>
+                  <name>deviceB</name>
+                  <root>
+                     <bbf-lt:link-table xmlns:bbf-lt="urn:bbf:yang:bbf-link-table">
+                        <bbf-lt:link-table>
+                           <bbf-lt:from-interface>ani-user3</bbf-lt:from-interface>
+                           <bbf-lt:to-interface>vani-user3</bbf-lt:to-interface>
+                        </bbf-lt:link-table>
+
+                        <bbf-lt:link-table>
+                           <bbf-lt:from-interface>ani-user4</bbf-lt:from-interface>
+                           <bbf-lt:to-interface>vani-user4</bbf-lt:to-interface>
+                        </bbf-lt:link-table>
+
+                        <bbf-lt:link-table>
+                           <bbf-lt:from-interface>onu-user3-eth.1</bbf-lt:from-interface>
+                           <bbf-lt:to-interface>olt-v-enet-user3.1</bbf-lt:to-interface>
+                        </bbf-lt:link-table>
+
+                        <bbf-lt:link-table>
+                           <bbf-lt:from-interface>onu-user4-eth.1</bbf-lt:from-interface>
+                           <bbf-lt:to-interface>olt-v-enet-user4.1</bbf-lt:to-interface>
+                        </bbf-lt:link-table>
+                     </bbf-lt:link-table>
+                  </root>
+               </device>
+            </managed-devices>
+         </network-manager>
+      </config>
+   </edit-config>
+</rpc>

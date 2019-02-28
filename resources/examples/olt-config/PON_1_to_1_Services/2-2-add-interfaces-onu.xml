@@ -1,0 +1,91 @@
+<!--
+   ~ Copyright 2018 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="34566754">
+   <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <target>
+         <running />
+      </target>
+      <config>
+         <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+               <device>
+                  <name>deviceB</name>
+                  <root>
+                     <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                        <if:interface>
+                           <if:name>vani-user1</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:v-ani</if:type>
+                           <bbf-xponvani:v-ani xmlns:bbf-xponvani="urn:bbf:yang:bbf-xponvani">
+                              <!-- <bbf-xponvani:parent-ref>channelpartition.1</bbf-xponvani:parent-ref> -->
+                              <bbf-xponvani:expected-serial-number>aaaaaaaaaaaa</bbf-xponvani:expected-serial-number>
+                           </bbf-xponvani:v-ani>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>ani-user1</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:ani</if:type>
+                           <bbf-xponani:ani xmlns:bbf-xponani="urn:bbf:yang:bbf-xponani">
+                           </bbf-xponani:ani>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>olt-v-enet-user1.1</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:olt-v-enet</if:type>
+                           <bbf-xponvani:olt-v-enet xmlns:bbf-xponvani="urn:bbf:yang:bbf-xponvani">
+                              <bbf-xponvani:lower-layer-interface>vani-user1</bbf-xponvani:lower-layer-interface>
+                           </bbf-xponvani:olt-v-enet>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>onu-user1-eth.1</if:name>
+                           <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</if:type>
+                        </if:interface>
+
+                        <if:interface>
+                           <if:name>vani-user2</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:v-ani</if:type>
+                           <bbf-xponvani:v-ani xmlns:bbf-xponvani="urn:bbf:yang:bbf-xponvani">
+                              <!-- <bbf-xponvani:parent-ref>xpon-cp.1</bbf-xponvani:parent-ref> -->
+                              <bbf-xponvani:expected-serial-number>aaaaaaaaaaaa</bbf-xponvani:expected-serial-number>
+                           </bbf-xponvani:v-ani>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>ani-user2</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:ani</if:type>
+                           <bbf-xponani:ani xmlns:bbf-xponani="urn:bbf:yang:bbf-xponani">
+                           </bbf-xponani:ani>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>olt-v-enet-user2.1</if:name>
+                           <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:olt-v-enet</if:type>
+                           <bbf-xponvani:olt-v-enet xmlns:bbf-xponvani="urn:bbf:yang:bbf-xponvani">
+                              <bbf-xponvani:lower-layer-interface>vani-user1</bbf-xponvani:lower-layer-interface>
+                           </bbf-xponvani:olt-v-enet>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>onu-user2-eth.1</if:name>
+                           <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</if:type>
+                        </if:interface>
+                        <if:interface>
+                           <if:name>uplink.1</if:name>
+                           <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</if:type>
+                        </if:interface>
+                     </if:interfaces>
+                  </root>
+               </device>
+            </managed-devices>
+         </network-manager>
+      </config>
+   </edit-config>
+</rpc>

@@ -16,6 +16,15 @@
 
 package org.broadband_forum.obbaa.device.adapter.impl;
 
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.ADAPTER_XML_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_DEVIATIONS_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_FEATURES_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.MODEL;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.SLASH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.YANG_LIB_FILE;
+import static org.broadband_forum.obbaa.device.adapter.CommonFileUtil.getAdapterDeviationsFromFile;
+import static org.broadband_forum.obbaa.device.adapter.CommonFileUtil.getAdapterFeaturesFromFile;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -23,67 +32,64 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
-import org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants;
 import org.broadband_forum.obbaa.device.adapter.CommonFileUtil;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
+import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService;
+import org.broadband_forum.obbaa.device.adapter.util.VariantFileUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
+import org.opendaylight.yangtools.yang.common.QName;
 
 public class NonCodedAdapterServiceImpl implements NonCodedAdapterService {
 
-    private final File m_stagingAreaDir;
-    private String m_stagingArea;
     private AdapterManager m_manager;
 
-    public NonCodedAdapterServiceImpl(String stagingArea, AdapterManager manager) {
-        m_stagingArea = stagingArea;
+    public NonCodedAdapterServiceImpl(AdapterManager manager) {
         m_manager = manager;
-        m_stagingAreaDir = new File(m_stagingArea);
     }
 
-    public void init() {
-        if (!m_stagingAreaDir.exists()) {
-            m_stagingAreaDir.mkdirs();
-        } else if (!m_stagingAreaDir.isDirectory()) {
-            throw new RuntimeException(m_stagingArea + " is not a directory");
+    @Override
+    public void deployAdapter(String deviceAdapterId, SubSystem subSystem, Class klass, String stagingArea,
+                              DeviceInterface configAlign) throws Exception {
+        String destDirname = stagingArea + File.separator + deviceAdapterId;
+        String deviceXmlPath = destDirname + ADAPTER_XML_PATH;
+        String yangXmlPath = destDirname + File.separator + YANG_LIB_FILE;
+        String supportedFeaturesPath = destDirname + DEFAULT_FEATURES_PATH;
+        String supportedDeviationPath = destDirname + DEFAULT_DEVIATIONS_PATH;
+        File deviceFile = new File(deviceXmlPath);
+        List<String> modulePaths = new ArrayList<>();
+        Map<URL, InputStream> moduleStream = CommonFileUtil.buildModuleStreamMap(destDirname, modulePaths);
+        VariantFileUtils.copyYangLibFiles(yangXmlPath, destDirname + SLASH + MODEL);
+        try (InputStream deviceXmlInputStream = new FileInputStream(deviceFile);
+             InputStream supportedFeaturesInputStream = new FileInputStream(supportedFeaturesPath);
+             InputStream supportedDeviationInputStream = new FileInputStream(supportedDeviationPath)) {
+            Set<QName> features = getAdapterFeaturesFromFile(supportedFeaturesInputStream);
+            Map<QName, Set<QName>> deviations = getAdapterDeviationsFromFile(supportedDeviationInputStream);
+            DeviceAdapter adapter = AdapterBuilder.createAdapterBuilder()
+                    .setDeviceXml(deviceXmlInputStream)
+                    .setModuleStream(moduleStream)
+                    .setSupportedFeatures(features)
+                    .setSupportedDeviations(deviations)
+                    .build();
+            adapter.init();
+            m_manager.deploy(adapter, subSystem, klass, configAlign);
         }
     }
 
     @Override
-    public void deployPlug(String devicePlugId, SubSystem subSystem, Class klass) throws Exception {
-        String destDirname = m_stagingArea + File.separator + devicePlugId;
-        String deviceXmlPath = destDirname + AdapterSpecificConstants.ADAPTER_XML_PATH;
-        File deviceFile = new File(deviceXmlPath);
-        InputStream inputStream = new FileInputStream(deviceFile);
-        List<String> modulePaths = new ArrayList<>();
-        Map<URL, InputStream> moduleStream = CommonFileUtil.buildModuleStreamMap(destDirname, modulePaths);
-        DeviceAdapter adapter = new DeviceAdapter(null, null, null, null, null, inputStream, moduleStream);
-        adapter.init();
-        adapter.setModuleStream(moduleStream);
-        m_manager.deploy(adapter, subSystem, klass);
-    }
-
-    @Override
-    public void unDeployPlug(String type, String interfaceVersion, String model, String vendor) throws Exception {
+    public void unDeployAdapter(String type, String interfaceVersion, String model, String vendor) throws Exception {
         m_manager.undeploy(m_manager.getDeviceAdapter(new DeviceAdapterId(type, interfaceVersion, model, vendor)));
 
     }
 
     @Override
-    public DeviceAdapterId getNonCodedPlugId(String plugArchiveFileName, String deviceXmlpath) throws Exception {
-        return CommonFileUtil.parseAdapterDeviceXMLFile(plugArchiveFileName, deviceXmlpath);
+    public DeviceAdapterId getNonCodedAdapterId(String adapterArchiveFileName, String deviceXmlpath) throws Exception {
+        return CommonFileUtil.parseAdapterXMLFile(adapterArchiveFileName, deviceXmlpath);
     }
 
-    @Override
-    public String getStagingArea() {
-        return m_stagingArea;
-    }
-
-    @Override
-    public void setStagingArea(String stagingArea) {
-        m_stagingArea = stagingArea;
-    }
 }

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
+import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaBuildException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.RpcRequestHandlerRegistryImpl;
@@ -48,8 +52,9 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.yang.ModelN
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.LockServiceException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.WriteLockTemplate;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +77,7 @@ public class AdapterManagerImpl implements AdapterManager {
     }
 
     @Override
-    public void deploy(DeviceAdapter adapter, SubSystem subSystem, Class klass) {
+    public void deploy(DeviceAdapter adapter, SubSystem subSystem, Class klass, DeviceInterface deviceInterface) {
         LOGGER.info("Deploying the adapter :" + adapter);
         try {
             m_readWriteLockService.executeWithWriteLock(new WriteLockTemplate<Void>() {
@@ -81,11 +86,12 @@ public class AdapterManagerImpl implements AdapterManager {
                     DeviceAdapterId adapterId = new DeviceAdapterId(adapter.getType(), adapter.getInterfaceVersion(),
                             adapter.getModel(), adapter.getVendor());
                     String componentId = getComponentId(adapter);
-                    AdapterContext adapterContext = new AdapterContext(m_readWriteLockService);
+                    AdapterContext adapterContext = new AdapterContext(m_readWriteLockService, deviceInterface);
                     try {
                         deployAdapter(adapter, adapterContext, componentId, subSystem, klass);
                         m_adapterContextRegistry.putIfAbsent(adapterId, adapterContext);
                         m_adapterMap.putIfAbsent(adapterId, adapter);
+                        adapter.setLastUpdateTime(DateTime.now().toDateTime(DateTimeZone.UTC));
                     } catch (Exception e) {
                         LOGGER.error("Error while deploying adapter: " + adapter, e);
                         throw new LockServiceException(e);
@@ -111,6 +117,7 @@ public class AdapterManagerImpl implements AdapterManager {
                             adapter.getInterfaceVersion(), adapter.getModel(), adapter.getVendor());
                     try {
                         unDeployAdapter(adapter);
+                        AdapterUtils.removeAdapterLastUpdateTime(adapter.genAdapterLastUpdateTimeKey());
                     } catch (Exception e) {
                         LOGGER.error("Error while undeploying adapter: " + adapter, e);
                         throw new LockServiceException(e);
@@ -126,14 +133,14 @@ public class AdapterManagerImpl implements AdapterManager {
     }
 
     private void unDeployAdapter(DeviceAdapter adapter) throws ModelNodeInitException {
-        LOGGER.info("undeploying device plug: " + adapter);
+        LOGGER.info("undeploying device adapter: " + adapter);
         String componentId = getComponentId(adapter);
         AdapterContext context = getAdapterContext(new DeviceAdapterId(adapter.getType(),
                 adapter.getInterfaceVersion(), adapter.getModel(), adapter.getVendor()));
         context.getDsmRegistry().undeploy(componentId);
         context.getModelNodeHelperRegistry().undeploy(componentId);
         try {
-            context.getSchemaRegistry().unloadSchemaContext(componentId, null);
+            context.getSchemaRegistry().unloadSchemaContext(componentId, Collections.emptySet() , null);
         } catch (Exception e) {
             LOGGER.error("Error while undeploying device adapter " + adapter, e);
             throw new ModelNodeInitException("Error while undeploying device adapter " + adapter, e);
@@ -190,7 +197,8 @@ public class AdapterManagerImpl implements AdapterManager {
 
     private void buildSchemaRegistry(SchemaRegistry schemaRegistry, String componentId, DeviceAdapter deviceAdapter) throws IOException {
         try {
-            schemaRegistry.loadSchemaContext(componentId, deviceAdapter.getModuleByteSources(), null, null);
+            schemaRegistry.loadSchemaContext(componentId, deviceAdapter.getModuleByteSources(), deviceAdapter.getSupportedFeatures(),
+                    deviceAdapter.getSupportedDevations());
         } catch (SchemaBuildException | MalformedURLException e) {
             throw new RuntimeException("Could not redeploy yangs into schema registry", e);
         }
@@ -212,7 +220,7 @@ public class AdapterManagerImpl implements AdapterManager {
         for (ModuleIdentifier moduleId : schemaRegistry.getAllModuleIdentifiers()) {
             ModelService service = new ModelService();
             service.setModuleName(moduleId.getName());
-            service.setModuleRevision(moduleId.getQNameModule().getFormattedRevision());
+            service.setModuleRevision(moduleId.getRevision().get().toString());
             service.setModelNodeDSM(m_dataStoreManager);
             service.setDefaultSubsystem(subSystem);
             adapter.addCapability(schemaRegistry.getCapability(moduleId));

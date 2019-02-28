@@ -16,6 +16,9 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
+import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getAdapterContext;
+import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getStandardAdapterContext;
+
 import java.io.File;
 import java.util.Arrays;
 
@@ -23,21 +26,21 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
-import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
+import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl;
-import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDSMRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.utils.AnnotationAnalysisException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.utils.EntityRegistryBuilder;
-import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.SingleXmlObjectDSM;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
+import org.broadband_forum.obbaa.pma.DeviceXmlStore;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
 import org.broadband_forum.obbaa.pma.PmaSession;
@@ -48,8 +51,6 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     private final DeviceManager m_deviceManager;
     private final EntityRegistry m_entityRegistry;
     private final SchemaRegistry m_schemaRegistry;
-    private final ModelNodeHelperRegistry m_modelNodeHelperRegistry;
-    private final SubSystemRegistry m_subsystemRegistry;
     private final ModelNodeDSMRegistry m_modelNodeDsmRegistry;
     private final String m_deviceFileBaseDirPath;
     private final NetConfServerImpl m_netconfServer;
@@ -57,17 +58,12 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     private final NetconfDeviceAlignmentService m_das;
     private AdapterManager m_adapterManager;
 
-    public PmaServerSessionFactory(String deviceFileBaseDirPath, DeviceManager deviceManager, NetConfServerImpl
-            netconfServer,
-                                   NetconfDeviceAlignmentService das, EntityRegistry entityRegistry, SchemaRegistry
-                                           schemaRegistry,
-                                   ModelNodeHelperRegistry modelNodeHelperRegistry, SubSystemRegistry subsystemRegistry,
+    public PmaServerSessionFactory(String deviceFileBaseDirPath, DeviceManager deviceManager, NetConfServerImpl netconfServer,
+                                   NetconfDeviceAlignmentService das, EntityRegistry entityRegistry, SchemaRegistry schemaRegistry,
                                    ModelNodeDSMRegistry modelNodeDsmRegistry, AdapterManager adapterManager) {
         m_das = das;
         m_entityRegistry = entityRegistry;
         m_schemaRegistry = schemaRegistry;
-        m_modelNodeHelperRegistry = modelNodeHelperRegistry;
-        m_subsystemRegistry = subsystemRegistry;
         m_modelNodeDsmRegistry = modelNodeDsmRegistry;
         m_deviceManager = deviceManager;
         m_netconfServer = netconfServer;
@@ -109,22 +105,18 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
 
     @NotNull
     private PmaServerImpl createPmaServer(Device device) {
-        return new PmaServerImpl(device, m_netconfServer, getDsm(device), getAdapterContext(device));
+        device.getDeviceManagement().setNetconf(AdapterUtils.getAdapter(device, m_adapterManager).getNetconf());
+        return new PmaServerImpl(device, m_netconfServer, getDsmAndStore(device), getAdapterContext(device, m_adapterManager),
+                getStandardAdapterContext(device, m_adapterManager), m_deviceFileBaseDirPath);
     }
 
-    private ModelNodeDataStoreManager getDsm(Device device) {
+    private Pair<ModelNodeDataStoreManager, DeviceXmlStore> getDsmAndStore(Device device) {
         DeviceXmlStore deviceStore = new DeviceXmlStore(getDeviceStoreFilePath(device.getDeviceName()));
-        AdapterContext adapterContext = getAdapterContext(device);
+        AdapterContext adapterContext = getStandardAdapterContext(device, m_adapterManager);
         SingleXmlObjectDSM<DeviceXmlStore> dsm = new SingleXmlObjectDSM<>(deviceStore, m_persistenceMgrUtil,
                 m_entityRegistry, adapterContext.getSchemaRegistry(), adapterContext.getModelNodeHelperRegistry(),
                 adapterContext.getSubSystemRegistry(), adapterContext.getDsmRegistry());
-        return dsm;
-    }
-
-    private AdapterContext getAdapterContext(Device dev) {
-        return m_adapterManager.getAdapterContext(new DeviceAdapterId(dev.getDeviceManagement().getDeviceType(),
-                dev.getDeviceManagement().getDeviceInterfaceVersion(), dev.getDeviceManagement().getDeviceModel(),
-                dev.getDeviceManagement().getDeviceVendor()));
+        return new Pair<>(dsm, deviceStore);
     }
 
     @NotNull

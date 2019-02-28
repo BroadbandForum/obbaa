@@ -16,12 +16,9 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
-import java.util.LinkedHashMap;
-
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dm.DeviceStateProvider;
-import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 
 public class NetconfConnectionStateProvider implements DeviceStateProvider {
@@ -37,14 +34,6 @@ public class NetconfConnectionStateProvider implements DeviceStateProvider {
 
     public void init() {
         m_deviceManager.addDeviceStateProvider(this);
-    }
-
-    @Override
-    public LinkedHashMap<String, Object> getState(String deviceName) {
-        ConnectionState connectionState = m_cm.getConnectionState(deviceName);
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put(CONNECTION_STATE, connectionState);
-        return map;
     }
 
     @Override

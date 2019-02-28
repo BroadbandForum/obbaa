@@ -16,8 +16,6 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
-import java.util.LinkedHashMap;
-
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dm.DeviceStateProvider;
 
@@ -36,11 +34,6 @@ public class DeviceCRUDListener implements DeviceStateProvider {
     public DeviceCRUDListener(DeviceManager deviceManager, PmaRegistryImpl pmaRegistry) {
         m_deviceManager = deviceManager;
         m_pmaRegistry = pmaRegistry;
-    }
-
-    @Override
-    public LinkedHashMap<String, Object> getState(String deviceName) {
-        return new LinkedHashMap<>();
     }
 
     @Override

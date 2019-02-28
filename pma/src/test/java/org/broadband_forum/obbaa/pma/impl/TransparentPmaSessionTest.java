@@ -24,6 +24,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -31,6 +33,7 @@ import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.pma.PmaServer;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +90,9 @@ public class TransparentPmaSessionTest {
 
     @Test
     public void testPmaContactsDMAndCMToExecuteNC() throws ExecutionException {
-        String response = m_pmaSession.executeNC(REQ_STR);
+        Map<NetConfResponse , List<Notification>> netConfResponseListMap = m_pmaSession.executeNC(REQ_STR);
+        Map.Entry<NetConfResponse , List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
+        String response = entry.getKey().responseToString();
         ArgumentCaptor<AbstractNetconfRequest> reqCaptor = ArgumentCaptor.forClass(AbstractNetconfRequest.class);
 
         verify(m_cm).executeNetconf(eq(m_device1Meta), reqCaptor.capture());

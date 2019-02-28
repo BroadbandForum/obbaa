@@ -19,8 +19,10 @@ package org.broadband_forum.obbaa.nbiadapter.netconf;
 import java.io.Serializable;
 import java.security.PublicKey;
 
+import org.broadband_forum.obbaa.netconf.api.server.auth.AuthenticationResult;
 import org.broadband_forum.obbaa.netconf.api.server.auth.ClientAuthenticationInfo;
 import org.broadband_forum.obbaa.netconf.api.server.auth.NetconfServerAuthenticationHandler;
+import org.broadband_forum.obbaa.netconf.api.server.auth.NetconfServerSessionListener;
 
 
 /**
@@ -63,29 +65,44 @@ public class NbiSshNetconfAuth implements NetconfServerAuthenticationHandler {
      *  NBI SSH Netconf server authenticate function based on user name and password.
      */
     @Override
-    public boolean authenticate(ClientAuthenticationInfo clientAuthInfo) {
+    public AuthenticationResult authenticate(ClientAuthenticationInfo clientAuthInfo) {
 
         if (m_strUserName.equals(clientAuthInfo.getUsername()) && m_strPassword.equals(clientAuthInfo.getPassword())) {
             LOGGER.info("Authentication is successful");
-            return true;
+            return new AuthenticationResult(true, clientAuthInfo.getClientSessionId());
         }
 
         LOGGER.info("Authentication is failed");
-        return false;
+        return AuthenticationResult.failedAuthResult();
     }
 
     /**
      *  NBI SSH Netconf server authenticate function based on public key.
      */
     @Override
-    public boolean authenticate(PublicKey pubKey) {
+    public AuthenticationResult authenticate(PublicKey pubKey) {
 
         //Currently does not support public key authentication
-        return false;
+        return AuthenticationResult.failedAuthResult();
     }
 
     @Override
     public void logout(Serializable sshSessionId) {
 
+    }
+
+    @Override
+    public void registerServerSessionListener(Serializable sessionId, NetconfServerSessionListener sessionListener) {
+
+    }
+
+    @Override
+    public void unregisterServerSessionListener(Serializable sessionId) {
+
+    }
+
+    @Override
+    public NetconfServerSessionListener getServerSessionListener(Serializable sessionId) {
+        return null;
     }
 }

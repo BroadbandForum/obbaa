@@ -20,6 +20,7 @@ import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.IN_ERROR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -31,20 +32,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.dmyang.tx.TxService;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
@@ -114,8 +121,6 @@ public class AlignmentTimerTest {
     @Mock
     private PmaSession m_pmaSession;
     @Mock
-    private NetconfConnectionManager m_connMgr;
-    @Mock
     private DeviceDao m_deviceDao;
     private TxService m_txService;
     @Mock
@@ -126,9 +131,15 @@ public class AlignmentTimerTest {
     private EntityManager entityMgr;
     @Mock
     private EntityTransaction entityTx;
+    @Mock
+    private AdapterManager m_adapterMgr;
+    @Mock
+    private DeviceInterface m_devInterface;
+    @Mock
+    private AdapterContext m_context;
 
     @Before
-    public void setUp() throws ExecutionException {
+    public void setUp() throws ExecutionException, NetconfMessageBuilderException {
         MockitoAnnotations.initMocks(this);
         m_txService = new TxService();
         when(m_persistenceMgrUtil.getEntityDataStoreManager()).thenReturn(entityDSM);
@@ -148,11 +159,13 @@ public class AlignmentTimerTest {
         m_inErrorDevice.getDeviceManagement().getDeviceState().setConfigAlignmentState(IN_ERROR + ", blah blah");
         m_devices.add(m_inErrorDevice);
         when(m_deviceDao.findAllDevices()).thenReturn(m_devices);
-        m_timer = new AlignmentTimer(m_pmaRegistry, m_connMgr);
-        m_timer.setTxService(m_txService);
-        m_timer.setDeviceDao(m_deviceDao);
-        when(m_pmaSession.executeNC(anyString())).thenReturn(SAMPLE_EMPTY_NC_RES);
-        when(m_connMgr.isConnected(anyObject())).thenReturn(true);
+        m_timer = new AlignmentTimer(m_pmaRegistry, m_adapterMgr, m_deviceDao, m_txService);
+        when(m_adapterMgr.getAdapterContext(any())).thenReturn(m_context);
+        when(m_context.getDeviceInterface()).thenReturn(m_devInterface);
+        Map<NetConfResponse, List<Notification>> map = new HashMap<>();
+        NetConfResponse netConfResponse = DocumentToPojoTransformer.getNetconfResponse(DocumentUtils.stringToDocument(SAMPLE_EMPTY_NC_RES));
+        map.put(netConfResponse, Collections.emptyList());
+        when(m_pmaSession.executeNC(anyString())).thenReturn(map);
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             return ((PmaSessionTemplate) args[1]).execute(m_pmaSession);
@@ -175,22 +188,17 @@ public class AlignmentTimerTest {
     }
 
     @Test
-    public void testNewDevicesWithConfigurationsAreAligned() throws ExecutionException {
-        when(m_pmaSession.executeNC(anyString())).thenReturn(SAMPLE_NON_EMPTY_NC_RES);
+    public void testNewDevicesWithConfigurationsAreAligned() throws ExecutionException, NetconfMessageBuilderException {
+        Map<NetConfResponse, List<Notification>> map = new HashMap<>();
+        NetConfResponse netConfResponse = DocumentToPojoTransformer.getNetconfResponse(DocumentUtils.stringToDocument(SAMPLE_NON_EMPTY_NC_RES));
+        map.put(netConfResponse, Collections.emptyList());
+        when(m_pmaSession.executeNC(anyString())).thenReturn(map);
         m_timer.runAlignment();
         verify(m_pmaSession, times(2)).align();
     }
 
     @Test
-    public void testNewDevicesWithConfigurationsAreAlignedOnlyWhenDeviceIsConnected() throws ExecutionException {
-        when(m_connMgr.isConnected(anyObject())).thenReturn(false);
-        m_timer.runAlignment();
-        verify(m_pmaSession, never()).forceAlign();
-        verify(m_pmaSession, never()).align();
-    }
-
-    @Test
-    public void testUploadConfig() throws ExecutionException, InterruptedException {
+    public void testUploadConfig() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
         m_newDevice.getDeviceManagement().setPushPmaConfigurationToDevice("false");
         Future<NetConfResponse> responseFuture = mock(Future.class);
         NetConfResponse netConfResponse = null;
@@ -200,15 +208,18 @@ public class AlignmentTimerTest {
             throw new RuntimeException(e);
         }
         when(responseFuture.get()).thenReturn(netConfResponse);
-        when(m_connMgr.executeNetconf(eq(m_newDevice), anyObject())).thenReturn(responseFuture);
-        when(m_pmaSession.executeNC(EDIT_CONFIG_REQ)).thenReturn(OK_RESPONSE);
+        when(m_devInterface.getConfig(eq(m_newDevice), anyObject())).thenReturn(responseFuture);
+        Map<NetConfResponse, List<Notification>> map = new HashMap<>();
+        NetConfResponse netConfRespons = DocumentToPojoTransformer.getNetconfResponse(DocumentUtils.stringToDocument(OK_RESPONSE));
+        map.put(netConfRespons, Collections.emptyList());
+        when(m_pmaSession.executeNC(EDIT_CONFIG_REQ)).thenReturn(map);
         m_timer.runAlignment();
         assertEquals("true", m_newDevice.getDeviceManagement().getPushPmaConfigurationToDevice());
         verify(m_deviceDao).updateDeviceAlignmentState("new-device", ALIGNED);
     }
 
     @Test
-    public void testUploadConfigError() throws ExecutionException, InterruptedException {
+    public void testUploadConfigError() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
         m_newDevice.getDeviceManagement().setPushPmaConfigurationToDevice("false");
         Future<NetConfResponse> responseFuture = mock(Future.class);
         NetConfResponse netConfResponse = null;
@@ -218,8 +229,11 @@ public class AlignmentTimerTest {
             throw new RuntimeException(e);
         }
         when(responseFuture.get()).thenReturn(netConfResponse);
-        when(m_connMgr.executeNetconf(eq(m_newDevice), anyObject())).thenReturn(responseFuture);
-        when(m_pmaSession.executeNC(EDIT_CONFIG_REQ)).thenReturn(ERROR_RESPONSE);
+        when(m_devInterface.getConfig(eq(m_newDevice), anyObject())).thenReturn(responseFuture);
+        Map<NetConfResponse, List<Notification>> map = new HashMap<>();
+        NetConfResponse netConfRespons = DocumentToPojoTransformer.getNetconfResponse(DocumentUtils.stringToDocument(ERROR_RESPONSE));
+        map.put(netConfRespons, Collections.emptyList());
+        when(m_pmaSession.executeNC(EDIT_CONFIG_REQ)).thenReturn(map);
         m_timer.runAlignment();
         assertEquals("false", m_newDevice.getDeviceManagement().getPushPmaConfigurationToDevice());
         verify(m_deviceDao, never()).updateDeviceAlignmentState(anyString(), anyString());
@@ -237,7 +251,7 @@ public class AlignmentTimerTest {
             throw new RuntimeException(e);
         }
         when(responseFuture.get()).thenReturn(netConfResponse);
-        when(m_connMgr.executeNetconf(eq(m_newDevice), anyObject())).thenReturn(responseFuture);
+        when(m_devInterface.getConfig(eq(m_newDevice), anyObject())).thenReturn(responseFuture);
         m_timer.runAlignment();
         assertEquals("true", m_newDevice.getDeviceManagement().getPushPmaConfigurationToDevice());
         verify(m_deviceDao).updateDeviceAlignmentState("new-device", ALIGNED);

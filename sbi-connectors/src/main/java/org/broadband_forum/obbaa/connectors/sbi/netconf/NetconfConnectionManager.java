@@ -81,10 +81,10 @@ public interface NetconfConnectionManager {
     /**
      * Returns the details of the existing connection to the device.
      *
-     * @param deviceName - Key of the device.
+     * @param device - Key of the device.
      * @return - Connection state details.
      */
-    ConnectionState getConnectionState(String deviceName);
+    ConnectionState getConnectionState(Device device);
 
     /**
      * Get list of "new devices" that have called home, but have not been managed in the data store.
@@ -99,5 +99,9 @@ public interface NetconfConnectionManager {
      * @param duid - Unique identifier of the new device.
      */
     void dropNewDeviceConnection(String duid);
+
+    void registerDeviceConnectionListener(ConnectionListener connectionListener);
+
+    void unregisterDeviceConnectionListener(ConnectionListener connectionListener);
 
 }

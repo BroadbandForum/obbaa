@@ -16,7 +16,6 @@
 
 package org.broadband_forum.obbaa.nbiadapter.netconf;
 
-import java.net.InetSocketAddress;
 import java.util.HashSet;
 
 import org.apache.log4j.Logger;
@@ -92,7 +91,7 @@ public class NbiSshNetconfServer {
 
         //Builder the SSH Netconf server configuration
         NetconfServerConfigurationBuilder builder = NetconfServerConfigurationBuilder
-                .createDefaultNcServerBuilder(new InetSocketAddress("0.0.0.0", m_serverPort))
+                .createDefaultNcServerBuilder(m_serverPort)
                 .setAuthenticationHandler(m_auth)
                 .setNetconfServerMessageListener(m_listener)
                 .setServerMessageHandler(new QueuingMessageHandler(m_listener))

@@ -1,0 +1,129 @@
+<!--
+   ~ Copyright 2018 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="34566760">
+   <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <target>
+         <running />
+      </target>
+      <config>
+         <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+               <device>
+                  <name>deviceB</name>
+                  <root>
+                     <bbf-xpongemtcont:xpongemtcont xmlns:bbf-xpongemtcont="urn:bbf:yang:bbf-xpongemtcont">
+                        <bbf-xpongemtcont:traffic-descriptor-profiles>
+                           <bbf-xpongemtcont:traffic-descriptor-profile>
+                              <bbf-xpongemtcont:name>traffic-desc-max20m</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:fixed-bandwidth>0</bbf-xpongemtcont:fixed-bandwidth>
+                              <bbf-xpongemtcont:assured-bandwidth>0</bbf-xpongemtcont:assured-bandwidth>
+                              <bbf-xpongemtcont:maximum-bandwidth>20000000</bbf-xpongemtcont:maximum-bandwidth>
+                              <bbf-xpongemtcont:additional-bw-eligibility-indicator>non-assured-sharing</bbf-xpongemtcont:additional-bw-eligibility-indicator>
+                           </bbf-xpongemtcont:traffic-descriptor-profile>
+                           <bbf-xpongemtcont:traffic-descriptor-profile>
+                              <bbf-xpongemtcont:name>assured-10m</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:fixed-bandwidth>0</bbf-xpongemtcont:fixed-bandwidth>
+                              <bbf-xpongemtcont:assured-bandwidth>10000000</bbf-xpongemtcont:assured-bandwidth>
+                              <bbf-xpongemtcont:maximum-bandwidth>10000000</bbf-xpongemtcont:maximum-bandwidth>
+                              <bbf-xpongemtcont:additional-bw-eligibility-indicator>none</bbf-xpongemtcont:additional-bw-eligibility-indicator>
+                           </bbf-xpongemtcont:traffic-descriptor-profile>
+                        </bbf-xpongemtcont:traffic-descriptor-profiles>
+
+                        <bbf-xpongemtcont:tconts>
+                           <bbf-xpongemtcont:tcont>
+                              <bbf-xpongemtcont:name>vani-user3-tcont.1</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface-reference>vani-user3</bbf-xpongemtcont:interface-reference>
+                              <bbf-xpongemtcont:traffic-descriptor-profile-ref>assured-10m</bbf-xpongemtcont:traffic-descriptor-profile-ref>
+                           </bbf-xpongemtcont:tcont>
+                           <bbf-xpongemtcont:tcont>
+                              <bbf-xpongemtcont:name>vani-user3-tcont.2</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface-reference>vani-user3</bbf-xpongemtcont:interface-reference>
+                              <bbf-xpongemtcont:traffic-descriptor-profile-ref>traffic-desc-max20m</bbf-xpongemtcont:traffic-descriptor-profile-ref>
+                           </bbf-xpongemtcont:tcont>
+
+                           <bbf-xpongemtcont:tcont>
+                              <bbf-xpongemtcont:name>vani-user4-tcont.1</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface-reference>vani-user4</bbf-xpongemtcont:interface-reference>
+                              <bbf-xpongemtcont:traffic-descriptor-profile-ref>assured-10m</bbf-xpongemtcont:traffic-descriptor-profile-ref>
+                           </bbf-xpongemtcont:tcont>
+                           <bbf-xpongemtcont:tcont>
+                              <bbf-xpongemtcont:name>vani-user4-tcont.2</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface-reference>vani-user4</bbf-xpongemtcont:interface-reference>
+                              <bbf-xpongemtcont:traffic-descriptor-profile-ref>traffic-desc-max20m</bbf-xpongemtcont:traffic-descriptor-profile-ref>
+                           </bbf-xpongemtcont:tcont>
+
+                        </bbf-xpongemtcont:tconts>
+                        <bbf-xpongemtcont:gemports>
+                           <bbf-xpongemtcont:gemport>
+                              <bbf-xpongemtcont:name>gem-user3-eth.1-tc0</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface>olt-v-enet-user3.1</bbf-xpongemtcont:interface>
+                              <bbf-xpongemtcont:traffic-class>0</bbf-xpongemtcont:traffic-class>
+                              <bbf-xpongemtcont:tcont-ref>vani-user3-tcont.1</bbf-xpongemtcont:tcont-ref>
+                           </bbf-xpongemtcont:gemport>
+                           <bbf-xpongemtcont:gemport>
+                              <bbf-xpongemtcont:name>gem-user3-eth.1-tc1</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface>olt-v-enet-user3.1</bbf-xpongemtcont:interface>
+                              <bbf-xpongemtcont:traffic-class>1</bbf-xpongemtcont:traffic-class>
+                              <bbf-xpongemtcont:tcont-ref>vani-user3-tcont.1</bbf-xpongemtcont:tcont-ref>
+                           </bbf-xpongemtcont:gemport>
+                           <bbf-xpongemtcont:gemport>
+                              <bbf-xpongemtcont:name>gem-user3-eth.1-tc2</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface>olt-v-enet-user3.1</bbf-xpongemtcont:interface>
+                              <bbf-xpongemtcont:traffic-class>2</bbf-xpongemtcont:traffic-class>
+                              <bbf-xpongemtcont:tcont-ref>vani-user3-tcont.2</bbf-xpongemtcont:tcont-ref>
+                           </bbf-xpongemtcont:gemport>
+                           <bbf-xpongemtcont:gemport>
+                              <bbf-xpongemtcont:name>gem-user3-eth.1-tc3</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface>olt-v-enet-user3.1</bbf-xpongemtcont:interface>
+                              <bbf-xpongemtcont:traffic-class>3</bbf-xpongemtcont:traffic-class>
+                              <bbf-xpongemtcont:tcont-ref>vani-user3-tcont.2</bbf-xpongemtcont:tcont-ref>
+                           </bbf-xpongemtcont:gemport>
+
+                           <bbf-xpongemtcont:gemport>
+                              <bbf-xpongemtcont:name>gem-user4-eth.1-tc0</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface>olt-v-enet-user4.1</bbf-xpongemtcont:interface>
+                              <bbf-xpongemtcont:traffic-class>0</bbf-xpongemtcont:traffic-class>
+                              <bbf-xpongemtcont:tcont-ref>vani-user4-tcont.1</bbf-xpongemtcont:tcont-ref>
+                           </bbf-xpongemtcont:gemport>
+                           <bbf-xpongemtcont:gemport>
+                              <bbf-xpongemtcont:name>gem-user4-eth.1-tc1</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface>olt-v-enet-user4.1</bbf-xpongemtcont:interface>
+                              <bbf-xpongemtcont:traffic-class>1</bbf-xpongemtcont:traffic-class>
+                              <bbf-xpongemtcont:tcont-ref>vani-user4-tcont.1</bbf-xpongemtcont:tcont-ref>
+                           </bbf-xpongemtcont:gemport>
+                           <bbf-xpongemtcont:gemport>
+                              <bbf-xpongemtcont:name>gem-user4-eth.1-tc2</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface>olt-v-enet-user4.1</bbf-xpongemtcont:interface>
+                              <bbf-xpongemtcont:traffic-class>2</bbf-xpongemtcont:traffic-class>
+                              <bbf-xpongemtcont:tcont-ref>vani-user4-tcont.2</bbf-xpongemtcont:tcont-ref>
+                           </bbf-xpongemtcont:gemport>
+                           <bbf-xpongemtcont:gemport>
+                              <bbf-xpongemtcont:name>gem-user4-eth.1-tc3</bbf-xpongemtcont:name>
+                              <bbf-xpongemtcont:interface>olt-v-enet-user4.1</bbf-xpongemtcont:interface>
+                              <bbf-xpongemtcont:traffic-class>3</bbf-xpongemtcont:traffic-class>
+                              <bbf-xpongemtcont:tcont-ref>vani-user4-tcont.2</bbf-xpongemtcont:tcont-ref>
+                           </bbf-xpongemtcont:gemport>
+
+                        </bbf-xpongemtcont:gemports>
+                     </bbf-xpongemtcont:xpongemtcont>
+                  </root>
+               </device>
+            </managed-devices>
+         </network-manager>
+      </config>
+   </edit-config>
+</rpc>

@@ -16,10 +16,13 @@
 
 package org.broadband_forum.obbaa.device.adapter;
 
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.COMMA;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -31,13 +34,18 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.bbf.obbaa.schemas.adapter.x10.Adapter;
 import org.bbf.obbaa.schemas.adapter.x10.AdapterDocument;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +116,7 @@ public final class CommonFileUtil {
         }
     }
 
-    public static DeviceAdapterId parseAdapterDeviceXMLFile(String zipFilename, String deviceXMLPath) throws Exception {
+    public static DeviceAdapterId parseAdapterXMLFile(String zipFilename, String deviceXMLPath) throws Exception {
         Path tempFile = null;
         try {
             // create a temp xml file to copy the device.xml file from ZIP
@@ -119,6 +127,28 @@ public final class CommonFileUtil {
                 throw new Exception(AdapterSpecificConstants.ADAPTER_DEFINITION_ARCHIVE_NOT_FOUND_ERROR);
             }
             copySpecificFilefromZip(zipFilename, deviceXMLPath, tempFile);
+            AdapterDocument deviceDocument = AdapterDocument.Factory.parse(tempFile.toFile());
+            Adapter adapter = deviceDocument.getAdapter();
+            if (adapter == null || adapter.getType() == null || adapter.getInterfaceVersion() == null
+                    || adapter.getModel() == null || adapter.getVendor() == null) {
+                throw new Exception(AdapterSpecificConstants.UNABLE_TO_GET_ADAPTER_DETAILS_TYPE);
+            }
+            return new DeviceAdapterId(adapter.getType(), adapter.getInterfaceVersion(), adapter.getModel(), adapter.getVendor());
+        } finally {
+            // delete temp file if it exists
+            if (tempFile != null) {
+                Files.deleteIfExists(tempFile);
+            }
+        }
+    }
+
+    public static DeviceAdapterId parseAdapterXMLFile(String adapterXmlPath, Bundle bundle) throws Exception {
+        Path tempFile = null;
+        try {
+            URL sourceAdapterXml = bundle.getResource(adapterXmlPath);
+            // create a temp xml file to copy the device.xml file from ZIP
+            tempFile = Files.createTempFile("temp", Paths.get(sourceAdapterXml.getFile()).getFileName().toString());
+            Files.copy(sourceAdapterXml.openStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
             AdapterDocument deviceDocument = AdapterDocument.Factory.parse(tempFile.toFile());
             Adapter adapter = deviceDocument.getAdapter();
             if (adapter == null || adapter.getType() == null || adapter.getInterfaceVersion() == null
@@ -148,6 +178,50 @@ public final class CommonFileUtil {
         }
         Collections.sort(modulePaths);
         return yangFilePath;
+    }
+
+    public static Set<QName> getAdapterFeaturesFromFile(InputStream inp) {
+        Set<QName> supportedFeatures = new HashSet<>();
+        List<String> qnameStrings;
+        try {
+            qnameStrings = IOUtils.readLines(inp, Charset.defaultCharset());
+            for (String qnameStr : qnameStrings) {
+                supportedFeatures.add(QName.create(qnameStr));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error while reading features from supported-features.txt", e);
+        }
+        return supportedFeatures;
+    }
+
+    public static Map<QName, Set<QName>> getAdapterDeviationsFromFile(InputStream deviationsFile) {
+        Map<QName, Set<QName>> supportedDeviations = new HashMap<>();
+        List<String> qnameStrings;
+        int iter;
+        try {
+            qnameStrings = IOUtils.readLines(deviationsFile, Charset.defaultCharset());
+            for (String qnameStr : qnameStrings) {
+                Set<QName> deviationQNames = new HashSet<>();
+                String[] moduleAndDeviations = qnameStr.split(COMMA);
+                /*
+                 * In each line : eg.
+                 * (urn:broadband-forum-org:yang:bbf-xdsl?revision=2016-01-25)bbf-xdsl,(urn:xxxxx-org:yang:nokia-xdsl-dev?revision=2017-07-
+                 * 05)nokia-xdsl-dev 1. First string will always be module name. 2. From second string it will be the deviations for the
+                 * module
+                 */
+                QName moduleQName = QName.create(moduleAndDeviations[0]);
+                if (moduleQName != null) {
+                    for (iter = 1; iter < moduleAndDeviations.length; iter++) {
+                        QName deviationQName = QName.create(moduleAndDeviations[iter]);
+                        deviationQNames.add(deviationQName);
+                    }
+                    supportedDeviations.put(moduleQName, deviationQNames);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error while reading deviations from supported-deviations.txt", e);
+        }
+        return supportedDeviations;
     }
 
 }

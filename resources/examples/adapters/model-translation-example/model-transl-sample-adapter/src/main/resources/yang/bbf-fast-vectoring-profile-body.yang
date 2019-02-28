@@ -1,0 +1,217 @@
+submodule bbf-fast-vectoring-profile-body {
+  yang-version 1.1;
+  belongs-to bbf-fast {
+    prefix bbf-fast;
+  }
+
+  include bbf-fast-base;
+
+  organization
+    "Broadband Forum <https://www.broadband-forum.org>
+     Common YANG Work Area";
+
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      Ken Kerpez, ASSIA, Inc.
+
+     Editor:      Joey Boyd, ADTRAN
+
+     PS Leader:   Ken Kerpez, ASSIA, Inc.
+
+     PS Leader:   Joey Boyd, ADTRAN
+
+     WA Director: Sven Ooghe, Nokia
+
+     WA Director: Joey Boyd, ADTRAN";
+
+  description
+    "This submodule contains a collection of YANG definitions for
+     managing vectoring profiles.
+
+     Copyright (c) 2016-2018 Broadband Forum
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms
+     <https://www.broadband-forum.org/ipr-policy>.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-355a1; see
+     the TR itself for full legal notices.";
+
+  revision 2018-10-01 {
+    description
+      "Amendment 1.
+       * Approval Date:    2018-10-01
+       * Publication Date: 2018-10-01.";
+    reference
+      "TR-355a1: YANG Modules for FTTdp Management
+                 <https://www.broadband-forum.org/technical/download/
+                        TR-355_Amendment-1.pdf>";
+  }
+  revision 2016-07-18 {
+    description
+      "Initial revision.
+       * Approval Date:    see revision date above.
+       * Publication Date: 2016-08-05.";
+    reference
+      "TR-355: YANG Modules for FTTdp Management
+               <https://www.broadband-forum.org/technical/download/
+                        TR-355.pdf>";
+  }
+
+  grouping vectoring-parameters {
+    description
+      "Vectoring configuration parameters applicable to both
+       upstream and downstream.";
+    reference
+      "ITU-T G.997.2 clause 7.1.7.";
+
+    leaf fext-to-cancel-enable {
+      type boolean;
+      default "true";
+      description
+        "Defines whether FEXT cancellation in the given direction
+         from all the other vectored lines into the line in the
+         vectored group is enabled or disabled.";
+      reference
+        "ITU-T G.997.2 clause 7.1.7.1 (FEXT_TO_CANCEL_ENABLEds) and
+         clause 7.1.7.2 (FEXT_TO_CANCEL_ENABLEus); ITU-T G.9701
+         clause 11.4.3.1.";
+    }
+  }
+
+  grouping vectoring-downstream-parameters {
+    description
+      "Vectoring configuration parameters applicable in the
+       downstream direction.";
+    reference
+      "ITU-T G.997.2 clause 7.1.7.";
+
+    leaf xlog-group-size-req {
+      type uint8 {
+        range "1 | 2 | 4 | 8 | 16 | 32 | 64";
+      }
+      units "1 sub-carrier";
+      default "1";
+      description
+        "This parameter is the requested lower bound on the value of 
+         XLOGGds in the reporting of Xlogpsds.";
+      reference
+        "ITU-T G.997.2 clause 7.1.7.3 (XLOGGREQds); ITU-T G.9701
+         clause 11.4.3.2";
+    }
+  }
+
+  grouping vectoring-profile {
+    description
+      "Defines the contents of a Vectoring Profile.";
+
+    container downstream {
+      description
+        "Downstream vectoring parameters";
+
+      uses vectoring-parameters;
+      uses vectoring-downstream-parameters;
+    }
+
+    container upstream {
+      description
+        "Upstream vectoring parameters";
+
+      uses vectoring-parameters;
+    }
+
+    leaf annex-x-mode {
+      if-feature "annex-x";
+      type enumeration {
+        enum "forbidden" {
+          description
+            "AnnexX_FORBIDDEN (Operation according to
+             Annex X operation is not allowed.).";
+        }
+        enum "preferred" {
+          description
+            "AnnexX_PREFERRED (Operation according to
+             Annex X is preferred.).";
+        }
+        enum "forced" {
+          description
+            "AnnexX_FORCED (Operation according to
+             Annex is forced.).";
+        }
+      }
+      default "forbidden";
+      description
+        " Determines whether Annex X operation of 
+          [ITU-T G.9701] is enabled.";
+      reference
+        "ITU-T G.9701 xlause X.6.7.1 and T.2.1.";
+    }
+
+    leaf annex-d-mode {
+      if-feature "annex-d";
+      type enumeration {
+        enum "forbidden" {
+          description
+            "AnnexD_FORBIDDEN (Operation according to
+             Annex D operation is not allowed.).";
+        }
+        enum "preferred" {
+          description
+            "AnnexD_PREFERRED (Operation according to
+             Annex D is preferred.).";
+        }
+        enum "forced" {
+          description
+            "AnnexD_FORCED (Operation according to
+             Annex D is forced.).";
+        }
+      }
+      must "(../annex-x-mode = 'forbidden' or .= 'forbidden')" {
+        description
+          "At least one of Annex X or annex D is forbidden.";
+      }
+      default "forbidden";
+      description
+        "Determines whether Annex D operation of 
+         [ITU-T G.9701] is enabled.";
+      reference
+        "ITU-T G.9701 clause D.5.7.1 and T.2.1.1.";
+    }
+  }
+}

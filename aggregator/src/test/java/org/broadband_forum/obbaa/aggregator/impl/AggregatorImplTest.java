@@ -19,6 +19,7 @@ package org.broadband_forum.obbaa.aggregator.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -35,17 +36,24 @@ import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
 import org.broadband_forum.obbaa.aggregator.api.NotificationProcessor;
 import org.broadband_forum.obbaa.aggregator.api.ProcessorCapability;
 import org.broadband_forum.obbaa.aggregator.processor.NetconfMessageUtil;
+import org.broadband_forum.obbaa.aggregator.processor.PmaAdapter;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
+import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 
 public class AggregatorImplTest {
     private AggregatorImpl m_aggregator;
 
     private NotificationProcessor m_notificationProcessor;
+
+    @Mock
+    private PmaAdapter m_pmaAdapterProcessor;
 
     @Mock
     private DeviceConfigProcessor m_deviceConfigProcessorDPU;
@@ -75,65 +83,65 @@ public class AggregatorImplTest {
                     "</rpc-reply>\n";
 
     private static String REQUEST_DEVICE_CONFIG = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1527307907169\">\n" +
-        "    <edit-config>\n" +
-        "        <target>\n" +
-        "            <running/>\n" +
-        "        </target>\n" +
-        "        <config>\n" +
-        "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-        "                <managed-devices>\n" +
-        "                    <device>\n" +
-        "                        <name>deviceA</name>\n" +
-        "                        <root>\n" +
-        "                            <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\n" +
-        "                                <if:interface xmlns:xc=\"urn:ietf:params:xml:ns:netconf:base:1.0\" xc:operation=\"create\">\n" +
-        "                                    <if:name>interfaceB</if:name>\n" +
-        "                                    <if:type xmlns:ianaift=\"urn:ietf:params:xml:ns:yang:iana-if-type\">ianaift:ethernetCsmacd</if:type>\n" +
-        "                                </if:interface>\n" +
-        "                            </if:interfaces>\n" +
-        "                        </root>\n" +
-        "                    </device>\n" +
-        "                    <device>\n" +
-        "                        <name>deviceB</name>\n" +
-        "                    </device>\n" +
-        "                </managed-devices>\n" +
-        "            </network-manager>\n" +
-        "        </config>\n" +
-        "    </edit-config>\n" +
-        "</rpc>";
+            "    <edit-config>\n" +
+            "        <target>\n" +
+            "            <running/>\n" +
+            "        </target>\n" +
+            "        <config>\n" +
+            "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+            "                <managed-devices>\n" +
+            "                    <device>\n" +
+            "                        <name>deviceA</name>\n" +
+            "                        <root>\n" +
+            "                            <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\n" +
+            "                                <if:interface xmlns:xc=\"urn:ietf:params:xml:ns:netconf:base:1.0\" xc:operation=\"create\">\n" +
+            "                                    <if:name>interfaceB</if:name>\n" +
+            "                                    <if:type xmlns:ianaift=\"urn:ietf:params:xml:ns:yang:iana-if-type\">ianaift:ethernetCsmacd</if:type>\n" +
+            "                                </if:interface>\n" +
+            "                            </if:interfaces>\n" +
+            "                        </root>\n" +
+            "                    </device>\n" +
+            "                    <device>\n" +
+            "                        <name>deviceB</name>\n" +
+            "                    </device>\n" +
+            "                </managed-devices>\n" +
+            "            </network-manager>\n" +
+            "        </config>\n" +
+            "    </edit-config>\n" +
+            "</rpc>";
 
     private static String REQUEST_DEVICE_ADD = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1527307907656\">\n" +
-        "    <edit-config>\n" +
-        "        <target>\n" +
-        "            <running />\n" +
-        "        </target>\n" +
-        "        <config>\n" +
-        "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-        "                <managed-devices>\n" +
-        "                    <device xmlns:xc=\"urn:ietf:params:xml:ns:netconf:base:1.0\" xc:operation=\"create\">\n" +
-        "                        <name>deviceA</name>\n" +
-        "                        <device-management>\n" +
-        "                            <type>DPU</type>\n" +
-        "                            <interface-version>1.0.0</interface-version>\n" +
-        "                            <vendor>Nokia</vendor>\n" +
-        "                            <device-connection>\n" +
-        "                                <connection-model>direct</connection-model>\n" +
-        "                                <password-auth>\n" +
-        "                                    <authentication>\n" +
-        "                                        <address>192.168.169.1</address>\n" +
-        "                                        <management-port>92994</management-port>\n" +
-        "                                        <user-name>DPU</user-name>\n" +
-        "                                        <password>DPU</password>\n" +
-        "                                    </authentication>\n" +
-        "                                </password-auth>\n" +
-        "                            </device-connection>\n" +
-        "                        </device-management>\n" +
-        "                    </device>\n" +
-        "                </managed-devices>\n" +
-        "            </network-manager>\n" +
-        "        </config>\n" +
-        "    </edit-config>\n" +
-        "</rpc>";
+            "    <edit-config>\n" +
+            "        <target>\n" +
+            "            <running />\n" +
+            "        </target>\n" +
+            "        <config>\n" +
+            "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+            "                <managed-devices>\n" +
+            "                    <device xmlns:xc=\"urn:ietf:params:xml:ns:netconf:base:1.0\" xc:operation=\"create\">\n" +
+            "                        <name>deviceA</name>\n" +
+            "                        <device-management>\n" +
+            "                            <type>DPU</type>\n" +
+            "                            <interface-version>1.0.0</interface-version>\n" +
+            "                            <vendor>Nokia</vendor>\n" +
+            "                            <device-connection>\n" +
+            "                                <connection-model>direct</connection-model>\n" +
+            "                                <password-auth>\n" +
+            "                                    <authentication>\n" +
+            "                                        <address>192.168.169.1</address>\n" +
+            "                                        <management-port>92994</management-port>\n" +
+            "                                        <user-name>DPU</user-name>\n" +
+            "                                        <password>DPU</password>\n" +
+            "                                    </authentication>\n" +
+            "                                </password-auth>\n" +
+            "                            </device-connection>\n" +
+            "                        </device-management>\n" +
+            "                    </device>\n" +
+            "                </managed-devices>\n" +
+            "            </network-manager>\n" +
+            "        </config>\n" +
+            "    </edit-config>\n" +
+            "</rpc>";
 
     private static String REQUEST_SCHEMA_MOUNT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1520261367256\">\n" +
@@ -158,63 +166,67 @@ public class AggregatorImplTest {
             "</rpc>\n";
 
     private static String REQUEST_DEVICE_SERVICE_GET = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1527307907656\">\n" +
-        "    <get-config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-        "        <source>\n" +
-        "            <running/>\n" +
-        "        </source>\n" +
-        "        <filter type=\"subtree\">\n" +
-        "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-        "                <managed-devices>\n" +
-        "                    <device>\n" +
-        "                        <name>deviceA</name>\n" +
-        "                        <root>\n" +
-        "                            <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\"/>\n" +
-        "                        </root>\n" +
-        "                    </device>\n" +
-        "                </managed-devices>\n" +
-        "            </network-manager>\n" +
-        "        </filter>\n" +
-        "    </get-config>\n" +
-        "</rpc>";
+            "    <get-config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+            "        <source>\n" +
+            "            <running/>\n" +
+            "        </source>\n" +
+            "        <filter type=\"subtree\">\n" +
+            "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+            "                <managed-devices>\n" +
+            "                    <device>\n" +
+            "                        <name>deviceA</name>\n" +
+            "                        <root>\n" +
+            "                            <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\"/>\n" +
+            "                        </root>\n" +
+            "                    </device>\n" +
+            "                </managed-devices>\n" +
+            "            </network-manager>\n" +
+            "        </filter>\n" +
+            "    </get-config>\n" +
+            "</rpc>";
 
     private static String REQUEST_DEVICE_GET = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1527307907656\">\n" +
-        "    <get xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-        "        <filter type=\"subtree\">\n" +
-        "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-        "                <managed-devices>\n" +
-        "                    <device/>\n" +
-        "                </managed-devices>\n" +
-        "            </network-manager>\n" +
-        "        </filter>\n" +
-        "    </get>\n" +
-        "</rpc>";
+            "    <get xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+            "        <filter type=\"subtree\">\n" +
+            "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+            "                <managed-devices>\n" +
+            "                    <device/>\n" +
+            "                </managed-devices>\n" +
+            "            </network-manager>\n" +
+            "        </filter>\n" +
+            "    </get>\n" +
+            "</rpc>";
 
     private static String REQUEST_DEVICE_GET_CONFIG = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1527307907656\">\n" +
-        "    <get-config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-        "        <source>\n" +
-        "            <running/>\n" +
-        "        </source>\n" +
-        "        <filter type=\"subtree\">\n" +
-        "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-        "                <managed-devices>\n" +
-        "                    <device/>\n" +
-        "                </managed-devices>\n" +
-        "            </network-manager>\n" +
-        "        </filter>\n" +
-        "    </get-config>\n" +
-        "</rpc>";
+            "    <get-config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+            "        <source>\n" +
+            "            <running/>\n" +
+            "        </source>\n" +
+            "        <filter type=\"subtree\">\n" +
+            "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+            "                <managed-devices>\n" +
+            "                    <device/>\n" +
+            "                </managed-devices>\n" +
+            "            </network-manager>\n" +
+            "        </filter>\n" +
+            "    </get-config>\n" +
+            "</rpc>";
 
     public static String NOTIFICATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<notification xmlns=\"urn:ietf:params:xml:ns:netconf:notification:1.0\">\n" +
-            "  <eventTime>2000-06-03T06:38:06Z</eventTime>\n" +
-            "  <board-remove xmlns=\"urn:huawei:params:xml:ns:yang:huawei-board\">\n" +
-            "    <type>H901GPHD</type>\n" +
-            "    <name>0.2</name>\n" +
-            "  </board-remove>\n" +
-            "  <board-remove xmlns=\"urn:huawei:params:xml:ns:yang:huawei-board\">\n" +
-            "    <type>TestBoard</type>\n" +
-            "    <name>0.5</name>\n" +
-            "  </board-remove>\n" +
+            "<eventTime>2019-01-24T09:46:40+00:00</eventTime>\n" +
+            "<netconf-config-change xmlns=\"urn:ietf:params:xml:ns:yang:ietf-netconf-notifications\">\n" +
+            "<datastore>running</datastore>\n" +
+            "<changed-by>\n" +
+            "<username>PMA_USER</username>\n" +
+            "<session-id>1</session-id>\n" +
+            "<source-host/>\n" +
+            "</changed-by>\n" +
+            "<edit>\n" +
+            "<target xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">/if:interfaces/if:interface[if:name='interfaceB']</target>\n" +
+            "<operation>delete</operation>\n" +
+            "</edit>\n" +
+            "</netconf-config-change>\n" +
             "</notification>";
 
     private static String DEVICE_NAME_TEST = "deviceName-ABC";
@@ -259,6 +271,7 @@ public class AggregatorImplTest {
 
         m_aggregator = new AggregatorImpl();
 
+        m_pmaAdapterProcessor = mock(PmaAdapter.class);
         m_deviceConfigProcessorDPU = mock(DeviceConfigProcessor.class);
         m_deviceConfigProcessorOLT = mock(DeviceConfigProcessor.class);
         m_globalRequestProcessor = mock(GlobalRequestProcessor.class);
@@ -269,11 +282,12 @@ public class AggregatorImplTest {
         m_moduleIdentifiers.add(m_moduleIdentifierTestA);
         m_moduleIdentifiers.add(m_moduleIdentifierTestB);
 
+        when(m_pmaAdapterProcessor.processRequest(anyString(), anyString())).thenReturn(RESPONSE_OK);
         when(m_deviceConfigProcessorDPU.processRequest(anyString(), anyString())).thenReturn(RESPONSE_OK);
         when(m_deviceConfigProcessorOLT.processRequest(anyString(), anyString())).thenReturn(RESPONSE_OK);
         m_aggregator.addProcessor(DPU, m_moduleIdentifiers, m_deviceConfigProcessorDPU);
         m_aggregator.addProcessor(OLT, m_moduleIdentifiers, m_deviceConfigProcessorOLT);
-
+        m_aggregator.addProcessor(DPU, m_moduleIdentifiers, m_pmaAdapterProcessor);
         m_aggregator.addProcessor(m_notificationProcessor);
 
         m_aggregator.registerDeviceManager(m_deviceManagementProcessor);
@@ -322,14 +336,16 @@ public class AggregatorImplTest {
 
     @Test
     public void publishNotificationTest() throws Exception {
-        m_aggregator.publishNotification(DEVICE_NAME_TEST, NOTIFICATION);
-        verify(m_notificationProcessor).publishNotification(anyString());
+        Notification notification = new NetconfNotification(DocumentUtils.stringToDocument(NOTIFICATION));
+        m_aggregator.publishNotification(DEVICE_NAME_TEST, notification);
+        verify(m_notificationProcessor).publishNotification(any(Notification.class));
     }
 
     @Test
     public void removeNotificationProcessorTest() throws Exception {
         m_aggregator.removeProcessor(m_notificationProcessor);
-        m_aggregator.publishNotification(DEVICE_NAME_TEST, NOTIFICATION);
+        Notification notification = new NetconfNotification(DocumentUtils.stringToDocument(NOTIFICATION));
+        m_aggregator.publishNotification(DEVICE_NAME_TEST, notification);
         verifyZeroInteractions(m_notificationProcessor);
     }
 

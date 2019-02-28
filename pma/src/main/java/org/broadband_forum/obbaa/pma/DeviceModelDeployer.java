@@ -19,7 +19,7 @@ package org.broadband_forum.obbaa.pma;
 import java.util.List;
 import java.util.Set;
 
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 
 public interface DeviceModelDeployer {
     List<String> getDeployedModules();

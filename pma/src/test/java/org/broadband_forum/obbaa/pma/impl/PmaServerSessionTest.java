@@ -17,18 +17,21 @@
 package org.broadband_forum.obbaa.pma.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
-import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
@@ -66,6 +69,8 @@ public class PmaServerSessionTest {
     private PmaServer m_server;
     @Captor
     private ArgumentCaptor<AbstractNetconfRequest> m_reqCaptor;
+    @Captor
+    private ArgumentCaptor<NetConfResponse> m_resCaptor;
     @Mock
     private Device m_device;
     @Mock
@@ -89,7 +94,9 @@ public class PmaServerSessionTest {
         m_dataContent.add(m_element1);
         m_dataContent.add(m_element2);
         when(m_response.getDataContent()).thenReturn(m_dataContent);
-        when(m_server.executeNetconf(anyObject())).thenReturn(m_response);
+        Map<NetConfResponse, List<Notification>> map = new HashMap<>();
+        map.put(m_response, Collections.emptyList());
+        when(m_server.executeNetconf(anyObject())).thenReturn(map);
         m_session = new PmaServerSession(m_device, m_server, m_das);
     }
 
@@ -113,21 +120,6 @@ public class PmaServerSessionTest {
                 "    </source>\n" +
                 "  </get-config>\n" +
                 "</rpc>\n", m_reqCaptor.getAllValues().get(0).requestToString());
-
-        verify(m_das).forceAlign(eq(m_device.getDeviceName()), (CopyConfigRequest) m_reqCaptor.capture());
-        assertEquals("<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                "  <copy-config>\n" +
-                "    <target>\n" +
-                "      <running/>\n" +
-                "    </target>\n" +
-                "    <source>\n" +
-                "      <config>\n" +
-                "        <some-config1 xmlns=\"some:ns\"/>\n" +
-                "        <some-config2 xmlns=\"some:ns\"/>\n" +
-                "      </config>\n" +
-                "    </source>\n" +
-                "  </copy-config>\n" +
-                "</rpc>\n", m_reqCaptor.getAllValues().get(1).requestToString());
-
+        verify(m_das).forceAlign(any(Device.class), any(NetConfResponse.class));
     }
 }

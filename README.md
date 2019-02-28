@@ -1,4 +1,49 @@
-# OB-BAA R1 Release Notes (31 October 2018)
+# OB-BAA R2 Release Notes (28 February 2019)
+
+Release 2.0.0 Highlights:
+=========================
+
+This release enhances the existing OB-BAA software by added now
+functionality that:
+
+-   provides the capability for vendors of access nodes that use
+    protocols other than NETCONF/YANG to be used in OB-BAA
+
+-   provides the ability for service providers to define the YANG
+    modules that comprise a type of Access Node (e.g., OLT, DPU). The
+    project includes examples of the YANG modules for an OLT or DPU
+    based on the work of the Broadband Forum\'s TR-413 specification.
+    Included with this feature is additional capabilities to audit the
+    adapters and the instances of access nodes that are associated with
+    the type of access node.
+
+-   includes the basic framework for support NETCONF notifications
+    needed in future releases of OB-BAA
+
+In addition to the new functionality, the OB-BAA distribution can be
+download as a docker directly from the [Broadband Forum\'s public docker
+repository](https://hub.docker.com/r/broadbandforum/baa).
+
+Finally this release includes **additional** examples of NETCONF
+commands that can be used to configure access nodes (OLTs, DPUs, ONTs)
+including the ability to configure:
+
+-   access node network interfaces along with their associated VLAN
+    tagging (C-VLAN, S-VLAN) and p-bit policies
+
+-   forwarding rules for traffic between the ONU UNI and the OLT NNI
+
+-   traffic descriptors and associated traffic filters for the access
+    node
+
+-   Layer 1 profiles (e.g., G.Fast) and association the profile to
+    interfaces
+
+## Restrictions:
+1. Restriction for TR-385 PON YANG modules: 
+	When trying to create a channel partition, the BAA layer returns an error that "An unexpected element channel-group-ref is present".
+	This message is due to the Open Daylight YANG tools component used by the BAA layer. There has been an issue submitted for this problem
+	with the OpenDaylight team.
 
 Release 1.1.0 Highlights:
 =========================

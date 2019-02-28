@@ -16,13 +16,15 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
+import java.util.List;
+import java.util.Map;
+
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
-import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
-import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
 import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
@@ -42,16 +44,16 @@ public class PmaServerSession implements PmaSession {
     }
 
     @Override
-    public String executeNC(String netconfRequest) {
+    public Map<NetConfResponse, List<Notification>> executeNC(String netconfRequest) {
         try {
             PmaServer.setCurrentDevice(m_device);
             Document document = null;
             document = DocumentUtils.stringToDocument(netconfRequest);
             AbstractNetconfRequest request = DocumentToPojoTransformer.getRequest(document);
-            return m_pmaServer.executeNetconf(request).responseToString();
+            return m_pmaServer.executeNetconf(request);
         } catch (NetconfMessageBuilderException e) {
             throw new IllegalArgumentException(String.format("Invalid netconf request received : %s for device %s",
-                netconfRequest, m_device), e);
+                    netconfRequest, m_device), e);
         } finally {
             PmaServer.clearCurrentDevice();
         }
@@ -64,15 +66,8 @@ public class PmaServerSession implements PmaSession {
             GetConfigRequest getConfig = new GetConfigRequest();
             getConfig.setSourceRunning();
             getConfig.setMessageId("internal");
-            NetConfResponse response = m_pmaServer.executeNetconf(getConfig);
-            CopyConfigRequest ccRequest = new CopyConfigRequest();
-            EditConfigElement config = new EditConfigElement();
-            config.setConfigElementContents(response.getDataContent());
-            ccRequest.setSourceConfigElement(config.getXmlElement());
-            ccRequest.setTargetRunning();
-            m_das.forceAlign(m_device.getDeviceName(), ccRequest);
-        } catch (NetconfMessageBuilderException e) {
-            throw new RuntimeException("Could not do forceAlign", e);
+            Map.Entry<NetConfResponse, List<Notification>> entry = getNetConfResponseListEntry(getConfig);
+            m_das.forceAlign(m_device, entry.getKey());
         } finally {
             PmaServer.clearCurrentDevice();
         }
@@ -80,10 +75,24 @@ public class PmaServerSession implements PmaSession {
 
     @Override
     public void align() {
-        m_das.align(m_device.getDeviceName());
+        m_das.align(m_device);
     }
 
     public boolean isActive() {
         return m_pmaServer.isActive();
+    }
+
+    @Override
+    public NetConfResponse getAllPersistCfg() {
+        PmaServer.setCurrentDevice(m_device);
+        GetConfigRequest getConfig = new GetConfigRequest();
+        getConfig.setSourceRunning();
+        getConfig.setMessageId("internal");
+        Map.Entry<NetConfResponse, List<Notification>> entry = getNetConfResponseListEntry(getConfig);
+        return entry.getKey();
+    }
+
+    private Map.Entry<NetConfResponse, List<Notification>> getNetConfResponseListEntry(GetConfigRequest getConfig) {
+        return m_pmaServer.executeNetconf(getConfig).entrySet().iterator().next();
     }
 }

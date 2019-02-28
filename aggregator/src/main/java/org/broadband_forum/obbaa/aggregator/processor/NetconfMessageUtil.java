@@ -18,9 +18,6 @@ package org.broadband_forum.obbaa.aggregator.processor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Optional;
 
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
@@ -28,8 +25,9 @@ import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
-import org.opendaylight.yangtools.yang.model.util.ModuleIdentifierImpl;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifierImpl;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -171,18 +169,15 @@ public final class NetconfMessageUtil {
     public static ModuleIdentifier buildModuleIdentifier(String name, String namespace, String revision) {
         try {
             URI namespaceUri = new URI(namespace);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date revisionDate = simpleDateFormat.parse(revision);
-
-            return ModuleIdentifierImpl.create(name, Optional.of(namespaceUri), Optional.of(revisionDate));
+            return ModuleIdentifierImpl.create(name, Optional.of(namespaceUri), Optional.of(Revision.of(revision)));
         }
-        catch (URISyntaxException | ParseException ex) {
+        catch (URISyntaxException ex) {
             return null;
         }
     }
 
     public static String buildModuleCapability(ModuleIdentifier moduleIdentifier) {
         return String.format("%s?module=%s&revision=%s", moduleIdentifier.getNamespace(),
-                moduleIdentifier.getName(), moduleIdentifier.getQNameModule().getFormattedRevision());
+                moduleIdentifier.getName(), moduleIdentifier.getRevision().get());
     }
 }

@@ -1,0 +1,4 @@
+(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision=2016-11-02)listen
+(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision=2016-11-02)ssh-listen
+(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision=2016-11-02)tls-listen
+(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision=2016-11-02)call-home

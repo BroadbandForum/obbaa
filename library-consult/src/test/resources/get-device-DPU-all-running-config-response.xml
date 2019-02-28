@@ -1,0 +1,11 @@
+
+<bbf-fast:fast xmlns:bbf-fast="urn:bbf:yang:bbf-fast">
+	<bbf-fast:service>
+		<bbf-fast:time-division-duplexing-profile>
+			<bbf-fast:name>tddprofile34</bbf-fast:name>
+			<bbf-fast:cyclic-extension>10</bbf-fast:cyclic-extension>
+			<bbf-fast:downstream-symbol-periods>15</bbf-fast:downstream-symbol-periods>
+			<bbf-fast:total-symbol-periods>36</bbf-fast:total-symbol-periods>
+		</bbf-fast:time-division-duplexing-profile>
+	</bbf-fast:service>
+</bbf-fast:fast>

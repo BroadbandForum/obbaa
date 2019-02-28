@@ -22,8 +22,8 @@ import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants
 import static org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer.getNetconfResponse;
 import static org.broadband_forum.obbaa.netconf.api.util.DocumentUtils.stringToDocument;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -38,12 +38,12 @@ import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.impl.AggregatorImpl;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.impl.NetconfConnectionManagerImpl;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
-import org.broadband_forum.obbaa.device.adapter.impl.AdapterManagerImpl;
+import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.dm.DeviceManagementSubsystem;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl;
-import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
@@ -79,6 +79,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
@@ -94,12 +95,11 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
     private NetconfClientSession m_newDeviceSession;
     private Set<String> m_newDeviceCaps;
     private NetconfClientInfo m_clientInfo = new NetconfClientInfo("UT", 1);
+    @Mock
     private NetconfConnectionManagerImpl m_connectionManager;
     private List<NewDeviceInfo> m_newDevices;
     @Mock
     private DeviceManager m_deviceManager;
-    @Mock
-    private DeviceDao m_deviceDao;
     public static final String OBBAA_YANG = "/yangs/bbf-obbaa-network-manager.yang";
     private NetConfServerImpl m_server;
     private ModelNodeHelperRegistry m_modelNodeHelperRegistry;
@@ -107,6 +107,8 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
     private DataStoreIntegrityServiceImpl m_integrityService;
     private DataStoreValidatorImpl m_datastoreValidator;
     private DeviceManagementSubsystem m_deviceSubsystem;
+    private Device m_directDevice;
+    private Device m_callhomeDevice;
     private static final String EXPECTED_DM_GET_REPLY_DIRECT = "<rpc-reply message-id=\"101\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
             "    <data>\n" +
         "            <network-manager xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
@@ -385,17 +387,21 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
             "    </data>\n" +
             "</rpc-reply>";
     private static String REQUEST_DEVICE_GET_CALLHOME = REQUEST_DEVICE_GET.replaceAll(DIRECT_DEVICE, CALLHOME_DEVICE);
-    private AdapterManager m_adapterManager;
+    @Mock
+    private AdapterManager m_adapterMgr;
+    @Mock
+    private DeviceInterface m_devInterface;
+    @Mock
+    private AdapterContext m_context;
 
     @Before
     public void setup() throws SchemaBuildException, ModelNodeFactoryException {
-
+        MockitoAnnotations.initMocks(this);
         m_aggregator = new AggregatorImpl();
         m_deviceManagerAdapter = new DeviceManagerAdapter(m_aggregator);
         String yangFilePath = getClass().getResource(OBBAA_YANG).getPath();
-        m_connectionManager = mock(NetconfConnectionManagerImpl.class);
-        m_newDeviceSession = mock(NetconfClientSession.class);
-        m_adapterManager = mock(AdapterManagerImpl.class);
+        m_directDevice = new Device();
+        m_callhomeDevice = new Device();
 
         m_schemaRegistry = new SchemaRegistryImpl(Collections.<YangTextSchemaSource>emptyList(), Collections.emptySet(), Collections.emptyMap(), new NoLockService());
         m_schemaRegistry.loadSchemaContext("network-manager", Arrays.asList(
@@ -412,7 +418,7 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
         m_server = new NetConfServerImpl(m_schemaRegistry);
 
         m_deviceManager = mock(DeviceManagerImpl.class);
-        m_deviceSubsystem = new DeviceManagementSubsystem(m_schemaRegistry, m_adapterManager);
+        m_deviceSubsystem = new DeviceManagementSubsystem(m_schemaRegistry, m_adapterMgr);
         m_deviceSubsystem.setDeviceManager(m_deviceManager);
         m_newDeviceCaps = new LinkedHashSet<>();
         m_newDeviceCaps.add("caps1");
@@ -422,8 +428,8 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
         m_newDevices.add(new NewDeviceInfo("duid-1234", m_newDeviceSession));
         when(m_connectionManager.getNewDevices()).thenReturn(m_newDevices);
         m_deviceSubsystem.setConnectionManager(m_connectionManager);
-        m_expValidator = new DSExpressionValidator(m_schemaRegistry, m_modelNodeHelperRegistry);
-        m_integrityService = new DataStoreIntegrityServiceImpl(m_modelNodeHelperRegistry, m_schemaRegistry, m_server);
+        m_expValidator = new DSExpressionValidator(m_schemaRegistry, m_modelNodeHelperRegistry , m_subSystemRegistry);
+        m_integrityService = new DataStoreIntegrityServiceImpl(m_server);
         m_datastoreValidator = new DataStoreValidatorImpl(m_schemaRegistry, m_modelNodeHelperRegistry, m_modelNodeDsm, m_integrityService, m_expValidator);
         YangUtils.deployInMemoryHelpers(yangFilePath, m_deviceSubsystem, m_modelNodeHelperRegistry,
                 m_subSystemRegistry, m_schemaRegistry, m_modelNodeDsm);
@@ -438,9 +444,12 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
         m_dataStore.setNbiNotificationHelper(m_nbiNotificationHelper);
         m_server.setRunningDataStore(m_dataStore);
         m_deviceManagerAdapter.setDmNetconfServer(m_server);
+        m_directDevice.setDeviceName(DIRECT_DEVICE);
+        m_callhomeDevice.setDeviceName(CALLHOME_DEVICE);
         ConnectionState connectionState = new ConnectionState();
-        when(m_connectionManager.getConnectionState(DIRECT_DEVICE)).thenReturn(connectionState);
-        when(m_connectionManager.getConnectionState(CALLHOME_DEVICE)).thenReturn(connectionState);
+        when(m_adapterMgr.getAdapterContext(any())).thenReturn(m_context);
+        when(m_context.getDeviceInterface()).thenReturn(m_devInterface);
+        when(m_devInterface.getConnectionState(any())).thenReturn(connectionState);
     }
 
     @Test

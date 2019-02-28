@@ -18,26 +18,31 @@ package org.broadband_forum.obbaa.adapter.threadlocals;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.jxpath.ri.compiler.Expression;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaBuildException;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaMountRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.constraints.payloadparsing.SchemaNodeConstraintParser;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.constraints.payloadparsing.typevalidators.TypeValidator;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.notification.listener.YangLibraryChangeNotificationListener;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.ActionDefinition;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
@@ -53,6 +58,10 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
         return c_registry.get();
     }
 
+    public static void clearRegistry() {
+        c_registry.remove();
+    }
+
     @Override
     public void buildSchemaContext(List<YangTextSchemaSource> coreYangModelFiles) throws SchemaBuildException {
         getRegistry().buildSchemaContext(coreYangModelFiles);
@@ -66,22 +75,24 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
+    public void buildSchemaContext(List<YangTextSchemaSource> coreYangModelFiles, Set<QName> supportedFeatures,
+                                   Map<QName, Set<QName>> supportedDeviations, boolean isYangLibNotificationSupported)
+            throws SchemaBuildException {
+        getRegistry().buildSchemaContext(coreYangModelFiles, supportedFeatures, supportedDeviations, isYangLibNotificationSupported);
+    }
+
+    @Override
     public Collection<DataSchemaNode> getRootDataSchemaNodes() {
         return getRegistry().getRootDataSchemaNodes();
     }
 
     @Override
-    public Module getModule(String name, String revision) {
+    public Optional<Module> getModule(String name, Revision revision) {
         return getRegistry().getModule(name, revision);
     }
 
     @Override
-    public Module getModule(String name, Date revision) {
-        return getRegistry().getModule(name, revision);
-    }
-
-    @Override
-    public Module getModule(String name) {
+    public Optional<Module> getModule(String name) {
         return getRegistry().getModule(name);
     }
 
@@ -107,8 +118,22 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
-    public void unloadSchemaContext(String componentId, Map<QName, Set<QName>> supportedDeviations) throws SchemaBuildException {
-        getRegistry().unloadSchemaContext(componentId, supportedDeviations);
+    public void loadSchemaContext(String componentId, List<YangTextSchemaSource> yangModelFiles, Set<QName> supportedFeatures, Map<QName,
+            Set<QName>> supportedDeviations, boolean isYangLibNotificationSupported) throws SchemaBuildException {
+        getRegistry().loadSchemaContext(componentId, yangModelFiles, supportedFeatures, supportedDeviations,
+                isYangLibNotificationSupported);
+    }
+
+    @Override
+    public void unloadSchemaContext(String componentId, Set<QName> supportedFeatures, Map<QName, Set<QName>> supportedDeviations)
+            throws SchemaBuildException {
+        getRegistry().unloadSchemaContext(componentId, supportedFeatures, supportedDeviations);
+    }
+
+    @Override
+    public void unloadSchemaContext(String componentId, Set<QName> supportedFeatures, Map<QName, Set<QName>> supportedDeviations,
+                                    boolean isYangLibNotificationSupported) throws SchemaBuildException {
+        getRegistry().unloadSchemaContext(componentId, supportedFeatures, supportedDeviations, isYangLibNotificationSupported);
     }
 
     @Override
@@ -122,8 +147,13 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
-    public SchemaNode getActionDefinitionNode(List<QName> path) {
+    public ActionDefinition getActionDefinitionNode(List<QName> path) {
         return getRegistry().getActionDefinitionNode(path);
+    }
+
+    @Override
+    public NotificationDefinition getNotificationDefinitionNode(List<QName> path) {
+        return getRegistry().getNotificationDefinitionNode(path);
     }
 
     @Override
@@ -192,7 +222,7 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
-    public Module findModuleByNamespaceAndRevision(URI namespace, Date revision) {
+    public Optional<Module> findModuleByNamespaceAndRevision(URI namespace, Revision revision) {
         return getRegistry().findModuleByNamespaceAndRevision(namespace, revision);
     }
 
@@ -298,23 +328,23 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
-    public void registerActionSchemaNode(String componentId, SchemaPath nodeSchemaPath, Set<ActionDefinition> actionDefinitions) {
-        getRegistry().registerActionSchemaNode(componentId, nodeSchemaPath, actionDefinitions);
-    }
-
-    @Override
-    public void deRegisterActionSchemaNodes(String componentId) {
-        getRegistry().deRegisterActionSchemaNodes(componentId);
-    }
-
-    @Override
     public Set<ActionDefinition> retrieveAllActionDefinitions() {
         return getRegistry().retrieveAllActionDefinitions();
     }
 
     @Override
+    public Set<NotificationDefinition> retrieveAllNotificationDefinitions() {
+        return getRegistry().retrieveAllNotificationDefinitions();
+    }
+
+    @Override
     public Map<ModuleIdentifier, Set<QName>> getSupportedDeviations() {
         return getRegistry().getSupportedDeviations();
+    }
+
+    @Override
+    public Map<ModuleIdentifier, Set<QName>> getSupportedFeatures() {
+        return getRegistry().getSupportedFeatures();
     }
 
     @Override
@@ -325,6 +355,91 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     @Override
     public Map<QName, DataSchemaNode> getIndexedChildren(SchemaPath parentSchemaPath) {
         return getRegistry().getIndexedChildren(parentSchemaPath);
+    }
+
+    @Override
+    public SchemaMountRegistry getMountRegistry() {
+        return getRegistry().getMountRegistry();
+    }
+
+    @Override
+    public SchemaPath getMountPath() {
+        return getRegistry().getMountPath();
+    }
+
+    @Override
+    public void setMountPath(SchemaPath mountPath) {
+        getRegistry().setMountPath(mountPath);
+    }
+
+    @Override
+    public SchemaPath stripRevisions(SchemaPath schemaPath) {
+        return getRegistry().stripRevisions(schemaPath);
+    }
+
+    @Override
+    public SchemaPath addRevisions(SchemaPath schemaPath) {
+        return getRegistry().addRevisions(schemaPath);
+    }
+
+    @Override
+    public void registerMountPointSchemaPath(String componentId, DataSchemaNode schemaNode) {
+        getRegistry().registerMountPointSchemaPath(componentId, schemaNode);
+    }
+
+    @Override
+    public void unregisterMountPointSchemaPath(String componentId) {
+        getRegistry().unregisterMountPointSchemaPath(componentId);
+    }
+
+    @Override
+    public Set<QName> retrieveAllMountPointsPath() {
+        return getRegistry().retrieveAllMountPointsPath();
+    }
+
+    @Override
+    public Collection<DataSchemaNode> retrieveAllNodesWithMountPointExtension() {
+        return getRegistry().retrieveAllNodesWithMountPointExtension();
+    }
+
+    @Override
+    public SchemaRegistry getParentRegistry() {
+        return getRegistry().getParentRegistry();
+    }
+
+    @Override
+    public void setParentRegistry(SchemaRegistry parent) {
+        getRegistry().setParentRegistry(parent);
+    }
+
+    @Override
+    public void putValidator(TypeDefinition<?> type, TypeValidator typeValidator) {
+        getRegistry().putValidator(type, typeValidator);
+    }
+
+    @Override
+    public TypeValidator getValidator(TypeDefinition<?> type) {
+        return getRegistry().getValidator(type);
+    }
+
+    @Override
+    public SchemaNodeConstraintParser getSchemaNodeConstraintParser(DataSchemaNode dataSchemaNode) {
+        return getRegistry().getSchemaNodeConstraintParser(dataSchemaNode);
+    }
+
+    @Override
+    public void putSchemaNodeConstraintParser(DataSchemaNode dataSchemaNode, SchemaNodeConstraintParser schemaNodeConstraintParser) {
+        getRegistry().putSchemaNodeConstraintParser(dataSchemaNode, schemaNodeConstraintParser);
+    }
+
+    @Override
+    public void setName(String schemaRegistryName) {
+        getRegistry().setName(schemaRegistryName);
+    }
+
+    @Override
+    public Map<SchemaPath, Expression> addChildImpactPaths(SchemaPath schemaPath) {
+        return getRegistry().addChildImpactPaths(schemaPath);
     }
 
     @Override
@@ -340,9 +455,5 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     @Override
     public Iterator getPrefixes(String string) {
         return getRegistry().getPrefixes(string);
-    }
-
-    public static void clearRegistry() {
-        c_registry.remove();
     }
 }

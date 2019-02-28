@@ -1,7 +1,6 @@
 package org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,14 +8,15 @@ import static org.junit.Assert.assertFalse;
 
 public class AggregatorRpcMessageTest {
     private static String REQUEST =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"10101\">\n" +
-            "  <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\n" +
-            "    <reload-yang-library xmlns=\"urn:bbf:yang:obbaa:pma-yang-library\">\n" +
-            "        <reload/>\n" +
-            "    </reload-yang-library>\n" +
-            "  </action>\n" +
-            "</rpc>\n";
+                    "    <action xmlns=\"urn:ietf:params:xml:ns:yang:1\">\n" +
+                    "        <deploy-adapter xmlns=\"urn:bbf:yang:obbaa:device-adapters\">\n" +
+                    "            <deploy>\n" +
+                    "                <adapter-archive>adapterExample.zip</adapter-archive>\n" +
+                    "            </deploy>\n" +
+                    "        </deploy-adapter>\n" +
+                    "    </action>\n" +
+                    "</rpc>";
 
     private AggregatorRpcMessage aggregatorRpcMessage;
 
@@ -32,12 +32,12 @@ public class AggregatorRpcMessageTest {
 
     @Test
     public void getOnlyOneTopXmlns() throws Exception {
-        assertEquals("urn:bbf:yang:obbaa:pma-yang-library", aggregatorRpcMessage.getOnlyOneTopXmlns());
+        assertEquals("urn:bbf:yang:obbaa:device-adapters", aggregatorRpcMessage.getOnlyOneTopXmlns());
     }
 
     @Test
     public void getOnlyOneTopPayload() throws Exception {
-        assertEquals("reload-yang-library",
+        assertEquals("deploy-adapter",
                 aggregatorRpcMessage.getOnlyOneTopPayload().getFirstChild().getLocalName());
     }
 

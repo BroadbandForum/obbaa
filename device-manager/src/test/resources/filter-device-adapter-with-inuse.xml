@@ -1,0 +1,5 @@
+<device-adapters xmlns="urn:bbf:yang:obbaa:network-manager">
+    <device-adapter>
+        <in-use>true</in-use>
+    </device-adapter>
+</device-adapters>

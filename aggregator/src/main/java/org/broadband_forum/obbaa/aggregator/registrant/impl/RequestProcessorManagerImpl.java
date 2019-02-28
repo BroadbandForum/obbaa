@@ -16,6 +16,11 @@
 
 package org.broadband_forum.obbaa.aggregator.registrant.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
@@ -23,14 +28,9 @@ import org.broadband_forum.obbaa.aggregator.api.ProcessorCapability;
 import org.broadband_forum.obbaa.aggregator.impl.ProcessorCapabilityImpl;
 import org.broadband_forum.obbaa.aggregator.processor.NetconfMessageUtil;
 import org.broadband_forum.obbaa.aggregator.registrant.api.RequestProcessorManager;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Request processor manager.
@@ -319,9 +319,9 @@ public class RequestProcessorManagerImpl implements RequestProcessorManager {
     private boolean isProcessorSupportTheXmlns(String deviceType, String xmlns,
                                                Set<ProcessorCapability> deviceProcessorCapabilities) {
         for (ProcessorCapability capability : deviceProcessorCapabilities) {
-            if (!capability.getDeviceType().equalsIgnoreCase(deviceType)) {
-                continue;
-            }
+//            if (!capability.getDeviceType().equalsIgnoreCase(deviceType)) {
+//                continue;
+//            }
 
             ModuleIdentifier moduleIdentifier = getModuleByXmlns(xmlns, capability.getModuleIdentifiers());
             if (moduleIdentifier != null) {

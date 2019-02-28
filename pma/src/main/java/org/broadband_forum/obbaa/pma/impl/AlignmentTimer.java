@@ -21,12 +21,15 @@ import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants
 import static org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer.getNetconfResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.log4j.Logger;
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.AlignmentOption;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
@@ -38,6 +41,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigTestOptions;
 import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
@@ -48,15 +52,17 @@ public class AlignmentTimer {
     private static final Logger LOGGER = Logger.getLogger(AlignmentTimer.class);
     private final PmaRegistry m_pmaRegistry;
     private final Timer m_timer;
-    private final NetconfConnectionManager m_connMgr;
     private TxService m_txService;
     private DeviceDao m_deviceDao;
+    private AdapterManager m_adapterMgr;
 
-    public AlignmentTimer(PmaRegistry pmaRegistry,
-                          NetconfConnectionManager connMgr) {
+    public AlignmentTimer(PmaRegistry pmaRegistry, AdapterManager adaperMgr,
+                          DeviceDao deviceDao, TxService txService) {
         m_pmaRegistry = pmaRegistry;
-        m_connMgr = connMgr;
+        m_adapterMgr = adaperMgr;
         m_timer = new Timer();
+        m_deviceDao = deviceDao;
+        m_txService = txService;
     }
 
     public TxService getTxService() {
@@ -100,29 +106,27 @@ public class AlignmentTimer {
             public Void execute() {
                 List<Device> devices = m_deviceDao.findAllDevices();
                 for (Device device : devices) {
-                    if (deviceIsConnected(device)) {
-                        try {
-                            m_pmaRegistry.executeWithPmaSession(device.getDeviceName(), session -> {
-                                if (device.isNeverAligned()) {
-                                    LOGGER.debug(String.format("Device %s is " + NEVER_ALIGNED, device));
-                                    AlignmentOption alignmentOption = device.getAlignmentOption();
-                                    if (AlignmentOption.PUSH.equals(alignmentOption)) {
-                                        if (deviceHasConfigurations(device)) {
-                                            session.forceAlign();
-                                        }
-                                    } else if (AlignmentOption.PULL.equals(alignmentOption)) {
-                                        invokeUploadConfig(device, session);
-                                        LOGGER.debug("Upload config done");
-                                        m_deviceDao.updateDeviceAlignmentState(device.getDeviceName(), ALIGNED);
+                    try {
+                        m_pmaRegistry.executeWithPmaSession(device.getDeviceName(), session -> {
+                            if (device.isNeverAligned()) {
+                                LOGGER.debug(String.format("Device %s is " + NEVER_ALIGNED, device));
+                                AlignmentOption alignmentOption = device.getAlignmentOption();
+                                if (AlignmentOption.PUSH.equals(alignmentOption)) {
+                                    if (deviceHasConfigurations(device)) {
+                                        session.forceAlign();
                                     }
-                                } else if (!device.isAligned()) {
-                                    session.align();
+                                } else if (AlignmentOption.PULL.equals(alignmentOption)) {
+                                    invokeUploadConfig(device, session);
+                                    LOGGER.debug("Upload config done");
+                                    m_deviceDao.updateDeviceAlignmentState(device.getDeviceName(), ALIGNED);
                                 }
-                                return null;
-                            });
-                        } catch (ExecutionException e) {
-                            LOGGER.error(String.format("Could not align device %s", device), e);
-                        }
+                            } else if (!device.isAligned()) {
+                                session.align();
+                            }
+                            return null;
+                        });
+                    } catch (ExecutionException e) {
+                        LOGGER.error(String.format("Could not align device %s", device), e);
                     }
                 }
                 return null;
@@ -133,21 +137,24 @@ public class AlignmentTimer {
     private void invokeUploadConfig(Device device, PmaSession session) throws ExecutionException {
         GetConfigRequest getConfigRequest = new GetConfigRequest();
         try {
-            NetConfResponse response = m_connMgr.executeNetconf(device, getConfigRequest).get();
+            AdapterContext context = AdapterUtils.getAdapterContext(device, m_adapterMgr);
+            NetConfResponse response = context.getDeviceInterface().getConfig(device, getConfigRequest).get();
             if (response != null) {
                 List<Element> configElements = response.getDataContent();
 
                 if (!configElements.isEmpty()) {
                     EditConfigRequest request = new EditConfigRequest()
-                        .setTargetRunning()
-                        .setTestOption(EditConfigTestOptions.SET)
-                        .setErrorOption(EditConfigErrorOptions.STOP_ON_ERROR)
-                        .setConfigElement(new EditConfigElement()
-                            .setConfigElementContents(configElements));
+                            .setTargetRunning()
+                            .setTestOption(EditConfigTestOptions.SET)
+                            .setErrorOption(EditConfigErrorOptions.STOP_ON_ERROR)
+                            .setConfigElement(new EditConfigElement()
+                                    .setConfigElementContents(configElements));
                     request.setMessageId("1");
                     request.setUploadToPmaRequest();
 
-                    String editResponseStr = session.executeNC(request.requestToString());
+                    Map<NetConfResponse, List<Notification>> netConfResponseListMap = session.executeNC(request.requestToString());
+                    Map.Entry<NetConfResponse, List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
+                    String editResponseStr = entry.getKey().responseToString();
                     NetConfResponse editresponse = getNetconfResponse(DocumentUtils.stringToDocument(editResponseStr));
                     if (!editresponse.isOk()) {
                         throw new ExecutionException("Upload config failed", new Throwable("bad upload config"));
@@ -169,15 +176,13 @@ public class AlignmentTimer {
         device.getDeviceManagement().setPushPmaConfigurationToDevice("true");
     }
 
-    private boolean deviceIsConnected(Device device) {
-        Device deviceInfo = m_deviceDao.getDeviceByName(device.getDeviceName());
-        return m_connMgr.isConnected(deviceInfo);
-    }
-
     private boolean deviceHasConfigurations(Device device) throws ExecutionException {
         return m_pmaRegistry.executeWithPmaSession(device.getDeviceName(), session -> {
-            String responseStr = session.executeNC(new GetConfigRequest().setSourceRunning().setMessageId("xx")
-                .requestToString());
+            Map<NetConfResponse, List<Notification>> netConfResponseListTreeMap = session.executeNC(new GetConfigRequest()
+                    .setSourceRunning().setMessageId("xx")
+                    .requestToString());
+            Map.Entry<NetConfResponse, List<Notification>> entry = netConfResponseListTreeMap.entrySet().iterator().next();
+            String responseStr = entry.getKey().responseToString();
             try {
                 NetConfResponse response = getNetconfResponse(DocumentUtils.stringToDocument(responseStr));
                 return !response.getDataContent().isEmpty();

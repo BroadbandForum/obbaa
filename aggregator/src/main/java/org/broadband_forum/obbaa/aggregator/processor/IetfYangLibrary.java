@@ -23,7 +23,7 @@ import org.broadband_forum.obbaa.aggregator.jaxb.yanglibrary.schema.library.Modu
 import org.broadband_forum.obbaa.aggregator.jaxb.yanglibrary.schema.library.YangLibrary;
 import org.broadband_forum.obbaa.aggregator.jaxb.yanglibrary.schema.state.ModulesState;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +143,7 @@ public class IetfYangLibrary implements GlobalRequestProcessor {
     private void buildModuleValue(Module module, ModuleIdentifier moduleIdentifier) {
         module.setId(buildModuleId(moduleIdentifier));
         module.setName(moduleIdentifier.getName());
-        module.setRevision(moduleIdentifier.getQNameModule().getFormattedRevision());
+        module.setRevision(moduleIdentifier.getRevision().get().toString());
         module.setNamespace(moduleIdentifier.getNamespace().toString());
     }
 
@@ -182,7 +182,7 @@ public class IetfYangLibrary implements GlobalRequestProcessor {
         if ((isFiltered(module.getId(), buildModuleId(moduleIdentifier)))
                 || (isFiltered(module.getName(), moduleIdentifier.getName()))
                 || (isFiltered(module.getNamespace(), moduleIdentifier.getNamespace().toString()))
-                || (isFiltered(module.getRevision(), moduleIdentifier.getQNameModule().getFormattedRevision()))) {
+                || (isFiltered(module.getRevision(), moduleIdentifier.getQNameModule().getRevision().toString()))) {
             return true;
         }
 

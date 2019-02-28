@@ -21,7 +21,7 @@
     <parent>
         <artifactId>baa-root-pom</artifactId>
         <groupId>org.bbf.obbaa</groupId>
-        <version>1.1.0</version>
+        <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>baa-dist</artifactId>
@@ -111,6 +111,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.bbf.obbaa.netconf</groupId>
+            <artifactId>netconf-notification-app</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.bbf.obbaa</groupId>
             <artifactId>sbi-connectors</artifactId>
             <version>${project.version}</version>
@@ -182,6 +188,12 @@
             <resource>
                 <directory>${project.build.directory}/generated-resources</directory>
             </resource>
+            <resource>
+                <directory>target/classes</directory>
+                <includes>
+                    <include>standard-adapters/*</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
@@ -235,6 +247,18 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>standard-adapters</includeArtifactIds>
+                            <outputDirectory>${project.build.directory}/generated-resources/standardAdapters/</outputDirectory>
+                            <includes>**/*.zip</includes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -270,7 +294,17 @@
                     </bootFeatures>
                 </configuration>
             </plugin>
-        </plugins>
-    </build>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker-maven-plugin.version}</version>
+                <configuration>
+                    <imageName>baa</imageName>
+                    <dockerDirectory>./</dockerDirectory>
+                    <forceTags>true</forceTags>
+                </configuration>
+            </plugin>
+    </plugins>
+</build>
 
 </project>

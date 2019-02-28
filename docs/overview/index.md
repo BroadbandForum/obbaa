@@ -1,8 +1,8 @@
 
+<a id="overview" />
+
 Overview
 ========
-
-<a id="overview" />
 
 The Open Broadband-Broadband Access Abstraction (OB-BAA) is an open
 source project that specifies the Northbound Interfaces (NBI), Core
@@ -161,6 +161,6 @@ release.**
  <img width="600px" height="300px" src="{{site.url}}/overview/system_functional.png">
 </p>
 
-[<--Introduction](../)
+[<--Introduction](../index.md#introduction)
 
-[Architecture -->](../architecture/)
+[Architecture -->](../architecture/index.md#architecture)

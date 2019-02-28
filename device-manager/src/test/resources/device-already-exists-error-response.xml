@@ -3,6 +3,6 @@
     <error-type>application</error-type>
     <error-tag>operation-failed</error-tag>
     <error-severity>error</error-severity>
-    <error-message>EditConfigException [rpcError=[NetconfRpcError [errorType=application, errorTag=data-exists, errorSeverity=error, errorAppTag=null, errorPath=/network-manager:network-manager/network-manager:managed-devices/network-manager:device[network-manager:name=deviceA], errorMessage='device' already exists. Create request Failed., errorInfoContent=null]]]</error-message>
+    <error-message>EditConfigException [rpcError=[NetconfRpcError [errorType=application, errorTag=data-exists, errorSeverity=error, errorAppTag=null, errorPath=/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name=deviceA], errorMessage='device' already exists. Create request Failed., errorInfoContent=null]]]</error-message>
   </rpc-error>
 </rpc-reply>

@@ -16,7 +16,7 @@
 
 package org.broadband_forum.obbaa.aggregator.api;
 
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 
 import java.util.Set;
 

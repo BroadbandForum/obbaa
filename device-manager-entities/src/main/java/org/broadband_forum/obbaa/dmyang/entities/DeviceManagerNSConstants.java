@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public interface DeviceManagerNSConstants {
+    String PREFIX = "baa-network-manager";
     String NS = "urn:bbf:yang:obbaa:network-manager";
     String REVISION = "2018-05-07";
     String NETWORK_MANAGER = "network-manager";
@@ -28,30 +29,41 @@ public interface DeviceManagerNSConstants {
     String NEW_DEVICES = "new-devices";
     String DEVICE_ADAPTERS = "device-adapters";
     String DEVICE_ADAPTER = "device-adapter";
-    SchemaPath NETWORK_MANAGER_SP = SchemaPath.create(true , QName.create(NS , REVISION , NETWORK_MANAGER));
+    SchemaPath NETWORK_MANAGER_SP = SchemaPath.create(true, QName.create(NS, REVISION, NETWORK_MANAGER));
     SchemaPath MANAGED_DEVICES_SP = SchemaPath.create(true, QName.create(NS, REVISION, NETWORK_MANAGER),
-        QName.create(NS, REVISION, MANAGED_DEVICES));
-    SchemaPath NEW_DEVICES_SP = SchemaPath.create(true, QName.create(NS , REVISION , NETWORK_MANAGER),
-        QName.create(NS, REVISION, NEW_DEVICES));
-    SchemaPath DEVICE_ADAPTERS_SP = SchemaPath.create(true, QName.create(NS , REVISION , NETWORK_MANAGER),
-        QName.create(NS, REVISION, DEVICE_ADAPTERS));
+            QName.create(NS, REVISION, MANAGED_DEVICES));
+    SchemaPath NEW_DEVICES_SP = SchemaPath.create(true, QName.create(NS, REVISION, NETWORK_MANAGER),
+            QName.create(NS, REVISION, NEW_DEVICES));
+    SchemaPath DEVICE_ADAPTERS_SP = SchemaPath.create(true, QName.create(NS, REVISION, NETWORK_MANAGER),
+            QName.create(NS, REVISION, DEVICE_ADAPTERS));
 
     ModelNodeId MANAGED_DEVICES_ID_TEMPLATE = new ModelNodeId("/container=network-manager/container=managed-devices", NS);
     ModelNodeId AUTH_ID_TEMPLATE = new ModelNodeId("/container=network-manager/container=managed-devices"
-        + "/container=device/name=direct-device"
-        + "/container=device-management/container=device-connection"
-        + "/container=password-auth/container=authentication", NS);
+            + "/container=device/name=direct-device"
+            + "/container=device-management/container=device-connection"
+            + "/container=password-auth/container=authentication", NS);
     String CONTAINER_DEVICE_TEMPLATE = "/container=device/name=";
     String DEVICE_MANAGEMENT = "device-management";
     ModelNodeId DEVICE_ID_TEMPLATE = new ModelNodeId("/container=network-manager/container=" + MANAGED_DEVICES
-        + CONTAINER_DEVICE_TEMPLATE + "directDevice/container=" + DEVICE_MANAGEMENT, NS);
+            + CONTAINER_DEVICE_TEMPLATE + "directDevice/container=" + DEVICE_MANAGEMENT, NS);
     String NEW_DEVICE = "new-device";
     ModelNodeId NETWORK_MANAGER_ID_TEMPLATE = new ModelNodeId("/container=network-manager", NS);
+
+    static String rootPathForDevice(String deviceName) {
+        return "/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device"
+                + "[baa-network-manager:name='" + deviceName + "']/baa-network-manager:root";
+    }
+
     String NAME = "name";
     String TYPE = "type";
     String INTERFACE_VERSION = "interface-version";
     String MODEL = "model";
     String VENDOR = "vendor";
+    String DESCRIPTION = "description";
+    String IS_NETCONF = "is-netconf";
+    String DEVELOPER = "developer";
+    String ADAPTER_REVISION = "revision";
+    String UPLOAD_DATE = "upload-date";
     String PUSH_PMA_CONFIGURATION_TO_DEVICE = "push-pma-configuration-to-device";
     String DEVICE_CONNECTION = "device-connection";
     String NS_REVISION = "2018-05-07";
@@ -77,4 +89,11 @@ public interface DeviceManagerNSConstants {
     String NOT_ALIGNED = "Not Aligned";
     String NEVER_ALIGNED = "Never Aligned";
     String CALL_HOME = "call-home";
+    String DEVICES_RELATED = "devices-related";
+    String DEVICE_COUNT = "device-count";
+    String IN_USE = "in-use";
+    String DEVICE_STATE_CHANGE = "device-state-change";
+    String YANG_MODULES = "yang-modules";
+    String MODULE = "module";
+    String DEVICE_ADAPTER_COUNT = "device-adapter-count";
 }

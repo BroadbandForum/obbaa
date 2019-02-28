@@ -21,6 +21,7 @@ import java.util.List;
 import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.server.NetconfQueryParams;
+import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ActionException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.CopyConfigException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.EditConfigException;
@@ -62,6 +63,16 @@ public class ThreadLocalRootModelNodeAggregator implements RootModelNodeAggregat
     @Override
     public List<ModelNode> getModelServiceRoots() {
         return getRootAggregator().getModelServiceRoots();
+    }
+
+    @Override
+    public List<ModelNode> getModelServiceRootsForEdit(EditConfigRequest request) {
+        return getRootAggregator().getModelServiceRootsForEdit(request);
+    }
+
+    @Override
+    public List<ModelNode> getModuleRootFromHelpers(String requiredElementNamespace, String requiredElementLocalName) {
+        return getRootAggregator().getModuleRootFromHelpers(requiredElementNamespace,requiredElementLocalName);
     }
 
     @Override
@@ -108,6 +119,11 @@ public class ThreadLocalRootModelNodeAggregator implements RootModelNodeAggregat
     @Override
     public void removeModelServiceRoot(String componentId) {
         getRootAggregator().removeModelServiceRoot(componentId);
+    }
+
+    @Override
+    public List<Pair<String, String>> getRootNodeNsLocalNamePairs() {
+        return getRootAggregator().getRootNodeNsLocalNamePairs();
     }
 
     public static void clearRootAggregator() {

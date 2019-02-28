@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1">
+    <data>
+        <modules-state xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+            <module-set-id>a1d78f4f1f32d244cba58cdadb0f45d7</module-set-id>
+            <module>
+                <name>ietf-netconf-server</name>
+                <revision>2016-03-16</revision>
+                <namespace>urn:ietf:params:xml:ns:yang:ietf-netconf-server</namespace>
+                <feature>tls-listen</feature>
+                <feature>tls-call-home</feature>
+                <deviation>
+                    <name>dummy-netconf-server-dev</name>
+                    <revision>2017-03-27</revision>
+                </deviation>
+                <conformance-type>implement</conformance-type>
+            </module>
+            <module>
+                <name>dummy-netconf-server-dev</name>
+                <revision>2017-03-27</revision>
+                <namespace>urn:xxxxx-org:yang:netconf-server-dev</namespace>
+                <conformance-type>implement</conformance-type>
+            </module>
+        </modules-state>
+    </data>
+</rpc-reply>

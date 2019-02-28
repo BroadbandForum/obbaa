@@ -1,8 +1,8 @@
 
+<a id="architecture" />
+
 Architecture
 ============
-
-<a id="architecture" />
 
 The OB-BAA software architecture is based on the logical system
 architecture where northbound interfaces are defined for management
@@ -119,7 +119,7 @@ ability to:
 -   Forward notifications and events coming from lower layers to one or
     more SDN Managers and Controllers connected via the NBI Adapter
     
-[For more information on the Aggregator Component](../aggregator/)
+[For more information on the Aggregator Component](aggregator/index.md#aggregator)
 
 #### Network Topology and Equipment Inventory (NTEI)
 
@@ -224,23 +224,23 @@ Connector reference for the Device Adapter that is used by the managed
 device and subscribes to Connection Manager\'s call back interface for
 receiving notifications and events from devices.
 
-#### Device Adapter
+#### Device Adapter Framework
 
-The Device Adapter component performs translation of device specific
+The Device Adapter Framework performs translation of device specific
 data models into the data models identified to the BAA layer\'s SAI
 component.
 
--   The Device Adapter component receives requests from PMA registry
-    which it translates to device specific request and uses supported
-    protocol specific Connection Manager to deploy the instruction into
+-   The Device Adapter Framework receives requests from PMA registry
+    which it translates to device specific request and uses a
+    protocol specific Connection Manager to deploy the request into
     the managed device.
 
--   The Device Adapter component also normalizes the device specific
+-   The Device Adapter Framework also normalizes the device specific
     notifications and events to the data model supported by the BAA
     layer\'s SAI component for that type of device and then forwards the
     notification and event to the PAM Registry component
 
-[For more information on the Device Adapter Component](../device_adapter/)
+[For more information on the Device Adapter Framework](device_adapter/index.md#device_adapter)
 
 #### L1 Engine
 
@@ -300,6 +300,6 @@ utilities like YANG module handling, security etc.
 
 Provides debugging utilities for application trouble shooting.
 
-[<--Overview](../overview)
+[<--Overview](../overview/index.md#overview)
 
-[Installing OB-BAA -->](../installing/)
+[Installing OB-BAA -->](../installing/index.md#installing)

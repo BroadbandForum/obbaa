@@ -20,6 +20,7 @@
            default-activation="eager">
     <jpa:enable />
     <tx:enable-annotations/>
+    <reference id="ncConnectionMgr" interface="org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager" availability="mandatory"/>
 
     <bean id="lockService" class="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl"/>
 
@@ -39,9 +40,12 @@
         <argument ref="dsmRegistry"/>
     </bean>
 
-    <bean id="nonCodedAdapterService" class="org.broadband_forum.obbaa.device.adapter.impl.NonCodedAdapterServiceImpl" init-method="init">
-        <argument value="/baa/stores/deviceAdapter"/>
+    <bean id="nonCodedAdapterService" class="org.broadband_forum.obbaa.device.adapter.impl.NonCodedAdapterServiceImpl">
         <argument ref="adapterManager"/>
+    </bean>
+
+    <bean id="nonCodedConfigAlign" class="org.broadband_forum.obbaa.device.adapter.impl.NcCompliantAdapterDeviceInterface">
+        <argument ref="ncConnectionMgr"/>
     </bean>
 
     <service ref="lockService" interface="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService"/>
@@ -50,5 +54,6 @@
     <service ref="dsmRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDSMRegistry"/>
     <service ref="aggregatedDSM" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager"/>
     <service ref="adapterManager" interface="org.broadband_forum.obbaa.device.adapter.AdapterManager"/>
+    <service ref="nonCodedConfigAlign" interface="org.broadband_forum.obbaa.device.adapter.DeviceInterface"/>
 
 </blueprint>

@@ -1,0 +1,19 @@
+<in-use-library-modules xmlns="urn:bbf:yang:obbaa:module-library-check">
+  <module>
+	<name>bbf-fast</name>
+	<revision>2017-03-13</revision>
+	<associated-adapters>
+	  <device-adapter>
+		<vendor>Huawei</vendor>
+		<model>MA5811s-AE08</model>
+		<type>DPU</type>
+		<interface-version>1.0</interface-version>
+		<device-count>2</device-count>
+		<devices>
+		  <device>DeviceC</device>
+		  <device>DeviceB</device>
+		</devices>
+	  </device-adapter>
+	</associated-adapters>
+  </module>
+</in-use-library-modules>

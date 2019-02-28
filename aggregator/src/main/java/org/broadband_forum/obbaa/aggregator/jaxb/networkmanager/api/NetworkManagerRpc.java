@@ -30,7 +30,7 @@ import org.broadband_forum.obbaa.aggregator.processor.AggregatorMessage;
 import org.broadband_forum.obbaa.aggregator.processor.NetconfMessageUtil;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

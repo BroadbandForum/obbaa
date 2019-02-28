@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907169">
+  <edit-config>
+    <target>
+      <running/>
+    </target>
+    <config>
+      <!-- 1:1 VLAN with S-TAG + C-TAG -->
+
+      <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+        <managed-devices>
+          <device>
+          <name>deviceA</name>
+          <root>
+            <!-- sub interface configuration -->
+            <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+
+			  <!-- Translate the User 3 traffic with VLAN 100 at the U interface to C-VLAN 300 -->
+              <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:name>user3.100</if:name>
+                <if:type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</if:type>
+                <bbf-subif:subif-lower-layer xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                  <bbf-subif:interface>ptm.3</bbf-subif:interface>
+                </bbf-subif:subif-lower-layer>
+                <bbf-if-usg:interface-usage xmlns:bbf-if-usg="urn:bbf:yang:bbf-interface-usage">
+                  <bbf-if-usg:interface-usage>user-port</bbf-if-usg:interface-usage>
+                </bbf-if-usg:interface-usage>
+                <bbf-subif:inline-frame-processing xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                  <bbf-subif:ingress-rule>
+                    <bbf-subif:rule>
+                      <bbf-subif:name>u3_uni100_to_cvlan300</bbf-subif:name>
+                      <bbf-subif:priority>1</bbf-subif:priority>
+                      <!-- filter by VLAN 100 -->
+                      <bbf-subif:flexible-match>
+                        <bbf-subif-tag:match-criteria xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                          <bbf-subif-tag:tag>
+                            <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                            <bbf-subif-tag:dot1q-tag>
+                              <bbf-subif-tag:vlan-id>100</bbf-subif-tag:vlan-id>
+                              <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</bbf-subif-tag:tag-type>
+                            </bbf-subif-tag:dot1q-tag>
+                          </bbf-subif-tag:tag>
+                        </bbf-subif-tag:match-criteria>
+                      </bbf-subif:flexible-match>
+                      <bbf-subif:ingress-rewrite>
+                        <!-- replace the incoming VLAN with VLAN 300 -->
+                        <bbf-subif-tag:pop-tags xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">1</bbf-subif-tag:pop-tags>
+                        <bbf-subif-tag:push-tag xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                          <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                          <bbf-subif-tag:dot1q-tag>
+                            <bbf-subif-tag:vlan-id>303</bbf-subif-tag:vlan-id>
+                            <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</bbf-subif-tag:tag-type>
+                            <bbf-subif-tag:write-pbit-0/>
+                            <bbf-subif-tag:write-dei-0/>
+                          </bbf-subif-tag:dot1q-tag>
+                        </bbf-subif-tag:push-tag>
+                      </bbf-subif:ingress-rewrite>
+                    </bbf-subif:rule>
+                  </bbf-subif:ingress-rule>
+                </bbf-subif:inline-frame-processing>
+              </if:interface>
+
+			  <!-- Translate the User 4 traffic with VLAN 100 at the U interface to C-VLAN 300 -->
+              <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:name>user4.100</if:name>
+                <if:type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</if:type>
+                <bbf-subif:subif-lower-layer xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                  <bbf-subif:interface>ptm.4</bbf-subif:interface>
+                </bbf-subif:subif-lower-layer>
+                <bbf-if-usg:interface-usage xmlns:bbf-if-usg="urn:bbf:yang:bbf-interface-usage">
+                  <bbf-if-usg:interface-usage>user-port</bbf-if-usg:interface-usage>
+                </bbf-if-usg:interface-usage>
+                <bbf-subif:inline-frame-processing xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                  <bbf-subif:ingress-rule>
+                    <bbf-subif:rule>
+                      <bbf-subif:name>u4_uni100_to_cvlan301</bbf-subif:name>
+                      <bbf-subif:priority>1</bbf-subif:priority>
+                      <!-- filter by VLAN 100 -->
+                      <bbf-subif:flexible-match>
+                        <bbf-subif-tag:match-criteria xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                          <bbf-subif-tag:tag>
+                            <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                            <bbf-subif-tag:dot1q-tag>
+                              <bbf-subif-tag:vlan-id>100</bbf-subif-tag:vlan-id>
+                              <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</bbf-subif-tag:tag-type>
+                            </bbf-subif-tag:dot1q-tag>
+                          </bbf-subif-tag:tag>
+                        </bbf-subif-tag:match-criteria>
+                      </bbf-subif:flexible-match>
+                      <bbf-subif:ingress-rewrite>
+                        <!-- replace the incoming VLAN with VLAN 300 -->
+                        <bbf-subif-tag:pop-tags xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">1</bbf-subif-tag:pop-tags>
+                        <bbf-subif-tag:push-tag xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                          <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                          <bbf-subif-tag:dot1q-tag>
+                            <bbf-subif-tag:vlan-id>304</bbf-subif-tag:vlan-id>
+                            <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</bbf-subif-tag:tag-type>
+                            <bbf-subif-tag:write-pbit-0/>
+                            <bbf-subif-tag:write-dei-0/>
+                          </bbf-subif-tag:dot1q-tag>
+                        </bbf-subif-tag:push-tag>
+                      </bbf-subif:ingress-rewrite>
+                    </bbf-subif:rule>
+                  </bbf-subif:ingress-rule>
+                </bbf-subif:inline-frame-processing>
+              </if:interface>
+
+			  <!-- Configure the uplink with User 3 VLANs -->
+              <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:name>network1.201.303</if:name>
+                <if:type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</if:type>
+                <bbf-subif:subif-lower-layer xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                  <bbf-subif:interface>uplink.1</bbf-subif:interface>
+                </bbf-subif:subif-lower-layer>
+                <bbf-if-usg:interface-usage xmlns:bbf-if-usg="urn:bbf:yang:bbf-interface-usage">
+                  <bbf-if-usg:interface-usage>network-port</bbf-if-usg:interface-usage>
+                </bbf-if-usg:interface-usage>
+                <bbf-subif:inline-frame-processing xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                  <bbf-subif:ingress-rule>
+                    <bbf-subif:rule>
+                      <bbf-subif:name>n1_201_303</bbf-subif:name>
+                      <bbf-subif:priority>1</bbf-subif:priority>
+                      <bbf-subif:flexible-match>
+                        <!-- Match double tagged traffic with the User 3 C-VLAN 303 and S-VLAN 201 -->
+                        <bbf-subif-tag:match-criteria xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                          <bbf-subif-tag:tag>
+                            <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                            <bbf-subif-tag:dot1q-tag>
+                              <bbf-subif-tag:vlan-id>201</bbf-subif-tag:vlan-id>
+                              <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:s-vlan</bbf-subif-tag:tag-type>
+                            </bbf-subif-tag:dot1q-tag>
+                          </bbf-subif-tag:tag>
+                          <bbf-subif-tag:tag>
+                            <bbf-subif-tag:index>1</bbf-subif-tag:index>
+                            <bbf-subif-tag:dot1q-tag>
+                              <bbf-subif-tag:vlan-id>303</bbf-subif-tag:vlan-id>
+                              <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</bbf-subif-tag:tag-type>
+                            </bbf-subif-tag:dot1q-tag>
+                          </bbf-subif-tag:tag>
+                        </bbf-subif-tag:match-criteria>
+                      </bbf-subif:flexible-match>
+                      <bbf-subif:ingress-rewrite>
+                        <bbf-subif-tag:pop-tags xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">1</bbf-subif-tag:pop-tags>
+                      </bbf-subif:ingress-rewrite>
+                    </bbf-subif:rule>
+                  </bbf-subif:ingress-rule>
+                  <bbf-subif:egress-rewrite>
+                    <!-- Push S-VLAN 201 (the C-VLAN already has been pushed at the downlink interface)-->
+                    <bbf-subif-tag:push-tag xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                      <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                      <bbf-subif-tag:dot1q-tag>
+                        <bbf-subif-tag:vlan-id>201</bbf-subif-tag:vlan-id>
+                        <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:s-vlan</bbf-subif-tag:tag-type>
+                        <bbf-subif-tag:write-pbit-0/>
+                        <bbf-subif-tag:write-dei-0/>
+                      </bbf-subif-tag:dot1q-tag>
+                    </bbf-subif-tag:push-tag>
+                  </bbf-subif:egress-rewrite>
+                </bbf-subif:inline-frame-processing>
+              </if:interface>
+
+			  <!-- Configure the uplink with User 4 VLANs -->
+              <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:name>network1.201.304</if:name>
+                <if:type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</if:type>
+                <bbf-subif:subif-lower-layer xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                  <bbf-subif:interface>uplink.1</bbf-subif:interface>
+                </bbf-subif:subif-lower-layer>
+                <bbf-if-usg:interface-usage xmlns:bbf-if-usg="urn:bbf:yang:bbf-interface-usage">
+                  <bbf-if-usg:interface-usage>network-port</bbf-if-usg:interface-usage>
+                </bbf-if-usg:interface-usage>
+                <bbf-subif:inline-frame-processing xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                  <bbf-subif:ingress-rule>
+                    <bbf-subif:rule>
+                      <bbf-subif:name>n1_201_304</bbf-subif:name>
+                      <bbf-subif:priority>1</bbf-subif:priority>
+                      <bbf-subif:flexible-match>
+                        <!-- Match double tagged traffic with the User 4 C-VLAN 304 and S-VLAN 201 -->
+                        <bbf-subif-tag:match-criteria xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                          <bbf-subif-tag:tag>
+                            <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                            <bbf-subif-tag:dot1q-tag>
+                              <bbf-subif-tag:vlan-id>201</bbf-subif-tag:vlan-id>
+                              <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:s-vlan</bbf-subif-tag:tag-type>
+                            </bbf-subif-tag:dot1q-tag>
+                          </bbf-subif-tag:tag>
+                          <bbf-subif-tag:tag>
+                            <bbf-subif-tag:index>1</bbf-subif-tag:index>
+                            <bbf-subif-tag:dot1q-tag>
+                              <bbf-subif-tag:vlan-id>304</bbf-subif-tag:vlan-id>
+                              <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</bbf-subif-tag:tag-type>
+                            </bbf-subif-tag:dot1q-tag>
+                          </bbf-subif-tag:tag>
+                        </bbf-subif-tag:match-criteria>
+                      </bbf-subif:flexible-match>
+                      <bbf-subif:ingress-rewrite>
+                        <bbf-subif-tag:pop-tags xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">1</bbf-subif-tag:pop-tags>
+                      </bbf-subif:ingress-rewrite>
+                    </bbf-subif:rule>
+                  </bbf-subif:ingress-rule>
+                  <bbf-subif:egress-rewrite>
+                    <!-- Push S-VLAN 201 (the C-VLAN already has been pushed at the downlink interface)-->
+                    <bbf-subif-tag:push-tag xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                      <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                      <bbf-subif-tag:dot1q-tag>
+                        <bbf-subif-tag:vlan-id>201</bbf-subif-tag:vlan-id>
+                        <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:s-vlan</bbf-subif-tag:tag-type>
+                        <bbf-subif-tag:write-pbit-0/>
+                        <bbf-subif-tag:write-dei-0/>
+                      </bbf-subif-tag:dot1q-tag>
+                    </bbf-subif-tag:push-tag>
+                  </bbf-subif:egress-rewrite>
+                </bbf-subif:inline-frame-processing>
+              </if:interface>
+            </if:interfaces>
+
+            <bbf-l2-fwd:forwarding xmlns:bbf-l2-fwd="urn:bbf:yang:bbf-l2-forwarding">
+              <bbf-l2-fwd:forwarders>
+
+                <!-- forwarder configuration from User 3 to S-TAG 201 -->
+                <bbf-l2-fwd:forwarder>
+                  <bbf-l2-fwd:name>user3_uni100_to_svlan_201</bbf-l2-fwd:name>
+                  <bbf-l2-fwd:ports>
+                    <bbf-l2-fwd:port>
+                      <bbf-l2-fwd:name>user3.100</bbf-l2-fwd:name>
+                      <bbf-l2-fwd:sub-interface>user3.100</bbf-l2-fwd:sub-interface>
+                    </bbf-l2-fwd:port>
+                    <bbf-l2-fwd:port>
+                      <bbf-l2-fwd:name>network1.201.303</bbf-l2-fwd:name>
+                      <bbf-l2-fwd:sub-interface>network1.201.303</bbf-l2-fwd:sub-interface>
+                    </bbf-l2-fwd:port>
+                  </bbf-l2-fwd:ports>
+                  <!-- disable MAC Learning -->
+                  <bbf-l2-fwd:mac-learning>
+                  </bbf-l2-fwd:mac-learning>
+                </bbf-l2-fwd:forwarder>
+
+                <!-- forwarder configuration from User 4 to S-TAG 201 -->
+                <bbf-l2-fwd:forwarder>
+                  <bbf-l2-fwd:name>user4_uni100_to_svlan_201</bbf-l2-fwd:name>
+                  <bbf-l2-fwd:ports>
+                    <bbf-l2-fwd:port>
+                      <bbf-l2-fwd:name>user4.100</bbf-l2-fwd:name>
+                      <bbf-l2-fwd:sub-interface>user4.100</bbf-l2-fwd:sub-interface>
+                    </bbf-l2-fwd:port>
+                    <bbf-l2-fwd:port>
+                      <bbf-l2-fwd:name>network1.201.304</bbf-l2-fwd:name>
+                      <bbf-l2-fwd:sub-interface>network1.201.304</bbf-l2-fwd:sub-interface>
+                    </bbf-l2-fwd:port>
+                  </bbf-l2-fwd:ports>
+                  <!-- disable MAC Learning -->
+                  <bbf-l2-fwd:mac-learning>
+                  </bbf-l2-fwd:mac-learning>
+                </bbf-l2-fwd:forwarder>
+              </bbf-l2-fwd:forwarders>
+            </bbf-l2-fwd:forwarding>
+          </root>
+        </device>
+      </managed-devices>
+    </network-manager>
+    </config>
+  </edit-config>
+</rpc>

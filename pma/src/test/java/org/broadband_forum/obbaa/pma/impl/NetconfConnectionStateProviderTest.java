@@ -16,13 +16,11 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.LinkedHashMap;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.dm.DeviceManager;
@@ -48,7 +46,7 @@ public class NetconfConnectionStateProviderTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         m_provider = new NetconfConnectionStateProvider(m_dm, m_cm);
-        when(m_cm.getConnectionState("device1")).thenReturn(m_deviceState);
+        when(m_cm.getConnectionState(any())).thenReturn(m_deviceState);
         when(m_dm.getDevice("callHomeDevice-1")).thenReturn(createCallHomeDevice("callHomeDevice-1"));
     }
 
@@ -64,13 +62,6 @@ public class NetconfConnectionStateProviderTest {
         m_provider.destroy();
         verify(m_dm).addDeviceStateProvider(m_provider);
         verify(m_dm).removeDeviceStateProvider(m_provider);
-    }
-
-    @Test
-    public void testStateIsFetchedFromCM() {
-        LinkedHashMap<String, Object> state = m_provider.getState("device1");
-        assertEquals(m_deviceState, state.get(NetconfConnectionStateProvider.CONNECTION_STATE));
-        assertEquals(1, state.size());
     }
 
     @Test

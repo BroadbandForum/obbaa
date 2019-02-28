@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="urn:ietf:params:xml:ns:yang:ietf-yang-library" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="urn:ietf:params:xml:ns:yang:ietf-yang-library" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="modules-state">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="module">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="name" type="xs:string" />
+              <xs:element name="revision" type="xs:string" />
+              <xs:element name="namespace" type="xs:string" />
+              <xs:element minOccurs="0" maxOccurs="unbounded" name="feature" type="xs:string" />
+              <xs:element minOccurs="0" maxOccurs="unbounded" name="deviation">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="name" type="xs:string" />
+                    <xs:element name="revision" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="conformance-type" type="xs:string" />
+              <xs:element minOccurs="0" maxOccurs="unbounded" name="submodule">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="name" type="xs:string" />
+                    <xs:element name="revision" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="module-set-id" type="xs:unsignedByte" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

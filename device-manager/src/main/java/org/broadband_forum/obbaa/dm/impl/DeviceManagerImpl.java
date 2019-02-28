@@ -22,8 +22,6 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dm.DeviceStateProvider;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
@@ -35,14 +33,9 @@ import org.broadband_forum.obbaa.dmyang.entities.Device;
 public class DeviceManagerImpl implements DeviceManager {
     private DeviceDao m_deviceDao;
     private Set<DeviceStateProvider> m_deviceStateProviders = new LinkedHashSet<>();
-    private final NetconfConnectionManager m_cm;
 
-    public DeviceManagerImpl(NetconfConnectionManager cm) {
-        m_cm = cm;
-    }
-
-    public DeviceDao getDeviceDao() {
-        return m_deviceDao;
+    public DeviceManagerImpl(DeviceDao deviceDao) {
+        m_deviceDao = deviceDao;
     }
 
     public void setDeviceDao(DeviceDao deviceDao) {
@@ -102,8 +95,4 @@ public class DeviceManagerImpl implements DeviceManager {
         m_deviceStateProviders.add(stateProvider);
     }
 
-    @Override
-    public List<NewDeviceInfo> getNewDevices() {
-        return m_cm.getNewDevices();
-    }
 }

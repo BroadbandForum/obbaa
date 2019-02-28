@@ -16,8 +16,6 @@
 
 package org.broadband_forum.obbaa.dm;
 
-import java.util.LinkedHashMap;
-
 /**
  * <p>
  * An interface to supply non-config (state) values to a Device.
@@ -26,12 +24,6 @@ import java.util.LinkedHashMap;
  * </p>
  */
 public interface DeviceStateProvider {
-    /**
-     * Callback method to get state values of a give device.
-     * @param deviceName - Key of the device.
-     * @return - State values.
-     */
-    LinkedHashMap<String, Object> getState(String deviceName);
 
     /**
      * Callback to perform business init activities when a new device gets managed by {@link DeviceManager}.

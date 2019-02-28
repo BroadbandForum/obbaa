@@ -16,14 +16,18 @@
 
 package org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl;
 
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.PREFIX;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.rootPathForDevice;
+
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.api.NetworkManagerRpc;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.messages.PojoToDocumentTransformer;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -44,8 +48,7 @@ public final class AggregatorUtils {
     public static Document stringToDocument(String request) throws DispatchException {
         try {
             return DocumentUtils.stringToDocument(trimXmlFormat(request));
-        }
-        catch (NetconfMessageBuilderException ex) {
+        } catch (NetconfMessageBuilderException ex) {
             throw new DispatchException(ex);
         }
     }
@@ -76,124 +79,45 @@ public final class AggregatorUtils {
     }
 
     /**
-     * Build managed-devices Element.
-     *
-     * @param document Node document
-     * @return Element of managed-devices
-     */
-    public static Element buildManagedDevicesElement(Document document) {
-        Element element = document.createElementNS(NetworkManagerRpc.NAMESPACE, "managed-devices");
-
-        return element;
-    }
-
-    /**
-     * Build device Element.
+     * Get node of target.
      *
      * @param document Owner document
-     * @return Element
-     */
-    public static Element buildDeviceElement(Document document) {
-        return document.createElement("device");
-    }
-
-    /**
-     * Build name Element.
-     *
-     * @param document Owner document
-     * @param deviceName Device name
-     * @return Element
-     */
-    public static Element buildDeviceNameElement(Document document, String deviceName) {
-        Element deviceNameNode = document.createElement("name");
-        if (deviceName != null) {
-            deviceNameNode.setTextContent(deviceName);
-        }
-
-        return deviceNameNode;
-    }
-
-    /**
-     * Build root Element.
-     *
-     * @param document Owner document
-     * @return Element
-     */
-    public static Element buildRootElement(Document document) {
-        return document.createElement("root");
-    }
-
-    /**
-     * Build framework of root node for inserting message of mounted.
-     *
-     * @param document Owner document
-     * @param parent Parent node
-     * @param deviceName Device name
-     * @return Element of root
-     */
-    public static Element buildInsertMountRootFramework(Document document, Node parent, String deviceName) {
-        Element managedDevices = buildManagedDevicesElement(document);
-        Element device = buildDeviceElement(document);
-        Element root = buildRootElement(document);
-
-        device.appendChild(buildDeviceNameElement(document, deviceName));
-        device.appendChild(root);
-        managedDevices.appendChild(device);
-
-        parent.appendChild(managedDevices);
-
-        return root;
-    }
-
-    /**
-     * Get node of event-time.
-     *
-     * @param document Owner document
-     * @return Node of event-time
+     * @return Node of target
      * @throws DispatchException Exception
      */
-    public static Node getEventTimeNode(Document document) throws DispatchException {
-        NodeList notificationList = document.getDocumentElement().getElementsByTagName("eventTime");
+    public static Element getTargetNode(Document document) throws DispatchException {
+        NodeList notificationList = document.getDocumentElement().getElementsByTagName("target");
         DispatchException.assertZero(notificationList.getLength(), "Error notification");
 
-        return notificationList.item(0);
+        return (Element) notificationList.item(0);
     }
 
     /**
      * Package notification.
      *
-     * @param deviceName Device name
+     * @param deviceName   Device name
      * @param notification Notification
      * @return Net message
      * @throws DispatchException Exception
      */
-    public static String packageNotification(String deviceName, String notification) throws DispatchException {
-        Document document = AggregatorUtils.stringToDocument(notification);
-        Node eventTime = getEventTimeNode(document);
-        Node notificationNode = eventTime.getParentNode();
-        Element insertParent = buildInsertMountRootFramework(document, notificationNode, deviceName);
-
-        Node insertNode = notificationNode.getLastChild();
-        Node needReplace = eventTime.getNextSibling();
-        replaceNotificationPayload(eventTime, insertParent, needReplace, insertNode);
-
-        return AggregatorUtils.documentToString(document);
+    public static Notification packageNotification(String deviceName, Notification notification) throws DispatchException,
+            NetconfMessageBuilderException {
+        Document notificationDocument = notification.getNotificationDocument();
+        Document notificationDoc = updateNotificationTargetElement(deviceName, notificationDocument);
+        return new NetconfNotification(notificationDoc);
     }
 
-    /**
-     * Replace payload of notification message.
-     *
-     * @param eventTime event-time node
-     * @param insertParent Parent node
-     * @param needReplace Node need be replaced
-     * @param insertNode Node need insert
-     */
-    public static void replaceNotificationPayload(Node eventTime, Element insertParent,
-                                                  Node needReplace, Node insertNode) {
-        while ((needReplace != null) && (!insertNode.equals(needReplace))) {
-            needReplace.getParentNode().removeChild(needReplace);
-            insertParent.appendChild(needReplace);
-            needReplace = eventTime.getNextSibling();
-        }
+    private static Document updateNotificationTargetElement(String deviceName, Document notificationDocument) throws DispatchException {
+        Element oldTargetNode = getTargetNode(notificationDocument);
+
+        StringBuilder newTargetText = new StringBuilder();
+        String oldTargetText = oldTargetNode.getTextContent();
+        String dmText = rootPathForDevice(deviceName);
+        newTargetText.append(dmText);
+        newTargetText.append(oldTargetText);
+        oldTargetNode.setAttribute(NetworkManagerRpc.XMLNS + ":" + PREFIX, NetworkManagerRpc.NAMESPACE);
+        oldTargetNode.setTextContent(newTargetText.toString());
+        return notificationDocument;
     }
+
 }

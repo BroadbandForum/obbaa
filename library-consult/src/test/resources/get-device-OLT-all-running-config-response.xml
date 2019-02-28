@@ -1,0 +1,12 @@
+
+      <fiber:fiber-traffic-descriptor-profiles xmlns:fiber="urn:bbf:yang:bbf-fiber">
+        <fiber:traffic-descriptor-profile>
+          <fiber:name>profile1</fiber:name>
+          <fiber:fixed-bandwidth>10240000</fiber:fixed-bandwidth>
+        </fiber:traffic-descriptor-profile>
+        <fiber:traffic-descriptor-profile>
+          <fiber:name>profile2</fiber:name>
+          <fiber:fixed-bandwidth>10240000</fiber:fixed-bandwidth>
+        </fiber:traffic-descriptor-profile>
+      </fiber:fiber-traffic-descriptor-profiles>
+

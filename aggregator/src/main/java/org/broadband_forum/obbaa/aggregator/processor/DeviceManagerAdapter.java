@@ -16,7 +16,9 @@
 
 package org.broadband_forum.obbaa.aggregator.processor;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
@@ -25,6 +27,7 @@ import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
@@ -70,6 +73,7 @@ public class DeviceManagerAdapter implements DeviceManagementProcessor {
     private NetConfResponse deviceManagement(NetconfClientInfo netconfClientInfo, Document document) throws DispatchException {
         String typeOfNetconfRequest = NetconfMessageUtil.getTypeOfNetconfRequest(document);
         NetConfResponse response = new NetConfResponse();
+        List<Notification> notificationList = Collections.emptyList();
 
         try {
             switch (typeOfNetconfRequest) {
@@ -78,7 +82,8 @@ public class DeviceManagerAdapter implements DeviceManagementProcessor {
                     break;
 
                 case NetconfResources.EDIT_CONFIG:
-                    m_dmNetconfServer.onEditConfig(netconfClientInfo, DocumentToPojoTransformer.getEditConfig(document), response);
+                    notificationList = m_dmNetconfServer.onEditConfig(netconfClientInfo, DocumentToPojoTransformer.getEditConfig(document),
+                            response);
                     break;
 
                 case NetconfResources.GET:
@@ -92,6 +97,11 @@ public class DeviceManagerAdapter implements DeviceManagementProcessor {
                 default:
                     // Does not support
                     throw new DispatchException("Does not support the operation.");
+            }
+            if ((notificationList != null) && (!notificationList.isEmpty())) {
+                for (Notification notification : notificationList) {
+                    m_aggregator.publishNotification(notification);
+                }
             }
         } catch (NetconfMessageBuilderException ex) {
             throw new DispatchException(ex);

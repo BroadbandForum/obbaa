@@ -22,7 +22,7 @@ import java.util.Collection;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 
 public interface AdapterManager {
-    void deploy(DeviceAdapter adapter, SubSystem subSystem, Class klass);
+    void deploy(DeviceAdapter adapter, SubSystem subSystem, Class klass, DeviceInterface deviceInterface);
 
     void undeploy(DeviceAdapter adapter);
 

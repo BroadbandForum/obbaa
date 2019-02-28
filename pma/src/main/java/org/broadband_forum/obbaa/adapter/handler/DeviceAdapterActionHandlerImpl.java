@@ -18,111 +18,90 @@ package org.broadband_forum.obbaa.adapter.handler;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
-import org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants;
-import org.broadband_forum.obbaa.device.adapter.CommonFileUtil;
-import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
-import org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService;
-import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
-import org.broadband_forum.obbaa.pma.impl.DeviceXmlStore;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.karaf.kar.KarService;
+import org.broadband_forum.obbaa.adapter.AdapterDeployer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviceAdapterActionHandlerImpl implements DeviceAdapterActionHandler {
+public class DeviceAdapterActionHandlerImpl implements AdapterDeployer {
 
+    private static final String KAR_EXTENSION = "kar";
     private String m_stagingArea;
-    private NonCodedAdapterService m_nonCodedAdapterService;
-    private SubSystem m_subSystem;
+    private final File m_stagingAreaDir;
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceAdapterActionHandlerImpl.class);
+    private KarService m_karService;
 
-    public DeviceAdapterActionHandlerImpl(NonCodedAdapterService nonCodedAdapterService, SubSystem subSystem) {
-        m_nonCodedAdapterService = nonCodedAdapterService;
-        m_stagingArea = nonCodedAdapterService.getStagingArea();
-        m_subSystem = subSystem;
+    public DeviceAdapterActionHandlerImpl(String stagingArea, KarService karService) {
+        m_stagingAreaDir = new File(stagingArea);
+        m_stagingArea = stagingArea;
+        m_karService = karService;
     }
 
     public void init() throws Exception {
+        if (!m_stagingAreaDir.exists()) {
+            m_stagingAreaDir.mkdirs();
+        } else if (!m_stagingAreaDir.isDirectory()) {
+            throw new RuntimeException(m_stagingArea + " is not a directory");
+        }
         File dir = new File(m_stagingArea);
-        File [] files = dir.listFiles((directory, name) -> {
-            return name.endsWith(".zip");
-        });
-        for (File file : files) {
-            deployRpc(file.getName());
+        File[] files = dir.listFiles((directory, name) -> name.endsWith(".kar"));
+        if (files != null) {
+            for (File file : files) {
+                deployAdapter(file.getName());
+            }
         }
     }
 
     @Override
-    public void deployRpc(String archiveName) throws Exception {
-        LOGGER.info("Received request for deploying adapter zip : " + archiveName);
-        if (archiveName != null) {
-            String archive = archiveName.trim();
-            deployAdapter(archive, m_subSystem);
+    public void deployAdapter(String fileName) throws Exception {
+        LOGGER.info("Received request for deploying coded adapter " + fileName);
+        try {
+            if (fileName != null) {
+                String archive = m_stagingArea + File.separator + fileName.trim();
+                String fileExt = FilenameUtils.getExtension(fileName);
+
+                if (!KAR_EXTENSION.equals(fileExt)) {
+                    throw new IOException("File format '" + fileExt + "' not supported");
+                }
+                deployKar(archive);
+            } else {
+                throw new RuntimeException("File name cannot be null");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error when deploying coded adapter : ", e);
+            throw new RuntimeException("Error when deploying coded adapter : " + e.getMessage());
         }
     }
 
     @Override
-    public void undeploy(String archiveName) throws Exception {
-        LOGGER.info("Received request for undeploying adapter zip : " + archiveName);
-        if (archiveName != null) {
-            String archive = archiveName.trim();
-            undeployAdapter(archive);
+    public void undeployAdapter(String fileName) throws Exception {
+        LOGGER.info("Received request for un-deploying coded adapter : " + fileName);
+        try {
+            if (fileName != null) {
+                String fileExt = FilenameUtils.getExtension(fileName);
+                String fileNameWOExt = FilenameUtils.removeExtension(fileName);
+
+                if (!KAR_EXTENSION.equals(fileExt)) {
+                    throw new IOException("File format '" + fileExt + "' not supported");
+                }
+                undeployKar(fileNameWOExt);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error when un-deploying coded adapter : ", e);
+            throw new RuntimeException("Error when un-deploying coded adapter : " + e);
         }
     }
 
-    private void undeployAdapter(String archive) throws Exception {
-        DeviceAdapterId adapter = getNonCodedPlugId(archive);
-        String adapterId = adapter.getType() + AdapterSpecificConstants.DASH + adapter.getInterfaceVersion()
-                + AdapterSpecificConstants.DASH + adapter.getModel() + AdapterSpecificConstants.DASH + adapter.getVendor();
-        String destDir = m_stagingArea + File.separator + adapterId;
-        String plugArchivePath = m_stagingArea + File.separator + archive;
-        m_nonCodedAdapterService.unDeployPlug(adapter.getType(), adapter.getInterfaceVersion(), adapter.getModel(),
-                adapter.getVendor());
-        deleteAdapterFiles(destDir, plugArchivePath);
-
+    private void deployKar(String url) throws Exception {
+        LOGGER.info("Installing kar ", url);
+        m_karService.install(Paths.get(url).toUri());
     }
 
-    private void deleteAdapterFiles(String destDir, String archive) throws IOException {
-        Path archieveFile = Paths.get(archive);
-        Files.deleteIfExists(archieveFile);
-        File unpackedDir = new File(destDir);
-        if (unpackedDir.exists()) {
-            FileUtils.deleteDirectory(unpackedDir);
-        }
-
-    }
-
-    private void deployAdapter(String archive, SubSystem subSystem) throws Exception {
-        DeviceAdapterId adapter = getNonCodedPlugId(archive);
-        String adapterId = adapter.getType() + AdapterSpecificConstants.DASH + adapter.getInterfaceVersion()
-                + AdapterSpecificConstants.DASH + adapter.getModel() + AdapterSpecificConstants.DASH + adapter.getVendor();
-        String destDir = m_stagingArea + File.separator + adapterId;
-        String plugArchivePath = m_stagingArea + File.separator + archive;
-        operationsOnArchive(destDir, plugArchivePath);
-        m_nonCodedAdapterService.deployPlug(adapterId, subSystem, DeviceXmlStore.class);
-    }
-
-    private DeviceAdapterId getNonCodedPlugId(String archive) throws Exception {
-        return m_nonCodedAdapterService.getNonCodedPlugId(
-                m_nonCodedAdapterService.getStagingArea() + File.separator + archive, AdapterSpecificConstants.ADAPTER_XML_PATH);
-    }
-
-    private void operationsOnArchive(String destDir, String plugArchivePath) throws Exception {
-        validateExistenceOfPlugArchive(plugArchivePath);
-        CommonFileUtil.unpackToSpecificDirectory(plugArchivePath, destDir);
-
-    }
-
-    protected void validateExistenceOfPlugArchive(String plugArchiveFileName) throws Exception {
-        Path path = Paths.get(plugArchiveFileName);
-        boolean exists = Files.exists(path, new LinkOption[] { LinkOption.NOFOLLOW_LINKS });
-        if (!exists) {
-            LOGGER.error(AdapterSpecificConstants.ADAPTER_DEFINITION_ARCHIVE_NOT_FOUND_ERROR);
-            throw new Exception(AdapterSpecificConstants.ADAPTER_DEFINITION_ARCHIVE_NOT_FOUND_ERROR);
-        }
+    private void undeployKar(String karName) throws Exception {
+        LOGGER.info("Undeploying kar ", karName);
+        m_karService.uninstall(karName);
     }
 }

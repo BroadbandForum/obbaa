@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>1.1.0</version>
+        <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.bbf.obbaa</groupId>
@@ -28,6 +28,11 @@
     <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/Persistence Management Agent</name>
     <dependencies>
+        <dependency>
+            <groupId>org.bbf.obbaa</groupId>
+            <artifactId>standard-adapters</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.bbf.obbaa</groupId>
             <artifactId>device-manager</artifactId>
@@ -66,6 +71,15 @@
             <artifactId>device-adapter-fwk</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+           <groupId>org.osgi</groupId>
+           <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.kar</groupId>
+            <artifactId>org.apache.karaf.kar.core</artifactId>
+            <version>4.0.4</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -79,7 +93,33 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
+            <resource>
+                <directory>target/classes</directory>
+                <includes>
+                    <include>standard-adapters/*</include>
+                </includes>
+            </resource>
         </resources>
+    <plugins>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>unpack-dependencies</id>
+                <phase>compile</phase>
+                <goals>
+                    <goal>unpack-dependencies</goal>
+                </goals>
+                <configuration>
+                    <includeArtifactIds>standard-adapters</includeArtifactIds>
+                    <outputDirectory>${project.build.directory}/classes/standard-adapters/</outputDirectory>
+                    <includes>**/*.zip</includes>
+                </configuration>
+            </execution>
+        </executions>
+    </plugin>
+    </plugins>
     </build>
 
 </project>

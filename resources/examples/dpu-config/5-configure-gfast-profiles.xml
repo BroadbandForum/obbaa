@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="34566754">
+  <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <target>
+      <running/>
+    </target>
+    <config>
+      <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+        <managed-devices>
+          <device>
+            <name>deviceA</name>
+            <root>
+              <bbf-fast:fast xmlns:bbf-fast="urn:bbf:yang:bbf-fast">
+                <bbf-fast:service>
+                  <!-- Downstream data rate profile -->
+                  <bbf-fast:downstream-data-rate-profile>
+                    <bbf-fast:name>downstream-data-rate-profile-demo</bbf-fast:name>
+                    <bbf-fast:maximum-net-data-rate>1000000</bbf-fast:maximum-net-data-rate>
+                    <bbf-fast:minimum-expected-throughput>0</bbf-fast:minimum-expected-throughput>
+                    <bbf-fast:maximum-gamma-data-rate>1000000</bbf-fast:maximum-gamma-data-rate>
+                    <bbf-fast:minimum-gamma-data-rate>1000000</bbf-fast:minimum-gamma-data-rate>
+                  </bbf-fast:downstream-data-rate-profile>
+                  <!-- upstream data rate profile -->
+                  <bbf-fast:upstream-data-rate-profile>
+                    <bbf-fast:name>upstream-data-rate-profile-demo</bbf-fast:name>
+                    <bbf-fast:maximum-net-data-rate>1000000</bbf-fast:maximum-net-data-rate>
+                    <bbf-fast:minimum-expected-throughput>0</bbf-fast:minimum-expected-throughput>
+                    <bbf-fast:maximum-gamma-data-rate>1000000</bbf-fast:maximum-gamma-data-rate>
+                    <bbf-fast:minimum-gamma-data-rate>1000000</bbf-fast:minimum-gamma-data-rate>
+                    <bbf-fast:dynamic-time-assignment>
+                      <bbf-fast:minimum-expected-throughput>0</bbf-fast:minimum-expected-throughput>
+                      <bbf-fast:maximum-net-data-rate>1000000</bbf-fast:maximum-net-data-rate>
+                    </bbf-fast:dynamic-time-assignment>
+                    <!-- <bbf-fast:low-andeftr-threshold>1000000</bbf-fast:low-andeftr-threshold> -->
+                  </bbf-fast:upstream-data-rate-profile>
+                  <!-- low power data rate profile -->
+                  <bbf-fast:low-power-data-rate-profile>
+                    <bbf-fast:name>low-power-data-rate-profile-demo</bbf-fast:name>
+                    <bbf-fast:maximum-net-data-rate-in-l2.2>100000</bbf-fast:maximum-net-data-rate-in-l2.2>
+                    <bbf-fast:minimum-expected-throughput-in-l2.2>0</bbf-fast:minimum-expected-throughput-in-l2.2>
+                    <bbf-fast:downstream>
+                      <bbf-fast:maximum-net-data-rate-in-l2.1>100000</bbf-fast:maximum-net-data-rate-in-l2.1>
+                      <bbf-fast:minimum-expected-throughput-in-l2.1>0</bbf-fast:minimum-expected-throughput-in-l2.1>
+                      <bbf-fast:minimum-expected-throughput-after-exit-from-l2.1>0</bbf-fast:minimum-expected-throughput-after-exit-from-l2.1>
+                    </bbf-fast:downstream>
+                    <bbf-fast:upstream>
+                      <bbf-fast:maximum-net-data-rate-in-l2.1>100000</bbf-fast:maximum-net-data-rate-in-l2.1>
+                      <bbf-fast:minimum-expected-throughput-in-l2.1>0</bbf-fast:minimum-expected-throughput-in-l2.1>
+                      <bbf-fast:minimum-expected-throughput-after-exit-from-l2.1>0</bbf-fast:minimum-expected-throughput-after-exit-from-l2.1>
+                    </bbf-fast:upstream>
+                  </bbf-fast:low-power-data-rate-profile>
+                  <!-- TDD profile -->
+                  <bbf-fast:time-division-duplexing-profile>
+                    <bbf-fast:name>time-division-duplexing-profile-demo</bbf-fast:name>
+                    <bbf-fast:total-symbol-periods>36</bbf-fast:total-symbol-periods>
+                    <bbf-fast:downstream-symbol-periods>28</bbf-fast:downstream-symbol-periods>
+                    <bbf-fast:cyclic-extension>16</bbf-fast:cyclic-extension>
+                    <bbf-fast:dynamic-time-assignment>
+                      <bbf-fast:dta-allowed>none</bbf-fast:dta-allowed>
+                      <bbf-fast:preferred-mds>28</bbf-fast:preferred-mds>
+                      <bbf-fast:minimum-mds>20</bbf-fast:minimum-mds>
+                      <bbf-fast:maximum-mds>28</bbf-fast:maximum-mds>
+                    </bbf-fast:dynamic-time-assignment>
+                  </bbf-fast:time-division-duplexing-profile>
+                </bbf-fast:service>
+                <bbf-fast:spectrum>
+                  <!-- Line Spectrum Profile -->
+                  <bbf-fast:line-spectrum-profile>
+                    <bbf-fast:name>line-spectrum-profile-demo</bbf-fast:name>
+                    <bbf-fast:link-state-enabling>l0-l3-enabled</bbf-fast:link-state-enabling>
+                    <bbf-fast:profiles>all</bbf-fast:profiles>
+                    <bbf-fast:maximum-psd-reduction-in-l2>255</bbf-fast:maximum-psd-reduction-in-l2>
+                    <bbf-fast:downstream>
+                      <bbf-fast:maximum-aggregate-transmit-power>5</bbf-fast:maximum-aggregate-transmit-power>
+                    </bbf-fast:downstream>
+                    <bbf-fast:upstream>
+                      <bbf-fast:maximum-aggregate-transmit-power>5</bbf-fast:maximum-aggregate-transmit-power>
+                    </bbf-fast:upstream>
+                  </bbf-fast:line-spectrum-profile>
+                  <!-- RFI Profile-->
+                  <bbf-fast:radio-frequency-interference-profile>
+                    <bbf-fast:name>radio-frequency-interference-profile-demo</bbf-fast:name>
+                  </bbf-fast:radio-frequency-interference-profile>
+                  <!-- Upsream Power Back Off Profile -->
+                  <bbf-fast:upstream-power-back-off-profile>
+                    <bbf-fast:name>upstream-power-back-off-profile-demo</bbf-fast:name>
+                    <bbf-fast:upbopsd-a>4095</bbf-fast:upbopsd-a>
+                    <bbf-fast:upbopsd-b>4095</bbf-fast:upbopsd-b>
+                    <bbf-fast:upbo-upstream-electrical-length>1280</bbf-fast:upbo-upstream-electrical-length>
+                    <bbf-fast:upbo-force-electrical-length>true</bbf-fast:upbo-force-electrical-length>
+                    <bbf-fast:upbo-reference-electrical-length>255</bbf-fast:upbo-reference-electrical-length>
+                  </bbf-fast:upstream-power-back-off-profile>
+                </bbf-fast:spectrum>
+                <bbf-fast:quality>
+                  <!-- Noise Margin Profile -->
+                  <bbf-fast:noise-margin-profile>
+                    <bbf-fast:name>noise-margin-profile-demo</bbf-fast:name>
+                    <bbf-fast:downstream>
+                      <bbf-fast:noise-margin>
+                        <bbf-fast:target-noise-margin>60</bbf-fast:target-noise-margin>
+                      </bbf-fast:noise-margin>
+                    </bbf-fast:downstream>
+                    <bbf-fast:upstream>
+                      <bbf-fast:noise-margin>
+                        <bbf-fast:target-noise-margin>60</bbf-fast:target-noise-margin>
+                      </bbf-fast:noise-margin>
+                    </bbf-fast:upstream>
+                  </bbf-fast:noise-margin-profile>
+                  <!-- Fast Rate Adaptation Profile -->
+                  <bbf-fast:fast-rate-adaptation-profile>
+                    <bbf-fast:name>fast-rate-adaptation-profile-demo</bbf-fast:name>
+                    <bbf-fast:downstream>
+                      <bbf-fast:time-window>12</bbf-fast:time-window>
+                      <bbf-fast:minimum-degraded-tones>100</bbf-fast:minimum-degraded-tones>
+                      <bbf-fast:uncorrectable-dtu>1023</bbf-fast:uncorrectable-dtu>
+                      <bbf-fast:vendor-discretionary-fra-triggering-criteria>false</bbf-fast:vendor-discretionary-fra-triggering-criteria>
+                    </bbf-fast:downstream>
+                    <bbf-fast:upstream>
+                      <bbf-fast:time-window>1</bbf-fast:time-window>
+                      <bbf-fast:minimum-degraded-tones>1</bbf-fast:minimum-degraded-tones>
+                      <bbf-fast:uncorrectable-dtu>1</bbf-fast:uncorrectable-dtu>
+                      <bbf-fast:vendor-discretionary-fra-triggering-criteria>true</bbf-fast:vendor-discretionary-fra-triggering-criteria>
+                    </bbf-fast:upstream>
+                  </bbf-fast:fast-rate-adaptation-profile>
+                  <!-- Vectoring Profile -->
+                  <bbf-fast:vectoring-profile>
+                    <bbf-fast:name>vectoring-profile-demo</bbf-fast:name>
+                    <bbf-fast:downstream>
+                      <bbf-fast:fext-to-cancel-enable>true</bbf-fast:fext-to-cancel-enable>
+                    </bbf-fast:downstream>
+                    <bbf-fast:upstream>
+                      <bbf-fast:fext-to-cancel-enable>true</bbf-fast:fext-to-cancel-enable>
+                    </bbf-fast:upstream>
+                  </bbf-fast:vectoring-profile>
+                  <!-- Retrain Profile -->
+                  <bbf-fast:fast-retrain-policy-profile>
+                    <bbf-fast:name>fast-retrain-policy-profile-demo</bbf-fast:name>
+                    <bbf-fast:downstream>
+                      <bbf-fast:los-defect-persistency>20</bbf-fast:los-defect-persistency>
+                      <bbf-fast:lom-defect-persistency>20</bbf-fast:lom-defect-persistency>
+                      <bbf-fast:lor-defect-persistency>20</bbf-fast:lor-defect-persistency>
+                      <bbf-fast:reinit-time-threshold>31</bbf-fast:reinit-time-threshold>
+                      <bbf-fast:low-etr-threshold>30</bbf-fast:low-etr-threshold>
+                    </bbf-fast:downstream>
+                    <bbf-fast:upstream>
+                      <bbf-fast:los-defect-persistency>1</bbf-fast:los-defect-persistency>
+                      <bbf-fast:lom-defect-persistency>2</bbf-fast:lom-defect-persistency>
+                      <bbf-fast:lor-defect-persistency>1</bbf-fast:lor-defect-persistency>
+                      <bbf-fast:reinit-time-threshold>5</bbf-fast:reinit-time-threshold>
+                      <bbf-fast:low-etr-threshold>1</bbf-fast:low-etr-threshold>
+                    </bbf-fast:upstream>
+                  </bbf-fast:fast-retrain-policy-profile>
+                  <!-- Retransmission Profile -->
+                  <bbf-fast:retransmission-profile>
+                    <bbf-fast:name>retransmission-profile-demo</bbf-fast:name>
+                    <bbf-fast:downstream>
+                      <bbf-fast:maximum-delay>64</bbf-fast:maximum-delay>
+                      <bbf-fast:minimum-inp-against-shine>0</bbf-fast:minimum-inp-against-shine>
+                      <bbf-fast:shine-ratio>0</bbf-fast:shine-ratio>
+                      <bbf-fast:minimum-inp-against-rein>0</bbf-fast:minimum-inp-against-rein>
+                      <bbf-fast:rein-inter-arrival-time>hz-100</bbf-fast:rein-inter-arrival-time>
+                      <bbf-fast:minimum-rfec-nfec-ratio>2</bbf-fast:minimum-rfec-nfec-ratio>
+                    </bbf-fast:downstream>
+                  </bbf-fast:retransmission-profile>
+                </bbf-fast:quality>
+                <bbf-fast:thresholds>
+                  <!-- Line threshold profile -->
+                  <bbf-fast:line-threshold-profile>
+                    <bbf-fast:name>line-threshold-profile-demo</bbf-fast:name>
+                  </bbf-fast:line-threshold-profile>
+                  <!-- Channel threshold profile -->
+                  <bbf-fast:channel-threshold-profile>
+                    <bbf-fast:name>channel-threshold-profile-demo</bbf-fast:name>
+                  </bbf-fast:channel-threshold-profile>
+                  <!-- Threshold Template -->
+                  <bbf-fast:threshold-template>
+                    <bbf-fast:name>threshold-template-demo</bbf-fast:name>
+                    <bbf-fast:ftu-o-15min-line-threshold-profile>line-threshold-profile-demo</bbf-fast:ftu-o-15min-line-threshold-profile>
+                    <bbf-fast:ftu-o-24hr-line-threshold-profile>line-threshold-profile-demo</bbf-fast:ftu-o-24hr-line-threshold-profile>
+                    <bbf-fast:ftu-r-15min-line-threshold-profile>line-threshold-profile-demo</bbf-fast:ftu-r-15min-line-threshold-profile>
+                    <bbf-fast:ftu-r-24hr-line-threshold-profile>line-threshold-profile-demo</bbf-fast:ftu-r-24hr-line-threshold-profile>
+                    <bbf-fast:ftu-o-15min-channel-threshold-profile>channel-threshold-profile-demo</bbf-fast:ftu-o-15min-channel-threshold-profile>
+                    <bbf-fast:ftu-o-24hr-channel-threshold-profile>channel-threshold-profile-demo</bbf-fast:ftu-o-24hr-channel-threshold-profile>
+                    <bbf-fast:ftu-r-15min-channel-threshold-profile>channel-threshold-profile-demo</bbf-fast:ftu-r-15min-channel-threshold-profile>
+                    <bbf-fast:ftu-r-24hr-channel-threshold-profile>channel-threshold-profile-demo</bbf-fast:ftu-r-24hr-channel-threshold-profile>
+                  </bbf-fast:threshold-template>
+                </bbf-fast:thresholds>
+                <bbf-fast:vectors>
+                  <bbf-fast:line-config-vector>
+                    <bbf-fast:name>line-config-vector-demo</bbf-fast:name>
+                    <bbf-fast:time-division-duplexing-profile>time-division-duplexing-profile-demo</bbf-fast:time-division-duplexing-profile>
+                    <bbf-fast:downstream-data-rate-profile>downstream-data-rate-profile-demo</bbf-fast:downstream-data-rate-profile>
+                    <bbf-fast:upstream-data-rate-profile>upstream-data-rate-profile-demo</bbf-fast:upstream-data-rate-profile>
+                    <bbf-fast:low-power-data-rate-profile>low-power-data-rate-profile-demo</bbf-fast:low-power-data-rate-profile>
+                    <bbf-fast:line-spectrum-profile>line-spectrum-profile-demo</bbf-fast:line-spectrum-profile>
+                    <bbf-fast:upstream-power-back-off-profile>upstream-power-back-off-profile-demo</bbf-fast:upstream-power-back-off-profile>
+                    <bbf-fast:radio-frequency-interference-profile>radio-frequency-interference-profile-demo</bbf-fast:radio-frequency-interference-profile>
+                    <bbf-fast:noise-margin-profile>noise-margin-profile-demo</bbf-fast:noise-margin-profile>
+                    <bbf-fast:fast-rate-adaptation-profile>fast-rate-adaptation-profile-demo</bbf-fast:fast-rate-adaptation-profile>
+                    <bbf-fast:retransmission-profile>retransmission-profile-demo</bbf-fast:retransmission-profile>
+                    <bbf-fast:fast-retrain-policy-profile>fast-retrain-policy-profile-demo</bbf-fast:fast-retrain-policy-profile>
+                    <bbf-fast:vectoring-profile>vectoring-profile-demo</bbf-fast:vectoring-profile>
+                  </bbf-fast:line-config-vector>
+                </bbf-fast:vectors>
+              </bbf-fast:fast>
+            </root>
+          </device>
+        </managed-devices>
+      </network-manager>
+    </config>
+  </edit-config>
+</rpc>

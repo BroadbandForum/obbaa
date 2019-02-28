@@ -27,8 +27,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
-import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
 import org.broadband_forum.obbaa.dm.DeviceStateProvider;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Authentication;
@@ -53,19 +51,14 @@ public class DeviceManagerImplTest {
     private DeviceStateProvider m_deviceConnectionStateProvider;
     @Mock
     private DeviceStateProvider m_deviceAlignmentStateProvider;
-    @Mock
-    private NetconfConnectionManager m_cm;
-    @Mock
-    private List<NewDeviceInfo> m_newDevices;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        m_dm = new DeviceManagerImpl(m_cm);
+        m_dm = new DeviceManagerImpl(m_deviceDao);
         m_dm.setDeviceDao(m_deviceDao);
         m_dm.addDeviceStateProvider(m_deviceConnectionStateProvider);
         m_dm.addDeviceStateProvider(m_deviceAlignmentStateProvider);
-        when(m_cm.getNewDevices()).thenReturn(m_newDevices);
     }
 
     @Test
@@ -145,11 +138,6 @@ public class DeviceManagerImplTest {
     public void testupdateConfigAlignmentState() {
         m_dm.updateConfigAlignmentState("deviceA", "Aligned");
         verify(m_deviceDao).updateDeviceAlignmentState("deviceA", "Aligned");
-    }
-
-    @Test
-    public void testGetNewDevices() {
-        assertEquals(m_newDevices, m_dm.getNewDevices());
     }
 
     @Test

@@ -45,8 +45,8 @@ public class NbiSshNetconfAuthTest {
     @Test
     public void authenticate() throws Exception{
 
-        assertTrue(sshAuth.authenticate(clientInfoOk));
-        assertFalse(sshAuth.authenticate(clientInfoError));
-        assertFalse(sshAuth.authenticate(new DSAPublicKey()));
+        assertTrue(sshAuth.authenticate(clientInfoOk).isAuthenticated());
+        assertFalse(sshAuth.authenticate(clientInfoError).isAuthenticated());
+        assertFalse(sshAuth.authenticate(new DSAPublicKey()).isAuthenticated());
     }
 }

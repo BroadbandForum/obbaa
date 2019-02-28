@@ -37,6 +37,7 @@ import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -75,6 +76,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
+    @Ignore
     public void testDeviceNotPresentToDeleteDevice() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/data-missing-error-response.xml"), deleteDevice().responseToString());
@@ -82,6 +84,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
+    @Ignore
     public void testDeviceAlreadyExistsErrorDuringCreateDevice() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/ok-response.xml"), createDevice().responseToString());

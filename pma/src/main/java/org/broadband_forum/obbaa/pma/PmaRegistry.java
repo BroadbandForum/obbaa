@@ -17,7 +17,11 @@
 package org.broadband_forum.obbaa.pma;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 
 /**
  * <p>
@@ -36,7 +40,7 @@ public interface PmaRegistry {
      * @throws IllegalStateException    - If the device is not connected.
      * @throws ExecutionException       - If there are exceptions during execution.
      */
-    String executeNC(String deviceName, String netconfRequest) throws IllegalArgumentException,
+    Map<NetConfResponse, List<Notification>> executeNC(String deviceName, String netconfRequest) throws IllegalArgumentException,
             IllegalStateException, ExecutionException;
 
     /**
@@ -54,6 +58,7 @@ public interface PmaRegistry {
 
     /**
      * Executes a copy-config RPC from PMA into the connected device to get the device aligned.
+     *
      * @param deviceName - Key of the device.
      * @throws ExecutionException - If there were problems during the execution.
      */
@@ -61,14 +66,17 @@ public interface PmaRegistry {
 
     /**
      * API to invoke the edit-config delta alignment on the device.
+     *
      * @param deviceName - Key of the device.
      * @throws ExecutionException - If there were problems during the execution.
      */
     void align(String deviceName) throws ExecutionException;
 
     /**
-     * Reloads the YANG schema of the device from the files available in the configured YANG deploy directory.
-     * @return - a List of YANG module names that were loaded into the schema.
+     * API to get all the persist configuration of the specific device.
+     *
+     * @param deviceName - Key of the device.
+     * @throws ExecutionException - If there were problems during the execution.
      */
-    List<String> reloadDeviceModel();
+    NetConfResponse getAllPersistCfg(String deviceName) throws ExecutionException;
 }

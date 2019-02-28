@@ -42,4 +42,9 @@
     <suppress files="PmaAdapter.java" checks="IllegalCatch"/>
     <suppress files="TimerService.java" checks="IllegalCatch"/>
     <suppress files="AlignmentTimer.java" checks="IllegalCatch"/>
+    <suppress files="PmaServerImpl.java" checks="IllegalCatch"/>
+    <suppress files="AbstractBaaMojo.java" checks="IllegalCatch"/>
+    <suppress files="YangLibraryMojo.java" checks="IllegalCatch"/>
+    <suppress files="NcCompliantRequestExecutor.java" checks="IllegalCatch"/>
+    <suppress files="ProtocolTranslDevInterface.java" checks="IllegalCatch"/>
 </suppressions>

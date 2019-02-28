@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
+import org.broadband_forum.obbaa.pma.DeviceXmlStore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

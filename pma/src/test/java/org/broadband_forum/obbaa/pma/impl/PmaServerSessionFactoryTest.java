@@ -25,8 +25,9 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 
-import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
@@ -75,6 +76,8 @@ public class PmaServerSessionFactoryTest {
     private DeviceMgmt m_deviceMgmt;
     @Mock
     private AdapterContext m_adapterContext;
+    @Mock
+    DeviceAdapter m_deviceAdapter;
 
     @Before
     public void setUp() throws Exception {
@@ -82,14 +85,15 @@ public class PmaServerSessionFactoryTest {
         m_tempDir = Files.createTempDir();
         String deviceFileBaseDir = m_tempDir.getAbsolutePath();
         m_factory = new PmaServerSessionFactory(deviceFileBaseDir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaRegistry,
-                m_modelNodeHelperRegistry, m_subsystemRegistry, m_modelNodeDsmRegistry, m_adapterManager);
+                m_modelNodeDsmRegistry, m_adapterManager);
         when(m_dm.getDevice(m_deviceKey)).thenReturn(m_device);
         when(m_device.getDeviceManagement()).thenReturn(m_deviceMgmt);
-        when(m_device.getDeviceManagement().getDeviceType()).thenReturn("Adapter1");
+        when(m_device.getDeviceManagement().getDeviceType()).thenReturn("dpu");
         when(m_device.getDeviceManagement().getDeviceInterfaceVersion()).thenReturn("1.0");
         when(m_device.getDeviceManagement().getDeviceModel()).thenReturn("4LT");
         when(m_device.getDeviceManagement().getDeviceVendor()).thenReturn("Vendor1");
         when(m_adapterManager.getAdapterContext(any())).thenReturn(m_adapterContext);
+        when(m_adapterManager.getDeviceAdapter(any())).thenReturn(m_deviceAdapter);
     }
 
     @After
@@ -110,7 +114,7 @@ public class PmaServerSessionFactoryTest {
         String deviceFileBaseDir = m_tempFile.getAbsolutePath();
         try {
             new PmaServerSessionFactory(deviceFileBaseDir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaRegistry,
-                    m_modelNodeHelperRegistry, m_subsystemRegistry, m_modelNodeDsmRegistry, m_adapterManager).init();
+                    m_modelNodeDsmRegistry, m_adapterManager).init();
             fail("Expected an exception to be thrown here");
         }catch (Exception e){
             assertTrue(e instanceof RuntimeException);

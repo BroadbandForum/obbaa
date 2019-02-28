@@ -16,6 +16,8 @@
 
 package org.broadband_forum.obbaa.aggregator.api;
 
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
+
 /**
  * Implemented by NB Adapter for notification process.
  */
@@ -23,7 +25,7 @@ public interface NotificationProcessor {
     /**
      * Provide a unified API to PMA/DM for notification sending.
      *
-     * @param notificationMessage Notification message
+     * @param notification Notification
      */
-    void publishNotification(String notificationMessage) throws DispatchException;
+    void publishNotification(Notification notification) throws DispatchException;
 }

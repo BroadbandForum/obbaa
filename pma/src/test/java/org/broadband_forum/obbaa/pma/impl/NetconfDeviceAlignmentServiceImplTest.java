@@ -22,6 +22,7 @@ import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -38,15 +39,20 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
+import org.broadband_forum.obbaa.device.adapter.impl.NcCompliantAdapterDeviceInterface;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.dmyang.tx.TxService;
-import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcError;
+import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
 import org.junit.Assert;
@@ -113,9 +119,16 @@ public class NetconfDeviceAlignmentServiceImplTest {
     private EntityManager entityMgr;
     @Mock
     private EntityTransaction entityTx;
+    @Mock
+    private AdapterManager m_manager;
+    @Mock
+    private AdapterContext m_context;
+    private DeviceInterface m_deviceInterface;
+    @Mock
+    private NetConfResponse m_getResponse;
 
     @Before
-    public void setUp() throws ExecutionException, InterruptedException {
+    public void setUp() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
         MockitoAnnotations.initMocks(this);
         m_txService = new TxService();
         when(m_persistenceMgrUtil.getEntityDataStoreManager()).thenReturn(entityDSM);
@@ -128,6 +141,11 @@ public class NetconfDeviceAlignmentServiceImplTest {
         when(m_edit4.requestToString()).thenReturn(EDIT_REQ_STR);
         when(m_edit5.requestToString()).thenReturn(EDIT_REQ_STR);
         when(m_cc.requestToString()).thenReturn(CC_REQ_STR);
+        m_deviceInterface = mock(NcCompliantAdapterDeviceInterface.class);
+        when(m_manager.getAdapterContext(any())).thenReturn(m_context);
+        when(m_context.getDeviceInterface()).thenReturn(m_deviceInterface);
+        when(m_deviceInterface.forceAlign(any(), any())).thenReturn(new Pair<>(m_cc, m_responseFutureObject));
+        when(m_deviceInterface.align(any(), any())).thenReturn(m_responseFutureObject);
         when(m_ncm.executeNetconf(anyString(), anyObject())).thenReturn(m_responseFutureObject);
         m_okResponse = new NetConfResponse().setOk(true);
         m_okResponse.setMessageId("1");
@@ -136,7 +154,7 @@ public class NetconfDeviceAlignmentServiceImplTest {
         m_notOkResponse.addError(NetconfRpcError.getApplicationError("Something went wrong"));
         m_notOkResponse.setMessageId("1");
         when(m_notOkResponseFuture.get()).thenReturn(m_notOkResponse);
-        m_das = new NetconfDeviceAlignmentServiceImpl(m_dm, m_ncm);
+        m_das = new NetconfDeviceAlignmentServiceImpl(m_dm, m_ncm, m_manager);
         m_das.setTxService(m_txService);
         m_device1 = createDevice("device1");
         m_device2 = createDevice("device2");
@@ -144,10 +162,10 @@ public class NetconfDeviceAlignmentServiceImplTest {
         when(m_dm.getDevice("device2")).thenReturn(m_device2);
         m_das.deviceAdded(m_device1.getDeviceName());
         m_das.deviceAdded(m_device2.getDeviceName());
-        m_das.forceAlign(m_device1.getDeviceName(), mock(CopyConfigRequest.class));
+        m_das.forceAlign(m_device1, mock(NetConfResponse.class));
         verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName() , ALIGNED);
         updateAlignment(m_device1.getDeviceName(), ALIGNED);
-        m_das.forceAlign(m_device2.getDeviceName(), mock(CopyConfigRequest.class));
+        m_das.forceAlign(m_device2, mock(NetConfResponse.class));
         verify(m_dm).updateConfigAlignmentState(m_device2.getDeviceName() , ALIGNED);
         updateAlignment(m_device2.getDeviceName(), ALIGNED);
         m_das.queueEdit(m_device1.getDeviceName(), m_edit1);
@@ -187,32 +205,32 @@ public class NetconfDeviceAlignmentServiceImplTest {
         m_das.alignAllDevices();
         assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
         assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
-        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_edit1);
-        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit2);
-        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_edit3);
-        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit4);
+        verify(m_deviceInterface).align(m_device1, m_edit1);
+        verify(m_deviceInterface).align(m_device2, m_edit2);
+        verify(m_deviceInterface).align(m_device1, m_edit3);
+        verify(m_deviceInterface).align(m_device2, m_edit4);
     }
 
     @Test
-    public void makeSureErrorResponseClearsRestOfEdits() throws ExecutionException {
+    public void makeSureErrorResponseClearsRestOfEdits() throws ExecutionException, NetconfMessageBuilderException {
         makeDeviceError(m_edit1);
         assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
         assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
-        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_edit1);
-        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit2);
-        verify(m_ncm, never()).executeNetconf(m_device1.getDeviceName(), m_edit3);
-        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit4);
+        verify(m_deviceInterface).align(m_device1, m_edit1);
+        verify(m_deviceInterface).align(m_device2, m_edit2);
+        verify(m_deviceInterface, never()).align(m_device1, m_edit3);
+        verify(m_deviceInterface).align(m_device2, m_edit4);
     }
 
     @Test
-    public void makeSureTimedoutResponseClearsRestOfEdits() throws ExecutionException, InterruptedException {
+    public void makeSureTimedoutResponseClearsRestOfEdits() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
         makeDeviceTimeout(m_edit1);
         assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
         assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
-        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_edit1);
-        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit2);
-        verify(m_ncm, never()).executeNetconf(m_device1.getDeviceName(), m_edit3);
-        verify(m_ncm).executeNetconf(m_device2.getDeviceName(), m_edit4);
+        verify(m_deviceInterface).align(m_device1, m_edit1);
+        verify(m_deviceInterface).align(m_device2, m_edit2);
+        verify(m_deviceInterface, never()).align(m_device1, m_edit3);
+        verify(m_deviceInterface).align(m_device2, m_edit4);
     }
 
     @Test
@@ -237,7 +255,7 @@ public class NetconfDeviceAlignmentServiceImplTest {
     }
 
     @Test
-    public void testErrorDeviceState() throws ExecutionException {
+    public void testErrorDeviceState() throws ExecutionException, NetconfMessageBuilderException {
         makeDeviceError(m_edit1);
         String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
             "  <edit-config>\n" +
@@ -262,7 +280,7 @@ public class NetconfDeviceAlignmentServiceImplTest {
     }
 
     @Test
-    public void testErrorDeviceStateDueToTimeout() throws ExecutionException, InterruptedException {
+    public void testErrorDeviceStateDueToTimeout() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
         makeDeviceTimeout(m_edit1);
         String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
             "  <edit-config>\n" +
@@ -280,7 +298,7 @@ public class NetconfDeviceAlignmentServiceImplTest {
     }
 
     @Test
-    public void makeSureEditsAreNotQueuedAfterError() throws ExecutionException {
+    public void makeSureEditsAreNotQueuedAfterError() throws ExecutionException, NetconfMessageBuilderException {
         makeDeviceError(m_edit1);
         updateAlignment(m_device1.getDeviceName(),IN_ERROR);
         m_das.queueEdit(m_device1.getDeviceName(), m_edit5);
@@ -289,17 +307,17 @@ public class NetconfDeviceAlignmentServiceImplTest {
     }
 
     @Test
-    public void testFullResyncExecutesCopyConfig() throws ExecutionException {
-        m_das.forceAlign(m_device1.getDeviceName(), m_cc);
-        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_cc);
+    public void testFullResyncExecutesCopyConfig() throws ExecutionException, NetconfMessageBuilderException {
+        m_das.forceAlign(m_device1, m_getResponse);
+        verify(m_deviceInterface).forceAlign(m_device1, m_getResponse);
         assertEquals("Aligned", m_das.getAlignmentState(m_device1.getDeviceName()));
     }
 
     @Test
-    public void testFullResyncError() throws ExecutionException {
-        makeDeviceError(m_cc);
-        m_das.forceAlign(m_device1.getDeviceName(), m_cc);
-        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_cc);
+    public void testFullResyncError() throws ExecutionException, NetconfMessageBuilderException {
+        makeDeviceError(null);
+        m_das.forceAlign(m_device1, m_getResponse);
+        verify(m_deviceInterface).forceAlign(m_device1, m_getResponse);
 
         String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
             "  <copy-config>\n" +
@@ -326,10 +344,10 @@ public class NetconfDeviceAlignmentServiceImplTest {
     }
 
     @Test
-    public void testFullResyncTimeout() throws ExecutionException, InterruptedException {
-        makeDeviceTimeout(m_cc);
-        m_das.forceAlign(m_device1.getDeviceName(), m_cc);
-        verify(m_ncm).executeNetconf(m_device1.getDeviceName(), m_cc);
+    public void testFullResyncTimeout() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
+        makeDeviceTimeout(null);
+        m_das.forceAlign(m_device1, m_getResponse);
+        verify(m_deviceInterface).forceAlign(m_device1, m_getResponse);
         String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
             "  <copy-config>\n" +
             "    <source>blah<source>\n" +
@@ -368,14 +386,16 @@ public class NetconfDeviceAlignmentServiceImplTest {
         assertFalse(m_das.getQueue().containsKey("deviceX"));
     }
 
-    private void makeDeviceTimeout(AbstractNetconfRequest request) throws ExecutionException, InterruptedException {
-        when(m_ncm.executeNetconf(m_device1.getDeviceName(), request)).thenReturn(m_notOkResponseFuture);
+    private void makeDeviceTimeout(EditConfigRequest request) throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
+        when(m_deviceInterface.forceAlign(m_device1, m_getResponse)).thenReturn(new Pair<>(m_cc ,m_notOkResponseFuture));
+        when(m_deviceInterface.align(m_device1, request)).thenReturn(m_notOkResponseFuture);
         when(m_notOkResponseFuture.get()).thenReturn(null);
         m_das.alignAllDevices();
     }
 
-    private void makeDeviceError(AbstractNetconfRequest request) throws ExecutionException {
-        when(m_ncm.executeNetconf(m_device1.getDeviceName(), request)).thenReturn(m_notOkResponseFuture);
+    private void makeDeviceError(EditConfigRequest request) throws ExecutionException, NetconfMessageBuilderException {
+        when(m_deviceInterface.forceAlign(m_device1, m_getResponse)).thenReturn(new Pair<>(m_cc ,m_notOkResponseFuture));
+        when(m_deviceInterface.align(m_device1, request)).thenReturn(m_notOkResponseFuture);
         m_das.alignAllDevices();
     }
 }

@@ -30,8 +30,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.pool2.BaseKeyedPooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
@@ -44,6 +42,8 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.CallHomeListenerComposite;
+import org.broadband_forum.obbaa.connectors.sbi.netconf.ConnectionListener;
+import org.broadband_forum.obbaa.connectors.sbi.netconf.LoggingFuture;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfTemplate;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
@@ -68,7 +68,6 @@ import org.broadband_forum.obbaa.netconf.api.transport.NetconfTransportOrder;
 import org.broadband_forum.obbaa.netconf.api.transport.NetconfTransportProtocol;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.client.ssh.auth.PasswordLoginProvider;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by kbhatk on 29/9/17.
@@ -85,6 +84,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     private static final int DUID_VALUE_START_INDEX = 5;
     private Map<Device, NetconfClientSession> m_callHomeSessions = new ConcurrentHashMap<>();
     private Map<String, NewDeviceInfo> m_newDeviceInfos = new ConcurrentHashMap<>();
+    private List<ConnectionListener> m_connectionListeners = new ArrayList<>();
 
 
     public NetconfConnectionManagerImpl(CallHomeListenerComposite callHomeListenerComposite,
@@ -112,14 +112,14 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     }
 
     public static void fillTransportDetails(Authentication authentication, NetconfClientConfigurationBuilder
-        configurationBuilder) {
+            configurationBuilder) {
         NetconfTransportOrder transportOrder = new NetconfTransportOrder();
         transportOrder.setTransportType(NetconfTransportProtocol.SSH.name());
         transportOrder.setServerSocketAddress(new InetSocketAddress(authentication.getAddress(), Integer.parseInt(authentication
-            .getManagementPort())));
+                .getManagementPort())));
         configurationBuilder.setNetconfLoginProvider(new PasswordLoginProvider(authentication.getUsername(),
-            authentication
-                .getPassword()));
+                authentication
+                        .getPassword()));
         try {
             configurationBuilder.setTransport(NetconfTransportFactory.makeNetconfTransport(transportOrder));
         } catch (NetconfConfigurationBuilderException e) {
@@ -169,10 +169,13 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
 
     private NetconfClientSession createSessionToDevice(Device device) {
         try {
-            NetconfClientSession session = m_dispatcher.createClient(getClientConfig(device)).get();
-            if (session != null) {
-                LOGGER.info(String.format("Connected to device %s", device));
-                return session;
+            if (device.getDeviceManagement().isNetconf()) {
+                NetconfClientSession session = m_dispatcher.createClient(getClientConfig(device)).get();
+                if (session != null) {
+                    LOGGER.info(String.format("Connected to device %s", device));
+                    notifyDeviceConnected(device, session);
+                    return session;
+                }
             }
         } catch (NetconfClientDispatcherException | InterruptedException | ExecutionException e) {
             LOGGER.debug(String.format("Could not setup connection to device %s", device), e);
@@ -180,18 +183,30 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         return null;
     }
 
+    private void notifyDeviceConnected(Device device, NetconfClientSession session) {
+        for (ConnectionListener connectionListener : m_connectionListeners) {
+            connectionListener.deviceConnected(device, session);
+        }
+    }
+
+    private void notifyDeviceDisconnected(Device device, NetconfClientSession session) {
+        for (ConnectionListener connectionListener : m_connectionListeners) {
+            connectionListener.deviceDisConnected(device, session);
+        }
+    }
+
     private NetconfClientConfiguration getClientConfig(Device device) {
         try {
             NetconfClientConfigurationBuilder builder = NetconfClientConfigurationBuilder
-                .createDefaultNcClientBuilder();
+                    .createDefaultNcClientBuilder();
             builder.addCapability(NetconfResources.NETCONF_BASE_CAP_1_0);
             Authentication authentication = device.getDeviceManagement().getDeviceConnection()
-                .getPasswordAuth().getAuthentication();
+                    .getPasswordAuth().getAuthentication();
             fillTransportDetails(authentication, builder);
             return builder.build();
         } catch (NetconfConfigurationBuilderException | UnknownHostException e) {
             throw new RuntimeException(String.format("Error while preparing configuration to connect to the device %s",
-                device), e);
+                    device), e);
         }
     }
 
@@ -201,7 +216,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
 
     @Override
     public Future<NetConfResponse> executeNetconf(Device device, AbstractNetconfRequest request)
-        throws IllegalStateException, ExecutionException {
+            throws IllegalStateException, ExecutionException {
         return executeWithSession(device, session -> {
             try {
                 LOGGER.info(String.format("Sending RPC to device %s RPC %s", device, request.requestToString()));
@@ -214,14 +229,14 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
 
     @Override
     public Future<NetConfResponse> executeNetconf(String deviceName, AbstractNetconfRequest request) throws
-        IllegalStateException,
-        ExecutionException {
+            IllegalStateException,
+            ExecutionException {
         return executeNetconf(m_deviceDao.getDeviceByName(deviceName), request);
     }
 
     @Override
     public <RT> RT executeWithSession(Device device, NetconfTemplate<RT> netconfTemplate)
-        throws IllegalStateException, ExecutionException {
+            throws IllegalStateException, ExecutionException {
         //Since this is a public API from connection manager, we do not want to allow creation of connection to a
         // "non-managed" device here.
         if (!isConnected(device)) {
@@ -247,8 +262,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     }
 
     @Override
-    public ConnectionState getConnectionState(String deviceName) {
-        Device device = m_deviceDao.getDeviceByName(deviceName);
+    public ConnectionState getConnectionState(Device device) {
         ConnectionState connectionState = new ConnectionState();
         if (isConnected(device)) {
             connectionState.setConnected(true);
@@ -278,6 +292,16 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         }
     }
 
+    @Override
+    public void registerDeviceConnectionListener(ConnectionListener connectionListener) {
+        m_connectionListeners.add(connectionListener);
+    }
+
+    @Override
+    public void unregisterDeviceConnectionListener(ConnectionListener connectionListener) {
+        m_connectionListeners.remove(connectionListener);
+    }
+
     private Future<NetConfResponse> wrapLogFuture(Device device, Future<NetConfResponse> future) {
         return new LoggingFuture(device, future);
     }
@@ -300,7 +324,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
                 if (callHomeDevice == null) {
                     //its a new device that is not configured
                     LOGGER.info(String.format("An un-managed device with duid : %s is calling home from ip : %s port : %s",
-                        duid, ipAddr, port));
+                            duid, ipAddr, port));
                     m_newDeviceInfos.put(duid, new NewDeviceInfo(duid, deviceSession));
                     deviceSession.addSessionListener(sessionId -> {
                         m_newDeviceInfos.remove(duid);
@@ -325,12 +349,16 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
 
     private void addCallHomeSession(Device callHomeDeviceInfo, NetconfClientSession deviceSession) {
         m_callHomeSessions.put(callHomeDeviceInfo, deviceSession);
-        deviceSession.addSessionListener(i -> m_connPool.clear(callHomeDeviceInfo));
+        notifyDeviceConnected(callHomeDeviceInfo, deviceSession);
+        deviceSession.addSessionListener(i -> {
+            m_connPool.clear(callHomeDeviceInfo);
+            notifyDeviceDisconnected(callHomeDeviceInfo, deviceSession);
+        });
     }
 
     public String extractDuid(X509Certificate x509Certificate, String ipAddress, Integer port) {
         LOGGER.debug(String.format("Retrieving DUID of call home device from Certificate : %s", x509Certificate
-            .getSubjectDN()));
+                .getSubjectDN()));
         X500Name x500Name = getX500Name(x509Certificate);
         String commonName = getSubjectCN(x500Name);
 
@@ -351,11 +379,11 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         RDN[] rdns = x500Name.getRDNs(BCStyle.SERIALNUMBER);
         if (rdns.length > 0) {
             LOGGER.debug(String.format(" The certificate of the device IP: %s , port: %s contains serialnumber",
-                ipAddress, port));
+                    ipAddress, port));
             return true;
         }
         LOGGER.debug(String.format(" The certificate of the device IP: %s , port: %s does not contain serialnumber",
-            ipAddress, port));
+                ipAddress, port));
         return false;
     }
 
@@ -378,7 +406,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     }
 
     private class DeviceMetaNetconfClientSessionKeyedPooledObjectFactory
-        extends BaseKeyedPooledObjectFactory<Device, NetconfClientSession> {
+            extends BaseKeyedPooledObjectFactory<Device, NetconfClientSession> {
         Set<Device> m_allKeys = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         @Override
@@ -389,7 +417,10 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
             }
             NetconfClientSession sessionToDevice = createSessionToDevice(key);
             if (sessionToDevice != null) {
-                sessionToDevice.addSessionListener(i -> m_connPool.clear(key));
+                sessionToDevice.addSessionListener(i -> {
+                    m_connPool.clear(key);
+                    notifyDeviceDisconnected(key, sessionToDevice);
+                });
             }
             return sessionToDevice;
         }
@@ -420,49 +451,6 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
 
         public Set<Device> getAllKeys() {
             return m_allKeys;
-        }
-    }
-
-    public class LoggingFuture implements Future<NetConfResponse> {
-        private final Future<NetConfResponse> m_innerFuture;
-        private final Device m_device;
-
-        public LoggingFuture(Device device, Future<NetConfResponse> future) {
-            m_device = device;
-            m_innerFuture = future;
-        }
-
-        @Override
-        public boolean cancel(boolean bool) {
-            return m_innerFuture.cancel(bool);
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return m_innerFuture.isCancelled();
-        }
-
-        @Override
-        public boolean isDone() {
-            return m_innerFuture.isDone();
-        }
-
-        @Override
-        public NetConfResponse get() throws InterruptedException, ExecutionException {
-            NetConfResponse netConfResponse = m_innerFuture.get();
-            LOGGER.info(String.format("Got response for device %s, response %s", m_device, netConfResponse
-                .responseToString()));
-            return netConfResponse;
-        }
-
-        @Override
-        public NetConfResponse get(long value, @NotNull TimeUnit timeUnit) throws InterruptedException,
-            ExecutionException,
-            TimeoutException {
-            NetConfResponse netConfResponse = m_innerFuture.get(value, timeUnit);
-            LOGGER.info(String.format("Got response for device %s, response %s", m_device, netConfResponse
-                .responseToString()));
-            return netConfResponse;
         }
     }
 }

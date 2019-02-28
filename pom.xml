@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>baa-root-pom</artifactId>
-    <version>1.1.0</version>
+    <version>2.0.0</version>
     <packaging>pom</packaging>
     <name>Broadband Access Abstraction</name>
 
@@ -36,6 +36,8 @@
         <module>nbi-adapter</module>
         <module>baa-feature</module>
         <module>baa-dist</module>
+        <module>library-consult</module>
+        <module>baa-maven-plugin</module>
     </modules>
 
     <properties>
@@ -43,8 +45,8 @@
         <java.source.version>1.8</java.source.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
         <docker-maven-plugin.version>0.4.3</docker-maven-plugin.version>
-        <netconf-lib.version>1.1.0</netconf-lib.version>
-        <netconf-fwk.version>1.1.0</netconf-fwk.version>
+        <netconf-lib.version>2.0.0</netconf-lib.version>
+        <netconf-fwk.version>2.0.0</netconf-fwk.version>
         <maven.install-plugin.version>2.4</maven.install-plugin.version>
         <maven-dependency-plugin.version>3.0.0</maven-dependency-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
@@ -56,19 +58,20 @@
         <mapdb.version>3.0.3</mapdb.version>
         <springfox-swagger-ui.version>2.7.0</springfox-swagger-ui.version>
         <commons-io.version>2.5</commons-io.version>
+        <commons.lang.version>2.6</commons.lang.version>
         <spring-boot.version>1.2.5.RELEASE</spring-boot.version>
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
         <jackson-jaxrs.version>1.9.13</jackson-jaxrs.version>
         <commons-pool2.version>2.4.2</commons-pool2.version>
         <log4j.version>1.2.16</log4j.version>
         <gson.version>2.2.2</gson.version>
-        <guava.version>22.0</guava.version>
+        <guava.version>23.6.1-jre</guava.version>
         <junit.version>4.12</junit.version>
         <xmlunit.version>1.5</xmlunit.version>
         <mockito-all.version>1.10.19</mockito-all.version>
         <netty.version>4.1.16.Final</netty.version>
         <pax-jdbc.version>1.1.0</pax-jdbc.version>
-        <opendaylight-yangtools.version>1.2.1</opendaylight-yangtools.version>
+        <opendaylight-yangtools.version>2.0.11</opendaylight-yangtools.version>
         <transaction.version>1.3.0</transaction.version>
         <transaction-api.version>1.2</transaction-api.version>
         <jpa.version>2.3.0</jpa.version>
@@ -101,6 +104,17 @@
         <org.apache.servicemix.specs.stax-api-1.2.version>2.5.0</org.apache.servicemix.specs.stax-api-1.2.version>
         <org.apache.servicemix.bundles.xmlbeans.version>2.6.0_2</org.apache.servicemix.bundles.xmlbeans.version>
         <xmlbeans.version>2.6.0</xmlbeans.version>
+        <maven.plugin.api.version>2.0</maven.plugin.api.version>
+        <maven.project.version>2.0</maven.project.version>
+        <plexus.classworlds.version>2.4.1</plexus.classworlds.version>
+        <junit.addons.version>1.4</junit.addons.version>
+        <maven.plugin.annotations.version>3.2</maven.plugin.annotations.version>
+        <maven-plugin-plugin.version>3.5</maven-plugin-plugin.version>
+        <maven-sonar-plugin.version>3.6.0.1398</maven-sonar-plugin.version>
+        <jacoco.maven.plugin>0.7.7.201606060606</jacoco.maven.plugin>
+        <jacoco.agent.version>0.7.7.201606060606</jacoco.agent.version>
+        <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     </properties>
 
     <dependencyManagement>
@@ -142,7 +156,6 @@
                 <scope>test</scope>
                 <version>${netconf-fwk.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger2</artifactId>
@@ -162,6 +175,11 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons.lang.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -293,6 +311,45 @@
                 <artifactId>xmlbeans</artifactId>
                 <version>${xmlbeans.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-plugin-api</artifactId>
+                <version>${maven.plugin.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-project</artifactId>
+                <version>${maven.project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-classworlds</artifactId>
+                <version>${plexus.classworlds.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.plugin-tools</groupId>
+                <artifactId>maven-plugin-tools-java</artifactId>
+                <version>${maven.plugin.annotations.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.plugin-tools</groupId>
+                <artifactId>maven-plugin-annotations</artifactId>
+                <version>${maven.plugin.annotations.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.maven.plugin}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>org.jacoco.agent</artifactId>
+                <version>${jacoco.agent.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -345,6 +402,11 @@
                     <artifactId>karaf-maven-plugin</artifactId>
                     <version>${karaf.maven.plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${maven-sonar-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -396,8 +458,51 @@
                     </supportedProjectTypes>
                 </configuration>
             </plugin>
+        <plugin>
+            <artifactId>maven-plugin-plugin</artifactId>
+            <version>${maven-plugin-plugin.version}</version>
+        </plugin>
         </plugins>
     </build>
+    <profiles>
+    <profile>
+        <id>jacoco</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.maven.plugin}</version>
+                    <configuration>
+                        <includes>
+                            <include>org.broadband_forum.obbaa.*</include>
+                        </includes>
+                        <destFile>${sonar.jacoco.reportPath}</destFile>
+                        <propertyName>jacoco.agent.argLine</propertyName>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <argLine>-Xms512m -Xmx3072m
+                            -XX:MaxPermSize=512m
+                            -XX:PermSize=256m
+                            -XX:-UseSplitVerifier
+                            ${jacoco.agent.argLine}</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+    </profiles>
     <repositories>
         <repository>
             <id>opendaylight-release</id>
