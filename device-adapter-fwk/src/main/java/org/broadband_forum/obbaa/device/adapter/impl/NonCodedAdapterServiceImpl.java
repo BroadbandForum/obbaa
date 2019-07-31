@@ -17,6 +17,7 @@
 package org.broadband_forum.obbaa.device.adapter.impl;
 
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.ADAPTER_XML_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_CONFIG_XML_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_DEVIATIONS_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_FEATURES_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.MODEL;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.CommonFileUtil;
@@ -55,29 +57,33 @@ public class NonCodedAdapterServiceImpl implements NonCodedAdapterService {
 
     @Override
     public void deployAdapter(String deviceAdapterId, SubSystem subSystem, Class klass, String stagingArea,
-                              DeviceInterface configAlign) throws Exception {
+                              DeviceInterface deviceInterface) throws Exception {
         String destDirname = stagingArea + File.separator + deviceAdapterId;
         String deviceXmlPath = destDirname + ADAPTER_XML_PATH;
         String yangXmlPath = destDirname + File.separator + YANG_LIB_FILE;
         String supportedFeaturesPath = destDirname + DEFAULT_FEATURES_PATH;
         String supportedDeviationPath = destDirname + DEFAULT_DEVIATIONS_PATH;
+        String defaultXml = destDirname + DEFAULT_CONFIG_XML_PATH;
         File deviceFile = new File(deviceXmlPath);
         List<String> modulePaths = new ArrayList<>();
         Map<URL, InputStream> moduleStream = CommonFileUtil.buildModuleStreamMap(destDirname, modulePaths);
         VariantFileUtils.copyYangLibFiles(yangXmlPath, destDirname + SLASH + MODEL);
         try (InputStream deviceXmlInputStream = new FileInputStream(deviceFile);
              InputStream supportedFeaturesInputStream = new FileInputStream(supportedFeaturesPath);
-             InputStream supportedDeviationInputStream = new FileInputStream(supportedDeviationPath)) {
+             InputStream supportedDeviationInputStream = new FileInputStream(supportedDeviationPath);
+             InputStream defaultXmlStream = new FileInputStream(defaultXml)) {
             Set<QName> features = getAdapterFeaturesFromFile(supportedFeaturesInputStream);
             Map<QName, Set<QName>> deviations = getAdapterDeviationsFromFile(supportedDeviationInputStream);
+            byte[] defaultXmlbytes = IOUtils.toByteArray(defaultXmlStream);
             DeviceAdapter adapter = AdapterBuilder.createAdapterBuilder()
                     .setDeviceXml(deviceXmlInputStream)
                     .setModuleStream(moduleStream)
                     .setSupportedFeatures(features)
                     .setSupportedDeviations(deviations)
+                    .setDefaultxmlBytes(defaultXmlbytes)
                     .build();
             adapter.init();
-            m_manager.deploy(adapter, subSystem, klass, configAlign);
+            m_manager.deploy(adapter, subSystem, klass, deviceInterface);
         }
     }
 

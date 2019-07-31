@@ -34,6 +34,7 @@ public class AdapterBuilder {
     private DeviceAdapterId m_deviceAdapterId;
     private Set<QName> m_supportedFeatures;
     private Map<QName, Set<QName>> m_supportedDeviations;
+    private byte[] m_defaultXmlBytes;
 
     public AdapterBuilder() {
     }
@@ -71,11 +72,17 @@ public class AdapterBuilder {
         if (m_deviceAdapterId == null) {
             m_deviceAdapterId = new DeviceAdapterId();
         }
-        return new DeviceAdapter(m_deviceAdapterId, m_caps, m_deviceXml, m_supportedFeatures, m_supportedDeviations, m_moduleStream);
+        return new DeviceAdapter(m_deviceAdapterId, m_caps, m_deviceXml, m_supportedFeatures, m_supportedDeviations,
+                m_moduleStream, m_defaultXmlBytes);
     }
 
     public AdapterBuilder setSupportedDeviations(Map<QName, Set<QName>> supportedDevations) {
         this.m_supportedDeviations = supportedDevations;
+        return this;
+    }
+
+    public AdapterBuilder setDefaultxmlBytes(byte[] defaultXmlBytes) {
+        this.m_defaultXmlBytes = defaultXmlBytes;
         return this;
     }
 }

@@ -23,17 +23,24 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>adapters</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </parent>
 
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>protocol-translation-example</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>protocol-transl-sample-adapter</module>
         <module>protocol-transl-feature</module>
     </modules>
+
+    <properties>
+        <adapterType>DPU</adapterType>
+        <adapterModel>protocoltls</adapterModel>
+        <adapterVendor>sample</adapterVendor>
+        <adapterVersion>1.0</adapterVersion>
+    </properties>
     
 </project>

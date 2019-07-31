@@ -134,8 +134,9 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
     }
 
     public void alignAllDevices() {
+        //align all devices is being used only in UTs, so make getResponse return null
         for (Map.Entry<String, List<EditConfigRequest>> queueEntry : m_queue.entrySet()) {
-            align(m_dm.getDevice(queueEntry.getKey()));
+            align(m_dm.getDevice(queueEntry.getKey()), null);
         }
     }
 
@@ -223,7 +224,7 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
     }
 
     @Override
-    public void align(Device device) {
+    public void align(Device device, NetConfResponse getConfigResponse) {
         String deviceName = device.getDeviceName();
         LOGGER.debug("Trying to flush changes to the device " + deviceName);
         WithSynchronousDeviceQueue alignTemplate = new WithSynchronousDeviceQueue<Void>() {
@@ -238,7 +239,7 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
                             LOGGER.debug(String.format("Trying to send edit %s to device %s",
                                     request.requestToString(), deviceName));
                         }
-                        Future<NetConfResponse> future = deviceInterface.align(device, request);
+                        Future<NetConfResponse> future = deviceInterface.align(device, request, getConfigResponse);
                         NetConfResponse response = future.get();
                         if (response == null || !response.isOk()) {
                             markDeviceInError(deviceName, queueForDevice, request.requestToString(), response);

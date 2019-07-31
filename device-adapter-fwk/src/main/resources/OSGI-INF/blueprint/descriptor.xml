@@ -21,16 +21,105 @@
     <jpa:enable />
     <tx:enable-annotations/>
     <reference id="ncConnectionMgr" interface="org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager" availability="mandatory"/>
+    <reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin" availability="mandatory"/>
+    <reference id="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry" availability="mandatory"/>
 
+    <bean id="osgiEDSM" class="org.broadband_forum.obbaa.netconf.alarm.persistence.jpa.AlarmOsgiEntityDataStoreManager"/>
+
+    <bean id="persistenceMgrUtil" class="org.broadband_forum.obbaa.netconf.persistence.jpa.OsgiPersistenceManagerUtil">
+        <property name="entityDataStoreManager" ref="osgiEDSM" />
+    </bean>
+    <bean id="modelNodeDSMRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDSMRegistryImpl"/>
     <bean id="lockService" class="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl"/>
 
-    <bean id="entityRegistry"
-          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistryImpl"/>
+    <bean id="entityRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistryImpl"/>
+
+    <bean id="notificationLogger" class="org.broadband_forum.obbaa.netconf.server.model.notification.NotificationLoggerImpl">
+        <argument ref="streamList" />
+    </bean>
+
+    <bean id="timerManager" class="org.broadband_forum.obbaa.device.adapter.impl.TimerMgrImpl"/>
+
+    <bean id="nbiNotificationsCounterInterceptor" class="org.broadband_forum.obbaa.netconf.stack.DefaultNcNotificationCounterService"/>
+
+    <bean id="netconfLogger" class="org.broadband_forum.obbaa.netconf.api.logger.DefaultNetconfLogger"/>
+
+    <bean id="streamList" class="org.broadband_forum.obbaa.netconf.server.model.notification.utils.StreamUtil"
+          factory-method="loadStreamList">
+        <argument value="/streams.xml"/>
+    </bean>
+
+    <bean id="notificationService" class="org.broadband_forum.obbaa.netconf.server.model.notification.NotificationServiceImpl">
+        <argument ref="streamList" />
+        <argument ref="notificationLogger"/>
+        <argument ref="timerManager"/>
+        <argument >
+            <bean class="java.util.concurrent.Executors" factory-method="newCachedThreadPool">
+            </bean>
+        </argument>
+        <argument ref="netconfLogger" />
+        <argument ref="nbiNotificationsCounterInterceptor" />
+    </bean>
+
+    <bean id="transactionService" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService">
+    </bean>
+
+    <bean id="modelNodeHelperRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistryImpl">
+        <argument ref="schemaRegistry"/>
+    </bean>
+
+    <bean id="rpcRequestHandlerRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.RpcRequestHandlerRegistryImpl"/>
+
+    <bean id="modelNodeHelperDeployer"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityModelNodeHelperDeployer">
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="schemaRegistry"/>
+        <argument ref="aggregatedDSM"/>
+        <argument ref="entityRegistry"/>
+        <argument ref="subsystemRegistry"/>
+    </bean>
+
+    <bean id="subsystemRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistryImpl"/>
+
+    <bean id="annotationBasedDSM"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.AnnotationBasedModelNodeDataStoreManager">
+        <argument ref="persistenceMgrUtil" />
+        <argument ref="entityRegistry" />
+        <argument ref="schemaRegistry" />
+        <argument ref="modelNodeHelperRegistry" />
+        <argument ref="subsystemRegistry"/>
+        <argument ref="dsmRegistry" />
+    </bean>
+
+    <bean id="internalAlarmService" class="org.broadband_forum.obbaa.netconf.alarm.service.DefaultInternalAlarmServiceImpl">
+        <argument ref="schemaRegistry" />
+        <argument ref="persistenceMgrUtil" />
+        <argument ref="annotationBasedDSM" />
+        <argument ref="notificationService" />
+        <argument ref="transactionService" />
+    </bean>
+
+    <bean id="alarmQueue" class="org.broadband_forum.obbaa.netconf.alarm.service.AlarmQueue">
+        <argument ref="internalAlarmService" />
+    </bean>
+
+    <bean id="alarmService" class="org.broadband_forum.obbaa.netconf.alarm.service.AlarmServiceImpl" init-method="init" destroy-method="close">
+        <argument ref="persistenceMgrUtil" />
+        <argument ref="alarmQueue" />
+    </bean>
+
+    <bean id="standardModelRegistrator" class="org.broadband_forum.obbaa.device.registrator.impl.StandardModelRegistrator">
+        <argument ref="notificationService" />
+        <argument ref="alarmService" />
+        <argument ref="schemaRegistry"/>
+    </bean>
 
     <bean id="adapterManager" class="org.broadband_forum.obbaa.device.adapter.impl.AdapterManagerImpl">
         <argument ref="aggregatedDSM"/>
         <argument ref="lockService"/>
         <argument ref="entityRegistry"/>
+        <argument ref="eventAdmin"/>
+        <argument ref="standardModelRegistrator" />
     </bean>
 
     <bean id="dsmRegistry"
@@ -40,6 +129,73 @@
         <argument ref="dsmRegistry"/>
     </bean>
 
+    <bean id="rootModelNodeAggregator" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.RootModelNodeAggregatorImpl">
+        <argument ref="schemaRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="aggregatedDSM"/>
+        <argument ref="subsystemRegistry"/>
+    </bean>
+    <bean id="dbMetaDao" class="org.broadband_forum.obbaa.dmyang.persistence.jpa.DbVersionDao">
+        <argument ref="persistenceMgrUtil"/>
+    </bean>
+    <bean id="dataStoreMetaProvider" class="org.broadband_forum.obbaa.dmyang.persistence.jpa.DefaultDataStoreMetaProvider">
+        <argument ref="dbMetaDao"/>
+    </bean>
+
+    <bean id="dmNetconfServer" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl">
+        <argument ref="schemaRegistry"/>
+        <property name="rpcRequestHandlerRegistry" ref="rpcRequestHandlerRegistry"/>
+        <property name="runningDataStore" ref="runningDataStore"/>
+    </bean>
+
+    <bean id="runningDataStore" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.DataStore">
+        <argument value="RUNNING"/>
+        <argument ref="rootModelNodeAggregator"/>
+        <argument ref="subsystemRegistry"/>
+        <argument ref="dataStoreValidator"/>
+        <argument ref="transactionService"/>
+        <property name="notificationService" ref="notificationService"/>
+        <property name="namespaceContext" ref="schemaRegistry"/>
+        <property name="nbiNotificationHelper" ref="nbiNotificationHelper"/>
+    </bean>
+
+    <bean id="jpaModelServiceDeployer" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service.ModelServiceDeployerImpl">
+        <argument ref="modelNodeDSMRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="subsystemRegistry"/>
+        <argument ref="rpcRequestHandlerRegistry"/>
+        <argument ref="modelNodeHelperDeployer"/>
+        <argument ref="schemaRegistry"/>
+        <argument ref="lockService"/>
+        <property name="rootModelNodeAggregator" ref="rootModelNodeAggregator"/>
+        <property name="entityRegistry" ref="entityRegistry"/>
+        <property name="dataStoreMetadataProvider" ref="dataStoreMetaProvider"/>
+        <property name="netconfServer" ref="dmNetconfServer"/>
+    </bean>
+
+
+    <bean id="nbiNotificationHelper" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NbiNotificationHelperImpl">
+    </bean>
+
+    <bean id="dataStoreValidator"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.DataStoreValidatorImpl">
+        <argument ref="schemaRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="aggregatedDSM"/>
+        <argument ref="dataStoreIntegrityService"/>
+        <argument ref="expressionValidator"/>
+    </bean>
+    <bean id="expressionValidator"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.util.DSExpressionValidator">
+        <argument ref="schemaRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="subsystemRegistry"/>
+    </bean>
+
+    <bean id="dataStoreIntegrityService"
+          class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.constraints.validation.service.DataStoreIntegrityServiceImpl">
+        <argument ref="dmNetconfServer"/>
+    </bean>
     <bean id="nonCodedAdapterService" class="org.broadband_forum.obbaa.device.adapter.impl.NonCodedAdapterServiceImpl">
         <argument ref="adapterManager"/>
     </bean>
@@ -55,5 +211,10 @@
     <service ref="aggregatedDSM" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager"/>
     <service ref="adapterManager" interface="org.broadband_forum.obbaa.device.adapter.AdapterManager"/>
     <service ref="nonCodedConfigAlign" interface="org.broadband_forum.obbaa.device.adapter.DeviceInterface"/>
-
+    <service ref="timerManager" interface="org.broadband_forum.obbaa.netconf.server.model.notification.TimerManager"/>
+    <service ref="notificationService" interface="org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService"/>
+    <service ref="rpcRequestHandlerRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.RpcRequestHandlerRegistry"/>
+    <service ref="jpaModelServiceDeployer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service.ModelServiceDeployer"/>
+    <service ref="modelNodeHelperRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry" />
+    <service ref="subsystemRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry" />
 </blueprint>

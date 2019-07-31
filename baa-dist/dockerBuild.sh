@@ -21,18 +21,18 @@ if [ "${bamboo_shortPlanName}" == "OBBAA-Develop" ]
 then
     echo "current branch is ${bamboo_repository_git_branch}, proceeding to push the docker image to artifactory"
     docker login -u${bamboo_artifactory_userName} -p${bamboo_artifactory_password} obbaa-develop.registry.broadband-forum.org
-    docker build -t obbaa-develop.registry.broadband-forum.org/baa:${bamboo_repository_git_branch}_${bamboo_buildNumber} .
-    docker push obbaa-develop.registry.broadband-forum.org/baa:${bamboo_repository_git_branch}_${bamboo_buildNumber}
-    docker tag obbaa-develop.registry.broadband-forum.org/baa:${bamboo_repository_git_branch}_${bamboo_buildNumber} obbaa-develop.registry.broadband-forum.org/baa:latest
+    docker build -t obbaa-develop.registry.broadband-forum.org/baa:${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber} .
+    docker push obbaa-develop.registry.broadband-forum.org/baa:${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber}
+    docker tag obbaa-develop.registry.broadband-forum.org/baa:${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber} obbaa-develop.registry.broadband-forum.org/baa:latest
     docker push obbaa-develop.registry.broadband-forum.org/baa:latest
 
 elif [ "${bamboo_shortPlanName}" == "OBBAA-master" ]
 then
     echo "current branch is ${bamboo_repository_git_branch}, proceeding to push the docker image to artifactory"
     docker login -u${bamboo_artifactory_userName} -p${bamboo_artifactory_password} obbaa-master.registry.broadband-forum.org
-    docker build -t obbaa-master.registry.broadband-forum.org/baa:${bamboo_repository_git_branch}_${bamboo_buildNumber} .
-    docker push obbaa-master.registry.broadband-forum.org/baa:${bamboo_repository_git_branch}_${bamboo_buildNumber}
-    docker tag obbaa-master.registry.broadband-forum.org/baa:${bamboo_repository_git_branch}_${bamboo_buildNumber} obbaa-master.registry.broadband-forum.org/baa:latest
+    docker build -t obbaa-master.registry.broadband-forum.org/baa:${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber} .
+    docker push obbaa-master.registry.broadband-forum.org/baa:${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber}
+    docker tag obbaa-master.registry.broadband-forum.org/baa:${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber} obbaa-master.registry.broadband-forum.org/baa:latest
     docker push obbaa-master.registry.broadband-forum.org/baa:latest
 else
     docker build -t obbaa-develop.registry.broadband-forum.org/baa:${bamboo_shortPlanName}_${bamboo_buildNumber} .

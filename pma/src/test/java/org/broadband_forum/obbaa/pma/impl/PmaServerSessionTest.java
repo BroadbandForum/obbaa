@@ -16,12 +16,12 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +34,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
 import org.junit.Before;
@@ -44,6 +45,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 public class PmaServerSessionTest {
     public static final String EDIT_REQ = "<rpc message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
@@ -101,25 +103,38 @@ public class PmaServerSessionTest {
     }
 
     @Test
-    public void testPmaSessionContactsPmaServer() {
+    public void testPmaSessionContactsPmaServer() throws NetconfMessageBuilderException, IOException, SAXException {
         m_session.executeNC(EDIT_REQ);
         verify(m_server).executeNetconf(m_reqCaptor.capture());
-        assertEquals(EDIT_REQ, m_reqCaptor.getValue().requestToString());
+        //assertEquals(EDIT_REQ, m_reqCaptor.getValue().requestToString());
+        TestUtil.assertXMLEquals(DocumentUtils.stringToDocument(EDIT_REQ).getDocumentElement(),
+                DocumentUtils.stringToDocument(m_reqCaptor.getValue().requestToString()).getDocumentElement());
     }
 
 
     @Test
-    public void testFullResyncSendsCC() {
+    public void testFullResyncSendsCC() throws NetconfMessageBuilderException, IOException, SAXException {
         m_session.forceAlign();
 
         verify(m_server).executeNetconf(m_reqCaptor.capture());
-        assertEquals("<rpc message-id=\"internal\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+//        assertEquals("<rpc message-id=\"internal\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+//                "  <get-config>\n" +
+//                "    <source>\n" +
+//                "      <running/>\n" +
+//                "    </source>\n" +
+//                "  </get-config>\n" +
+//                "</rpc>\n", m_reqCaptor.getAllValues().get(0).requestToString());
+
+        String expect = "<rpc message-id=\"internal\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
                 "  <get-config>\n" +
                 "    <source>\n" +
                 "      <running/>\n" +
                 "    </source>\n" +
                 "  </get-config>\n" +
-                "</rpc>\n", m_reqCaptor.getAllValues().get(0).requestToString());
+                "</rpc>\n";
+
+        TestUtil.assertXMLEquals(DocumentUtils.stringToDocument(expect).getDocumentElement(),
+                DocumentUtils.stringToDocument(m_reqCaptor.getAllValues().get(0).requestToString()).getDocumentElement());
         verify(m_das).forceAlign(any(Device.class), any(NetConfResponse.class));
     }
 }

@@ -46,6 +46,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcError;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorSeverity;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorTag;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorType;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
@@ -80,10 +81,11 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
     }
 
     @Override
-    public Future<NetConfResponse> align(Device device, EditConfigRequest request) throws ExecutionException {
+    public Future<NetConfResponse> align(Device device, EditConfigRequest request, NetConfResponse getConfigResponse)
+            throws ExecutionException {
         if (isConnected(device)) {
-            return executeNetconf(device);
-        } else  {
+            return executeRequest(device);
+        } else {
             throw new IllegalStateException(String.format("Device not connected %s", device.getDeviceName()));
         }
     }
@@ -99,9 +101,9 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
             ccRequest.setTargetRunning();
             Document responseDocument = stringToDocument(OK_RESPONSE);
             final NetConfResponse testResponse = getNetconfResponse(responseDocument);
-            Future<NetConfResponse> responseFuture = new FutureNetconfReponse(testResponse);
+            Future<NetConfResponse> responseFuture = executeRequest(device);
             return new Pair<>(ccRequest, responseFuture);
-        } else  {
+        } else {
             throw new IllegalStateException(String.format("Device not connected %s", device.getDeviceName()));
         }
     }
@@ -114,8 +116,9 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
     @Override
     public void veto(Device device, EditConfigRequest request, Document dataStore) throws SubSystemValidationException {
         try {
-            String dataStoreString = DocumentUtils.documentToPrettyString(dataStore);
-            if ((StringUtils.countMatches(dataStoreString, "<interface>") > 3)) {
+            String dataStoreString = DocumentUtils.documentToPrettyString(dataStore.getDocumentElement());
+            if ((StringUtils.countMatches(dataStoreString, "<interface>") > 3)
+                   || (StringUtils.countMatches(dataStoreString, "<if:interface>") > 3)) {
                 throw new SubSystemValidationException(new NetconfRpcError(
                         NetconfRpcErrorTag.OPERATION_FAILED, NetconfRpcErrorType.Application,
                         NetconfRpcErrorSeverity.Error, "The maximum instances which can be created "
@@ -163,10 +166,9 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
                 LOGGER.error("error while creating sftp session", e);
             }
             return false;
-        }
-        else {
+        } else {
             LOGGER.warn(String.format("Sftp does not support callhome devices, hence returning connection "
-                   + "status as false for device %s", device.getDeviceName()));
+                    + "status as false for device %s", device.getDeviceName()));
             return false;
         }
     }
@@ -200,8 +202,12 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
         return connectionState;
     }
 
-    public Future<NetConfResponse> executeNetconf(Device device)
-            throws IllegalStateException, ExecutionException {
+    @Override
+    public Notification normalizeNotification(Notification notification) {
+        return notification;
+    }
+
+    private Future<NetConfResponse> executeRequest(Device device) throws IllegalStateException, ExecutionException {
         try {
             transfer(createSftpInfo(device), m_session);
         } catch (IOException | SftpException | JSchException e) {
@@ -217,5 +223,4 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
             throw new RuntimeException("Error while aligning with device");
         }
     }
-
 }

@@ -23,16 +23,22 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.karaf.kar.KarService;
 import org.broadband_forum.obbaa.adapter.AdapterDeployer;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviceAdapterActionHandlerImpl implements AdapterDeployer {
+public class DeviceAdapterActionHandlerImpl implements AdapterDeployer, EventHandler {
 
     private static final String KAR_EXTENSION = "kar";
+    private static final String DELIMITER = "-";
     private String m_stagingArea;
     private final File m_stagingAreaDir;
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceAdapterActionHandlerImpl.class);
     private KarService m_karService;
+    //Archive should be in the format "vendor-type-model-interfaceVersion.kar"
+    private static final String FILENAME_PATTERN = "([a-zA-Z]*)" + DELIMITER + "([a-zA-Z]*)" + DELIMITER + "([a-zA-Z0-9]*)"
+            + DELIMITER + "([0-9]\\.[0-9])";
 
     public DeviceAdapterActionHandlerImpl(String stagingArea, KarService karService) {
         m_stagingAreaDir = new File(stagingArea);
@@ -66,6 +72,9 @@ public class DeviceAdapterActionHandlerImpl implements AdapterDeployer {
                 if (!KAR_EXTENSION.equals(fileExt)) {
                     throw new IOException("File format '" + fileExt + "' not supported");
                 }
+                if (!verifyFileNameMatchesExpectedPattern(fileName)) {
+                    throw new RuntimeException("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)");
+                }
                 deployKar(archive);
             } else {
                 throw new RuntimeException("File name cannot be null");
@@ -87,6 +96,9 @@ public class DeviceAdapterActionHandlerImpl implements AdapterDeployer {
                 if (!KAR_EXTENSION.equals(fileExt)) {
                     throw new IOException("File format '" + fileExt + "' not supported");
                 }
+                if (!verifyFileNameMatchesExpectedPattern(fileName)) {
+                    throw new RuntimeException("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)");
+                }
                 undeployKar(fileNameWOExt);
             }
         } catch (Exception e) {
@@ -103,5 +115,29 @@ public class DeviceAdapterActionHandlerImpl implements AdapterDeployer {
     private void undeployKar(String karName) throws Exception {
         LOGGER.info("Undeploying kar ", karName);
         m_karService.uninstall(karName);
+
+    }
+
+    private boolean verifyFileNameMatchesExpectedPattern(String fileName) {
+        boolean patternMatched = false;
+        String fileNameWoExt = fileName.replace("." + KAR_EXTENSION, "");
+        LOGGER.info("File name without Extension " + fileNameWoExt);
+        if (fileNameWoExt.matches(FILENAME_PATTERN)) {
+            patternMatched = true;
+        }
+        return patternMatched;
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        LOGGER.info("Received an Event :" + event);
+        String fileName = (String) event.getProperty("FileName");
+        try {
+            LOGGER.error(String.format("Adapter deployment failed!! Reason : Maximum allowed versions reached for adapter %s.kar "
+                    + "cleaning the kar file", fileName));
+            undeployKar(fileName);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

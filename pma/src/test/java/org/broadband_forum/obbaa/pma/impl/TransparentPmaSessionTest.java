@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -34,12 +35,16 @@ import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
+import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
 import org.broadband_forum.obbaa.pma.PmaServer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.xml.sax.SAXException;
 
 /**
  * Created by kbhatk on 10/30/17.
@@ -89,15 +94,20 @@ public class TransparentPmaSessionTest {
     }
 
     @Test
-    public void testPmaContactsDMAndCMToExecuteNC() throws ExecutionException {
+    public void testPmaContactsDMAndCMToExecuteNC()
+            throws ExecutionException, NetconfMessageBuilderException, IOException, SAXException {
         Map<NetConfResponse , List<Notification>> netConfResponseListMap = m_pmaSession.executeNC(REQ_STR);
         Map.Entry<NetConfResponse , List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
         String response = entry.getKey().responseToString();
         ArgumentCaptor<AbstractNetconfRequest> reqCaptor = ArgumentCaptor.forClass(AbstractNetconfRequest.class);
 
         verify(m_cm).executeNetconf(eq(m_device1Meta), reqCaptor.capture());
-        assertEquals(REQ_STR, reqCaptor.getValue().requestToString());
-        assertEquals(OK_RESPONSE, response);
+
+        TestUtil.assertXMLEquals(DocumentUtils.stringToDocument(REQ_STR).getDocumentElement(),
+                DocumentUtils.stringToDocument(reqCaptor.getValue().requestToString()).getDocumentElement());
+
+        TestUtil.assertXMLEquals(DocumentUtils.stringToDocument(OK_RESPONSE).getDocumentElement(),
+                DocumentUtils.stringToDocument(response).getDocumentElement());
     }
 
 }

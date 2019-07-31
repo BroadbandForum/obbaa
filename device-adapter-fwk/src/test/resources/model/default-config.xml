@@ -1,0 +1,10 @@
+<data>
+    <if:interfaces
+            xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces"
+            xmlns:bbfift="urn:broadband-forum-org:yang:bbf-if-type">
+        <if:interface>
+            <if:name>Interface1</if:name>
+            <if:type>bbfift:xdsl</if:type>
+        </if:interface>
+    </if:interfaces>
+</data>

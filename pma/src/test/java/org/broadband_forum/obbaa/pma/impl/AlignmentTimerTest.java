@@ -66,12 +66,12 @@ import org.mockito.MockitoAnnotations;
 
 public class AlignmentTimerTest {
 
-    private static final String SAMPLE_EMPTY_NC_RES = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" " +
+    private static String SAMPLE_EMPTY_NC_RES = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" " +
         "message-id=\"101012\">\n" +
         "  <data>\n" +
         "  </data>\n" +
         "</rpc-reply>";
-    private static final String SAMPLE_NON_EMPTY_NC_RES = "<rpc-reply " +
+    private static String SAMPLE_NON_EMPTY_NC_RES = "<rpc-reply " +
         "xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" " +
         "message-id=\"101012\">\n" +
         "  <data>\n" +
@@ -82,7 +82,7 @@ public class AlignmentTimerTest {
         "  </data>\n" +
         "</rpc-reply>";
 
-    private static final String EDIT_CONFIG_REQ = "<rpc message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+    private static String EDIT_CONFIG_REQ = "<rpc message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
         "  <edit-config>\n" +
         "    <target>\n" +
         "      <running/>\n" +
@@ -99,11 +99,11 @@ public class AlignmentTimerTest {
         "  </edit-config>\n" +
         "</rpc>\n";
 
-    private static final String OK_RESPONSE = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+    private static String OK_RESPONSE = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
         "  <ok/>\n" +
         "</rpc-reply>";
 
-    private static final String ERROR_RESPONSE = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+    private static String ERROR_RESPONSE = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
         "  <rpc-error>\n" +
         "    <error-type>application</error-type>\n" +
         "    <error-tag>operation-failed</error-tag>\n" +
@@ -138,8 +138,59 @@ public class AlignmentTimerTest {
     @Mock
     private AdapterContext m_context;
 
+
+    private void reviseStrForWindows() {
+         SAMPLE_EMPTY_NC_RES = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" " +
+                "message-id=\"101012\">\r\n" +
+                "  <data>\r\n" +
+                "  </data>\r\n" +
+                "</rpc-reply>";
+         SAMPLE_NON_EMPTY_NC_RES = "<rpc-reply " +
+                "xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" " +
+                "message-id=\"101012\">\r\n" +
+                "  <data>\r\n" +
+                "    <root-config xmlns=\"urn:bbf:yang:obbaa:network-manager\">\r\n" +
+                "      <config1>\r\n" +
+                "      </config1>\r\n" +
+                "    </root-config>\r\n" +
+                "  </data>\r\n" +
+                "</rpc-reply>";
+
+         EDIT_CONFIG_REQ = "<rpc message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n" +
+                "  <edit-config>\r\n" +
+                "    <target>\r\n" +
+                "      <running/>\r\n" +
+                "    </target>\r\n" +
+                "    <default-operation>merge</default-operation>\r\n" +
+                "    <test-option>set</test-option>\r\n" +
+                "    <error-option>stop-on-error</error-option>\r\n" +
+                "    <config>\r\n" +
+                "      <root-config xmlns=\"urn:bbf:yang:obbaa:network-manager\">\r\n" +
+                "      <config1>\r\n" +
+                "      </config1>\r\n" +
+                "    </root-config>\r\n" +
+                "    </config>\r\n" +
+                "  </edit-config>\r\n" +
+                "</rpc>\r\n";
+
+          OK_RESPONSE = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n" +
+                "  <ok/>\r\n" +
+                "</rpc-reply>";
+
+          ERROR_RESPONSE = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n" +
+                "  <rpc-error>\r\n" +
+                "    <error-type>application</error-type>\r\n" +
+                "    <error-tag>operation-failed</error-tag>\r\n" +
+                "    <error-severity>error</error-severity>\r\n" +
+                "  </rpc-error>\r\n" +
+                "</rpc-reply>";
+    }
     @Before
     public void setUp() throws ExecutionException, NetconfMessageBuilderException {
+
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            reviseStrForWindows();
+        }
         MockitoAnnotations.initMocks(this);
         m_txService = new TxService();
         when(m_persistenceMgrUtil.getEntityDataStoreManager()).thenReturn(entityDSM);

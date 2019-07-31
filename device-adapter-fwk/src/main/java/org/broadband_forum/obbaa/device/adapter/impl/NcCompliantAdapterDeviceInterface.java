@@ -30,6 +30,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemValidationException;
@@ -46,7 +47,8 @@ public class NcCompliantAdapterDeviceInterface implements DeviceInterface {
     }
 
     @Override
-    public Future<NetConfResponse> align(Device device, EditConfigRequest request) throws ExecutionException {
+    public Future<NetConfResponse> align(Device device, EditConfigRequest request, NetConfResponse getConfigResponse)
+            throws ExecutionException {
         if (m_ncm.isConnected(device)) {
             return m_ncm.executeNetconf(device.getDeviceName(), request);
         } else {
@@ -96,5 +98,10 @@ public class NcCompliantAdapterDeviceInterface implements DeviceInterface {
     @Override
     public ConnectionState getConnectionState(Device device) {
         return m_ncm.getConnectionState(device);
+    }
+
+    @Override
+    public Notification normalizeNotification(Notification notification) {
+        return notification;
     }
 }

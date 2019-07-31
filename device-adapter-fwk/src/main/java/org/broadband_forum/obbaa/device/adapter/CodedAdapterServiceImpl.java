@@ -17,6 +17,7 @@
 package org.broadband_forum.obbaa.device.adapter;
 
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.ADAPTER_XML_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_CONFIG_XML_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_DEVIATIONS_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_FEATURES_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.YANG_PATH;
@@ -34,9 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.osgi.framework.Bundle;
+
 
 public class CodedAdapterServiceImpl implements CodedAdapterService {
     private AdapterManager m_adapterManager;
@@ -58,15 +61,18 @@ public class CodedAdapterServiceImpl implements CodedAdapterService {
     public void deployAdapter() throws Exception {
         Map<URL, InputStream> moduleStream = buildModuleStreamMap(YANG_PATH);
         try (InputStream deviceXmlInputStream = m_bundle.getResource(ADAPTER_XML_PATH).openStream();
-        InputStream supportedFeaturesInputStream = m_bundle.getResource(DEFAULT_FEATURES_PATH).openStream();
-        InputStream supportedDeviationInputStream = m_bundle.getResource(DEFAULT_DEVIATIONS_PATH).openStream()) {
+             InputStream supportedFeaturesInputStream = m_bundle.getResource(DEFAULT_FEATURES_PATH).openStream();
+             InputStream supportedDeviationInputStream = m_bundle.getResource(DEFAULT_DEVIATIONS_PATH).openStream();
+             InputStream defaultConfigStream = m_bundle.getResource(DEFAULT_CONFIG_XML_PATH).openStream()) {
             Set<QName> features = getAdapterFeaturesFromFile(supportedFeaturesInputStream);
             Map<QName, Set<QName>> deviations = getAdapterDeviationsFromFile(supportedDeviationInputStream);
+            byte[] defaultXmlBytes = IOUtils.toByteArray(defaultConfigStream);
             DeviceAdapter adapter = AdapterBuilder.createAdapterBuilder()
                     .setDeviceXml(deviceXmlInputStream)
                     .setModuleStream(moduleStream)
                     .setSupportedFeatures(features)
                     .setSupportedDeviations(deviations)
+                    .setDefaultxmlBytes(defaultXmlBytes)
                     .build();
             adapter.init();
             m_adapterManager.deploy(adapter, m_subsystem, m_klass, m_deviceInterface);
@@ -78,6 +84,7 @@ public class CodedAdapterServiceImpl implements CodedAdapterService {
         DeviceAdapterId adapterId = CommonFileUtil.parseAdapterXMLFile(ADAPTER_XML_PATH, m_bundle);
         m_adapterManager.undeploy(m_adapterManager.getDeviceAdapter(adapterId));
     }
+
 
     protected Map<URL, InputStream> buildModuleStreamMap(String yangPath) throws IOException {
         Map<URL, InputStream> moduleStream = new HashMap<URL, InputStream>();

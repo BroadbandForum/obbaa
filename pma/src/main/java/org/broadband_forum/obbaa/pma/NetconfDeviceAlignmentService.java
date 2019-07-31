@@ -27,7 +27,7 @@ public interface NetconfDeviceAlignmentService extends DeviceAlignmentService {
 
     List<EditConfigRequest> getEditQueue(String deviceName);
 
-    void align(Device device);
+    void align(Device device, NetConfResponse getConfigResponse);
 
     void forceAlign(Device device, NetConfResponse getConfigResponse);
 

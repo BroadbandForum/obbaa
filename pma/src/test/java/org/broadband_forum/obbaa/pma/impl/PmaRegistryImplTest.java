@@ -20,6 +20,7 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,9 +30,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
@@ -48,6 +51,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -87,10 +92,14 @@ public class PmaRegistryImplTest {
     @Mock
     private DataStore m_dataStore;
     @Mock
-    private DeviceAdapter m_deviceAdapter;
     private PmaRegistryImpl m_pmaRegistryTransparentSF;
     private File m_tempDir;
     private String m_dir;
+    private DeviceAdapterId m_deviceAdapterId;
+
+    DeviceAdapter m_deviceAdapter;
+    @Captor
+    private ArgumentCaptor<NetConfResponse> m_netconfResponse;
 
 
     @Before
@@ -101,28 +110,32 @@ public class PmaRegistryImplTest {
         m_pmaRegistry = new PmaRegistryImpl(m_dm, new PmaServerSessionFactory(m_dir, m_dm, m_netconfServer, m_das, m_entityRegistry,
                 m_schemaReg, m_modelNodeDsmReg, m_adapterManager));
         m_pmaRegistryTransparentSF = new PmaRegistryImpl(m_dm, new TransparentPmaSessionFactory(m_cm, m_dm));
+        m_deviceAdapterId = new DeviceAdapterId("dpu", "1.0", "standard", "BBF");
+        m_deviceAdapter = AdapterBuilder.createAdapterBuilder()
+                .setDeviceAdapterId(m_deviceAdapterId)
+                .build();
         when(m_cm.isConnected(m_device1Meta)).thenReturn(true);
         when(m_dm.getDevice("device1")).thenReturn(m_device1Meta);
         when(m_device1Meta.getDeviceManagement()).thenReturn(m_devMgmt);
         when(m_device1Meta.getDeviceName()).thenReturn("device1");
         when(m_devMgmt.getDeviceInterfaceVersion()).thenReturn("1.0");
-        when(m_devMgmt.getDeviceVendor()).thenReturn("vendor1");
-        when(m_devMgmt.getDeviceModel()).thenReturn("model1");
+        when(m_devMgmt.getDeviceVendor()).thenReturn("BBF");
+        when(m_devMgmt.getDeviceModel()).thenReturn("standard");
         when(m_devMgmt.getDeviceType()).thenReturn("dpu");
         Future<NetConfResponse> futureObject = mock(Future.class);
         when(futureObject.get()).thenReturn(m_response);
         when(m_cm.executeNetconf((Device) anyObject(), anyObject())).thenReturn(futureObject);
         when(m_adapterManager.getAdapterContext(any())).thenReturn(m_adapterContext);
-        when(m_adapterManager.getDeviceAdapter(any())).thenReturn(m_deviceAdapter);
+        when(m_adapterManager.getDeviceAdapter(m_deviceAdapterId)).thenReturn(m_deviceAdapter);
         when(m_netconfServer.getDataStore("running")).thenReturn(m_dataStore);
     }
 
     @Test
     public void testExceptionIsThrownWhenDeviceNotManaged() throws ExecutionException {
-        try{
+        try {
             m_pmaRegistry.executeNC("device2", "");
             fail("Expected an exception here");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             assertEquals("Device not managed : device2", e.getMessage());
         }
     }
@@ -131,10 +144,10 @@ public class PmaRegistryImplTest {
     @Test
     public void testExceptionIsThrownWhenNoConnectionToDevice() throws ExecutionException {
         when(m_cm.isConnected(m_device1Meta)).thenReturn(false);
-        try{
+        try {
             m_pmaRegistry.executeNC("device1", "");
             fail("Expected an exception here");
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             assertEquals("Device not connected : device1", e.getMessage());
         }
     }
@@ -150,7 +163,7 @@ public class PmaRegistryImplTest {
         when(m_adapterManager.getAdapterContext(any())).thenReturn(null);
         try {
             m_pmaRegistry.executeWithPmaSession("device1", session -> "response");
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             assertEquals("Could not get session to Pma device1", e.getMessage());
         }
     }
@@ -169,7 +182,7 @@ public class PmaRegistryImplTest {
     @Test
     public void testsyncContactsDAS() throws ExecutionException {
         m_pmaRegistry.align("device1");
-        verify(m_das).align(m_device1Meta);
+        verify(m_das).align(eq(m_device1Meta), m_netconfResponse.capture());
     }
 
     @Test
@@ -180,12 +193,12 @@ public class PmaRegistryImplTest {
     }
 
     @After
-    public void teardown() throws Exception{
+    public void teardown() throws Exception {
         deleteIfExists(m_tempDir);
     }
 
     private void deleteIfExists(File file) {
-        if(file != null && file.exists()){
+        if (file != null && file.exists()) {
             file.delete();
         }
     }

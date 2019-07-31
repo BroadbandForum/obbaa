@@ -16,6 +16,7 @@
 
 package org.broadband_forum.obbaa.model.tls;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -26,6 +27,7 @@ import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.netconf.alarm.util.AlarmConstants;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
@@ -35,63 +37,60 @@ import org.broadband_forum.obbaa.netconf.api.messages.EditConfigTestOptions;
 import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcError;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorSeverity;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorTag;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorType;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemValidationException;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class ModelTranslDeviceInterface implements DeviceInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(ModelTranslDeviceInterface.class);
     private NetconfConnectionManager m_ncm;
+    public static final String IETF_ALARM_NS = "urn:ietf:params:xml:ns:yang:ietf-alarms";
 
     public ModelTranslDeviceInterface(NetconfConnectionManager ncm) {
         this.m_ncm = ncm;
     }
 
     @Override
-    public Future<NetConfResponse> align(Device device, EditConfigRequest request) throws ExecutionException {
+    public Future<NetConfResponse> align(Device device, EditConfigRequest request, NetConfResponse getConfigResponse)
+            throws ExecutionException {
         if (m_ncm.isConnected(device)) {
             try {
+                String dataStoreString = DocumentUtils.documentToPrettyString(getConfigResponse.getData());
+                /* String check is done in this class because it is just a sample VDA. Essentially DOM/Xpath
+                 evaluation should be used */
+                int interfaceCount = StringUtils.countMatches(dataStoreString, "<interface>");
+                interfaceCount = interfaceCount + StringUtils.countMatches(dataStoreString, "<if:interface>");
+                LOGGER.info(String.format("The current PMA datastore interface count for device %s is : %s", device.getDeviceName(),
+                        interfaceCount));
                 NodeList listOfNodes = request.getConfigElement().getXmlElement().getChildNodes();
-                List<Element> elementList = new ArrayList<>();
-                for (int i = 0; i < listOfNodes.getLength(); i++) {
-                    Element dataNode = (Element) listOfNodes.item(i);
-                    if (dataNode.getLocalName().equalsIgnoreCase("interfaces")) {
-                        for (Element element : DocumentUtils.getChildElements(listOfNodes.item(i))) {
-                            if (element.getLocalName().equalsIgnoreCase("interface")) {
-                                for (Element child : DocumentUtils.getChildElements(element)) {
-                                    if (child.getLocalName().equalsIgnoreCase("description")) {
-                                        element.removeChild(child);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    elementList.add(dataNode);
-                }
                 EditConfigRequest newRequest = new EditConfigRequest()
                         .setTargetRunning()
                         .setTestOption(EditConfigTestOptions.SET)
                         .setErrorOption(EditConfigErrorOptions.STOP_ON_ERROR)
                         .setConfigElement(new EditConfigElement()
-                                .setConfigElementContents(elementList));
+                        .setConfigElementContents(translate(listOfNodes)));
                 request.setMessageId(request.getMessageId());
                 return m_ncm.executeNetconf(device.getDeviceName(), newRequest);
             } catch (NetconfMessageBuilderException e) {
-                LOGGER.error("Error while aligning with device");
-                throw new RuntimeException("Error while aligning with device");
+                LOGGER.error("Error while aligning device", e);
+                throw new RuntimeException("Error while aligning device", e);
             }
         } else {
-            throw new IllegalStateException(String.format("Device not connected %s", device));
+            throw new IllegalStateException(String.format("Device %s is not connected", device.getDeviceName()));
         }
     }
 
@@ -101,14 +100,34 @@ public class ModelTranslDeviceInterface implements DeviceInterface {
         if (m_ncm.isConnected(device)) {
             CopyConfigRequest ccRequest = new CopyConfigRequest();
             EditConfigElement config = new EditConfigElement();
-            config.setConfigElementContents(getConfigResponse.getDataContent());
+            config.setConfigElementContents(translate(getConfigResponse.getData().getChildNodes()));
             ccRequest.setSourceConfigElement(config.getXmlElement());
             ccRequest.setTargetRunning();
             Future<NetConfResponse> responseFuture = m_ncm.executeNetconf(device.getDeviceName(), ccRequest);
             return new Pair<>(ccRequest, responseFuture);
         } else {
-            throw new IllegalStateException(String.format("Device not connected %s", device));
+            throw new IllegalStateException(String.format("Device %s is not connected", device.getDeviceName()));
         }
+    }
+
+    private List<Element> translate(NodeList listOfNodes) {
+        List<Element> elementList = new ArrayList<>();
+        for (int i = 0; i < listOfNodes.getLength(); i++) {
+            Element dataNode = (Element) listOfNodes.item(i);
+            if (dataNode.getLocalName().equalsIgnoreCase("interfaces")) {
+                for (Element element : DocumentUtils.getChildElements(listOfNodes.item(i))) {
+                    if (element.getLocalName().equalsIgnoreCase("interface")) {
+                        for (Element child : DocumentUtils.getChildElements(element)) {
+                            if (child.getLocalName().equalsIgnoreCase("description")) {
+                                element.removeChild(child);
+                            }
+                        }
+                    }
+                }
+            }
+            elementList.add(dataNode);
+        }
+        return elementList;
     }
 
     @Override
@@ -116,16 +135,18 @@ public class ModelTranslDeviceInterface implements DeviceInterface {
         if (m_ncm.isConnected(device)) {
             return m_ncm.executeNetconf(device, getRequest);
         } else {
-            throw new IllegalStateException(String.format("Device not connected %s", device));
+            throw new IllegalStateException(String.format("Device %s is not connected", device.getDeviceName()));
         }
     }
 
     @Override
     public void veto(Device device, EditConfigRequest request, Document dataStore) throws SubSystemValidationException {
-        LOGGER.info("Inside veto of the dummy device adapter - just testing");
         try {
-            String dataStoreString = DocumentUtils.documentToPrettyString(dataStore);
-            if ((StringUtils.countMatches(dataStoreString, "<interface>") > 3)) {
+            String dataStoreString = DocumentUtils.documentToPrettyString(dataStore.getDocumentElement());
+            /* String check is done in this class because it is just a sample VDA. Essentially a DOM/Xpath
+                 evaluation should be used */
+            if ((StringUtils.countMatches(dataStoreString, "<interface>") > 3)
+                    || (StringUtils.countMatches(dataStoreString, "<if:interface>") > 3)) {
                 throw new SubSystemValidationException(new NetconfRpcError(
                         NetconfRpcErrorTag.OPERATION_FAILED, NetconfRpcErrorType.Application,
                         NetconfRpcErrorSeverity.Error, "The maximum instances which can be created "
@@ -163,12 +184,54 @@ public class ModelTranslDeviceInterface implements DeviceInterface {
         if (m_ncm.isConnected(device)) {
             return m_ncm.executeNetconf(device, getConfigRequest);
         } else {
-            throw new IllegalStateException(String.format("Device not connected %s", device));
+            throw new IllegalStateException(String.format("Device %s is not connected", device.getDeviceName()));
         }
     }
 
     @Override
     public ConnectionState getConnectionState(Device device) {
         return m_ncm.getConnectionState(device);
+    }
+
+    @Override
+    public Notification normalizeNotification(Notification notification) {
+        //check the notification type is alarm-notification
+        QName alarmNotificationQname = QName.create(IETF_ALARM_NS, "alarm-notification");
+        if (alarmNotificationQname.equals(notification.getType())) {
+            return convertAlarm(notification);
+        }
+        return null;
+    }
+
+    private Notification convertAlarm(Notification notification) {
+        NodeList list = notification.getNotificationElement().getChildNodes();
+        QName severityQName = QName.create(IETF_ALARM_NS, AlarmConstants.ALARM_PERCEIVED_SEVERITY);
+        QName alarmTextQName = QName.create(IETF_ALARM_NS, AlarmConstants.ALARM_TEXT);
+        //change the severity and alarm-text -> to test that normalization works
+        for (int index = 0; index < list.getLength(); index++) {
+            Node innerNode = list.item(index);
+            if (innerNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element innerNodeEle = (Element) innerNode;
+                String innerNodeName = innerNodeEle.getLocalName();
+                QName attributeQName = QName.create(innerNodeEle.getNamespaceURI(), innerNodeName);
+                if (attributeQName.equals(severityQName)) {
+                    if ("major".equals(innerNodeEle.getTextContent().trim())) {
+                        innerNodeEle.setTextContent("warning");
+                    }
+                } else if (attributeQName.equals(alarmTextQName)) {
+                    if ("raisealarm".equalsIgnoreCase(innerNodeEle.getTextContent().trim())) {
+                        innerNodeEle.setTextContent("raiseAlarm :: Normalized Vendor alarm");
+                    }
+                }
+            }
+        }
+        NetconfNotification normalizedNotification = null;
+        try {
+            normalizedNotification = new NetconfNotification(notification.getNotificationDocument());
+        } catch (NetconfMessageBuilderException e) {
+            LOGGER.error("error while forming netconf notification", e);
+        }
+        LOGGER.info(String.format("the Normalized alarm is %s: ", notification.notificationToPrettyString()));
+        return normalizedNotification;
     }
 }

@@ -19,7 +19,7 @@
     <action xmlns="urn:ietf:params:xml:ns:yang:1">
         <undeploy-adapter xmlns="urn:bbf:yang:obbaa:device-adapters">
             <undeploy>
-                <adapter-archive>protocol-transl-feature-2.0.0.kar</adapter-archive>
+                <adapter-archive>protocol-transl-feature-2.1.0.kar</adapter-archive>
             </undeploy>
         </undeploy-adapter>
     </action>

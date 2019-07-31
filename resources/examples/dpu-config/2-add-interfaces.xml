@@ -27,178 +27,178 @@
             <root>
               <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
                 <!-- add G.fast interfaces -->
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.1</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.2</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.3</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.4</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.5</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.6</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.7</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.8</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.9</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.10</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.11</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.12</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.13</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.14</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.15</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>dsl.16</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
                 </if:interface>
 
                 <!-- add packet interfaces -->
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.1</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.1</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.2</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.2</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.3</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.3</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.4</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.4</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.5</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.5</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.6</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.6</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.7</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.7</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.8</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.8</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.9</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.9</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.10</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.10</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.11</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.11</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.12</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.12</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.13</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.13</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.14</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.14</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.15</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
                     <bbf-ptm:lower-layer-if>dsl.15</bbf-ptm:lower-layer-if>
                   </bbf-ptm:ptm>
                 </if:interface>
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>ptm.16</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ptm</if:type>
                   <bbf-ptm:ptm xmlns:bbf-ptm="urn:bbf:yang:bbf-ptm">
@@ -207,7 +207,7 @@
                 </if:interface>
 
                 <!-- add uplink interfaces -->
-                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" >
                   <if:name>uplink.1</if:name>
                   <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</if:type>
                 </if:interface>

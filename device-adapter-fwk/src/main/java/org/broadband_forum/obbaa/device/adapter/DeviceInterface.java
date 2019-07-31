@@ -26,6 +26,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemValidationException;
@@ -37,16 +38,18 @@ public interface DeviceInterface {
      *
      * @param device  Device for which the request is dedicated
      * @param request the edit-config request
+     * @param getConfigResponse the get-config response from PMA data-store for device
      * @return future response
      * @throws ExecutionException throws Execution Exception
      */
-    Future<NetConfResponse> align(Device device, EditConfigRequest request) throws ExecutionException;
+    Future<NetConfResponse> align(Device device, EditConfigRequest request, NetConfResponse getConfigResponse)
+            throws ExecutionException;
 
     /**
      * Send request to device on first contact scenario at SBI side.
      *
      * @param device Device for which the request is dedicated
-     * @param getConfigResponse get-config response from PMA
+     * @param getConfigResponse get-config response from PMA data-store for device
      * @return pair of request and response
      * @throws NetconfMessageBuilderException throws Netconf Message builder exception
      * @throws ExecutionException             throws Execution Exception
@@ -68,7 +71,7 @@ public interface DeviceInterface {
      * Veto changes if needed based on adapter specific rules.
      *
      * @param device    Device for which the request is dedicated
-     * @param request   request which needs to validated based onn rules
+     * @param request   request which needs to validated based on rules
      * @param dataStore the existing device datastore
      */
     void veto(Device device, EditConfigRequest request, Document dataStore) throws SubSystemValidationException;
@@ -90,4 +93,12 @@ public interface DeviceInterface {
      * @return Connection State of the device
      */
     ConnectionState getConnectionState(Device device);
+
+    /**
+     * Normalize the vendor specific notification coming from the device to the supported notification format.
+     *
+     * @param notification the notification from the device to be normalized
+     * @return the normalized notification
+     */
+    Notification normalizeNotification(Notification notification);
 }

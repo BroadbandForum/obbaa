@@ -33,7 +33,8 @@
         <property name="message" value="File has Windows (CR+LF) instead of UNIX (LF) end of line (EOL) delimiters."/>
     </module>
     <module name="SuppressionFilter">
-        <property name="file" value="${checkstyle.suppressions.file}"/>
+        <property name="file" value="${checkstyle.suppressions.file}"
+        default = "checkstyle-suppressions.xml"/>
     </module>
     <module name="SuppressWarningsFilter"/>
     <module name="TreeWalker">

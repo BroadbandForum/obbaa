@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.bbf.obbaa</groupId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <artifactId>resources</artifactId>
     <packaging>pom</packaging>
     <name>OB-BAA/Resources</name>

@@ -19,6 +19,7 @@ package org.broadband_forum.obbaa.device.adapter;
 
 import java.util.Collection;
 
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 
 public interface AdapterManager {
@@ -33,4 +34,8 @@ public interface AdapterManager {
     AdapterContext getAdapterContext(DeviceAdapterId adapterId);
 
     Collection<DeviceAdapter> getAllDeviceAdapters();
+
+    EditConfigRequest getEditRequestForAdapter(DeviceAdapterId adapterId);
+
+    String EVENT_TOPIC = "com/bbf/obbaa/AdapterManager/Event";
 }

@@ -26,12 +26,15 @@ import static org.mockito.Mockito.when;
 import java.util.concurrent.ExecutionException;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
 import org.broadband_forum.obbaa.netconf.api.client.NotificationListener;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,12 +46,16 @@ public class DeviceReconnectionNotificationActionTest {
 
     private NetconfConnectionManager m_netconfConnectionManager;
     private DeviceReconnectionNotificationAction m_deviceReconnectNotificationAction;
+    private AdapterManager m_adapterManager;
+    private PmaRegistry m_pmaRegistry;
 
     @Before
     public void setUp() {
         m_notificationService = mock(NotificationService.class);
         m_netconfConnectionManager = mock(NetconfConnectionManager.class);
-        m_deviceReconnectNotificationAction = new DeviceReconnectionNotificationAction(m_notificationService, m_netconfConnectionManager);
+        m_adapterManager = mock(AdapterManager.class);
+        m_pmaRegistry = mock(PmaRegistry.class);
+        m_deviceReconnectNotificationAction = new DeviceReconnectionNotificationAction(m_notificationService, m_netconfConnectionManager, m_adapterManager, m_pmaRegistry);
     }
 
     @Test
@@ -63,21 +70,17 @@ public class DeviceReconnectionNotificationActionTest {
         verify(m_netconfConnectionManager).unregisterDeviceConnectionListener(m_deviceReconnectNotificationAction);
     }
 
-
     @Test
     public void testCreateSubscriptionWithReplay() throws NetconfMessageBuilderException, InterruptedException, ExecutionException,
             ParserException {
         NetconfClientSession clientSession = mock(NetconfClientSession.class);
-        Device device = mock(Device.class);
-
-        when(m_notificationService.isNotificationSupported(any(NetconfClientSession.class))).thenReturn(true);
-        when(m_notificationService.isReplaySupported(any(NetconfClientSession.class))).thenReturn(true);
+        Device device = getDevice();
         NetConfResponse response = new NetConfResponse();
         response.setOk(true);
+        when(m_notificationService.isReplaySupported(any(NetconfClientSession.class))).thenReturn(true);
         when(m_notificationService.createSubscriptionWithCallback(any(NetconfClientSession.class), any(String.class),
                 any(NotificationListener.class), any(), eq(true))).thenReturn(response);
         m_deviceReconnectNotificationAction.deviceConnected(device, clientSession);
-
         verify(m_notificationService, never()).createSubscriptionWithCallback(any(NetconfClientSession.class), any(String.class),
                 any(NotificationListener.class), any(), eq(false));
     }
@@ -86,18 +89,26 @@ public class DeviceReconnectionNotificationActionTest {
     public void testCreateSubscriptionWithoutReplay() throws NetconfMessageBuilderException, InterruptedException, ExecutionException,
             ParserException {
         NetconfClientSession clientSession = mock(NetconfClientSession.class);
-        Device device = mock(Device.class);
-
-        when(m_notificationService.isNotificationSupported(any(NetconfClientSession.class))).thenReturn(true);
-        when(m_notificationService.isReplaySupported(any(NetconfClientSession.class))).thenReturn(false);
+        Device device = getDevice();
         NetConfResponse response = new NetConfResponse();
         response.setOk(true);
+        when(m_notificationService.isReplaySupported(any(NetconfClientSession.class))).thenReturn(false);
         when(m_notificationService.createSubscriptionWithCallback(any(NetconfClientSession.class), any(String.class),
                 any(NotificationListener.class), any(), eq(false))).thenReturn(response);
         m_deviceReconnectNotificationAction.deviceConnected(device, clientSession);
-
         verify(m_notificationService, never()).createSubscriptionWithCallback(any(NetconfClientSession.class), any(String.class),
                 any(NotificationListener.class), any(), eq(true));
     }
 
+    private Device getDevice(){
+        Device device = mock(Device.class);
+        DeviceMgmt deviceMgmt = mock(DeviceMgmt.class);
+        when(m_notificationService.isNotificationSupported(any(NetconfClientSession.class))).thenReturn(true);
+        when(device.getDeviceManagement()).thenReturn(deviceMgmt);
+        when(deviceMgmt.getDeviceType()).thenReturn("");
+        when(deviceMgmt.getDeviceInterfaceVersion()).thenReturn("");
+        when(deviceMgmt.getDeviceModel()).thenReturn("");
+        when(deviceMgmt.getDeviceVendor()).thenReturn("");
+        return  device;
+    }
 }

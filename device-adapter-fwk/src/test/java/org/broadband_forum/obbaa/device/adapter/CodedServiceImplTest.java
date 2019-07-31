@@ -17,6 +17,7 @@
 package org.broadband_forum.obbaa.device.adapter;
 
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.ADAPTER_XML_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_CONFIG_XML_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_DEVIATIONS_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_FEATURES_PATH;
 import static org.junit.Assert.assertEquals;
@@ -24,9 +25,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,18 +53,44 @@ public class CodedServiceImplTest {
     private URL m_featuresUrl;
     private URL m_deviationsUrl;
     @Mock
-    private DeviceAdapter m_dummyAdapter;
+    private DeviceAdapter m_testAdapter;
+    private URL m_defaultConfigUrl;
+    private String m_expectedDefaultXml;
 
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         m_codedAdapterService = new CodedAdapterServiceImpl(m_adapterManager, m_bundle, this.getClass(), m_subsystem, m_deviceInterface);
         m_adapterUrl = getClass().getResource(ADAPTER_XML_PATH);
-        when(m_bundle.getResource(ADAPTER_XML_PATH)).thenReturn(m_adapterUrl);
         m_featuresUrl = getClass().getResource(DEFAULT_FEATURES_PATH);
-        when(m_bundle.getResource(DEFAULT_FEATURES_PATH)).thenReturn(m_featuresUrl);
         m_deviationsUrl = getClass().getResource(DEFAULT_DEVIATIONS_PATH);
+        m_defaultConfigUrl = getClass().getResource(DEFAULT_CONFIG_XML_PATH);
+        m_expectedDefaultXml = "<data>\n" +
+                "    <if:interfaces\n" +
+                "            xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\"\n" +
+                "            xmlns:bbfift=\"urn:broadband-forum-org:yang:bbf-if-type\">\n" +
+                "        <if:interface>\n" +
+                "            <if:name>Interface1</if:name>\n" +
+                "            <if:type>bbfift:xdsl</if:type>\n" +
+                "        </if:interface>\n" +
+                "    </if:interfaces>\n" +
+                "</data>\n";
+
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            m_adapterUrl = revisePathForWindow(m_adapterUrl);
+            m_featuresUrl = revisePathForWindow(m_featuresUrl);
+            m_deviationsUrl = revisePathForWindow(m_deviationsUrl);
+            m_defaultConfigUrl = revisePathForWindow(m_defaultConfigUrl);
+        }
+
+        when(m_bundle.getResource(ADAPTER_XML_PATH)).thenReturn(m_adapterUrl);
+        when(m_bundle.getResource(DEFAULT_FEATURES_PATH)).thenReturn(m_featuresUrl);
         when(m_bundle.getResource(DEFAULT_DEVIATIONS_PATH)).thenReturn(m_deviationsUrl);
+        when(m_bundle.getResource(DEFAULT_CONFIG_XML_PATH)).thenReturn(m_defaultConfigUrl);
+    }
+
+    private URL revisePathForWindow(URL orginalUrl) throws IOException {
+        return new URL("file:" + orginalUrl.getPath().substring(1));
     }
 
     @Test
@@ -73,18 +102,22 @@ public class CodedServiceImplTest {
         DeviceAdapterId expectedId = new DeviceAdapterId(actualAdapter.getType(), actualAdapter.getInterfaceVersion(),
                 actualAdapter.getModel(), actualAdapter.getVendor());
         assertEquals(expectedId, actualAdapter.getDeviceAdapterId());
-        assertEquals(4, actualAdapter.getSupportedFeatures().size());
+        assertEquals(3, actualAdapter.getSupportedFeatures().size());
         assertEquals(1, actualAdapter.getSupportedDevations().size());
         assertEquals(5, actualAdapter.getCapabilities().size());
         assertEquals(2, actualAdapter.getRevisions().size());
+        assertEquals(m_expectedDefaultXml, IOUtils.toString(new ByteArrayInputStream(actualAdapter.getDefaultXmlBytes())));
         assertEquals("Developer for this test case", actualAdapter.getDeveloper());
+        assertEquals("1.0", actualAdapter.getStdAdapterIntVersion());
     }
 
     @Test
     public void testUndeployAdapter() throws Exception {
-        when(m_adapterManager.getDeviceAdapter(new DeviceAdapterId("ADAPTER1", "1.0", "4LT", "VENDOR1" )))
-                .thenReturn(m_dummyAdapter);
+        when(m_adapterManager.getDeviceAdapter(new DeviceAdapterId("DPU", "1.0", "4LT", "VENDOR1")))
+                .thenReturn(m_testAdapter);
         m_codedAdapterService.unDeployAdapter();
-        verify(m_adapterManager).undeploy(m_dummyAdapter);
+        verify(m_adapterManager).undeploy(m_testAdapter);
     }
+
+
 }

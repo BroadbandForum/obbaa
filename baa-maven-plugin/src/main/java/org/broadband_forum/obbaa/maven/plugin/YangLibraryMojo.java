@@ -70,6 +70,9 @@ public class YangLibraryMojo extends AbstractBaaMojo {
             String yangLibraryFile = AdapterSpecificConstants.YANG_LIB_FILE;
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             yangLibFile = cl.getResource(yangLibraryFile).getFile();
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                yangLibFile = yangLibFile.substring(1);
+            }
         }
         File modelDir = new File(m_outputDir);
         modelDir.mkdirs();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.broadband_forum.obbaa.dm.impl;
+package org.broadband_forum.obbaa.device.adapter.impl;
 
 
 import org.broadband_forum.obbaa.netconf.server.model.notification.NotificationStopTask;

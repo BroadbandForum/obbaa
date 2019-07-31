@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,15 +38,18 @@ import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.DataStore;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
+import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
 import org.broadband_forum.obbaa.pma.DeviceXmlStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.xml.sax.SAXException;
 
 import com.google.common.io.Files;
 
@@ -111,12 +115,25 @@ public class PmaServerImplTest {
     }
 
     @Test
-    public void testPmaServerContactsServerMessageListener() {
+    public void testPmaServerContactsServerMessageListener()
+            throws NetconfMessageBuilderException, IOException, SAXException {
         Map<NetConfResponse, List<Notification>> netConfResponseListMap = m_pmaServer.executeNetconf(m_getRequest);
         Map.Entry<NetConfResponse, List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
         NetConfResponse response = entry.getKey();
         verify(m_netconfServer).onGet(eq(PMA_USER), eq(m_getRequest), anyObject());
-        assertEquals("<rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+//        assertEquals("<rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+//                "  <data>\n" +
+//                "    <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\n" +
+//                "    <if:interface>\n" +
+//                "        <if:name>xdsl-line:1/1/1/new</if:name>\n" +
+//                "        <if:type xmlns:bbfift=\"urn:broadband-forum-org:yang:bbf-if-type\">bbfift:xdsl</if:type>\n" +
+//                "    </if:interface>\n" +
+//                "</if:interfaces>\n" +
+//                "  </data>\n" +
+//                "</rpc-reply>\n", response.responseToString());
+
+
+        String expect = "<rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
                 "  <data>\n" +
                 "    <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\n" +
                 "    <if:interface>\n" +
@@ -125,21 +142,37 @@ public class PmaServerImplTest {
                 "    </if:interface>\n" +
                 "</if:interfaces>\n" +
                 "  </data>\n" +
-                "</rpc-reply>\n", response.responseToString());
+                "</rpc-reply>\n";
+
+        TestUtil.assertXMLEquals(DocumentUtils.stringToDocument(expect).getDocumentElement(),
+                DocumentUtils.stringToDocument(response.responseToString()).getDocumentElement());
+
         verifyZeroInteractions(m_deviceDataStore);
     }
 
     @Test
-    public void testPmaServerContactsServerMessageListenerOnEdit() {
+    public void testPmaServerContactsServerMessageListenerOnEdit()
+            throws NetconfMessageBuilderException, IOException, SAXException {
         Map<NetConfResponse, List<Notification>> netConfResponseListMap = m_pmaServer.executeNetconf(m_editRequest);
         Map.Entry<NetConfResponse, List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
         NetConfResponse response = entry.getKey();
         verify(m_netconfServer).onEditConfig(eq(PMA_USER), eq(m_editRequest), anyObject());
-        assertEquals("<rpc-reply message-id=\"2\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+//        assertEquals("<rpc-reply message-id=\"2\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+//                "  <data>\n" +
+//                "    <ok/>\n" +
+//                "  </data>\n" +
+//                "</rpc-reply>", response.responseToString().trim());
+
+
+        String expect = "<rpc-reply message-id=\"2\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
                 "  <data>\n" +
                 "    <ok/>\n" +
                 "  </data>\n" +
-                "</rpc-reply>", response.responseToString().trim());
+                "</rpc-reply>";
+
+        TestUtil.assertXMLEquals(DocumentUtils.stringToDocument(expect).getDocumentElement(),
+                DocumentUtils.stringToDocument(response.responseToString().trim()).getDocumentElement());
+
         verify(m_deviceDataStore).getDeviceXml();
     }
 }

@@ -16,25 +16,41 @@
 
 package org.broadband_forum.obbaa.device.adapter.impl;
 
+import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getStandardAdapterContext;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
+import org.broadband_forum.obbaa.device.registrator.impl.StandardModelRegistrator;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigErrorOptions;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigTestOptions;
+import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.netconf.api.utils.SystemPropertyUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaBuildException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.constraints.payloadparsing.RpcRequestConstraintParser;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.constraints.payloadparsing.util.SchemaRegistryUtil;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.RpcRequestHandlerRegistryImpl;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry;
@@ -52,33 +68,44 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.yang.ModelN
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.LockServiceException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.WriteLockTemplate;
+import org.broadband_forum.obbaa.netconf.server.rpc.RequestType;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class AdapterManagerImpl implements AdapterManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdapterManagerImpl.class);
-
 
     private ModelNodeDataStoreManager m_dataStoreManager;
     private ReadWriteLockService m_readWriteLockService;
     private EntityRegistry m_entityRegistry;
     private Map<DeviceAdapterId, AdapterContext> m_adapterContextRegistry = new ConcurrentHashMap<>();
     private Map<DeviceAdapterId, DeviceAdapter> m_adapterMap = new HashMap<DeviceAdapterId, DeviceAdapter>();
+    private Map<DeviceAdapterId, EditConfigRequest> m_defaultConfigReqMap = new HashMap<>();
+    private int m_maxAllowedAdapterVersions = Integer.parseInt(SystemPropertyUtils.getInstance().getFromEnvOrSysProperty(
+            "MAXIMUM_ALLOWED_ADAPTER_VERSIONS", "3"));
+    private final EventAdmin m_eventAdmin;
+    private StandardModelRegistrator m_standardModelRegistrator;
 
-    public AdapterManagerImpl(ModelNodeDataStoreManager dataStoreManager,
-                              ReadWriteLockService readWriteLockService, EntityRegistry entityRegistry) {
+    public AdapterManagerImpl(ModelNodeDataStoreManager dataStoreManager, ReadWriteLockService readWriteLockService,
+                              EntityRegistry entityRegistry, EventAdmin eventAdmin, StandardModelRegistrator standardModelRegistrator) {
         m_dataStoreManager = dataStoreManager;
         m_readWriteLockService = readWriteLockService;
         m_entityRegistry = entityRegistry;
+        m_eventAdmin = eventAdmin;
+        m_standardModelRegistrator = standardModelRegistrator;
     }
 
     @Override
     public void deploy(DeviceAdapter adapter, SubSystem subSystem, Class klass, DeviceInterface deviceInterface) {
-        LOGGER.info("Deploying the adapter :" + adapter);
+        LOGGER.info("Deploying the adapter: " + adapter.getDeviceAdapterId().toString());
         try {
             m_readWriteLockService.executeWithWriteLock(new WriteLockTemplate<Void>() {
                 @Override
@@ -88,13 +115,28 @@ public class AdapterManagerImpl implements AdapterManager {
                     String componentId = getComponentId(adapter);
                     AdapterContext adapterContext = new AdapterContext(m_readWriteLockService, deviceInterface);
                     try {
+                        verifyIfMaxAllowedAdaptersInstalled(adapterId, adapter);
+                        m_standardModelRegistrator.setOldIdentities(SchemaRegistryUtil.getAllIdentities(
+                                adapterContext.getSchemaRegistry()));
                         deployAdapter(adapter, adapterContext, componentId, subSystem, klass);
                         m_adapterContextRegistry.putIfAbsent(adapterId, adapterContext);
                         m_adapterMap.putIfAbsent(adapterId, adapter);
+                        EditConfigRequest editReq = validateDefaultXmlAndGenerateEditConfig(adapter, adapterContext);
+                        m_defaultConfigReqMap.putIfAbsent(adapterId, editReq);
                         adapter.setLastUpdateTime(DateTime.now().toDateTime(DateTimeZone.UTC));
+                        m_standardModelRegistrator.onDeployed(adapter, adapterContext);
                     } catch (Exception e) {
-                        LOGGER.error("Error while deploying adapter: " + adapter, e);
-                        throw new LockServiceException(e);
+                        try {
+                            AdapterUtils.logErrorToFile(e.toString(), adapter);
+                        } catch (IOException ex) {
+                            LOGGER.error(String.format(ex.getMessage()));
+                        }
+                        //remove keys from the map
+                        m_adapterContextRegistry.remove(adapterId);
+                        m_adapterMap.remove(adapterId);
+                        m_defaultConfigReqMap.remove(adapterId);
+                        LOGGER.error("Error while deploying adapter: " + adapter.getDeviceAdapterId().toString(), e);
+                        throw new RuntimeException("Error while deploying adapter", e);
                     }
 
                     return null;
@@ -108,7 +150,7 @@ public class AdapterManagerImpl implements AdapterManager {
 
     @Override
     public void undeploy(DeviceAdapter adapter) {
-        LOGGER.info("Undeploying device adapter: " + adapter);
+        LOGGER.info("Undeploying device adapter: " + adapter.getDeviceAdapterId().toString());
         try {
             m_readWriteLockService.executeWithWriteLock(new WriteLockTemplate<Void>() {
                 @Override
@@ -120,10 +162,12 @@ public class AdapterManagerImpl implements AdapterManager {
                         AdapterUtils.removeAdapterLastUpdateTime(adapter.genAdapterLastUpdateTimeKey());
                     } catch (Exception e) {
                         LOGGER.error("Error while undeploying adapter: " + adapter, e);
-                        throw new LockServiceException(e);
+                        throw new RuntimeException(e);
                     }
                     m_adapterMap.remove(deviceAdapterId);
                     m_adapterContextRegistry.remove(deviceAdapterId);
+                    m_defaultConfigReqMap.remove(deviceAdapterId);
+                    m_standardModelRegistrator.onUndeployed(adapter, getAdapterContext(deviceAdapterId));
                     return null;
                 }
             });
@@ -133,14 +177,14 @@ public class AdapterManagerImpl implements AdapterManager {
     }
 
     private void unDeployAdapter(DeviceAdapter adapter) throws ModelNodeInitException {
-        LOGGER.info("undeploying device adapter: " + adapter);
+        LOGGER.info("undeploying device adapter: " + adapter.getDeviceAdapterId().toString());
         String componentId = getComponentId(adapter);
         AdapterContext context = getAdapterContext(new DeviceAdapterId(adapter.getType(),
                 adapter.getInterfaceVersion(), adapter.getModel(), adapter.getVendor()));
         context.getDsmRegistry().undeploy(componentId);
         context.getModelNodeHelperRegistry().undeploy(componentId);
         try {
-            context.getSchemaRegistry().unloadSchemaContext(componentId, Collections.emptySet() , null);
+            context.getSchemaRegistry().unloadSchemaContext(componentId, adapter.getSupportedFeatures(), adapter.getSupportedDevations());
         } catch (Exception e) {
             LOGGER.error("Error while undeploying device adapter " + adapter, e);
             throw new ModelNodeInitException("Error while undeploying device adapter " + adapter, e);
@@ -149,7 +193,7 @@ public class AdapterManagerImpl implements AdapterManager {
     }
 
     private void deployAdapter(DeviceAdapter adapter, AdapterContext adapterContext, String componentId, SubSystem subSystem, Class klass)
-            throws ModelNodeInitException, IOException {
+            throws IOException {
         SchemaRegistry schemaRegistry = adapterContext.getSchemaRegistry();
         SubSystemRegistry subSystemRegistry = adapterContext.getSubSystemRegistry();
         ModelNodeDSMRegistry dsmRegistry = adapterContext.getDsmRegistry();
@@ -168,6 +212,45 @@ public class AdapterManagerImpl implements AdapterManager {
         serviceDeployer.setRootModelNodeAggregator(rootModelNodeAggregator);
         deployModelServices(serviceDeployer, schemaRegistry, subSystem, adapter);
         updateEntityRegistry(componentId, schemaRegistry, klass);
+    }
+
+    private EditConfigRequest validateDefaultXmlAndGenerateEditConfig(DeviceAdapter adapter, AdapterContext adapterContext) {
+        Document defaultXml = fetchDefaultData(adapter);
+        try {
+            Element dataElement = defaultXml.getDocumentElement();
+            List<Element> childElements = DocumentUtils.getChildElements(dataElement);
+            if (childElements.size() > 0) {
+                EditConfigRequest request = new EditConfigRequest()
+                        .setTargetRunning()
+                        .setTestOption(EditConfigTestOptions.SET)
+                        .setErrorOption(EditConfigErrorOptions.STOP_ON_ERROR)
+                        .setConfigElement(new EditConfigElement().setConfigElementContents(childElements));
+                request.setMessageId("internal");
+                request.setConfigElement(new EditConfigElement().setConfigElementContents(childElements));
+                SchemaRegistryImpl stdAdapterSchemaRegistry = getStandardAdapterContext(this, adapter).getSchemaRegistry();
+                RpcRequestConstraintParser parser = new RpcRequestConstraintParser(stdAdapterSchemaRegistry, null, null);
+                parser.validate(request, RequestType.EDIT_CONFIG);
+                //since there is no datastore for adapter, use the defaultXml itself as datastore
+                adapterContext.getDeviceInterface().veto(null, request, defaultXml);
+                return request;
+            } else {
+                LOGGER.info(String.format("The adapter %s does not contain default configurations", adapter.getDeviceAdapterId()));
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Document fetchDefaultData(DeviceAdapter adapter) {
+        Document doc;
+        try (InputStream defaultXml = new ByteArrayInputStream(adapter.getDefaultXmlBytes())) {
+            doc = DocumentUtils.loadXmlDocument(defaultXml);
+        } catch (Exception e) {
+            LOGGER.error("Failed to parse default-config.xml from the adapter: " + adapter.getDeviceAdapterId(), e);
+            throw new RuntimeException("Failed to parse default-config.xml from the adapter " + e);
+        }
+        return doc;
     }
 
     private String getComponentId(DeviceAdapter adapter) {
@@ -194,6 +277,10 @@ public class AdapterManagerImpl implements AdapterManager {
         return m_adapterMap.values();
     }
 
+    @Override
+    public EditConfigRequest getEditRequestForAdapter(DeviceAdapterId adapterId) {
+        return m_defaultConfigReqMap.get(adapterId);
+    }
 
     private void buildSchemaRegistry(SchemaRegistry schemaRegistry, String componentId, DeviceAdapter deviceAdapter) throws IOException {
         try {
@@ -241,4 +328,54 @@ public class AdapterManagerImpl implements AdapterManager {
         }
         return rootNodeMap;
     }
+
+    private boolean isMaxAllowedAdaptersInstalled(DeviceAdapter adapter) {
+        boolean isMaxAdaptersInstalled = false;
+        DeviceAdapterId adapterId = adapter.getDeviceAdapterId();
+        Collection<DeviceAdapter> adapters = getAllDeviceAdapters();
+        int numberOfInstalledAdapterVersions = 0;
+        for (DeviceAdapter deployed : adapters) {
+            DeviceAdapterId deployedAdapterId = deployed.getDeviceAdapterId();
+            if (compareAdapterDetails(adapterId, deployedAdapterId)) {
+                numberOfInstalledAdapterVersions++;
+            }
+        }
+        LOGGER.info(String.format("Number of adapters already installed for the same vendor & model combination:%s",
+                numberOfInstalledAdapterVersions));
+        if (numberOfInstalledAdapterVersions >= m_maxAllowedAdapterVersions) {
+            isMaxAdaptersInstalled = true;
+        }
+        return isMaxAdaptersInstalled;
+    }
+
+    private boolean compareAdapterDetails(DeviceAdapterId adapterId, DeviceAdapterId deployedAdapterId) {
+        return !deployedAdapterId.getModel().equals(AdapterSpecificConstants.STANDARD)
+                && !deployedAdapterId.getVendor().equals(AdapterSpecificConstants.BBF)
+                && deployedAdapterId.getModel().equals(adapterId.getModel()) && deployedAdapterId.getType().equals(adapterId.getType())
+                && deployedAdapterId.getVendor().equals(adapterId.getVendor());
+    }
+
+    private String prepareArchiveName(DeviceAdapter adapter) {
+        return adapter.getVendor() + AdapterSpecificConstants.DASH + adapter.getType() + AdapterSpecificConstants.DASH
+                + adapter.getModel() + AdapterSpecificConstants.DASH + adapter.getInterfaceVersion();
+    }
+
+    private void sendEvent(String fileName) {
+        LOGGER.info("Sending event for Adapter {} ", fileName);
+        Dictionary properties = new Hashtable();
+        properties.put("FileName", fileName);
+        Event event = new Event(EVENT_TOPIC, properties);
+        m_eventAdmin.postEvent(event);
+    }
+
+    private void verifyIfMaxAllowedAdaptersInstalled(DeviceAdapterId adapterId, DeviceAdapter adapter) {
+        if (isMaxAllowedAdaptersInstalled(adapter)) {
+            sendEvent(prepareArchiveName(adapter));
+            adapter.setLastUpdateTime(DateTime.now().toDateTime(DateTimeZone.UTC));
+            throw new RuntimeException(String.format(("Adapter deployment failed!! Reason : maximum allowed versions(%s) "
+                            + "reached for the specified adapter(%s), Uninstall any older version to proceed"),
+                    m_maxAllowedAdapterVersions, adapterId));
+        }
+    }
+
 }

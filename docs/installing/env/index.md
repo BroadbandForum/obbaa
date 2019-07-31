@@ -59,7 +59,7 @@ HDD
 #### Operating System (OS) Requirements
 
 While there isn\'t a strict requirement on the OS needed for the
-project, Ubuntu is the OS in which the core development team uses.\
+project, Ubuntu is the OS in which the core development team uses.
 For the Guest OS in a VM: 64bit Ubuntu 16.04.04 is the recommended
 and either server or desktop versions are supported.
 
@@ -156,28 +156,16 @@ The code base is split across two repositories:
 
 -   obbaa - OB-BAA main repository
 
-##### Key update
-
-To clone OB-BAA code into a server, the user ssh public key needs to
-be updated in the user\'s bitbucket account.
-
-Do the following:
-
--   Open <https://code.broadband-forum.org/account>
-
--   Under SSH Keys add an entry with the public ssh key of the dev
-    server
-
 ##### Clone OB-BAA NETCONF stack repository
 
 ```
-  git clone -b develop --single-branch ssh://git@code.broadband-forum.org:7999/ob-baa/obbaa-netconf-stack.git
+  git clone https://github.com/BroadbandForum/obbaa-netconf-stack.git
 ```
 
 ##### Clone OB-BAA obbaa repository
 
 ```
-  git clone -b develop --single-branch ssh://git@code.broadband-forum.org:7999/ob-baa/obbaa.git
+  git clone https://github.com/BroadbandForum/obbaa.git
 ```
 
 ### Build OB-BAA

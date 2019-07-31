@@ -32,6 +32,8 @@
         <class>org.broadband_forum.obbaa.dmyang.entities.PasswordAuth</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.DbVersion</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.Netconf</class>
+        <class>org.broadband_forum.obbaa.netconf.alarm.entity.Alarm</class>
+        <class>org.broadband_forum.obbaa.netconf.alarm.entity.AlarmDefinitionInfo</class>
 
         <properties>
             <!-- Configuring JDBC properties -->

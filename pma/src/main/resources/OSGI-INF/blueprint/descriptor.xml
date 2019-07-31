@@ -170,6 +170,11 @@
         <argument ref="karService"/>
     </bean>
 
+    <service ref="adapterActionHandler" interface="org.osgi.service.event.EventHandler">
+        <service-properties>
+            <entry key="event.topics" value="com/bbf/obbaa/AdapterManager/Event"/>
+        </service-properties>
+    </service>
 
     <bean id="standardAdapterDeployer" class="org.broadband_forum.obbaa.adapter.StandardAdaptersDeployer" init-method="init">
         <argument ref="nonCodedAdapterService"/>
@@ -186,6 +191,8 @@
           init-method="init" destroy-method="destroy">
         <argument ref="notificationService"/>
         <argument ref="ncConnectionMgr"/>
+        <argument ref="adapterManager"/>
+        <argument ref="pmaRegistry"/>
     </bean>
 
     <bean id="deviceReconnectionNotificationListener" class="org.broadband_forum.obbaa.pma.impl.DeviceReconnectionNotificationListener"
@@ -194,9 +201,14 @@
         <argument ref="ncConnectionMgr"/>
     </bean>
 
+    <bean id="defaultConfigService" class="org.broadband_forum.obbaa.pma.impl.DefaultConfigService" init-method="init" destroy-method="destroy">
+        <argument ref="deviceManager"/>
+        <argument ref="pmaRegistry"/>
+        <argument ref="adapterManager"/>
+    </bean>
+
     <service ref="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry"/>
     <service ref="netconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer"/>
     <service ref="adapterActionHandler" interface="org.broadband_forum.obbaa.adapter.AdapterDeployer"/>
     <service ref="deviceSubsystem" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem"/>
-
 </blueprint>

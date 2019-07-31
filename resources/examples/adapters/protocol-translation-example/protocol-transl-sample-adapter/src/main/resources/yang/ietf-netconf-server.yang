@@ -1,24 +1,34 @@
   module ietf-netconf-server {
-    //yang-version 1.1;
+    yang-version 1.1;
 
     namespace "urn:ietf:params:xml:ns:yang:ietf-netconf-server";
-    prefix "ncserver";
+    prefix "ncs";
 
-    import ietf-inet-types {           // RFC 6991
+    import ietf-inet-types {
       prefix inet;
-    }
-    import ietf-x509-cert-to-name {    // RFC 7407
-      prefix x509c2n;
-    }
-    import ietf-ssh-server {           // RFC VVVV
-      prefix ss;
-      revision-date 2016-03-16;
-    }
-    import ietf-tls-server {           // RFC VVVV
-      prefix ts;
-      revision-date 2016-03-16;
+      reference
+        "RFC 6991: Common YANG Data Types";
     }
 
+    import ietf-x509-cert-to-name {
+      prefix x509c2n;
+      reference
+        "RFC 7407: A YANG Data Model for SNMP Configuration";
+    }
+
+    import ietf-ssh-server {
+      prefix ss;
+      revision-date 2016-11-02; // stable grouping definitions
+      reference
+        "RFC YYYY: SSH Client and Server Models";
+    }
+
+    import ietf-tls-server {
+      prefix ts;
+      revision-date 2016-11-02; // stable grouping definitions
+      reference
+        "RFC ZZZZ: TLS Client and Server Models";
+    }
 
     organization
      "IETF NETCONF (Network Configuration) Working Group";
@@ -51,41 +61,38 @@
       Legal Provisions Relating to IETF Documents
       (http://trustee.ietf.org/license-info).
 
-      This version of this YANG module is part of RFC VVVV; see
+      This version of this YANG module is part of RFC XXXX; see
       the RFC itself for full legal notices.";
 
-    revision "2016-03-16" {
+    revision "2016-11-02" {
       description
        "Initial version";
       reference
-       "RFC VVVV: NETCONF Server and RESTCONF Server Configuration
-                  Models";
+       "RFC XXXX: NETCONF Client and Server Models";
     }
 
 
     // Features
 
+    feature listen {
+      description
+       "The 'listen' feature indicates that the NETCONF server
+        supports opening a port to accept NETCONF client connections
+        using at least one transport (e.g., SSH, TLS, etc.).";
+    }
+
     feature ssh-listen {
       description
-       "The ssh-listen feature indicates that the NETCONF server
+       "The 'ssh-listen' feature indicates that the NETCONF server
         supports opening a port to accept NETCONF over SSH
         client connections.";
       reference
        "RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)";
     }
 
-    feature ssh-call-home {
-      description
-       "The ssh-call-home feature indicates that the NETCONF
-        server supports initiating a NETCONF over SSH call
-        home connection to NETCONF clients.";
-      reference
-       "RFC YYYY: NETCONF Call Home and RESTCONF Call Home";
-    }
-
     feature tls-listen {
       description
-       "The tls-listen feature indicates that the NETCONF server
+       "The 'tls-listen' feature indicates that the NETCONF server
         supports opening a port to accept NETCONF over TLS
         client connections.";
       reference
@@ -94,24 +101,32 @@
                   Authentication";
     }
 
-    feature tls-call-home {
+    feature call-home {
       description
-       "The tls-call-home feature indicates that the NETCONF
-        server supports initiating a NETCONF over TLS call
+       "The 'call-home' feature indicates that the NETCONF server
+        supports initiating NETCONF call home connections to NETCONF
+        clients using at least one transport (e.g., SSH, TLS, etc.).";
+      reference
+       "RFC YYYY: NETCONF Call Home and RESTCONF Call Home";
+    }
+
+    feature ssh-call-home {
+      description
+       "The 'ssh-call-home' feature indicates that the NETCONF
+        server supports initiating a NETCONF over SSH call
         home connection to NETCONF clients.";
       reference
        "RFC YYYY: NETCONF Call Home and RESTCONF Call Home";
     }
 
-    feature ssh-x509-certs {
+    feature tls-call-home {
       description
-        "The ssh-x509-certs feature indicates that the NETCONF
-         server supports RFC 6187";
+       "The 'tls-call-home' feature indicates that the NETCONF
+        server supports initiating a NETCONF over TLS call
+        home connection to NETCONF clients.";
       reference
-        "RFC 6187: X.509v3 Certificates for Secure Shell
-         Authentication";
+       "RFC YYYY: NETCONF Call Home and RESTCONF Call Home";
     }
-
 
 
     // top-level container  (groupings below)
@@ -138,7 +153,7 @@
       }
 
       container listen {
-        //if-feature "(ssh-listen or tls-listen)";
+        if-feature listen;
         description
           "Configures listen behavior";
         leaf max-sessions {
@@ -162,8 +177,6 @@
              notification subscription active are never dropped.";
         }
         list endpoint {
-
-
           key name;
           description
             "List of endpoints to listen for NETCONF connections on.";
@@ -212,9 +225,7 @@
       }
 
       container call-home {
-
-
-        //if-feature "(ssh-call-home or tls-call-home)";
+        if-feature call-home;
         description
           "Configures call-home behavior";
         list netconf-client {
@@ -239,7 +250,7 @@
                    configuration.";
                 uses endpoints-container {
                   refine endpoints/endpoint/port {
-                    default 7777;
+                    default 4334;
                   }
                 }
                 uses ss:non-listening-ssh-server-grouping;
@@ -253,7 +264,7 @@
                    configuration.";
                 uses endpoints-container {
                   refine endpoints/endpoint/port {
-                    default 8888;
+                    default 4335;
                   }
                 }
                 uses ts:non-listening-tls-server-grouping {
@@ -323,10 +334,10 @@
                       type uint8;
                       default 3;
                       description
-                       "Sets the number of maximum number of sequential
-                        keep-alive messages that can fail to obtain a
-                        response from the SSH/TLS client before assuming
-                        the SSH/TLS client is no longer alive.";
+                       "Sets the maximum number of sequential keep-alive
+                        messages that can fail to obtain a response from
+                        the SSH/TLS client before assuming the SSH/TLS
+                        client is no longer alive.";
                     }
                   }
                 }
@@ -337,10 +348,10 @@
                   description
                    "Periodically connect to the NETCONF client, so that
                     the NETCONF client may deliver messages pending for
-                    the NETCONF server.  The NETCONF client is expected
-                    to close the connection when it is ready to release
-                    it, thus starting the NETCONF server's timer until
-                    next connection.";
+                    the NETCONF server.  The NETCONF client must close
+                    the connection when it is ready to release it. Once
+                    the connection has been closed, the NETCONF server
+                    will restart its timer until the next connection.";
                   leaf idle-timeout {
                     type uint16;
                     units "seconds";
@@ -375,12 +386,13 @@
           }
           container reconnect-strategy {
             description
-             "The reconnection strategy guides how a NETCONF server
+             "The reconnection strategy directs how a NETCONF server
               reconnects to a NETCONF client, after discovering its
-              connection to the client has dropped.  The NETCONF
-              server starts with the specified endpoint and tries
-              to connect to it max-attempts times before trying the
-              next endpoint in the list (round robin).";
+              connection to the client has dropped, even if due to a
+              reboot.  The NETCONF server starts with the specified
+              endpoint and tries to connect to it max-attempts times
+              before trying the next endpoint in the list (round
+              robin).";
             leaf start-with {
               type enumeration {
                 enum first-listed {
@@ -448,7 +460,7 @@
           "Container for the list of endpoints.";
         list endpoint {
           key name;
-          //min-elements 1;
+          min-elements 1;
           ordered-by user;
           description
             "User-ordered list of endpoints for this NETCONF client.
@@ -478,4 +490,5 @@
         }
       }
     }
+
   }

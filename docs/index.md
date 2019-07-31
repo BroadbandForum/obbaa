@@ -1,5 +1,5 @@
 <h1>Open Broadband: Broadband Access Abstraction (OB-BAA)</h1>
-<h4>Version 2.0.0</h4>
+<h4>Version 2.1.0</h4>
 
 **Table of Contents**
 
@@ -82,20 +82,21 @@
 
 ### Release 2
 
-* OB-BAA release 2.0.0 (February 2019)
+* [OB-BAA release 2.0.0 (February 2019)]https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_2_0_0)
+* [OB-BAA release 2.1.0 (July 2019)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_2_1_0)
 
 ### Release 1
 
-* OB-BAA release 1.0.0 (July 2018)
-* OB-BAA release 1.1.0 (October 2018)
+* [OB-BAA release 1.0.0 (July 2018)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_1_0_0)
+* [OB-BAA release 1.1.0 (October 2018)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_1_1_0)
 
 ## Participants
 
-| :---: | :---: | :---: | :---: |
-|![Altice](assets/img/altice.jpg){: width="100px" height="80px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|
-|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|
-|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|![TelecomItalia](assets/img/tim.png){: width="100px" height="60px"}|
-|![UNH](assets/img/iol.png){: width="100px" height="45px"}|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="60px"}||
+| :---: | :---: | :---: | :---: | :---: |
+|![Altice](assets/img/altice.jpg){: width="100px" height="80px"}|![ATT](assets/img/att.png){: width="90px" height="80px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|
+|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|
+|![DZS](assets/img/dzs.png){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|![TelecomItalia](assets/img/tim.png){: width="100px" height="60px"}|![UNH](assets/img/iol.png){: width="100px" height="45px"}|
+|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="60px"}||
 
 How to Get Involved
 ===================
@@ -105,8 +106,7 @@ Involvement in OB-BAA requires that you sign the Broadband Forum\'s
 Agreement](https://wiki.broadband-forum.org/download/attachments/37193235/OB-BAA%20CLA%2013Dec2017.pdf?version=1&modificationDate=1516308789992&api=v2)
 (PDF), and then send the signed agreement to:
 
-Name: [Robin
-Mersh](https://wiki.broadband-forum.org/display/~rmersh@broadband-forum.org)
+Name: [Robin Mersh](https://wiki.broadband-forum.org/display/~rmersh@broadband-forum.org)
 (CEO The Broadband Forum)
 
 Email: <rmersh@broadband-forum.org>

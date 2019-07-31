@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>model-translation-example</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </parent>
 
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>model-transl-feature</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <dependencies>
         <dependency>
             <groupId>org.bbf.obbaa</groupId>
@@ -65,6 +65,24 @@
                         </goals>
                         <configuration>
                             <featuresFile>${project.build.directory}/classes/features.xml</featuresFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-and-rename-file</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>rename</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>${project.build.directory}/${artifactId}-${project.version}.kar</sourceFile>
+                            <destinationFile>${project.build.directory}/${adapterVendor}-${adapterType}-${adapterModel}-${adapterVersion}.kar</destinationFile>
                         </configuration>
                     </execution>
                 </executions>

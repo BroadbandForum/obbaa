@@ -16,7 +16,6 @@
 
 package org.broadband_forum.obbaa.aggregator.processor;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,6 +36,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.broadband_forum.obbaa.pma.impl.PmaRegistryImpl;
 import org.junit.BeforeClass;
@@ -135,7 +135,10 @@ public class PmaAdapterTest {
         map.put(netConfResponse, Collections.emptyList());
         when(m_pmaRegistry.executeNC(DEVICE_NAME_A, REQUEST_DEVICE_CONFIG_GET)).thenReturn(map);
         String response = m_pmaAdapter.processRequest(DEVICE_NAME_A, REQUEST_DEVICE_CONFIG_GET);
-        assertEquals(RESPONSE_OK_XML, response);
+//        assertEquals(RESPONSE_OK_XML, response);
+
+        TestUtil.assertXMLEquals(DocumentUtils.stringToDocument(RESPONSE_OK_XML).getDocumentElement(),
+                DocumentUtils.stringToDocument(response).getDocumentElement());
     }
 
     @Test

@@ -1,0 +1,11 @@
+<baa-network-manager:active-alarms xmlns:baa-network-manager="http://www.example.com/network-manager/managed-devices">
+<baa-network-manager:offset>1</baa-network-manager:offset>
+<baa-network-manager:alarm>
+<baa-network-manager:resource>ams:mobject-manager/prefix=XDSL port/ne=myNE/agent=ICAM/relative=R1.S1.LT1.P1</baa-network-manager:resource>
+<baa-network-manager:alarm-type-id>baa-network-manager:testId</baa-network-manager:alarm-type-id>
+<baa-network-manager:alarm-type-qualifier/>
+<baa-network-manager:time>2016-06-15T10:34:57.648+05:30</baa-network-manager:time>
+<baa-network-manager:perceived-severity>critical</baa-network-manager:perceived-severity>
+<baa-network-manager:alarm-text>Test</baa-network-manager:alarm-text>
+</baa-network-manager:alarm>
+</baa-network-manager:active-alarms>

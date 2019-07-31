@@ -107,12 +107,14 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     private PmaServerImpl createPmaServer(Device device) {
         device.getDeviceManagement().setNetconf(AdapterUtils.getAdapter(device, m_adapterManager).getNetconf());
         return new PmaServerImpl(device, m_netconfServer, getDsmAndStore(device), getAdapterContext(device, m_adapterManager),
-                getStandardAdapterContext(device, m_adapterManager), m_deviceFileBaseDirPath);
+                getStandardAdapterContext(m_adapterManager,
+                        AdapterUtils.getAdapter(device, m_adapterManager)), m_deviceFileBaseDirPath);
     }
 
     private Pair<ModelNodeDataStoreManager, DeviceXmlStore> getDsmAndStore(Device device) {
         DeviceXmlStore deviceStore = new DeviceXmlStore(getDeviceStoreFilePath(device.getDeviceName()));
-        AdapterContext adapterContext = getStandardAdapterContext(device, m_adapterManager);
+        AdapterContext adapterContext = getStandardAdapterContext(m_adapterManager,
+                AdapterUtils.getAdapter(device, m_adapterManager));
         SingleXmlObjectDSM<DeviceXmlStore> dsm = new SingleXmlObjectDSM<>(deviceStore, m_persistenceMgrUtil,
                 m_entityRegistry, adapterContext.getSchemaRegistry(), adapterContext.getModelNodeHelperRegistry(),
                 adapterContext.getSubSystemRegistry(), adapterContext.getDsmRegistry());

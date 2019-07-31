@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class DeviceAdapter implements Serializable {
 
+    private byte[] m_defaultXmlBytes;
     private Map<QName, Set<QName>> m_supportedDeviations = new HashMap<>();
     private DeviceAdapterId m_deviceAdapterId;
     private List<String> m_capabilities;
@@ -52,18 +53,20 @@ public class DeviceAdapter implements Serializable {
     private String m_developer;
     private List<Date> m_revisions = new ArrayList<>();
     private Boolean m_isNetconf = true;
+    private String m_stdAdapterIntVersion;
 
     private static final String ADAPT_LAST_UPDATE_TIME_KEY_POSTFIX = ":last-update-time";
 
     protected DeviceAdapter(DeviceAdapterId deviceAdapterId, List<String> capabilities,
                             InputStream deviceXml, Set<QName> supportedFeatures, Map<QName, Set<QName>> supportedDeviations,
-                            Map<URL, InputStream> moduleStream) {
+                            Map<URL, InputStream> moduleStream, byte[] defaultXmlBytes) {
         m_deviceAdapterId = deviceAdapterId;
         m_capabilities = capabilities;
         m_moduleStream = moduleStream;
         m_deviceXml = deviceXml;
         m_supportedFeatures = supportedFeatures;
         m_supportedDeviations = supportedDeviations;
+        m_defaultXmlBytes = defaultXmlBytes;
     }
 
     public void init() {
@@ -74,32 +77,12 @@ public class DeviceAdapter implements Serializable {
         return m_deviceAdapterId;
     }
 
-    public void setDeviceAdapterId(DeviceAdapterId deviceAdapterId) {
-        m_deviceAdapterId = deviceAdapterId;
-    }
-
     public List<String> getCapabilities() {
         return m_capabilities;
     }
 
     public void setCapabilities(List<String> capabilities) {
         m_capabilities = capabilities;
-    }
-
-    public Map<URL, InputStream> getModuleStream() {
-        return m_moduleStream;
-    }
-
-    public void setModuleStream(Map<URL, InputStream> moduleStream) {
-        m_moduleStream = moduleStream;
-    }
-
-    public InputStream getDeviceXml() {
-        return m_deviceXml;
-    }
-
-    public void setDeviceXml(InputStream deviceXml) {
-        m_deviceXml = deviceXml;
     }
 
     public String getType() {
@@ -122,16 +105,12 @@ public class DeviceAdapter implements Serializable {
         return m_supportedFeatures;
     }
 
-    public void setSupportedFeatures(Set<QName> supportedFeatures) {
-        m_supportedFeatures = supportedFeatures;
-    }
-
     public Map<QName, Set<QName>> getSupportedDevations() {
         return m_supportedDeviations;
     }
 
-    public void setSupportedDevations(Map<QName, Set<QName>> supportedDeviations) {
-        this.m_supportedDeviations = supportedDeviations;
+    public byte[] getDefaultXmlBytes() {
+        return m_defaultXmlBytes;
     }
 
     @Override
@@ -192,6 +171,7 @@ public class DeviceAdapter implements Serializable {
             m_deviceAdapterId.setInterfaceVersion(adapter.getInterfaceVersion());
             m_deviceAdapterId.setModel(adapter.getModel());
             m_deviceAdapterId.setVendor(adapter.getVendor());
+            setStdAdapterIntVersion(adapter.getStdAdapterIntVersion());
             setCapabilities(adapter.getCapabilities().getValueList());
             if (adapter.xgetDeveloper() != null) {
                 setDeveloper(adapter.getDeveloper());
@@ -220,14 +200,6 @@ public class DeviceAdapter implements Serializable {
 
     public void addCapability(String capability) {
         m_capabilities.add(capability);
-    }
-
-    public void setModuleStreams(Map<URL, InputStream> moduleStream) {
-        this.m_moduleStream = moduleStream;
-    }
-
-    public Map<URL, InputStream> getModuleStreams() {
-        return m_moduleStream;
     }
 
     public List<YangTextSchemaSource> getModuleByteSources() throws IOException {
@@ -275,6 +247,14 @@ public class DeviceAdapter implements Serializable {
 
     public void setNetconf(Boolean netconf) {
         m_isNetconf = netconf;
+    }
+
+    public String getStdAdapterIntVersion() {
+        return m_stdAdapterIntVersion;
+    }
+
+    public void setStdAdapterIntVersion(String stdAdapterIntVersion) {
+        m_stdAdapterIntVersion = stdAdapterIntVersion;
     }
 }
 

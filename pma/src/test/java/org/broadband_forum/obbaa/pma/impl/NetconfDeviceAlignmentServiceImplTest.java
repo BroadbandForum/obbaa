@@ -85,6 +85,32 @@ public class NetconfDeviceAlignmentServiceImplTest {
         "    </config>\n" +
         "  </copy-config>\n" +
         "</rpc>";
+
+    //windows has different line feed
+    public static final String EDIT_REQ_STR_WINDOWS = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n" +
+            "  <edit-config>\r\n" +
+            "    <target>\r\n" +
+            "      <running />\r\n" +
+            "    </target>\r\n" +
+            "    <test-option>set</test-option>\r\n" +
+            "    <config>\r\n" +
+            "      <some-config xmlns=\"some:ns\"/>\r\n" +
+            "    </config>\r\n" +
+            "  </edit-config>\r\n" +
+            "</rpc>";
+    private static final String CC_REQ_STR_WINDOWS = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n" +
+            "  <copy-config>\r\n" +
+            "    <source>blah<source>\r\n" +
+            "\t<target>\r\n" +
+            "      <running />\r\n" +
+            "    </target>\r\n" +
+            "    <test-option>set</test-option>\r\n" +
+            "    <config>\r\n" +
+            "      <some-config xmlns=\"some:ns\"/>\r\n" +
+            "    </config>\r\n" +
+            "  </copy-config>\r\n" +
+            "</rpc>";
+
     NetconfDeviceAlignmentServiceImpl m_das;
     @Mock
     private EditConfigRequest m_edit1;
@@ -126,6 +152,7 @@ public class NetconfDeviceAlignmentServiceImplTest {
     private DeviceInterface m_deviceInterface;
     @Mock
     private NetConfResponse m_getResponse;
+    private NetConfResponse m_pmaDsGetConfigResponse;
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
@@ -135,17 +162,28 @@ public class NetconfDeviceAlignmentServiceImplTest {
         when(entityDSM.getEntityManager()).thenReturn(entityMgr);
         when(entityMgr.getTransaction()).thenReturn(entityTx);
         when(entityTx.isActive()).thenReturn(true);
-        when(m_edit1.requestToString()).thenReturn(EDIT_REQ_STR);
-        when(m_edit2.requestToString()).thenReturn(EDIT_REQ_STR);
-        when(m_edit3.requestToString()).thenReturn(EDIT_REQ_STR);
-        when(m_edit4.requestToString()).thenReturn(EDIT_REQ_STR);
-        when(m_edit5.requestToString()).thenReturn(EDIT_REQ_STR);
-        when(m_cc.requestToString()).thenReturn(CC_REQ_STR);
+        if (isWindowsSys()) {
+            when(m_edit1.requestToString()).thenReturn(EDIT_REQ_STR_WINDOWS);
+            when(m_edit2.requestToString()).thenReturn(EDIT_REQ_STR_WINDOWS);
+            when(m_edit3.requestToString()).thenReturn(EDIT_REQ_STR_WINDOWS);
+            when(m_edit4.requestToString()).thenReturn(EDIT_REQ_STR_WINDOWS);
+            when(m_edit5.requestToString()).thenReturn(EDIT_REQ_STR_WINDOWS);
+            when(m_cc.requestToString()).thenReturn(CC_REQ_STR_WINDOWS);
+        }
+        else {
+            when(m_edit1.requestToString()).thenReturn(EDIT_REQ_STR);
+            when(m_edit2.requestToString()).thenReturn(EDIT_REQ_STR);
+            when(m_edit3.requestToString()).thenReturn(EDIT_REQ_STR);
+            when(m_edit4.requestToString()).thenReturn(EDIT_REQ_STR);
+            when(m_edit5.requestToString()).thenReturn(EDIT_REQ_STR);
+            when(m_cc.requestToString()).thenReturn(CC_REQ_STR);
+        }
+
         m_deviceInterface = mock(NcCompliantAdapterDeviceInterface.class);
         when(m_manager.getAdapterContext(any())).thenReturn(m_context);
         when(m_context.getDeviceInterface()).thenReturn(m_deviceInterface);
         when(m_deviceInterface.forceAlign(any(), any())).thenReturn(new Pair<>(m_cc, m_responseFutureObject));
-        when(m_deviceInterface.align(any(), any())).thenReturn(m_responseFutureObject);
+        when(m_deviceInterface.align(any(), any(), any())).thenReturn(m_responseFutureObject);
         when(m_ncm.executeNetconf(anyString(), anyObject())).thenReturn(m_responseFutureObject);
         m_okResponse = new NetConfResponse().setOk(true);
         m_okResponse.setMessageId("1");
@@ -205,10 +243,10 @@ public class NetconfDeviceAlignmentServiceImplTest {
         m_das.alignAllDevices();
         assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
         assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
-        verify(m_deviceInterface).align(m_device1, m_edit1);
-        verify(m_deviceInterface).align(m_device2, m_edit2);
-        verify(m_deviceInterface).align(m_device1, m_edit3);
-        verify(m_deviceInterface).align(m_device2, m_edit4);
+        verify(m_deviceInterface).align(m_device1, m_edit1, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface).align(m_device2, m_edit2, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface).align(m_device1, m_edit3, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface).align(m_device2, m_edit4, m_pmaDsGetConfigResponse);
     }
 
     @Test
@@ -216,10 +254,10 @@ public class NetconfDeviceAlignmentServiceImplTest {
         makeDeviceError(m_edit1);
         assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
         assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
-        verify(m_deviceInterface).align(m_device1, m_edit1);
-        verify(m_deviceInterface).align(m_device2, m_edit2);
-        verify(m_deviceInterface, never()).align(m_device1, m_edit3);
-        verify(m_deviceInterface).align(m_device2, m_edit4);
+        verify(m_deviceInterface).align(m_device1, m_edit1, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface).align(m_device2, m_edit2, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface, never()).align(m_device1, m_edit3, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface).align(m_device2, m_edit4, m_pmaDsGetConfigResponse);
     }
 
     @Test
@@ -227,10 +265,10 @@ public class NetconfDeviceAlignmentServiceImplTest {
         makeDeviceTimeout(m_edit1);
         assertEquals(0, m_das.getEditQueue(m_device1.getDeviceName()).size());
         assertEquals(0, m_das.getEditQueue(m_device2.getDeviceName()).size());
-        verify(m_deviceInterface).align(m_device1, m_edit1);
-        verify(m_deviceInterface).align(m_device2, m_edit2);
-        verify(m_deviceInterface, never()).align(m_device1, m_edit3);
-        verify(m_deviceInterface).align(m_device2, m_edit4);
+        verify(m_deviceInterface).align(m_device1, m_edit1, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface).align(m_device2, m_edit2, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface, never()).align(m_device1, m_edit3, m_pmaDsGetConfigResponse);
+        verify(m_deviceInterface).align(m_device2, m_edit4, m_pmaDsGetConfigResponse);
     }
 
     @Test
@@ -257,43 +295,88 @@ public class NetconfDeviceAlignmentServiceImplTest {
     @Test
     public void testErrorDeviceState() throws ExecutionException, NetconfMessageBuilderException {
         makeDeviceError(m_edit1);
-        String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-            "  <edit-config>\n" +
-            "    <target>\n" +
-            "      <running />\n" +
-            "    </target>\n" +
-            "    <test-option>set</test-option>\n" +
-            "    <config>\n" +
-            "      <some-config xmlns=\"some:ns\"/>\n" +
-            "    </config>\n" +
-            "  </edit-config>\n" +
-            "</rpc>,\n" +
-            "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-            "  <rpc-error>\n" +
-            "    <error-type>application</error-type>\n" +
-            "    <error-tag>operation-failed</error-tag>\n" +
-            "    <error-severity>error</error-severity>\n" +
-            "    <error-message>Something went wrong</error-message>\n" +
-            "  </rpc-error>\n" +
-            "</rpc-reply>\n";
+        String expected;
+
+        if (isWindowsSys()) {
+             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n" +
+                    "  <edit-config>\r\n" +
+                    "    <target>\r\n" +
+                    "      <running />\r\n" +
+                    "    </target>\r\n" +
+                    "    <test-option>set</test-option>\r\n" +
+                    "    <config>\r\n" +
+                    "      <some-config xmlns=\"some:ns\"/>\r\n" +
+                    "    </config>\r\n" +
+                    "  </edit-config>\r\n" +
+                    "</rpc>,\r\n" +
+                    "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n" +
+                    "  <rpc-error>\r\n" +
+                    "    <error-type>application</error-type>\r\n" +
+                    "    <error-tag>operation-failed</error-tag>\r\n" +
+                    "    <error-severity>error</error-severity>\r\n" +
+                    "    <error-message>Something went wrong</error-message>\r\n" +
+                    "  </rpc-error>\r\n" +
+                    "</rpc-reply>\r\n";
+        }
+        else {
+             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                    "  <edit-config>\n" +
+                    "    <target>\n" +
+                    "      <running />\n" +
+                    "    </target>\n" +
+                    "    <test-option>set</test-option>\n" +
+                    "    <config>\n" +
+                    "      <some-config xmlns=\"some:ns\"/>\n" +
+                    "    </config>\n" +
+                    "  </edit-config>\n" +
+                    "</rpc>,\n" +
+                    "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+                    "  <rpc-error>\n" +
+                    "    <error-type>application</error-type>\n" +
+                    "    <error-tag>operation-failed</error-tag>\n" +
+                    "    <error-severity>error</error-severity>\n" +
+                    "    <error-message>Something went wrong</error-message>\n" +
+                    "  </rpc-error>\n" +
+                    "</rpc-reply>\n";
+        }
+
         verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(),expected);
     }
 
     @Test
     public void testErrorDeviceStateDueToTimeout() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
         makeDeviceTimeout(m_edit1);
-        String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-            "  <edit-config>\n" +
-            "    <target>\n" +
-            "      <running />\n" +
-            "    </target>\n" +
-            "    <test-option>set</test-option>\n" +
-            "    <config>\n" +
-            "      <some-config xmlns=\"some:ns\"/>\n" +
-            "    </config>\n" +
-            "  </edit-config>\n" +
-            "</rpc>,\n" +
-            "response received : request timed out";
+        String expected;
+
+        if (isWindowsSys()) {
+             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n" +
+                    "  <edit-config>\r\n" +
+                    "    <target>\r\n" +
+                    "      <running />\r\n" +
+                    "    </target>\r\n" +
+                    "    <test-option>set</test-option>\r\n" +
+                    "    <config>\r\n" +
+                    "      <some-config xmlns=\"some:ns\"/>\r\n" +
+                    "    </config>\r\n" +
+                    "  </edit-config>\r\n" +
+                    "</rpc>,\r\n" +
+                    "response received : request timed out";
+        }
+        else {
+             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                    "  <edit-config>\n" +
+                    "    <target>\n" +
+                    "      <running />\n" +
+                    "    </target>\n" +
+                    "    <test-option>set</test-option>\n" +
+                    "    <config>\n" +
+                    "      <some-config xmlns=\"some:ns\"/>\n" +
+                    "    </config>\n" +
+                    "  </edit-config>\n" +
+                    "</rpc>,\n" +
+                    "response received : request timed out";
+        }
+
         verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(),expected);
     }
 
@@ -318,27 +401,53 @@ public class NetconfDeviceAlignmentServiceImplTest {
         makeDeviceError(null);
         m_das.forceAlign(m_device1, m_getResponse);
         verify(m_deviceInterface).forceAlign(m_device1, m_getResponse);
+        String expected;
 
-        String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-            "  <copy-config>\n" +
-            "    <source>blah<source>\n" +
-            "\t<target>\n" +
-            "      <running />\n" +
-            "    </target>\n" +
-            "    <test-option>set</test-option>\n" +
-            "    <config>\n" +
-            "      <some-config xmlns=\"some:ns\"/>\n" +
-            "    </config>\n" +
-            "  </copy-config>\n" +
-            "</rpc>,\n" +
-            "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-            "  <rpc-error>\n" +
-            "    <error-type>application</error-type>\n" +
-            "    <error-tag>operation-failed</error-tag>\n" +
-            "    <error-severity>error</error-severity>\n" +
-            "    <error-message>Something went wrong</error-message>\n" +
-            "  </rpc-error>\n" +
-            "</rpc-reply>\n";
+        if (isWindowsSys()) {
+             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n" +
+                    "  <copy-config>\r\n" +
+                    "    <source>blah<source>\r\n" +
+                    "\t<target>\r\n" +
+                    "      <running />\r\n" +
+                    "    </target>\r\n" +
+                    "    <test-option>set</test-option>\r\n" +
+                    "    <config>\r\n" +
+                    "      <some-config xmlns=\"some:ns\"/>\r\n" +
+                    "    </config>\r\n" +
+                    "  </copy-config>\r\n" +
+                    "</rpc>,\r\n" +
+                    "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n" +
+                    "  <rpc-error>\r\n" +
+                    "    <error-type>application</error-type>\r\n" +
+                    "    <error-tag>operation-failed</error-tag>\r\n" +
+                    "    <error-severity>error</error-severity>\r\n" +
+                    "    <error-message>Something went wrong</error-message>\r\n" +
+                    "  </rpc-error>\r\n" +
+                    "</rpc-reply>\r\n";
+        }
+        else {
+             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                    "  <copy-config>\n" +
+                    "    <source>blah<source>\n" +
+                    "\t<target>\n" +
+                    "      <running />\n" +
+                    "    </target>\n" +
+                    "    <test-option>set</test-option>\n" +
+                    "    <config>\n" +
+                    "      <some-config xmlns=\"some:ns\"/>\n" +
+                    "    </config>\n" +
+                    "  </copy-config>\n" +
+                    "</rpc>,\n" +
+                    "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
+                    "  <rpc-error>\n" +
+                    "    <error-type>application</error-type>\n" +
+                    "    <error-tag>operation-failed</error-tag>\n" +
+                    "    <error-severity>error</error-severity>\n" +
+                    "    <error-message>Something went wrong</error-message>\n" +
+                    "  </rpc-error>\n" +
+                    "</rpc-reply>\n";
+        }
+
         verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(),expected);
 
     }
@@ -348,19 +457,40 @@ public class NetconfDeviceAlignmentServiceImplTest {
         makeDeviceTimeout(null);
         m_das.forceAlign(m_device1, m_getResponse);
         verify(m_deviceInterface).forceAlign(m_device1, m_getResponse);
-        String expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
-            "  <copy-config>\n" +
-            "    <source>blah<source>\n" +
-            "\t<target>\n" +
-            "      <running />\n" +
-            "    </target>\n" +
-            "    <test-option>set</test-option>\n" +
-            "    <config>\n" +
-            "      <some-config xmlns=\"some:ns\"/>\n" +
-            "    </config>\n" +
-            "  </copy-config>\n" +
-            "</rpc>,\n" +
-            "response received : request timed out";
+
+        String expected;
+
+        if (isWindowsSys()) {
+             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\r\n" +
+                    "  <copy-config>\r\n" +
+                    "    <source>blah<source>\r\n" +
+                    "\t<target>\r\n" +
+                    "      <running />\r\n" +
+                    "    </target>\r\n" +
+                    "    <test-option>set</test-option>\r\n" +
+                    "    <config>\r\n" +
+                    "      <some-config xmlns=\"some:ns\"/>\r\n" +
+                    "    </config>\r\n" +
+                    "  </copy-config>\r\n" +
+                    "</rpc>,\r\n" +
+                    "response received : request timed out";
+        }
+        else {
+             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                    "  <copy-config>\n" +
+                    "    <source>blah<source>\n" +
+                    "\t<target>\n" +
+                    "      <running />\n" +
+                    "    </target>\n" +
+                    "    <test-option>set</test-option>\n" +
+                    "    <config>\n" +
+                    "      <some-config xmlns=\"some:ns\"/>\n" +
+                    "    </config>\n" +
+                    "  </copy-config>\n" +
+                    "</rpc>,\n" +
+                    "response received : request timed out";
+        }
+
         verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(), expected);
     }
 
@@ -388,14 +518,19 @@ public class NetconfDeviceAlignmentServiceImplTest {
 
     private void makeDeviceTimeout(EditConfigRequest request) throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
         when(m_deviceInterface.forceAlign(m_device1, m_getResponse)).thenReturn(new Pair<>(m_cc ,m_notOkResponseFuture));
-        when(m_deviceInterface.align(m_device1, request)).thenReturn(m_notOkResponseFuture);
+        when(m_deviceInterface.align(m_device1, request, m_pmaDsGetConfigResponse)).thenReturn(m_notOkResponseFuture);
         when(m_notOkResponseFuture.get()).thenReturn(null);
         m_das.alignAllDevices();
     }
 
     private void makeDeviceError(EditConfigRequest request) throws ExecutionException, NetconfMessageBuilderException {
         when(m_deviceInterface.forceAlign(m_device1, m_getResponse)).thenReturn(new Pair<>(m_cc ,m_notOkResponseFuture));
-        when(m_deviceInterface.align(m_device1, request)).thenReturn(m_notOkResponseFuture);
+        when(m_deviceInterface.align(m_device1, request, m_pmaDsGetConfigResponse)).thenReturn(m_notOkResponseFuture);
         m_das.alignAllDevices();
     }
+
+    private boolean isWindowsSys() {
+        return System.getProperty("os.name").startsWith("Windows");
+    }
+
 }

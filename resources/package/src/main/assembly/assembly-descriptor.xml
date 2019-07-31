@@ -46,7 +46,8 @@
             <outputDirectory>models</outputDirectory>
             <includes>
                 <include>yang/aggregator-yang/*.yang</include>
-                <include>standard-adapters/standard-*.zip</include>
+                <include>standard-adapters/bbf-dpu-standard-*.zip</include>
+                <include>standard-adapters/bbf-olt-standard-*.zip</include>
             </includes>
         </fileSet>
         <fileSet>

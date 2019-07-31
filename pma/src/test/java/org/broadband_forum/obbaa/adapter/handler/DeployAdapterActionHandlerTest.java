@@ -18,6 +18,7 @@ package org.broadband_forum.obbaa.adapter.handler;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -49,17 +50,86 @@ public class DeployAdapterActionHandlerTest {
         m_adapterActionHandler = new DeviceAdapterActionHandlerImpl(m_stagingArea, m_karService);
     }
 
+
     @Test
     public void testDeployCodedAdapter() throws Exception {
-        m_adapterActionHandler.deployAdapter("test/adapter.kar");
-        verify(m_karService).install(m_url);
+        m_adapterActionHandler.deployAdapter("bbf-dpu-4lt-1.0.kar");
+        //  verify(m_karService).install(m_url);
+
+        //the url in windows will be : "file:///D:/home/test/adapter.kar", which will cause the case fail
+        verify(m_karService).install(any());
+    }
+
+    @Test
+    public void testDeployCodedAdapterWrongPattenForVendor() throws Exception {
+        String expectedMessage;
+        expectedMessage = "File name is not in the expected pattern";
+        try {
+            m_adapterActionHandler.deployAdapter("b123b!@#$f)(*&-dpu-4lt-1.0.kar");
+            fail("Expected a runtimeException");
+        } catch (Exception e) {
+            assertTrue("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)", e.getMessage().contains(expectedMessage));
+
+        }
+    }
+
+    @Test
+    public void testDeployCodedAdapterWrongPattenForType() throws Exception {
+        String expectedMessage;
+        expectedMessage = "File name is not in the expected pattern";
+        try {
+            m_adapterActionHandler.deployAdapter("bbf-123!@#$-4lt-10.kar");
+            fail("Expected a runtimeException");
+        } catch (Exception e) {
+            assertTrue("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)", e.getMessage().contains(expectedMessage));
+
+        }
+    }
+
+    @Test
+    public void testDeployCodedAdapterWrongPattenForModel() throws Exception {
+        String expectedMessage;
+        expectedMessage = "File name is not in the expected pattern";
+        try {
+            m_adapterActionHandler.deployAdapter("bbf-olt-4.!lt-1.0.kar");
+            fail("Expected a runtimeException");
+        } catch (Exception e) {
+            assertTrue("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)", e.getMessage().contains(expectedMessage));
+
+        }
+    }
+
+    @Test
+    public void testDeployCodedAdapterWrongPattenForIfversion() throws Exception {
+        String expectedMessage;
+        expectedMessage = "File name is not in the expected pattern";
+        try {
+            m_adapterActionHandler.deployAdapter("bbf-olt-8lt-1234.kar");
+            fail("Expected a runtimeException");
+        } catch (Exception e) {
+            assertTrue("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)", e.getMessage().contains(expectedMessage));
+
+        }
+    }
+
+    @Test
+    public void testDeployCodedAdapterWrongPatten() throws Exception {
+        String expectedMessage;
+        expectedMessage = "File name is not in the expected pattern";
+        try {
+            m_adapterActionHandler.deployAdapter("bbfolt4lt1.0.kar");
+            fail("Expected a runtimeException");
+        } catch (Exception e) {
+            assertTrue("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)", e.getMessage().contains(expectedMessage));
+
+        }
     }
 
     @Test
     public void testDeployAdapterInstallingKarThrowsError() throws Exception {
         doThrow(new RuntimeException("Install error")).when(m_karService).install(m_url);
         try {
-            m_adapterActionHandler.deployAdapter("test/adapter.kar");
+            m_adapterActionHandler.deployAdapter("bbf-dpu-4lt-1.0.kar");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("Install error"));
         }
@@ -67,18 +137,31 @@ public class DeployAdapterActionHandlerTest {
 
     @Test
     public void testUndeployKar() throws Exception {
-        m_adapterActionHandler.undeployAdapter("adapter.kar");
-        verify(m_karService).uninstall("adapter");
+        m_adapterActionHandler.undeployAdapter("bbf-olt-8lt-1.0.kar");
+        verify(m_karService).uninstall("bbf-olt-8lt-1.0");
+    }
+
+    @Test
+    public void testUndeployKarwhenWrongPattern() throws Exception {
+        String expectedMessage;
+        expectedMessage = "File name is not in the expected pattern";
+        try {
+            m_adapterActionHandler.undeployAdapter("bbfolt4lt1.0.kar");
+            fail("Expected a runtimeException");
+        } catch (Exception e) {
+            assertTrue("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)", e.getMessage().contains(expectedMessage));
+
+        }
     }
 
     @Test
     public void testUndeployKarWhichIsNotInstalled() throws Exception {
-        doThrow(new RuntimeException("uninstall error")).when(m_karService).uninstall("adapter");
+        doThrow(new RuntimeException("uninstall error")).when(m_karService).uninstall("bbf-olt-8lt-1.0");
         try {
-            m_adapterActionHandler.undeployAdapter("adapter.kar");
+            m_adapterActionHandler.undeployAdapter("bbf-olt-8lt-1.0.kar");
             fail("Should have failed while uninstalling kar");
         } catch (RuntimeException e) {
-            assertTrue( e.getMessage().contains("uninstall error"));
+            assertTrue(e.getMessage().contains("uninstall error"));
         }
     }
 

@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,6 +57,7 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ModelNodeId;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemValidationException;
 import org.broadband_forum.obbaa.netconf.server.RequestScope;
 import org.broadband_forum.obbaa.netconf.server.RequestTask;
+import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
 import org.broadband_forum.obbaa.pma.DeviceXmlStore;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
@@ -68,6 +70,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 public class DeviceSubsystemTest {
 
@@ -137,7 +140,9 @@ public class DeviceSubsystemTest {
     }
 
     @Test
-    public void testNcSessionMgrIsContactedToRetrieveStateValues() throws GetAttributeException, ExecutionException {
+    public void testNcSessionMgrIsContactedToRetrieveStateValues()
+            throws GetAttributeException, ExecutionException, NetconfMessageBuilderException, IOException,
+            SAXException {
         Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> attributes = getAttributes();
         m_deviceSubsystem.retrieveStateAttributes(attributes, new NetconfQueryParams(UNBOUNDED, true));
         verify(m_deviceInterface).get(eq(m_device), m_requestCaptor.capture());
@@ -161,7 +166,9 @@ public class DeviceSubsystemTest {
                 "    </filter>\n" +
                 "  </get>\n" +
                 "</rpc>";
-        assertEquals(expectedGetRequest, m_requestCaptor.getValue().requestToString().trim());
+//        assertEquals(expectedGetRequest, m_requestCaptor.getValue().requestToString().trim());
+        TestUtil.assertXMLEquals(DocumentUtils.stringToDocument(expectedGetRequest).getDocumentElement(),
+                DocumentUtils.stringToDocument(m_requestCaptor.getValue().requestToString().trim()).getDocumentElement());
     }
 
     private Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> getAttributes() {

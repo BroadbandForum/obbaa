@@ -59,6 +59,8 @@ public class NcCompliantAdapterDeviceInterfaceTest {
     private GetRequest m_getRequest;
     @Mock
     private GetConfigRequest m_getConfigRequest;
+    @Mock
+    private NetConfResponse m_netConfResponse;
 
 
     @Before
@@ -72,7 +74,7 @@ public class NcCompliantAdapterDeviceInterfaceTest {
 
     @Test
     public void testEditConfig() throws ExecutionException {
-        m_deviceInterface.align(m_device, m_editRequest);
+        m_deviceInterface.align(m_device, m_editRequest, m_netConfResponse);
         verify(m_ncm).executeNetconf("testDevice", m_editRequest);
     }
 
@@ -104,6 +106,27 @@ public class NcCompliantAdapterDeviceInterfaceTest {
                 "    </source>\n" +
                 "  </copy-config>\n" +
                 "</rpc>";
+
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            expected = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\r\n" +
+                    "  <copy-config>\r\n" +
+                    "    <target>\r\n" +
+                    "      <running/>\r\n" +
+                    "    </target>\r\n" +
+                    "    <source>\r\n" +
+                    "      <config>\r\n" +
+                    "        <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\r\n" +
+                    "    <if:interface>\r\n" +
+                    "        <if:name>xdsl-line:1/1/1/new</if:name>\r\n" +
+                    "        <if:type xmlns:bbfift=\"urn:broadband-forum-org:yang:bbf-if-type\">bbfift:xdsl</if:type>\r\n" +
+                    "    </if:interface>\r\n" +
+                    "</if:interfaces>\r\n" +
+                    "      </config>\r\n" +
+                    "    </source>\r\n" +
+                    "  </copy-config>\r\n" +
+                    "</rpc>";
+        }
+
         Pair<AbstractNetconfRequest, Future<NetConfResponse>> copyConfigResponse = m_deviceInterface.forceAlign(m_device, getResponse);
         verify(m_ncm).executeNetconf(anyString(), any(CopyConfigRequest.class));
         assertEquals(expected, copyConfigResponse.getFirst().requestToString().trim());
@@ -135,7 +158,7 @@ public class NcCompliantAdapterDeviceInterfaceTest {
     public void testAlignWhenDeviceNotConnected() throws ExecutionException {
         when(m_ncm.isConnected(m_device)).thenReturn(false);
         try {
-            m_deviceInterface.align(m_device, m_editRequest);
+            m_deviceInterface.align(m_device, m_editRequest, m_netConfResponse);
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains(DEVICE_NOT_CONNECTED_TEST_DEVICE));
         }

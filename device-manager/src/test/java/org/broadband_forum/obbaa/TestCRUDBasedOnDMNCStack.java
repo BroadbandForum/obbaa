@@ -93,6 +93,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
+    @Ignore
     public void testEmptyGetconfig() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/getConfigNoDeviceResponse.xml"), getConfig().responseToString());
@@ -100,6 +101,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
+    @Ignore
     public void testCreateAndDeleteDevice() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/ok-response.xml"), createDevice().responseToString());

@@ -1,0 +1,34 @@
+module sample-ietf-interfaces-dev {
+
+  namespace "urn:xxxxx-org:yang:sample-ietf-interfaces-dev";  
+            
+  prefix "itf-dev";
+
+  import ietf-interfaces { prefix if; }
+  import ietf-yang-types { prefix yang; }
+  
+  organization 
+    "TBD";
+    
+  contact 
+    "TBD";
+    
+  description 
+    "Dummy deviation module to test BAA support of deviations
+     Primarily uses 'legal' deviations as defined in bbf2016.707.00
+     A few 'illegal' deviations are added for cmpleteness.";
+  
+  revision 2017-07-05 {
+    description 
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  deviation "/if:interfaces/if:interface/if:description" {
+    deviate add {
+       default "test-deviation";
+    }
+  }  
+
+}

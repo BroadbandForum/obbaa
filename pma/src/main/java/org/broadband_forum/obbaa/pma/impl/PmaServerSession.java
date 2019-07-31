@@ -75,7 +75,16 @@ public class PmaServerSession implements PmaSession {
 
     @Override
     public void align() {
-        m_das.align(m_device);
+        try {
+            PmaServer.setCurrentDevice(m_device);
+            GetConfigRequest getConfig = new GetConfigRequest();
+            getConfig.setSourceRunning();
+            getConfig.setMessageId("internal");
+            Map.Entry<NetConfResponse, List<Notification>> entry = getNetConfResponseListEntry(getConfig);
+            m_das.align(m_device, entry.getKey());
+        } finally {
+            PmaServer.clearCurrentDevice();
+        }
     }
 
     public boolean isActive() {

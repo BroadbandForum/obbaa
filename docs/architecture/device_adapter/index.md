@@ -100,8 +100,7 @@ are pluggable into OB-BAA using the VDA\'s interface.
 
 The VDA that is plugged into OB-BAA has certain requirements. These are:
 
--   The VDA implements the VDA interface is
-    defined [here](#VDAInterface)
+-   The VDA implements the VDA interface is defined [here](#VDAInterface)
 
 -   The VDA provides the complete set of YANG modules that comprise its
     YANG module library
@@ -115,11 +114,6 @@ The VDA that is plugged into OB-BAA has certain requirements. These are:
 
 -   A metadata artifact that contains static information used by the
     Adapter Framework to relate the vendorAN instance with a VDA
-
-**Info:** Future releases of OB-BAA will allow VDAs to define:
-
--   A Default Device Template that defines how to instantiate a device with defaults for all its attributes.
-
 
 ## The Adapter Framework At Work
 
@@ -152,31 +146,36 @@ public interface DeviceInterface {
      * Veto changes if needed based on adapter specific rules.
      *
      * @param device    Device for which the request is dedicated
-     * @param request   request which needs to validated based onn rules
+     * @param request   request which needs to validated based on rules
      * @param dataStore the existing device datastore
      */
-    void veto(Device device, EditConfigRequest request, Document dataStore) throws SubSystemValidationException;
+    void veto(Device device, EditConfigRequest request, Document dataStore)
+    	throws SubSystemValidationException;
  
-    /**
+   /**
      * Send an edit-config request for a device at the SBI side.
      *
      * @param device  Device for which the request is dedicated
      * @param request the edit-config request
+     * @param getConfigResponse the get-config response from PMA data-store for device
      * @return future response
      * @throws ExecutionException throws Execution Exception
      */
-    Future<NetConfResponse> align(Device device, EditConfigRequest request) throws ExecutionException;
+    Future<NetConfResponse> align(Device device, EditConfigRequest request,
+    		NetConfResponse getConfigResponse)
+            throws ExecutionException;
  
     /**
      * Send request to device on first contact scenario at SBI side.
      *
      * @param device Device for which the request is dedicated
-     * @param getConfigResponse get-config response from PMA
+     * @param getConfigResponse get-config response from PMA data-store for device
      * @return pair of request and response
      * @throws NetconfMessageBuilderException throws Netconf Message builder exception
      * @throws ExecutionException             throws Execution Exception
      */
-    Pair<AbstractNetconfRequest, Future<NetConfResponse>> forceAlign(Device device, NetConfResponse getConfigResponse)
+    Pair<AbstractNetconfRequest, Future<NetConfResponse>> 
+    		forceAlign(Device device, NetConfResponse getConfigResponse)
             throws NetconfMessageBuilderException, ExecutionException;
  
     /**
@@ -197,7 +196,8 @@ public interface DeviceInterface {
      * @return future response
      * @throws ExecutionException throws Execution Exception
      */
-    Future<NetConfResponse> getConfig(Device device, GetConfigRequest getConfigRequest) throws ExecutionException;
+    Future<NetConfResponse> getConfig(Device device, GetConfigRequest getConfigRequest)
+    	throws ExecutionException;
  
     /**
      * Get the connection state for the device based on the protocol.
@@ -206,6 +206,14 @@ public interface DeviceInterface {
      * @return Connection State of the device
      */
     ConnectionState getConnectionState(Device device);
+ 
+    /**
+     * Normalize the vendor specific notification coming from the device to the supported notification format.
+     *
+     * @param notification the notification from the device to be normalized
+     * @return the normalized notification
+     */
+    Notification normalizeNotification(Notification notification);
 }
 ```
 

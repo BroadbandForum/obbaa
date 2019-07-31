@@ -47,4 +47,13 @@
     <suppress files="YangLibraryMojo.java" checks="IllegalCatch"/>
     <suppress files="NcCompliantRequestExecutor.java" checks="IllegalCatch"/>
     <suppress files="ProtocolTranslDevInterface.java" checks="IllegalCatch"/>
+    <suppress files="DefaultConfigService.java" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.netconf.alarm.entity.*" checks="MemberName"/>
+    <suppress files="AlarmQueue.java" checks="IllegalCatch"/>
+    <suppress files="AlarmServiceImpl.java" checks="IllegalCatch"/>
+    <suppress files="AlarmDefinitionServiceImpl.java" checks="IllegalCatch"/>
+    <suppress files="AlarmNotificationUtil.java" checks="IllegalCatch"/>
+    <suppress files="DeviceNotificationListener.java" checks="IllegalCatch"/>
+    <suppress files="AlarmUtil.java" checks="LocalVariableName"/>
+    <suppress files="AlarmUtil.java" checks="ParameterName"/>
 </suppressions>

@@ -34,6 +34,7 @@
         <bundle>mvn:org.bbf.obbaa.netconf/netconf-server-modelnode-fwk/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa.netconf/netconf-notification-app/${project.version}</bundle>
 
+        <bundle>mvn:org.bbf.obbaa/netconf-alarm-app/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa/device-adapter-fwk/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa/device-manager-entities/${project.version}</bundle>
         <bundle>mvn:org.bbf.obbaa/sbi-connectors/${project.version}</bundle>

@@ -36,10 +36,11 @@ public interface AdapterSpecificConstants {
     String SLASH = "/";
     String DEFAULT_FEATURES_PATH = "/model/supported-features.txt";
     String DEFAULT_DEVIATIONS_PATH = "/model/supported-deviations.txt";
+    String DEFAULT_CONFIG_XML_PATH = "/model/default-config.xml";
     String COMMA = ",";
     String DPU = "DPU";
     String OLT = "OLT";
     String STANDARD = "standard";
     String BBF = "BBF";
-    String STD_ADAPTER_VERSION = "1.0";
+    String STD_ADAPTER_OLDEST_VERSION = "1.0";
 }

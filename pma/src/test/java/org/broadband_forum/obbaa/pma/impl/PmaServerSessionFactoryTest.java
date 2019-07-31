@@ -25,9 +25,11 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 
+import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
@@ -76,8 +78,8 @@ public class PmaServerSessionFactoryTest {
     private DeviceMgmt m_deviceMgmt;
     @Mock
     private AdapterContext m_adapterContext;
-    @Mock
     DeviceAdapter m_deviceAdapter;
+    private DeviceAdapterId m_deviceAdapterId;
 
     @Before
     public void setUp() throws Exception {
@@ -86,24 +88,28 @@ public class PmaServerSessionFactoryTest {
         String deviceFileBaseDir = m_tempDir.getAbsolutePath();
         m_factory = new PmaServerSessionFactory(deviceFileBaseDir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaRegistry,
                 m_modelNodeDsmRegistry, m_adapterManager);
+        m_deviceAdapterId = new DeviceAdapterId("dpu", "1.0", "standard", "BBF");
+        m_deviceAdapter = AdapterBuilder.createAdapterBuilder()
+                .setDeviceAdapterId(m_deviceAdapterId)
+                .build();
         when(m_dm.getDevice(m_deviceKey)).thenReturn(m_device);
         when(m_device.getDeviceManagement()).thenReturn(m_deviceMgmt);
         when(m_device.getDeviceManagement().getDeviceType()).thenReturn("dpu");
         when(m_device.getDeviceManagement().getDeviceInterfaceVersion()).thenReturn("1.0");
-        when(m_device.getDeviceManagement().getDeviceModel()).thenReturn("4LT");
-        when(m_device.getDeviceManagement().getDeviceVendor()).thenReturn("Vendor1");
+        when(m_device.getDeviceManagement().getDeviceModel()).thenReturn("standard");
+        when(m_device.getDeviceManagement().getDeviceVendor()).thenReturn("BBF");
         when(m_adapterManager.getAdapterContext(any())).thenReturn(m_adapterContext);
-        when(m_adapterManager.getDeviceAdapter(any())).thenReturn(m_deviceAdapter);
+        when(m_adapterManager.getDeviceAdapter(m_deviceAdapterId)).thenReturn(m_deviceAdapter);
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() {
         deleteIfExists(m_tempDir);
         deleteIfExists(m_tempFile);
     }
 
     private void deleteIfExists(File file) {
-        if(file != null && file.exists()){
+        if (file != null && file.exists()) {
             file.delete();
         }
     }
@@ -116,9 +122,9 @@ public class PmaServerSessionFactoryTest {
             new PmaServerSessionFactory(deviceFileBaseDir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaRegistry,
                     m_modelNodeDsmRegistry, m_adapterManager).init();
             fail("Expected an exception to be thrown here");
-        }catch (Exception e){
+        } catch (Exception e) {
             assertTrue(e instanceof RuntimeException);
-            assertEquals(m_tempFile.getAbsolutePath()+" is not a directory", e.getMessage());
+            assertEquals(m_tempFile.getAbsolutePath() + " is not a directory", e.getMessage());
         }
     }
 

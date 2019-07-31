@@ -22,29 +22,37 @@ import java.util.concurrent.ExecutionException;
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.ConnectionListener;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
-import org.broadband_forum.obbaa.netconf.api.client.NotificationListener;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
-import org.broadband_forum.obbaa.netconf.client.notification.NetconfNotificationListener;
+import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.joda.time.DateTime;
 
 public class DeviceReconnectionNotificationAction implements ConnectionListener {
 
     private static final Logger LOGGER = Logger.getLogger(DeviceReconnectionNotificationAction.class);
+    private final PmaRegistry m_pmaRegistry;
 
 
     private NotificationService m_notificationService;
 
     private NetconfConnectionManager m_netconfConnectionManager;
+    private AdapterManager m_adapterManager;
 
     public DeviceReconnectionNotificationAction(NotificationService notificationService,
-                                                NetconfConnectionManager netconfConnectionManager) {
+                                                NetconfConnectionManager netconfConnectionManager, AdapterManager adapterManager,
+                                                PmaRegistry pmaRegistry) {
         m_notificationService = notificationService;
         m_netconfConnectionManager = netconfConnectionManager;
+        m_adapterManager = adapterManager;
+        m_pmaRegistry = pmaRegistry;
     }
 
     public void init() {
@@ -78,18 +86,24 @@ public class DeviceReconnectionNotificationAction implements ConnectionListener 
         LOGGER.info(String.format("Device %s disconnected closing subscription %s", device, session));
     }
 
-    private void createSubscriptionToDevice(NetconfClientSession clientSession, final Device deviceRefId, boolean isReplaySupported) throws
+    private void createSubscriptionToDevice(NetconfClientSession clientSession, final Device device, boolean isReplaySupported) throws
             NetconfMessageBuilderException, InterruptedException, ExecutionException {
         NetConfResponse response = null;
-        NotificationListener subscriber = new NetconfNotificationListener();
+        DeviceAdapterId deviceAdapterId = new DeviceAdapterId(device.getDeviceManagement().getDeviceType(),
+                device.getDeviceManagement().getDeviceInterfaceVersion(), device.getDeviceManagement().getDeviceModel(),
+                device.getDeviceManagement().getDeviceVendor());
+        AdapterContext adapterContext = AdapterUtils.getAdapterContext(device, m_adapterManager);
+
+        DeviceNotificationListener subscriber = new DeviceNotificationListener(device, deviceAdapterId, m_notificationService,
+                adapterContext, m_pmaRegistry);
+
         Date timeOfLastSentEvent = NetconfResources.parseDateTime("1970-01-01T00:00:00+00:00").toDate();
         String timeFormat = NetconfResources.DATE_TIME_WITH_TZ_WITHOUT_MS.print(new DateTime(timeOfLastSentEvent));
         response = m_notificationService
                 .createSubscriptionWithCallback(clientSession, timeFormat,
-                        subscriber, deviceRefId.getDeviceName(), isReplaySupported);
+                        subscriber, device, isReplaySupported);
         if (response.isOk()) {
             LOGGER.info("Create Subscription Successful");
         }
     }
-
 }

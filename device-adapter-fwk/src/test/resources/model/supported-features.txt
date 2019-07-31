@@ -1,4 +1,3 @@
-(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision=2016-11-02)listen
-(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision=2016-11-02)ssh-listen
-(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision=2016-11-02)tls-listen
-(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision=2016-11-02)call-home
+(urn:ietf:params:xml:ns:yang:ietf-interfaces?revision=2014-05-08)arbitrary-names
+(urn:ietf:params:xml:ns:yang:ietf-interfaces?revision=2014-05-08)pre-provisioning
+(urn:ietf:params:xml:ns:yang:ietf-interfaces?revision=2014-05-08)if-mib

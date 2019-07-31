@@ -20,5 +20,7 @@ OB-BAA:
 
 -   [Creation and deployment of Vendor Device Adapters](dvda/index.md#dvda)
 
+-   [Using NETCONF Event Notifications in the BAA layer](notif/index.md#notif)
+
 [<--Installing OB-BAA](../installing/index.md#installing)
     

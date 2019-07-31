@@ -28,6 +28,12 @@
                availability="mandatory"/>
     <reference id="deviceDao" interface="org.broadband_forum.obbaa.dmyang.dao.DeviceDao" availability="mandatory"/>
     <reference id="adapterManager" interface="org.broadband_forum.obbaa.device.adapter.AdapterManager" availability="mandatory"/>
+    <reference id="timerManager" interface="org.broadband_forum.obbaa.netconf.server.model.notification.TimerManager"
+               availability="mandatory"/>
+    <reference id="notificationService" interface="org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService"
+               availability="mandatory"/>
+    <reference id="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry" availability="mandatory"/>
+    <reference id="lockService" interface="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService" availability="mandatory"/>
 
     <bean id="deviceManager" class="org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl">
         <argument ref="deviceDao"/>
@@ -36,23 +42,6 @@
 
 
     <reference id="datasource" interface="javax.sql.DataSource" filter="(osgi.jndi.service.name=baa)" availability="mandatory"/>
-
-    <bean id="lockService" class="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl"/>
-
-    <bean id="schemaMountRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.schema.support.SchemaMountRegistryImpl"/>
-    <bean id="schemaRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl">
-        <argument>
-            <list/>
-        </argument>
-        <argument>
-            <set/>
-        </argument>
-        <argument>
-            <map/>
-        </argument>
-        <argument ref="lockService"/>
-        <property name="schemaMountRegistry" ref="schemaMountRegistry"/>
-    </bean>
 
     <bean id="modelNodeHelperRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistryImpl">
         <argument ref="schemaRegistry"/>
@@ -245,21 +234,7 @@
 
     <bean id="netconfLogger" class="org.broadband_forum.obbaa.netconf.api.logger.DefaultNetconfLogger"/>
 
-    <bean id="timerManager" class="org.broadband_forum.obbaa.dm.impl.TimerMgrImpl"/>
-
-    <bean id="notificationService" class="org.broadband_forum.obbaa.netconf.server.model.notification.NotificationServiceImpl">
-        <argument ref="streamList"/>
-        <argument ref="notificationLogger"/>
-        <argument ref="timerManager"/>
-        <argument ref="nbiNotificationsCounterInterceptor"/>
-        <argument>
-            <bean class="java.util.concurrent.Executors" factory-method="newCachedThreadPool">
-            </bean>
-        </argument>
-        <argument ref="netconfLogger"/>
-    </bean>
-
-    <bean id="notificationSubsystem" class="org.broadband_forum.obbaa.netconf.server.model.notification.NotificationSubSystem">
+   <bean id="notificationSubsystem" class="org.broadband_forum.obbaa.netconf.server.model.notification.NotificationSubSystem">
         <argument ref="notificationService"/>
         <argument ref="notificationLogger"/>
     </bean>
@@ -327,5 +302,4 @@
             <entry key="component" value="dm"/>
         </service-properties>
     </service>
-    <service ref="notificationService" interface="org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService"/>
 </blueprint>

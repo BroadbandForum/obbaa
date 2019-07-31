@@ -1,1 +1,1 @@
-(urn:ietf:params:xml:ns:yang:ietf-interfaces?revision=2014-05-08)ietf-interfaces,(urn:xxxxx-org:yang:test-ietf-interfaces-dev?revision=2017-07-05)test-ietf-interfaces-dev
+(urn:ietf:params:xml:ns:yang:ietf-interfaces?revision=2014-05-08)ietf-interfaces,(urn:xxxxx-org:yang:test-ietf-interfaces-dev?revision=2017-07-05)sample-ietf-interfaces-dev

@@ -66,6 +66,7 @@
                            <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:channel-termination</if:type>
                            <bbf-xpon:channel-termination xmlns:bbf-xpon="urn:bbf:yang:bbf-xpon">
                               <bbf-xpon:channel-pair-ref>channelpair.1</bbf-xpon:channel-pair-ref>
+                              <bbf-xpon:channel-termination-type xmlns:bbf-xpon-types="urn:bbf:yang:bbf-xpon-types">bbf-xpon-types:xgs</bbf-xpon:channel-termination-type>
                               <bbf-xpon:xgs-pon-id>1</bbf-xpon:xgs-pon-id>
                            </bbf-xpon:channel-termination>
                         </if:interface>

@@ -1,0 +1,14 @@
+<alarms:alarm-notification xmlns:alarms="urn:ietf:params:xml:ns:yang:ietf-alarms">
+    <alarms:alarm>
+        <alarms:resource
+                xmlns:baa="http://www.example.com/network-manager/baa">/baa:network-manager/baa-network-manager:new-devices/baa-network-manager:new-device[baa-network-manager:identification-method=duid][baa-network-manager:identification-value=R1.S1.LT1.P1.ONT1]
+        </alarms:resource>
+        <alarms:alarm-type-id>
+            baa-network-manager:device-alarm
+        </alarms:alarm-type-id>
+        <alarms:alarm-type-qualifier>xyz-al:xdsl-fe-los</alarms:alarm-type-qualifier>
+        <alarms:time>2016-11-07T17:45:02.004+05:30</alarms:time>
+        <alarms:perceived-severity>major</alarms:perceived-severity>
+        <alarms:alarm-text>dummyText</alarms:alarm-text>
+    </alarms:alarm>
+</alarms:alarm-notification>

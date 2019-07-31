@@ -1,0 +1,75 @@
+module sample-alarm-types {
+    yang-version 1.1;
+     namespace "urn:xxxxx:ns:yang:sample-alarms-types";
+     prefix samp-al;
+
+     import ietf-alarms {
+         prefix al;
+     }
+
+      organization
+       "model-translation";
+
+      contact
+        "Web : TBD
+         Help e-mail : TBD
+         Editor : TBD  ";
+
+      description
+        "This module provides the details of supported alarm types for example model translation";
+
+      revision 2019-07-12 {
+         description
+            "TBD";
+         reference
+            "TBD";
+      }
+
+      identity sample-alarms {
+          base al:alarm-type-id;
+          description
+             "Sample alarm type definitions";
+      }
+      
+      identity communication-alarm {
+          base sample-alarms;
+          description
+            "Abstract alarm type for communication alarms";
+      }
+          
+      identity equipment-alarm {
+          base sample-alarms;
+          description
+            "Abstract alarm type for equipment alarms";
+      }
+
+      identity environmental-alarm {
+          base sample-alarms;
+          description
+            "Abstract alarm type for environmental alarms";
+      }
+
+      identity alarm-type1 {
+          base communication-alarm;
+          description
+            "Concrete alarm of type communication alarm for testing";
+      }
+
+      identity alarm-type2 {
+          base communication-alarm;
+          description
+            "Concrete alarm of type communication alarm for testing";
+      }
+
+      identity alarm-type3 {
+          base equipment-alarm;
+          description
+            "Concrete alarm of type equipment alarm for testing";
+      }
+
+      identity alarm-type4 {
+          base environmental-alarm;
+          description
+            "Concrete alarm of type environmental alarm for testing";
+      }
+}

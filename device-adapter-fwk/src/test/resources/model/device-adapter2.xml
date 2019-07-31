@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<Adapter type="ADAPTER2" interfaceVersion="2.0" model="8LT" vendor="VENDOR2"
+<Adapter type="DPU" interfaceVersion="2.0" model="8LT" vendor="VENDOR2"
          xmlns="http://www.bbf.org/obbaa/schemas/adapter/1.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.bbf.org/obbaa/schemas/adapter/1.0

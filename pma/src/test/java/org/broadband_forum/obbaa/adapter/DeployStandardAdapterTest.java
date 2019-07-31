@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import org.apache.commons.io.FileUtils;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService;
@@ -110,6 +111,10 @@ public class DeployStandardAdapterTest {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         String sourceYangsDirName = cl.getResource(zipArchivePath).getFile();
 
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            sourceYangsDirName = sourceYangsDirName.substring(1);
+        }
+
         Path sourcePath = Paths.get(sourceYangsDirName);
         Path destinationPath = Paths.get(stagingAreaPath + stagedAreaArchivePath);
         //overwrite existing file, if exists
@@ -120,15 +125,14 @@ public class DeployStandardAdapterTest {
         Files.copy(sourcePath, destinationPath, options);
     }
 
-
     @After
     public void teardown() throws Exception {
         deleteIfExists(m_tempDir);
     }
 
-    private void deleteIfExists(File file) {
+    private void deleteIfExists(File file) throws IOException {
         if (file != null && file.exists()) {
-            file.delete();
+            FileUtils.deleteDirectory(file);
         }
     }
 }

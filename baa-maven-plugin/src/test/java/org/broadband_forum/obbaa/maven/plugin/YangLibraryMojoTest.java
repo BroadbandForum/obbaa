@@ -57,6 +57,9 @@ public class YangLibraryMojoTest  extends PlexusTestCase {
         YangLibraryMojo mojo = setupMojo();
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         String yangLibFile = cl.getResource("model/deviationmissing-yang-library.xml").getFile();
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            yangLibFile = yangLibFile.substring(1); //for windows adapt
+        }
         mojo.setEnableForTesting(true);
         mojo.setYangLibFilePath(yangLibFile);
         try {

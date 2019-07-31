@@ -16,6 +16,13 @@
 
 package org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.api;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.bind.JAXBException;
+
 import org.broadband_forum.obbaa.aggregator.api.DeviceManagementProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.impl.SingleDeviceRequest;
@@ -23,8 +30,8 @@ import org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl.AggregatorUtils;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc.RpcOperationType;
 import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.Device;
-import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.NetworkManager;
 import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.ManagedDevices;
+import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.NetworkManager;
 import org.broadband_forum.obbaa.aggregator.jaxb.utils.JaxbUtils;
 import org.broadband_forum.obbaa.aggregator.processor.AggregatorMessage;
 import org.broadband_forum.obbaa.aggregator.processor.NetconfMessageUtil;
@@ -35,12 +42,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import javax.xml.bind.JAXBException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Network-manager YANG model message.
@@ -317,14 +318,19 @@ public class NetworkManagerRpc {
     /**
      * Create a element of managed-devices.
      *
-     * @param managedDeviceDocument Current document
+     * @param document Current document
      * @return Element
      */
-    private static Element buildManagedDevicesElement(Document managedDeviceDocument) {
-        Element managedDevices = managedDeviceDocument.createElement("managed-devices");
-        managedDevices.setAttribute("xmlns", NetworkManagerRpc.NAMESPACE);
-
+    private static Element buildManagedDevicesElement(Document document) {
+        Element managedDevices = document.createElement("managed-devices");
         return managedDevices;
+    }
+
+    private static Element buildNetworkMgrElement(Document document) {
+        Element networkMgrElement = document.createElement("network-manager");
+        networkMgrElement.setAttribute("xmlns", NetworkManagerRpc.NAMESPACE);
+
+        return networkMgrElement;
     }
 
     /**
@@ -395,14 +401,16 @@ public class NetworkManagerRpc {
         NetConfResponse netConfResponse = new NetConfResponse().setMessageId(
                 getNetconfRpcMessage().getRpc().getMessageId());
 
-        Document managedDeviceDocument = DocumentUtils.createDocument();
-        Element managedDevicesElement = buildManagedDevicesElement(managedDeviceDocument);
+        Document document = DocumentUtils.createDocument();
+        Element networkMgrElement = buildNetworkMgrElement(document);
+        Element managedDevicesElement = buildManagedDevicesElement(document);
+        networkMgrElement.appendChild(managedDevicesElement);
         for (Map.Entry<Document, String> entry : responses.entrySet()) {
             Document oneResponseDocument = entry.getKey();
-            buildDeviceElementWithInfo(managedDeviceDocument, managedDevicesElement, entry.getValue(), oneResponseDocument);
+            buildDeviceElementWithInfo(document, managedDevicesElement, entry.getValue(), oneResponseDocument);
         }
 
-        netConfResponse.addDataContent(managedDevicesElement);
+        netConfResponse.addDataContent(networkMgrElement);
         return netConfResponse.responseToString();
     }
 

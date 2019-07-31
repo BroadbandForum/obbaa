@@ -147,10 +147,63 @@
         <property name="netconfServer" ref="netconfServer"/>
     </bean>
 
+    <bean id="notificationLogger" class="org.broadband_forum.obbaa.netconf.server.model.notification.NotificationLoggerImpl">
+        <constructor-arg>
+            <list/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="nbiNotificationsCounterInterceptor" class="org.broadband_forum.obbaa.netconf.stack.DefaultNcNotificationCounterService"/>
+
+    <bean id="netconfLogger" class="org.broadband_forum.obbaa.netconf.api.logger.DefaultNetconfLogger"/>
+
+    <bean id="notificationService" class="org.broadband_forum.obbaa.netconf.server.model.notification.NotificationServiceImpl">
+        <constructor-arg>
+            <list/>
+        </constructor-arg>
+        <constructor-arg ref="notificationLogger"/>
+        <constructor-arg>
+            <null/>
+        </constructor-arg>
+        <constructor-arg >
+            <bean class="java.util.concurrent.Executors" factory-method="newCachedThreadPool">
+            </bean>
+        </constructor-arg>
+        <constructor-arg ref="netconfLogger" />
+        <constructor-arg ref="nbiNotificationsCounterInterceptor" />
+    </bean>
+
+    <bean id="transactionService" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService">
+    </bean>
+
+    <bean id="internalAlarmService" class="org.broadband_forum.obbaa.netconf.alarm.service.DefaultInternalAlarmServiceImpl">
+        <constructor-arg ref="schemaRegistry" />
+        <constructor-arg ref="persistenceMgrUtil" />
+        <constructor-arg ref="annotationBasedDSM" />
+        <constructor-arg ref="notificationService" />
+        <constructor-arg ref="transactionService" />
+    </bean>
+
+
+    <bean id="alarmQueue" class="org.broadband_forum.obbaa.netconf.alarm.service.AlarmQueue">
+        <constructor-arg ref="internalAlarmService" />
+    </bean>
+
+    <bean id="alarmService" class="org.broadband_forum.obbaa.netconf.alarm.service.AlarmServiceImpl">
+        <constructor-arg ref="persistenceMgrUtil" />
+        <constructor-arg ref="alarmQueue" />
+    </bean>
+
+    <bean id="standardModelRegistrator" class="org.broadband_forum.obbaa.device.registrator.impl.StandardModelRegistrator">
+        <constructor-arg ref="notificationService" />
+        <constructor-arg ref="alarmService" />
+    </bean>
+
     <bean id="adapterMgr" class="org.broadband_forum.obbaa.device.adapter.impl.AdapterManagerImpl">
         <constructor-arg ref="annotationBasedDSM"/>
         <constructor-arg ref="lockService"/>
         <constructor-arg ref="entityRegistry"/>
+        <constructor-arg ref="standardModelRegistrator" />
     </bean>
 
     <bean id="deviceManagementSubSystem" class="org.broadband_forum.obbaa.dm.DeviceManagementSubsystem">

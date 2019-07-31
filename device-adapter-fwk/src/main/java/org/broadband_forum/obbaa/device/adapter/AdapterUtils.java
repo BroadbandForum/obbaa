@@ -20,13 +20,29 @@ import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DPU;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.OLT;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD;
-import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STD_ADAPTER_VERSION;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STD_ADAPTER_OLDEST_VERSION;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import org.broadband_forum.obbaa.device.adapter.util.SystemProperty;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public final class AdapterUtils {
+
+    private static final String LOG_FILE_FOLDER = File.separator + "baa" + File.separator + "stores" + File.separator
+            + "deviceAdapter" + File.separator;
+    private static final String LOG_FILE = "errorEvents";
+    private static final String LOG_FILE_PATH = LOG_FILE_FOLDER + File.separator + LOG_FILE;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdapterUtils.class);
 
     private AdapterUtils() {
 
@@ -38,22 +54,34 @@ public final class AdapterUtils {
                 device.getDeviceManagement().getDeviceModel(), device.getDeviceManagement().getDeviceVendor()));
     }
 
-    public static AdapterContext getStandardAdapterContext(Device dev, AdapterManager adapterManager) {
-        if (dev.getDeviceManagement().getDeviceType().equalsIgnoreCase(DPU)) {
-            AdapterContext adapterContext = adapterManager.getAdapterContext(new DeviceAdapterId(DPU, STD_ADAPTER_VERSION, STANDARD, BBF));
+    public static AdapterContext getStandardAdapterContext(AdapterManager adapterManager, DeviceAdapter deviceAdapter) {
+        String adapterType = deviceAdapter.getType();
+        if (deviceAdapter.getStdAdapterIntVersion() != null
+                && !deviceAdapter.getModel().equals(STANDARD) && !deviceAdapter.getVendor().equals(BBF)) {
+            return getStdAdapterContext(adapterType, adapterManager, deviceAdapter.getStdAdapterIntVersion());
+
+        } else if (deviceAdapter.getStdAdapterIntVersion() == null
+                && !deviceAdapter.getModel().equals(STANDARD) && !deviceAdapter.getVendor().equals(BBF)) {
+            return getStdAdapterContext(adapterType, adapterManager, STD_ADAPTER_OLDEST_VERSION);
+        } else {
+            //device is std
+            return getStdAdapterContext(adapterType, adapterManager, deviceAdapter.getInterfaceVersion());
+        }
+
+    }
+
+    private static AdapterContext getStdAdapterContext(String adapterType, AdapterManager adapterManager, String adapterVersion) {
+        if (adapterType.equalsIgnoreCase(DPU) || adapterType.equalsIgnoreCase(OLT)) {
+            AdapterContext adapterContext = adapterManager.getAdapterContext(new DeviceAdapterId(adapterType,
+                    adapterVersion, STANDARD, BBF));
             if (adapterContext == null) {
-                throw new RuntimeException("no standard adapterContext deployed for : " + dev.getDeviceManagement().getDeviceType());
-            }
-            return adapterContext;
-        } else if (dev.getDeviceManagement().getDeviceType().equalsIgnoreCase(OLT)) {
-            AdapterContext adapterContext = adapterManager.getAdapterContext(new DeviceAdapterId(OLT, STD_ADAPTER_VERSION, STANDARD, BBF));
-            if (adapterContext == null) {
-                throw new RuntimeException("no standard adapterContext deployed for : " + dev.getDeviceManagement().getDeviceType());
+                throw new RuntimeException("no standard adapterContext deployed for : " + adapterType);
             }
             return adapterContext;
         } else {
-            throw new RuntimeException("no standard adapter found for this type of device : " + dev.getDeviceManagement().getDeviceType());
-        } //Clean this up later for generic
+            throw new RuntimeException("no standard adapter found for this type of device : " + adapterType);
+        }
+
     }
 
     public static String updateAdapterLastUpdateTime(String key, DateTime now) {
@@ -81,5 +109,34 @@ public final class AdapterUtils {
         return adapterManager.getDeviceAdapter(new DeviceAdapterId(
                 device.getDeviceManagement().getDeviceType(), device.getDeviceManagement().getDeviceInterfaceVersion(),
                 device.getDeviceManagement().getDeviceModel(), device.getDeviceManagement().getDeviceVendor()));
+    }
+
+    public static EditConfigRequest getDefaultEditReq(Device device, AdapterManager adapterManager) {
+        return adapterManager.getEditRequestForAdapter(new DeviceAdapterId(
+                device.getDeviceManagement().getDeviceType(), device.getDeviceManagement().getDeviceInterfaceVersion(),
+                device.getDeviceManagement().getDeviceModel(), device.getDeviceManagement().getDeviceVendor()));
+    }
+
+    private static void createLogFile() throws IOException {
+        File logFile = new File(LOG_FILE_PATH);
+        if (!logFile.exists()) {
+            Boolean result = logFile.createNewFile();
+            LOGGER.info(String.format("creation of file:%s in path %s result %s", LOG_FILE, LOG_FILE_FOLDER, result));
+        }
+    }
+
+    public static void logErrorToFile(String exception, DeviceAdapter adapter) throws IOException {
+        createLogFile();
+        DeviceAdapterId adapterId = new DeviceAdapterId(adapter.getType(), adapter.getInterfaceVersion(),
+                adapter.getModel(), adapter.getVendor());
+        final DateTime now = DateTime.now();
+        String timeStamp = now.withZone(DateTimeZone.UTC).toString();
+        String eventLog = timeStamp + ":" + exception + ":" + adapterId.toString();
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(LOG_FILE_PATH, true))) {
+            LOGGER.info(String.format("Logging Exception to file : %s ", LOG_FILE));
+            bw.append(eventLog);
+            bw.append(System.lineSeparator());
+            bw.newLine();
+        }
     }
 }
