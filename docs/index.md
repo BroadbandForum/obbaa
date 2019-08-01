@@ -82,7 +82,7 @@
 
 ### Release 2
 
-* [OB-BAA release 2.0.0 (February 2019)]https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_2_0_0)
+* [OB-BAA release 2.0.0 (February 2019)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_2_0_0)
 * [OB-BAA release 2.1.0 (July 2019)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_2_1_0)
 
 ### Release 1
