@@ -19,11 +19,12 @@
 if [ "${bamboo_shortPlanName}" == "OBBAA-Develop" ]
 then
     echo "current branch is ${bamboo_repository_git_branch} pushing the resources to artifactory"
-    curl --insecure -X PUT -u ${bamboo_artifactory_userName}:${bamboo_artifactory_password} -T target/obbaa-resources-1.0.0-SNAPSHOT.zip "https://registry.broadband-forum.org/artifactory/obbaa-resources-develop/obbaa-resources-${bamboo.obbaa.current.release}-${bamboo.repository.git.branch}_${bamboo.buildNumber}.zip"
+    curl -X PUT -u ${bamboo_artifactory_userName}:${bamboo_artifactory_password} -T target/obbaa-resources-${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber}.zip "https://registry.broadband-forum.org/artifactory/obbaa-resources-develop/obbaa-resources-${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber}.zip"
+
 elif [ "${bamboo_shortPlanName}" == "OBBAA-master" ]
 then
     echo "current branch is ${bamboo_repository_git_branch} pushing the resources to artifactory"
-    curl --insecure -X PUT -u ${bamboo_artifactory_userName}:${bamboo_artifactory_password} -T target/obbaa-resources-${bamboo.obbaa.current.release}.zip "https://registry.broadband-forum.org/artifactory/obbaa-resources-master/obbaa-resources-${bamboo.obbaa.current.release}-${bamboo.repository.git.branch}_${bamboo.buildNumber}.zip"
+    curl -X PUT -u ${bamboo_artifactory_userName}:${bamboo_artifactory_password} -T target/obbaa-resources-${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber}.zip "https://registry.broadband-forum.org/artifactory/obbaa-resources-master/obbaa-resources-${bamboo_obbaa_current_release}-${bamboo_repository_git_branch}_${bamboo_buildNumber}.zip"
 else
     echo "current branch ${bamboo_repository_git_branch} is a feature branch, ignoring artifacts to be pushed to artifactory"
 fi

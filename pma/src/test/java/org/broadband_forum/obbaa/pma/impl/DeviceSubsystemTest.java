@@ -102,9 +102,12 @@ public class DeviceSubsystemTest {
     @Mock
     private DeviceXmlStore m_backupStore;
     @Captor
-    ArgumentCaptor<Document> m_documentCaptor;
-
+    ArgumentCaptor<Document> m_updatedDsCaptor;
+    @Captor
+    ArgumentCaptor<Document> m_oldDsCaptor;
     private List<ChangeNotification> m_changeNotifications = new ArrayList<>();
+    private static final String UPDATED_DS = "<updated-ds/>";
+    private static final String OLD_DS = "<old-ds/>";
 
     @Before
     public void setUp() throws ExecutionException {
@@ -113,17 +116,16 @@ public class DeviceSubsystemTest {
         m_leaf1 = QName.create("urn:ietf:ns", "leaf1");
         m_leaf2 = QName.create("urn:ietf:ns", "leaf2");
         m_deviceSubsystem = new DeviceSubsystem(m_das, m_schemaReg, m_adapterManager);
-        String dummyXml = "<some-xml/>";
         PmaServer.setCurrentDevice(m_device);
         PmaServer.setCurrentDeviceXmlStore(m_deviceStore);
         PmaServer.setBackupDeviceXmlStore(m_backupStore);
-        when(m_deviceStore.getDeviceXml()).thenReturn(dummyXml);
+        when(m_deviceStore.getDeviceXml()).thenReturn(UPDATED_DS);
+        when(m_backupStore.getDeviceXml()).thenReturn(OLD_DS);
         when(m_device.getDeviceManagement()).thenReturn(m_devMgmt);
         m_deviceInterface = mock(NcCompliantAdapterDeviceInterface.class);
         when(m_adapterManager.getAdapterContext(any())).thenReturn(m_context);
         when(m_context.getDeviceInterface()).thenReturn(m_deviceInterface);
         when(m_deviceInterface.get(any(), any())).thenReturn(m_netconfResponse);
-        when(m_backupStore.getDeviceXml()).thenReturn("<test/>");
     }
 
     @After
@@ -198,20 +200,24 @@ public class DeviceSubsystemTest {
     public void testPreCommitChanged() throws SubSystemValidationException, NetconfMessageBuilderException {
         RequestScope.getCurrentScope().putInCache(RequestTask.CURRENT_REQ, m_request);
         m_deviceSubsystem.notifyPreCommitChange(m_changeNotifications);
-        verify(m_deviceInterface).veto(eq(m_device), eq(m_request), m_documentCaptor.capture());
-        assertEquals("<some-xml/>", DocumentUtils.documentToPrettyString(m_documentCaptor.getValue()).trim());
+        verify(m_deviceInterface).veto(eq(m_device), eq(m_request), m_updatedDsCaptor.capture(), m_oldDsCaptor.capture());
+        assertEquals(OLD_DS, DocumentUtils.documentToPrettyString(m_updatedDsCaptor.getValue()).trim());
+        assertEquals(UPDATED_DS, DocumentUtils.documentToPrettyString(m_oldDsCaptor.getValue()).trim());
     }
 
     @Test
-    public void testPreCommitChangedVetoThrowsException() throws SubSystemValidationException {
+    public void testPreCommitChangedVetoThrowsException() throws SubSystemValidationException, NetconfMessageBuilderException {
         RequestScope.getCurrentScope().putInCache(RequestTask.CURRENT_REQ, m_request);
-        doThrow(new SubSystemValidationException("Veto threw exception")).when(m_deviceInterface).veto(eq(m_device), eq(m_request), m_documentCaptor.capture());
+        doThrow(new SubSystemValidationException("Veto threw exception")).when(m_deviceInterface).veto(eq(m_device), eq(m_request),
+                m_updatedDsCaptor.capture(), m_oldDsCaptor.capture());
         try {
             m_deviceSubsystem.notifyPreCommitChange(m_changeNotifications);
+            assertEquals(UPDATED_DS, DocumentUtils.documentToPrettyString(m_updatedDsCaptor.getValue()).trim());
+            assertEquals(OLD_DS, DocumentUtils.documentToPrettyString(m_oldDsCaptor.getValue()).trim());
             fail("Should have failed");
         } catch (SubSystemValidationException e) {
             assertEquals("Veto threw exception", e.getMessage());
-            verify(m_deviceStore).setDeviceXml("<test/>");
+            verify(m_deviceStore).setDeviceXml(OLD_DS);
         }
     }
 }

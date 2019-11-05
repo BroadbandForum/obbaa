@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>adapters</artifactId>
-        <version>2.1.0</version>
+        <version>${obbaa-release.version}</version>
     </parent>
 
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>model-translation-example</artifactId>
-    <version>2.1.0</version>
+    <version>${obbaa-release.version}</version>
     <packaging>pom</packaging>
 
     <modules>

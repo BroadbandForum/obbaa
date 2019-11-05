@@ -140,9 +140,10 @@ public class ModelTranslDeviceInterface implements DeviceInterface {
     }
 
     @Override
-    public void veto(Device device, EditConfigRequest request, Document dataStore) throws SubSystemValidationException {
+    public void veto(Device device, EditConfigRequest request, Document oldDataStore, Document updatedDataStore)
+            throws SubSystemValidationException {
         try {
-            String dataStoreString = DocumentUtils.documentToPrettyString(dataStore.getDocumentElement());
+            String dataStoreString = DocumentUtils.documentToPrettyString(updatedDataStore.getDocumentElement());
             /* String check is done in this class because it is just a sample VDA. Essentially a DOM/Xpath
                  evaluation should be used */
             if ((StringUtils.countMatches(dataStoreString, "<interface>") > 3)

@@ -19,7 +19,7 @@
     <action xmlns="urn:ietf:params:xml:ns:yang:1">
         <deploy-adapter xmlns="urn:bbf:yang:obbaa:device-adapters">
             <deploy>
-                <adapter-archive>protocol-transl-feature-2.1.0.kar</adapter-archive>
+                <adapter-archive>sample-DPU-protocoltls-1.0.kar</adapter-archive>
             </deploy>
         </deploy-adapter>
     </action>

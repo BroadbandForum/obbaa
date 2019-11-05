@@ -28,6 +28,7 @@ services:
             - "5005:5005"
             - "9292:9292"
             - "4335:4335"
+            - "162:162/udp"
         environment:
             - BAA_USER=admin
             - BAA_USER_PASSWORD=password

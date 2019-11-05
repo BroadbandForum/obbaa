@@ -1,5 +1,5 @@
 <h1>Open Broadband: Broadband Access Abstraction (OB-BAA)</h1>
-<h4>Version 2.1.0</h4>
+<h4>Version 2.1.1</h4>
 
 **Table of Contents**
 
@@ -82,13 +82,13 @@
 
 ### Release 2
 
-* [OB-BAA release 2.0.0 (February 2019)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_2_0_0)
-* [OB-BAA release 2.1.0 (July 2019)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_2_1_0)
+* [OB-BAA release 2.0.0 (February 2019)]({{ site.obbaa_readme }}#rel_2_0_0)
+* [OB-BAA release 2.1.0 (July 2019)]({{ site.obbaa_readme }}#rel_2_1_0)
 
 ### Release 1
 
-* [OB-BAA release 1.0.0 (July 2018)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_1_0_0)
-* [OB-BAA release 1.1.0 (October 2018)](https://github.com/BroadbandForum/obbaa/blob/master/README.md#rel_1_1_0)
+* [OB-BAA release 1.0.0 (July 2018)]({{ site.obbaa_readme }}#rel_1_0_0)
+* [OB-BAA release 1.1.0 (October 2018)]({{ site.obbaa_readme }}#rel_1_1_0)
 
 ## Participants
 

@@ -51,6 +51,7 @@ import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemValidationException;
+import org.broadband_forum.obbaa.pma.NonNCNotificationHandler;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -75,9 +76,11 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
             + "  <ok/>\n"
             + "</rpc-reply>";
     private Session m_session = null;
+    private final NonNCNotificationHandler m_nonNCNotificationHandler;
 
-    public ProtocolTranslDevInterface(Bundle bundle) {
+    public ProtocolTranslDevInterface(Bundle bundle, NonNCNotificationHandler nonNCNotificationHandler) {
         m_bundle = bundle;
+        m_nonNCNotificationHandler = nonNCNotificationHandler;
     }
 
     @Override
@@ -114,9 +117,10 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
     }
 
     @Override
-    public void veto(Device device, EditConfigRequest request, Document dataStore) throws SubSystemValidationException {
+    public void veto(Device device, EditConfigRequest request, Document oldDataStore, Document updatedDataStore)
+            throws SubSystemValidationException {
         try {
-            String dataStoreString = DocumentUtils.documentToPrettyString(dataStore.getDocumentElement());
+            String dataStoreString = DocumentUtils.documentToPrettyString(updatedDataStore.getDocumentElement());
             if ((StringUtils.countMatches(dataStoreString, "<interface>") > 3)
                    || (StringUtils.countMatches(dataStoreString, "<if:interface>") > 3)) {
                 throw new SubSystemValidationException(new NetconfRpcError(
@@ -222,5 +226,17 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
             LOGGER.error("Error while aligning with device");
             throw new RuntimeException("Error while aligning with device");
         }
+    }
+
+    /**
+     * This is a dummy implementation when a notification is received. When a notification is received, the notification must be
+     * converted to a netconf notification. This notification along with ip and string of the device should call
+     * m_nonNCNotificationHandler.handleNotification().
+     * @param ip : ip of the device from which notification is received
+     * @param port : port of the device from which notification is received
+     * @param notification : Notification received from the device
+     */
+    private void notificationReceived(String ip, String port, Notification notification) {
+        m_nonNCNotificationHandler.handleNotification(ip, port, notification);
     }
 }

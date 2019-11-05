@@ -132,19 +132,26 @@ public class DeviceSubsystem extends AbstractSubSystem {
     public void notifyPreCommitChange(List<ChangeNotification> changeNotificationList) throws
             SubSystemValidationException {
         Device device = PmaServer.getCurrentDevice();
-        DeviceXmlStore deviceStore = PmaServer.getCurrentDeviceXmlStore();
-        Document document;
+        DeviceXmlStore updatedDeviceStore = PmaServer.getCurrentDeviceXmlStore();
+        DeviceXmlStore oldDataStore = PmaServer.getBackupDeviceXmlStore();
+        Document updatedDataStoreDoc = null;
+        Document oldDataStoreDoc = null;
         try {
-            document = DocumentUtils.stringToDocument(deviceStore.getDeviceXml());
+            if (updatedDeviceStore.getDeviceXml() != null && !updatedDeviceStore.getDeviceXml().isEmpty()) {
+                updatedDataStoreDoc = DocumentUtils.stringToDocument(updatedDeviceStore.getDeviceXml());
+            }
+            if (oldDataStore.getDeviceXml() != null && !oldDataStore.getDeviceXml().isEmpty()) {
+                oldDataStoreDoc = DocumentUtils.stringToDocument(oldDataStore.getDeviceXml());
+            }
         } catch (NetconfMessageBuilderException e) {
             throw new RuntimeException(e.getMessage());
         }
         DeviceInterface deviceInterface = AdapterUtils.getAdapterContext(device, m_adapterManager).getDeviceInterface();
         try {
             deviceInterface.veto(device, (EditConfigRequest) RequestScope.getCurrentScope().getFromCache(CURRENT_REQ),
-                    document);
+                    oldDataStoreDoc, updatedDataStoreDoc);
         } catch (SubSystemValidationException e) {
-            deviceStore.setDeviceXml(PmaServer.getBackupDeviceXmlStore().getDeviceXml());
+            updatedDeviceStore.setDeviceXml(oldDataStore.getDeviceXml());
             throw e;
 
         }

@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>baa-root-pom</artifactId>
-    <version>2.1.0</version>
+    <version>${obbaa-release.version}</version>
     <packaging>pom</packaging>
     <name>Broadband Access Abstraction</name>
 
@@ -42,12 +42,13 @@
     </modules>
 
     <properties>
+        <obbaa-release.version>2.1.1</obbaa-release.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <java.source.version>1.8</java.source.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
         <docker-maven-plugin.version>0.4.3</docker-maven-plugin.version>
-        <netconf-lib.version>2.1.0</netconf-lib.version>
-        <netconf-fwk.version>2.1.0</netconf-fwk.version>
+        <netconf-lib.version>${obbaa-release.version}</netconf-lib.version>
+        <netconf-fwk.version>${obbaa-release.version}</netconf-fwk.version>
         <maven.install-plugin.version>2.4</maven.install-plugin.version>
         <maven-dependency-plugin.version>3.0.0</maven-dependency-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>

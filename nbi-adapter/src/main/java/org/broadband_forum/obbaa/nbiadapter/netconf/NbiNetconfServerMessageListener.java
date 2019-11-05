@@ -235,6 +235,8 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
 
     @Override
     public void onCreateSubscription(NetconfClientInfo info, NetconfRpcRequest req, ResponseChannel responseChannel) {
+        logRpc(info, req);
+
         m_coreNetconfServer.onCreateSubscription(info, req, responseChannel);
     }
 

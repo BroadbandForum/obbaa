@@ -69,12 +69,13 @@ public interface DeviceInterface {
 
     /**
      * Veto changes if needed based on adapter specific rules.
-     *
      * @param device    Device for which the request is dedicated
      * @param request   request which needs to validated based on rules
-     * @param dataStore the existing device datastore
+     * @param oldDataStore the PMA data-store for the device as before the edit-config
+     * @param updatedDataStore the current PMA data-store for the device
      */
-    void veto(Device device, EditConfigRequest request, Document dataStore) throws SubSystemValidationException;
+    void veto(Device device, EditConfigRequest request, Document oldDataStore, Document updatedDataStore)
+            throws SubSystemValidationException;
 
     /**
      * Send a get-config request to device at SBI Side.

@@ -18,6 +18,7 @@
     <reference id="adapterManager" interface="org.broadband_forum.obbaa.device.adapter.AdapterManager" availability="mandatory"/>
     <reference id="deviceSubsystem" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem" availability="mandatory"/>
     <reference id="ncConnectionMgr" interface="org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager" availability="mandatory"/>
+    <reference id="nonNCNotificationHandler" interface="org.broadband_forum.obbaa.pma.NonNCNotificationHandler" availability="mandatory"/>
 
     <bean id="codedAdapterServiceImpl" class="org.broadband_forum.obbaa.device.adapter.CodedAdapterServiceImpl" init-method="deployAdapter" destroy-method="unDeployAdapter">
         <argument ref="adapterManager"/>
@@ -31,7 +32,7 @@
 
     <bean id="modelAdapter" class="org.broadband_forum.obbaa.protocol.tls.ProtocolTranslDevInterface">
         <argument ref="blueprintBundle"/>
+        <argument ref="nonNCNotificationHandler"/>
     </bean>
-
 
 </blueprint>

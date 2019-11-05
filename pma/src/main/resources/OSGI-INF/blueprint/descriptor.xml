@@ -207,8 +207,16 @@
         <argument ref="adapterManager"/>
     </bean>
 
+    <bean id="nonNCNotificationHandler" class="org.broadband_forum.obbaa.pma.impl.NonNCNotificationHandlerImpl">
+        <argument ref="notificationService"/>
+        <argument ref="adapterManager"/>
+        <argument ref="pmaRegistry"/>
+        <argument ref="deviceManager"/>
+    </bean>
+
     <service ref="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry"/>
     <service ref="netconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer"/>
     <service ref="adapterActionHandler" interface="org.broadband_forum.obbaa.adapter.AdapterDeployer"/>
     <service ref="deviceSubsystem" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem"/>
+    <service ref="nonNCNotificationHandler" interface="org.broadband_forum.obbaa.pma.NonNCNotificationHandler"/>
 </blueprint>

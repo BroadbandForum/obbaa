@@ -28,6 +28,8 @@ public class OnuStateChangeCallbackRegistrator implements StandardAdapterModelRe
     private static final Logger LOGGER = LoggerFactory.getLogger(OnuStateChangeCallbackRegistrator.class);
     public static final String ONU_STATE_CHANGE_NS = "urn:bbf:yang:bbf-xpon-onu-states";
     public static final String ONU_STATE_CHANGE_NOTIFICATION = "onu-state-change";
+    public static final String ONU_STATES_MODULE_NAME = "bbf-xpon-onu-states";
+    public static final String ONU_STATES_REVISION = "2019-02-25";
     private NotificationService m_notificationService;
     private static final String BBF_ONU_STATE_CAP_FORMAT = "%s?module=%s&revision=%s";
     private static final String BBF_ONU_STATE_CAP_FORMAT_NO_REV = "%s?module=%s";
@@ -45,18 +47,29 @@ public class OnuStateChangeCallbackRegistrator implements StandardAdapterModelRe
         if (module != null) {
             String moduleNS = module.getNamespace().toString();
             String moduleName = module.getName();
-            Optional<Revision> dpuModuleRevision = module.getQNameModule().getRevision();
-            LOGGER.debug(String.format("Registering onuStateChangeCallBack if not already registered while adapter %s deployment",
-                    deviceAdapterId));
-            if (m_callbackMapPerAdapter.get(deviceAdapterId) == null) {
-                List<NotificationCallBackInfo> notificationCallBackInfos = createNotificationCallBackInfo(moduleNS,
-                        moduleName, dpuModuleRevision, adapter, adapterContext);
-                m_notificationService.registerCallBack(notificationCallBackInfos);
-                LOGGER.info(String.format("notification callback is registered for the notification namespace %s for adapter %s",
-                        moduleNS, deviceAdapterId));
-            }
+            Optional<Revision> moduleRevision = module.getQNameModule().getRevision();
+            registerNotificationCallback(adapter, adapterContext, deviceAdapterId, moduleNS, moduleName, moduleRevision);
         } else {
-            LOGGER.warn("No matching bbf-xpon-onu-states module found for adapter: " + deviceAdapterId);
+            //FIXME: This is a workaround for adding the callback to VDA (olt) which may not have the module
+            if ("OLT".equalsIgnoreCase(adapter.getType())) {
+                registerNotificationCallback(adapter, adapterContext, deviceAdapterId, ONU_STATE_CHANGE_NS, ONU_STATES_MODULE_NAME,
+                        Optional.of(Revision.of(ONU_STATES_REVISION)));
+            } else {
+                LOGGER.warn("No matching bbf-xpon-onu-states module found for adapter: " + deviceAdapterId);
+            }
+        }
+    }
+
+    private void registerNotificationCallback(DeviceAdapter adapter, AdapterContext adapterContext, DeviceAdapterId deviceAdapterId,
+                                              String moduleNS, String moduleName, Optional<Revision> moduleRevision) {
+        LOGGER.debug(String.format("Registering onuStateChangeCallBack if not already registered while adapter %s deployment",
+                deviceAdapterId));
+        if (m_callbackMapPerAdapter.get(deviceAdapterId) == null) {
+            List<NotificationCallBackInfo> notificationCallBackInfos = createNotificationCallBackInfo(moduleNS,
+                    moduleName, moduleRevision, adapter, adapterContext);
+            m_notificationService.registerCallBack(notificationCallBackInfos);
+            LOGGER.info(String.format("notification callback is registered for the notification namespace %s for adapter %s",
+                    moduleNS, deviceAdapterId));
         }
     }
 

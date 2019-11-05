@@ -132,11 +132,11 @@ public class ModelTranslDeviceInterfaceTest {
         m_configElement.setConfigElementContents(m_rootElements);
         m_editRequest.setConfigElement(m_configElement);
         //verify veto passes without any exception
-        m_deviceInterface.veto(m_device, m_editRequest, DocumentUtils.stringToDocument(FileUtil.loadAsString("/veto-less-than-3-ints.xml")));
+        m_deviceInterface.veto(m_device, m_editRequest, null, DocumentUtils.stringToDocument(FileUtil.loadAsString("/veto-less-than-3-ints.xml")));
 
         //verify veto fails when more than 3 instances exist in the datastore
         try {
-            m_deviceInterface.veto(m_device, m_editRequest, DocumentUtils.stringToDocument(FileUtil.loadAsString("/veto-more-than-3-ints.xml")));
+            m_deviceInterface.veto(m_device, m_editRequest,null, DocumentUtils.stringToDocument(FileUtil.loadAsString("/veto-more-than-3-ints.xml")));
         } catch (SubSystemValidationException e) {
             assertEquals(THE_MAXIMUM_INSTANCES_WHICH_CAN_BE_CREATED_FOR_INTERFACES_IS_3, e.getMessage());
         }
@@ -153,7 +153,7 @@ public class ModelTranslDeviceInterfaceTest {
         m_configElement.setConfigElementContents(m_rootElements);
         m_editRequest.setConfigElement(m_configElement);
         try {
-            m_deviceInterface.veto(m_device, m_editRequest, DocumentUtils.stringToDocument(FileUtil.loadAsString("/veto-less-than-3-ints.xml")));
+            m_deviceInterface.veto(m_device, m_editRequest,null, DocumentUtils.stringToDocument(FileUtil.loadAsString("/veto-less-than-3-ints.xml")));
         } catch (SubSystemValidationException e) {
             assertEquals(INT_NAME_EXCEEDS_10_CHARACTERS, e.getMessage());
         }
@@ -161,7 +161,7 @@ public class ModelTranslDeviceInterfaceTest {
         //NetconfMessageBuilder Exception during veto
         doThrow(new NetconfMessageBuilderException("Simply throw exception")).when(m_configElement).getXmlElement();
         try {
-            m_deviceInterface.veto(m_device, m_editRequest, DocumentUtils.stringToDocument(FileUtil.loadAsString("/veto-less-than-3-ints.xml")));
+            m_deviceInterface.veto(m_device, m_editRequest, null, DocumentUtils.stringToDocument(FileUtil.loadAsString("/veto-less-than-3-ints.xml")));
         } catch (SubSystemValidationException e) {
             assertEquals("Error occurred during veto", e.getMessage());
         }

@@ -82,7 +82,8 @@ public class NcCompliantAdapterDeviceInterface implements DeviceInterface {
     }
 
     @Override
-    public void veto(Device device, EditConfigRequest request, Document dataStore) throws SubSystemValidationException {
+    public void veto(Device device, EditConfigRequest request, Document oldDataStore, Document updatedDataStore)
+            throws SubSystemValidationException {
 
     }
 

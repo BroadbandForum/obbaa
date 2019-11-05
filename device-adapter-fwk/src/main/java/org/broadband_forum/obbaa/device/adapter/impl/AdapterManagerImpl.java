@@ -17,6 +17,7 @@
 package org.broadband_forum.obbaa.device.adapter.impl;
 
 import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getStandardAdapterContext;
+import static org.broadband_forum.obbaa.netconf.api.util.DocumentUtils.createDocument;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -230,8 +231,8 @@ public class AdapterManagerImpl implements AdapterManager {
                 SchemaRegistryImpl stdAdapterSchemaRegistry = getStandardAdapterContext(this, adapter).getSchemaRegistry();
                 RpcRequestConstraintParser parser = new RpcRequestConstraintParser(stdAdapterSchemaRegistry, null, null);
                 parser.validate(request, RequestType.EDIT_CONFIG);
-                //since there is no datastore for adapter, use the defaultXml itself as datastore
-                adapterContext.getDeviceInterface().veto(null, request, defaultXml);
+                //since there is no datastore for adapter, use the defaultXml itself as updated datastore and for old ds, dummy document
+                adapterContext.getDeviceInterface().veto(null, request, createDocument(), defaultXml);
                 return request;
             } else {
                 LOGGER.info(String.format("The adapter %s does not contain default configurations", adapter.getDeviceAdapterId()));

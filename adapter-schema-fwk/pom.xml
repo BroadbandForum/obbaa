@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>2.1.0</version>
+        <version>${obbaa-release.version}</version>
     </parent>
 
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>adapter-schema-fwk</artifactId>
-    <version>2.1.0</version>
+    <version>${obbaa-release.version}</version>
     <name>Broadband Access Abstraction/Adapter Schema Framework</name>
 
     <dependencies>

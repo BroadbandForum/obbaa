@@ -100,7 +100,21 @@ are pluggable into OB-BAA using the VDA\'s interface.
 
 The VDA that is plugged into OB-BAA has certain requirements. These are:
 
--   The VDA implements the VDA interface is defined [here](#VDAInterface)
+-   The VDA implements the VDA interface that is defined [here](#VDAInterface).  
+	VDA's that are not based on the NETCONF protocol need to include the following interface so that notifications received and forwarded for a device.
+	```
+	public interface NonNCNotificationHandler {
+	
+	    /**
+	     * This api must be called by VDA when a notification is received.
+	     * @param ip : ip of the device from which notification is received
+	     * @param port : port of the device from which notification is received
+	     * @param notification : Notification received from the device
+	     */
+	    void handleNotification(String ip, String port, Notification notification);
+	
+	}
+	```
 
 -   The VDA provides the complete set of YANG modules that comprise its
     YANG module library
@@ -137,20 +151,19 @@ command as it processes through the Adapter Framework:
 
 ## Vendor Device Adapter Interface<a name="VDAInterface"></a>
 
-The following the interface for that each instance of a VDA implements
-to work in the Adapter Framework.
+The following interface is implemented by instances of a VDA in order to work within the Adapter Framework.
 
 ```
 public interface DeviceInterface {
    /**
      * Veto changes if needed based on adapter specific rules.
-     *
      * @param device    Device for which the request is dedicated
      * @param request   request which needs to validated based on rules
-     * @param dataStore the existing device datastore
+     * @param oldDataStore the PMA data-store for the device as before the edit-config
+     * @param updatedDataStore the current PMA data-store for the device
      */
-    void veto(Device device, EditConfigRequest request, Document dataStore)
-    	throws SubSystemValidationException;
+    void veto(Device device, EditConfigRequest request, Document oldDataStore, Document updatedDataStore)
+            throws SubSystemValidationException;
  
    /**
      * Send an edit-config request for a device at the SBI side.
@@ -161,8 +174,7 @@ public interface DeviceInterface {
      * @return future response
      * @throws ExecutionException throws Execution Exception
      */
-    Future<NetConfResponse> align(Device device, EditConfigRequest request,
-    		NetConfResponse getConfigResponse)
+    Future<NetConfResponse> align(Device device, EditConfigRequest request, NetConfResponse getConfigResponse)
             throws ExecutionException;
  
     /**
@@ -174,8 +186,7 @@ public interface DeviceInterface {
      * @throws NetconfMessageBuilderException throws Netconf Message builder exception
      * @throws ExecutionException             throws Execution Exception
      */
-    Pair<AbstractNetconfRequest, Future<NetConfResponse>> 
-    		forceAlign(Device device, NetConfResponse getConfigResponse)
+    Pair<AbstractNetconfRequest, Future<NetConfResponse>> forceAlign(Device device, NetConfResponse getConfigResponse)
             throws NetconfMessageBuilderException, ExecutionException;
  
     /**
@@ -196,8 +207,7 @@ public interface DeviceInterface {
      * @return future response
      * @throws ExecutionException throws Execution Exception
      */
-    Future<NetConfResponse> getConfig(Device device, GetConfigRequest getConfigRequest)
-    	throws ExecutionException;
+    Future<NetConfResponse> getConfig(Device device, GetConfigRequest getConfigRequest) throws ExecutionException;
  
     /**
      * Get the connection state for the device based on the protocol.

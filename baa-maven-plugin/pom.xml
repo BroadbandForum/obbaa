@@ -23,11 +23,11 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>2.1.0</version>
+        <version>${obbaa-release.version}</version>
     </parent>
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>baa-maven-plugin</artifactId>
-    <version>2.1.0</version>
+    <version>${obbaa-release.version}</version>
     <packaging>maven-plugin</packaging>
     <name>BAA/Maven plugin</name>
 

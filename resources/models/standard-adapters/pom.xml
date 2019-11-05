@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>models</artifactId>
-        <version>2.1.0</version>
+        <version>${obbaa-release.version}</version>
     </parent>
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>standard-adapters</artifactId>
-    <version>2.1.0</version>
+    <version>${obbaa-release.version}</version>
     <name>OB-BAA/Resources/Models/Standard Adapters</name>
 
     <build>
