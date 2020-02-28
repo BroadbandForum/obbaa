@@ -1,0 +1,29 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <data>
+    <baa-network-manager:network-manager xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager">
+      <baa-network-manager:managed-devices>
+        <baa-network-manager:device>
+          <baa-network-manager:name>deviceA</baa-network-manager:name>
+          <baa-network-manager:device-management>
+            <baa-network-manager:interface-version>1.0.0</baa-network-manager:interface-version>
+            <baa-network-manager:push-pma-configuration-to-device>true</baa-network-manager:push-pma-configuration-to-device>
+            <baa-network-manager:type>OLT</baa-network-manager:type>
+            <baa-network-manager:vendor>sample</baa-network-manager:vendor>
+            <baa-network-manager:device-connection>
+              <baa-network-manager:connection-model>snmp</baa-network-manager:connection-model>
+              <baa-network-manager:snmp-auth>
+                <baa-network-manager:snmp-authentication>
+                  <baa-network-manager:address>192.168.169.1</baa-network-manager:address>
+                  <baa-network-manager:agent-port>161</baa-network-manager:agent-port>
+                  <baa-network-manager:trap-port>162</baa-network-manager:trap-port>
+                  <baa-network-manager:snmp-version>v2c</baa-network-manager:snmp-version>
+                  <baa-network-manager:community-string>public</baa-network-manager:community-string>
+                </baa-network-manager:snmp-authentication>
+              </baa-network-manager:snmp-auth>
+            </baa-network-manager:device-connection>
+          </baa-network-manager:device-management>
+        </baa-network-manager:device>
+      </baa-network-manager:managed-devices>
+    </baa-network-manager:network-manager>
+  </data>
+</rpc-reply>

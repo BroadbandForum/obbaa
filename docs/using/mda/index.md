@@ -13,13 +13,15 @@ with a Standard Device Adapter (SDA) for that type of device (e.g., OLT, DPU).
 
 To assist in maintaining the Device Adapters in the BAA layer, this section
 describes commands that can assist in monitoring the library of the
-Device Adapters, including finding out what:
+Device Adapters, including finding out:
 
--   Device Adapters exist and their corresponding attributes of the Device Adapter
+-   What Device Adapters exist and their corresponding attributes of the Device Adapter
 
--   YANG modules are associated with a Device Adapter
+-	How well a Device Adapter conforms to the standard YANG modules for the device
 
--   YANG modules used by a device
+-   What YANG modules are associated with a Device Adapter
+
+-   What YANG modules used by a device
 
 Looking up Information Associated with Device Adapters
 -------------------------------------------
@@ -87,6 +89,241 @@ the Device Adapters (i.e., SDA, VDA) that have been deployed into the BAA layer.
   </data>
 </rpc-reply>
 ```
+
+Determine the Conformance of a Device Adapter to the Standardized Data Model:
+=============================================================================
+
+Overview:
+---------
+
+This Factory Garment tag is calculated based on the YANG modules that
+are being used in the adapters (standard vs vendor). It provides an
+overview of vendor adapter model alignment with respect to Standard
+adapters bundled in OB-BAA.
+
+Description:
+------------
+
+Factory Garment Tags for a vendor adapter is calculated by comparing the
+YANG modules available in standard adapters and YANG modules that are
+used in the vendor specific adapters. For each vendor adapter it
+provides metrics about the model alignment with the standard model set.
+
+Precondition:
+-------------
+
+Factory Garment tag shall be calculated/retrieved only when the
+environment variable **ENABLE\_FACTORY\_GARMENT\_TAG\_RETRIEVAL** in
+the baa docker-compose file is set to **True**. 
+Below is the snapshot of the updated baa docker-compose file:
+
+```
+###########################################################################
+# Copyright 2018-2020 Broadband Forum
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###########################################################################
+version: '3.5'
+networks:
+    baadist_default:
+        driver: bridge
+        name: baadist_default
+services:
+    baa:
+        image: baa
+        container_name: baa
+        restart: always
+        ports:
+            - "8080:8080"
+            - "5005:5005"
+            - "9292:9292"
+            - "4335:4335"
+            - "162:162/udp"
+        environment:
+            - BAA_USER=admin
+            - BAA_USER_PASSWORD=password
+            #Possible Values for PMA_SESSION_FACTORY_TYPE are REGULAR,TRANSPARENT, Default value is REGULAR
+            - PMA_SESSION_FACTORY_TYPE=REGULAR
+            - MAXIMUM_ALLOWED_ADAPTER_VERSIONS=3
+            - ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL=True
+        volumes:
+            - /baa/stores:/baa/stores
+        networks:
+            - baadist_default
+```
+
+**Info:** If the environment variable **ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL** 
+          not present in the docker-compose file then default value of the same 
+          shall be considered as **"True"**.
+
+### Factory Garment Tag Parameters
+The parameters of the Factory Garment Tags are defined below:
+
+|  S.no | Parameter | Description | Remarks |
+| :---: | :---: | :--- | :--- |
+|1|number-of-modules-present-in-standard-adapter|Number of modules present in the corresponding standard adapter|This shall be calculated by counting the total number of YANG modules present in the corresponding standard adapter|
+|2|total-number-of-modules-present|Total number of modules present in the vendor adapter|This shall be calculated by counting the total number of YANG modules present in the vendor adapter|
+|3|percentage-adherence-to-standard-module|Percentage of standard modules that are being re-used in the vendor adapter|Percentage of standard modules being reused in vendor adapter (i.e., ((number-of-reused-standard-modules *100)/total-number-of-standard-modules))|
+|4|deviated-standard-module|List of deviated standard modules|Standard modules that are having deviations added in vendor adapter|
+|5|percentage-of-standard-modules-having-deviation|Percentage of standard modules that are deviated|Percentage of reused standard modules that are having deviations added in vendor adapter (i.e., ((number-of-deviated-standard-modules *100)/number-of-reused-standard-module))|
+|6|augmented-standard-module|List of augmented standard modules|Standard modules that are having augmentations added in vendor adapter|
+|7|percentage-of-standard-modules-having-augments|Percentage of standard modules that are augmentation|Percentage of standard modules that are being referred in augments added in vendor adapter (i.e., ((number-of-augmented-standard-modules *100)/number-of-reused-standard-module))|
+
+Example of a Get Device Adapters Request:
+
+```
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1548128755928">
+  <get>
+    <filter type="subtree">
+      <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+        <device-adapters>
+          <device-adapter-count />
+          <device-adapter>
+            <factory-garment-tag />
+            <type />
+            <interface-version />
+            <model />
+            <vendor />
+            <is-netconf/>
+            <description />
+            <upload-date />
+            <developer />
+            <revision/>
+            <push-pma-configuration-to-device />
+            <in-use />
+            <devices-related />
+          </device-adapter>
+        </device-adapters>
+      </network-manager>
+    </filter>
+  </get>
+</rpc>
+```
+
+Response for Get Adapters Request when the Factory Garment environment value is **True**:
+```
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1548128755928">
+  <data>
+    <baa-network-manager:network-manager xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager">
+      <device-adapters xmlns="urn:bbf:yang:obbaa:network-manager">
+        <device-adapter>
+          <type>DPU</type>
+          <interface-version>1.0</interface-version>
+          <model>standard</model>
+          <vendor>BBF</vendor>
+          <is-netconf>true</is-netconf>
+          <description>This is an adapter for standard.DPU provided by BBF</description>
+          <upload-date>2020-02-11T09:14:22.392Z</upload-date>
+          <developer>BBF</developer>
+          <revision>2020-01-17</revision>
+          <in-use>false</in-use>
+        </device-adapter>
+        <device-adapter>
+          <type>OLT</type>
+          <interface-version>1.0</interface-version>
+          <model>standard</model>
+          <vendor>BBF</vendor>
+          <is-netconf>true</is-netconf>
+          <description>This is an adapter for standard.OLT provided by BBF</description>
+          <upload-date>2020-02-11T09:14:24.857Z</upload-date>
+          <developer>BBF</developer>
+          <revision>2020-01-17</revision>
+          <in-use>false</in-use>
+        </device-adapter>
+        <device-adapter>
+          <type>DPU</type>
+          <interface-version>1.0</interface-version>
+          <model>modeltls</model>
+          <vendor>sample</vendor>
+          <factory-garment-tag>
+            <number-of-modules-present-in-standard-adapter>70</number-of-modules-present-in-standard-adapter>
+            <total-number-of-modules-present>60</total-number-of-modules-present>
+            <percentage-adherence-to-standard-module>31%</percentage-adherence-to-standard-module>
+            <deviated-standard-module>bbf-fast</deviated-standard-module>
+            <percentage-of-standard-modules-having-deviation>4%</percentage-of-standard-modules-having-deviation>
+            <augmented-standard-module>ietf-netconf-acm</augmented-standard-module>
+            <augmented-standard-module>bbf-l2-forwarding</augmented-standard-module>
+            <augmented-standard-module>ietf-netconf</augmented-standard-module>
+            <augmented-standard-module>ietf-interfaces</augmented-standard-module>
+            <augmented-standard-module>ietf-system</augmented-standard-module>
+            <percentage-of-standard-modules-having-augments>7%</percentage-of-standard-modules-having-augments>
+          </factory-garment-tag>
+          <is-netconf>true</is-netconf>
+          <description>This is an adapter for modeltls.DPU provided by sample</description>
+          <upload-date>2020-02-12T11:47:40.513Z</upload-date>
+          <developer>Sample developer for Model translation</developer>
+          <revision>2019-01-01</revision>
+          <in-use>false</in-use>
+        </device-adapter>
+        <device-adapter-count>3</device-adapter-count>
+      </device-adapters>
+    </baa-network-manager:network-manager>
+  </data>
+</rpc-reply>
+```
+
+Response for Get Adapters Request when the Factory Garment environment value is **False**:
+```
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1548128755928">
+  <data>
+    <baa-network-manager:network-manager xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager">
+      <device-adapters xmlns="urn:bbf:yang:obbaa:network-manager">
+        <device-adapter>
+          <type>DPU</type>
+          <interface-version>1.0</interface-version>
+          <model>standard</model>
+          <vendor>BBF</vendor>
+          <is-netconf>true</is-netconf>
+          <description>This is an adapter for standard.DPU provided by BBF</description>
+          <upload-date>2020-02-11T09:14:22.392Z</upload-date>
+          <developer>BBF</developer>
+          <revision>2020-01-17</revision>
+          <in-use>false</in-use>
+        </device-adapter>
+        <device-adapter>
+          <type>OLT</type>
+          <interface-version>1.0</interface-version>
+          <model>standard</model>
+          <vendor>BBF</vendor>
+          <is-netconf>true</is-netconf>
+          <description>This is an adapter for standard.OLT provided by BBF</description>
+          <upload-date>2020-02-11T09:14:24.857Z</upload-date>
+          <developer>BBF</developer>
+          <revision>2020-01-17</revision>
+          <in-use>false</in-use>
+        </device-adapter>
+        <device-adapter>
+          <type>DPU</type>
+          <interface-version>1.0</interface-version>
+          <model>modeltls</model>
+          <vendor>sample</vendor>
+          <is-netconf>true</is-netconf>
+          <description>This is an adapter for modeltls.DPU provided by sample</description>
+          <upload-date>2020-02-12T11:47:40.513Z</upload-date>
+          <developer>Sample developer for Model translation</developer>
+          <revision>2019-01-01</revision>
+          <in-use>false</in-use>
+        </device-adapter>
+        <device-adapter-count>3</device-adapter-count>
+      </device-adapters>
+    </baa-network-manager:network-manager>
+  </data>
+</rpc-reply>
+```
+
+**Info:** In a vendor adapter, if no modules for the corresponding standard YNG modules are reused,
+          the percentage-of-standard-modules-having-deviation and percentage-of-standard-modules-having-augments 
+          will become \"Not Applicable\" as the number of reused modules are \"0\" (zero) in this case.
 
 Monitoring  Device Adapter
 ------------------

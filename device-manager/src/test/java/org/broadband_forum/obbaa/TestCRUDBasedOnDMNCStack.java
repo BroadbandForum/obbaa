@@ -52,6 +52,8 @@ public class TestCRUDBasedOnDMNCStack {
     @Mock
     private NetconfClientInfo m_clientInfo;
     private EditConfigRequest m_createDevice;
+    private EditConfigRequest m_createSnmpV2Device;
+    private EditConfigRequest m_createSnmpV3Device;
     private GetConfigRequest m_getConfig;
     private EditConfigRequest m_deleteDevice;
     @Mock
@@ -73,6 +75,8 @@ public class TestCRUDBasedOnDMNCStack {
         m_createDevice = DocumentToPojoTransformer.getEditConfig(DocumentUtils.stringToDocument(load("/createDevice.xml")));
         m_deleteDevice = DocumentToPojoTransformer.getEditConfig(DocumentUtils.stringToDocument(load("/deleteDevice.xml")));
         m_getConfig = DocumentToPojoTransformer.getGetConfig(DocumentUtils.stringToDocument(load("/getConfig.xml")));
+        m_createSnmpV2Device = DocumentToPojoTransformer.getEditConfig(DocumentUtils.stringToDocument(load("/createSnmpV2Device.xml")));
+        m_createSnmpV3Device = DocumentToPojoTransformer.getEditConfig(DocumentUtils.stringToDocument(load("/createSnmpV3Device.xml")));
     }
 
     @Test
@@ -111,6 +115,26 @@ public class TestCRUDBasedOnDMNCStack {
         //assertEquals(load("/getConfigNoDeviceResponse.xml"), getConfig().responseToString());
     }
 
+    @Test
+    @Ignore
+    public void testCreateAndDeleteSnmpV2Device() {
+        m_pmUtil.getEntityDataStoreManager().beginTransaction();
+        assertEquals(load("/ok-response.xml"), createSnmpV2Device().responseToString());
+        assertEquals(load("/getConfigSnmpV2CreateResponse.xml"), getConfig().responseToString());
+        assertEquals(load("/ok-response.xml"), deleteDevice().responseToString());
+        m_pmUtil.getEntityDataStoreManager().commitTransaction();
+    }
+
+    @Test
+    @Ignore
+    public void testCreateAndDeleteSnmpV3Device() {
+        m_pmUtil.getEntityDataStoreManager().beginTransaction();
+        assertEquals(load("/ok-response.xml"), createSnmpV3Device().responseToString());
+        assertEquals(load("/getConfigSnmpV2CreateResponse.xml"), getConfig().responseToString());
+        assertEquals(load("/ok-response.xml"), deleteDevice().responseToString());
+        m_pmUtil.getEntityDataStoreManager().commitTransaction();
+    }
+
     private NetConfResponse getConfig() {
         NetConfResponse getConfigResponse = new NetConfResponse();
         m_netconfServer.onGetConfig(m_clientInfo, m_getConfig, getConfigResponse);
@@ -120,6 +144,18 @@ public class TestCRUDBasedOnDMNCStack {
     private NetConfResponse createDevice() {
         NetConfResponse createResponse = new NetConfResponse();
         m_netconfServer.onEditConfig(m_clientInfo, m_createDevice, createResponse);
+        return createResponse;
+    }
+
+    private NetConfResponse createSnmpV2Device() {
+        NetConfResponse createResponse = new NetConfResponse();
+        m_netconfServer.onEditConfig(m_clientInfo, m_createSnmpV2Device, createResponse);
+        return createResponse;
+    }
+
+    private NetConfResponse createSnmpV3Device() {
+        NetConfResponse createResponse = new NetConfResponse();
+        m_netconfServer.onEditConfig(m_clientInfo, m_createSnmpV3Device, createResponse);
         return createResponse;
     }
 

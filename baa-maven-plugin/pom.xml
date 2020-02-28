@@ -21,13 +21,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>3.0.0</version>
     </parent>
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>baa-maven-plugin</artifactId>
-    <version>${obbaa-release.version}</version>
     <packaging>maven-plugin</packaging>
     <name>BAA/Maven plugin</name>
 
@@ -41,7 +40,7 @@
             <artifactId>maven-project</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>device-adapter-fwk</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -62,6 +61,4 @@
             <artifactId>maven-plugin-annotations</artifactId>
         </dependency>
     </dependencies>
-
-
 </project>

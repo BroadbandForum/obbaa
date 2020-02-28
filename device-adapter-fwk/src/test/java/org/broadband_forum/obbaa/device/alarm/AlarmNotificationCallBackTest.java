@@ -183,7 +183,7 @@ public class AlarmNotificationCallBackTest {
 
         private static final String SBI_IETF_ALARM_NAMESPACE = "urn:ietf:params:xml:ns:yang:ietf-alarms";
 
-        private List<AlarmNotification> m_alarms;
+        private AlarmNotification m_alarm;
 
         private SchemaRegistry m_schemaRegistry;
 
@@ -208,7 +208,7 @@ public class AlarmNotificationCallBackTest {
         private Element getAlarmNotificationElement() {
             try {
                 AlarmsDocumentTransformer transformer = new AlarmsDocumentTransformer(m_schemaRegistry, null);
-                return transformer.buildAlarmNotification(m_alarms, SBI_IETF_ALARM_NAMESPACE);
+                return transformer.buildAlarmNotification(m_alarm, SBI_IETF_ALARM_NAMESPACE);
             } catch (NetconfMessageBuilderException e) {
                 throw new RuntimeException("Error while getting alarm notification element ", e);
             }
@@ -221,7 +221,7 @@ public class AlarmNotificationCallBackTest {
 
         @Override
         public String toString() {
-            return "SBINotification [alarms=" + m_alarms + "]";
+            return "SBINotification [alarm=" + m_alarm + "]";
         }
 
     }

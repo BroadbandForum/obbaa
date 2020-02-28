@@ -66,7 +66,7 @@ public class DeployStandardAdapterTest {
         m_adapterManager = mock(AdapterManagerImpl.class);
         m_subsystem = mock(DeviceSubsystem.class);
         m_nonCodedAdapterService = new NonCodedAdapterServiceImpl(m_adapterManager);
-        m_adaptersDeployer = new StandardAdaptersDeployer(m_nonCodedAdapterService, m_subsystem, m_dir, null);
+        m_adaptersDeployer = new StandardAdaptersDeployer(m_nonCodedAdapterService, m_subsystem, m_dir, m_dir, null);
     }
 
     @Test

@@ -20,18 +20,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4.0.0.xsd">
     <parent>
         <artifactId>baa-root-pom</artifactId>
-        <groupId>org.bbf.obbaa</groupId>
-        <version>${obbaa-release.version}</version>
+        <groupId>org.broadband-forum.obbaa</groupId>
+        <version>3.0.0</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.bbf.obbaa</groupId>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>device-manager-entities</artifactId>
     <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/Device Manager Entities</name>
     <dependencies>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>aggregator-yang</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -41,7 +41,7 @@
             <version>${spring-boot-auto-configure.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa.netconf</groupId>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -63,6 +63,10 @@
         <dependency>
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -116,5 +120,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

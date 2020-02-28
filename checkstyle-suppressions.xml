@@ -36,6 +36,7 @@
     <suppress files="TxService.java" checks="IllegalCatch"/>
     <suppress files="TxService.java" checks="IllegalThrows"/>
     <suppress files="AdapterManagerImpl.java" checks="IllegalCatch"/>
+    <suppress files="CodedAdapterServiceImpl.java" checks="IllegalCatch"/>
     <suppress files="DeviceAdapter.java" checks="IllegalCatch"/>
     <suppress files="CommonFileUtil.java" checks="IllegalCatch"/>
     <suppress files="DeviceAdapterActionHandlerImpl.java" checks="IllegalCatch"/>
@@ -56,4 +57,14 @@
     <suppress files="DeviceNotificationListener.java" checks="IllegalCatch"/>
     <suppress files="AlarmUtil.java" checks="LocalVariableName"/>
     <suppress files="AlarmUtil.java" checks="ParameterName"/>
+    <suppress files="IpfixMessageDecoder.java" checks="IllegalCatch"/>
+    <suppress files="DecodingDataRecordServiceImpl.java" checks="IllegalCatch"/>
+    <suppress files="IpfixConstants.java" checks="IllegalCatch"/>
+    <suppress files="IpfixConstants.java" checks="HideUtilityClassConstructor"/>
+    <suppress files="IpfixCollectorHandler.java" checks="IllegalCatch"/>
+    <suppress files="IpfixCollectorTimeoutHandler.java" checks="IllegalCatch"/>
+    <suppress files="NcClientServiceImpl.java" checks="IllegalCatch"/>
+    <suppress files="DeviceCacheServiceImpl.java" checks="IllegalCatch"/>
+    <suppress files="PMDataHandler.java" checks="IllegalCatch"/>
+    <suppress files="CollectingServiceImpl.java" checks="IllegalCatch"/>
 </suppressions>

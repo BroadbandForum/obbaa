@@ -18,12 +18,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>resources</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>package</artifactId>
     <packaging>pom</packaging>
     <name>OB-BAA/Resources/Package</name>
@@ -37,7 +37,7 @@
                     <descriptors>
                         <descriptor>src/main/assembly/assembly-descriptor.xml</descriptor>
                     </descriptors>
-                    <finalName>obbaa-resources-${version}</finalName>
+                    <finalName>obbaa-resources-${revision}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>

@@ -24,6 +24,7 @@ import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NAME;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NEVER_ALIGNED;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NS;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.SNMP;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -169,6 +170,10 @@ public class Device implements Comparable<Device> {
 
     public boolean isCallhome() {
         return deviceManagement.getDeviceConnection().getConnectionModel().equals(CALL_HOME);
+    }
+
+    public boolean isSnmp() {
+        return deviceManagement.getDeviceConnection().getConnectionModel().equals(SNMP);
     }
 
     public AlignmentOption getAlignmentOption() {

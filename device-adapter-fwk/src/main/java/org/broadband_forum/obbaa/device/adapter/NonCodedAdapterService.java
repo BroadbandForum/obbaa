@@ -19,7 +19,7 @@ package org.broadband_forum.obbaa.device.adapter;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 
 public interface NonCodedAdapterService {
-    void deployAdapter(String deviceAdapterId, SubSystem subSystem, Class klass, String stagingArea,
+    void deployAdapter(String deviceAdapterId, SubSystem subSystem, Class klass, String stagingArea, String ipfixStagingArea,
                        DeviceInterface deviceInterface) throws Exception;
 
     void unDeployAdapter(String type, String interfaceVersion, String model, String vendor) throws Exception;

@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class StandardAdaptersDeployer implements AdapterDeployer {
 
+    private final String m_ipfixStagingArea;
     private String m_stagingArea;
     private final File m_stagingAreaDir;
     private NonCodedAdapterService m_nonCodedAdapterService;
@@ -44,10 +45,11 @@ public class StandardAdaptersDeployer implements AdapterDeployer {
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardAdaptersDeployer.class);
 
     public StandardAdaptersDeployer(NonCodedAdapterService nonCodedAdapterService, SubSystem subSystem,
-                                    String stagingArea, DeviceInterface deviceInterface) {
+                                    String stagingArea, String ipfixStagingArea, DeviceInterface deviceInterface) {
         m_nonCodedAdapterService = nonCodedAdapterService;
         m_stagingAreaDir = new File(stagingArea);
         m_stagingArea = stagingArea;
+        m_ipfixStagingArea = ipfixStagingArea;
         m_subSystem = subSystem;
         m_deviceInterface = deviceInterface;
     }
@@ -83,7 +85,7 @@ public class StandardAdaptersDeployer implements AdapterDeployer {
         String destDir = stagingArea + File.separator + adapterId;
         String adpaterArchivePath = stagingArea + File.separator + archive;
         operationsOnArchive(destDir, adpaterArchivePath);
-        m_nonCodedAdapterService.deployAdapter(adapterId, subSystem, DeviceXmlStore.class, stagingArea, devInterface);
+        m_nonCodedAdapterService.deployAdapter(adapterId, subSystem, DeviceXmlStore.class, stagingArea, m_ipfixStagingArea, devInterface);
     }
 
     @Override

@@ -73,8 +73,8 @@ public class StandardModelRegistratorTest {
     private static final DeviceAdapter m_deviceAdapter1 = mock(DeviceAdapter.class);
     private StandardModelRegistrator m_standardModelRegistrator;
     private static final DeviceAdapterId m_deviceAdapterId = new DeviceAdapterId("DPU", "1.0", "Standard", "BBF");
-    private YangTextSchemaSource m_ietfAlarmYang = YangParserUtil.getYangSource(StandardModelRegistratorTest.class.getResource("/yang/ietf-alarms1@2018-11-22.yang"));
-    private YangTextSchemaSource m_ietfAlarm1Yang = YangParserUtil.getYangSource(StandardModelRegistratorTest.class.getResource("/yang/ietf-alarms4@2018-11-22.yang"));
+    private YangTextSchemaSource m_ietfAlarmYang = YangParserUtil.getYangSource(StandardModelRegistratorTest.class.getResource("/yang/ietf-alarms1@2019-09-11.yang"));
+    private YangTextSchemaSource m_ietfAlarm1Yang = YangParserUtil.getYangSource(StandardModelRegistratorTest.class.getResource("/yang/ietf-alarms4@2019-09-11.yang"));
     private YangTextSchemaSource m_ietfYangTypesYang = YangParserUtil.getYangSource(StandardModelRegistratorTest.class.getResource("/yang/ietf-yang-types.yang"));
     private YangTextSchemaSource m_ietfYangTypesCoreYang = YangParserUtil.getYangSource(StandardModelRegistratorTest.class.getResource("/coreyangs/ietf-yang-types.yang"));
     private YangTextSchemaSource m_ietfInetTypesYang = YangParserUtil.getYangSource(StandardModelRegistratorTest.class.getResource("/coreyangs/ietf-inet-types.yang"));
@@ -100,14 +100,14 @@ public class StandardModelRegistratorTest {
         Module module = mock(Module.class);
         when(module.getNamespace()).thenReturn(new URI(IETF_ALARM_NS1));
         when(module.getName()).thenReturn(IETF_ALARM_MGMT_MODULE1);
-        QNameModule qNameModule = QNameModule.create(new URI(IETF_ALARM_NS1), Revision.of("2018-11-22"));
+        QNameModule qNameModule = QNameModule.create(new URI(IETF_ALARM_NS1), Revision.of("2019-09-11"));
         when(module.getQNameModule()).thenReturn(qNameModule);
         when(m_mountRegistry.getModuleByNamespace(IETF_ALARM_NS1)).thenReturn(module);
 
         Module module1 = mock(Module.class);
         when(module1.getNamespace()).thenReturn(new URI(IETF_ALARM_NS1));
         when(module1.getName()).thenReturn(IETF_ALARM_MGMT_MODULE4);
-        QNameModule qNameModule1 = QNameModule.create(new URI(IETF_ALARM_NS1), Revision.of("2018-11-22"));
+        QNameModule qNameModule1 = QNameModule.create(new URI(IETF_ALARM_NS1), Revision.of("2019-09-11"));
         when(module1.getQNameModule()).thenReturn(qNameModule1);
         when(m_mountRegistry.getModuleByNamespace(IETF_ALARM_NS1)).thenReturn(module1);
         m_adapterTypeVersion = m_deviceAdapterId.getType() + "." + m_deviceAdapterId.getInterfaceVersion() + "." + m_deviceAdapterId.getModel() + "." + m_deviceAdapterId.getVendor();

@@ -1,0 +1,36 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <data>
+    <baa-network-manager:network-manager xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager">
+      <baa-network-manager:managed-devices>
+        <baa-network-manager:device>
+          <baa-network-manager:name>deviceA</baa-network-manager:name>
+          <baa-network-manager:device-management>
+            <baa-network-manager:interface-version>1.0.0</baa-network-manager:interface-version>
+            <baa-network-manager:push-pma-configuration-to-device>true</baa-network-manager:push-pma-configuration-to-device>
+            <baa-network-manager:type>OLT</baa-network-manager:type>
+            <baa-network-manager:vendor>sample</baa-network-manager:vendor>
+            <baa-network-manager:device-connection>
+              <baa-network-manager:connection-model>snmp</baa-network-manager:connection-model>
+              <baa-network-manager:snmp-auth>
+                <baa-network-manager:snmp-authentication>
+                  <baa-network-manager:address>192.168.169.1</baa-network-manager:address>
+                  <baa-network-manager:agent-port>161</baa-network-manager:agent-port>
+                  <baa-network-manager:trap-port>162</baa-network-manager:trap-port>
+                  <baa-network-manager:snmp-version>v3</baa-network-manager:snmp-version>
+                  <baa-network-manager:snmpv3-auth>
+                    <baa-network-manager:user-name>user</baa-network-manager:user-name>
+                    <baa-network-manager:security-level>authPriv</baa-network-manager:security-level>
+                    <baa-network-manager:auth-protocol>AuthSHA</baa-network-manager:auth-protocol>
+                    <baa-network-manager:auth-password>my_authpass</baa-network-manager:auth-password>
+                    <baa-network-manager:priv-protocol>PrivAES</baa-network-manager:priv-protocol>
+                    <baa-network-manager:priv-password>my_privpass</baa-network-manager:priv-password>
+                  </baa-network-manager:snmpv3-auth>
+                </baa-network-manager:snmp-authentication>
+              </baa-network-manager:snmp-auth>
+            </baa-network-manager:device-connection>
+          </baa-network-manager:device-management>
+        </baa-network-manager:device>
+      </baa-network-manager:managed-devices>
+    </baa-network-manager:network-manager>
+  </data>
+</rpc-reply>

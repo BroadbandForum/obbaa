@@ -244,14 +244,10 @@ public class DefaultInternalAlarmServiceImpl implements InternalAlarmService {
 
     private void sendNotification(List<AlarmWithCondition> alarms) {
         if (!alarms.isEmpty()) {
-            List<AlarmNotification> notifications = new ArrayList<AlarmNotification>();
-
             for (AlarmWithCondition alarmWithCondition : alarms) {
                 AlarmNotification alarmNotification = getAlarmNotificationFor(alarmWithCondition);
-                notifications.add(alarmNotification);
+                notify(alarmNotification);
             }
-
-            notify(notifications);
         }
     }
 
@@ -268,9 +264,9 @@ public class DefaultInternalAlarmServiceImpl implements InternalAlarmService {
         return alarmNotification;
     }
 
-    private void notify(List<AlarmNotification> alarmNotifications) {
+    private void notify(AlarmNotification alarmNotification) {
         m_notification = new DefaultAlarmStateChangeNotification(m_schemaRegistry, m_dsm);
-        m_notification.setAlarmNotification(alarmNotifications);
+        m_notification.setAlarmNotification(alarmNotification);
         m_notificationService.sendNotification(AlarmConstants.ALARM_STREAM_NAME, m_notification);
     }
 

@@ -1,0 +1,41 @@
+###########################################################################
+# Copyright 2018 Broadband Forum
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###########################################################################
+version: '3.5'
+networks:
+    ipfix_default:
+        driver: bridge
+        name: ipfix_default
+services:
+    ipfix-collector:
+        image: ipfix-collector
+        container_name: ipfix-collector
+        restart: always
+        ports:
+            - "8005:5005"
+            - "4494:4494"
+        environment:
+            - IPFIX_COLLECTOR_PORT=4494
+            - IPFIX_IE_MAPPING_DIR=/ipfix/ie-mapping/
+            - IPFIX_COLLECTOR_MAX_CONNECTION=10000
+            - OBBAA_HOST=10.1.1.1
+            - OBBAA_SSH_PORT=9292
+            - OBBAA_USERNAME=admin
+            - OBBAA_PASSWORD=password
+            - DEBUG=true
+        volumes:
+            - /baa/stores/ipfix:/ipfix/ie-mapping/
+        networks:
+            - ipfix_default

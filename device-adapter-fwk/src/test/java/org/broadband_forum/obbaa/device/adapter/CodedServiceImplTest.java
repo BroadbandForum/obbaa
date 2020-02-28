@@ -20,6 +20,7 @@ import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_CONFIG_XML_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_DEVIATIONS_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_FEATURES_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_IPFIX_MAPPING_FILE_PATH;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -56,15 +57,17 @@ public class CodedServiceImplTest {
     private DeviceAdapter m_testAdapter;
     private URL m_defaultConfigUrl;
     private String m_expectedDefaultXml;
+    private URL m_defaultIpfixMappingFileUrl;
 
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
-        m_codedAdapterService = new CodedAdapterServiceImpl(m_adapterManager, m_bundle, this.getClass(), m_subsystem, m_deviceInterface);
+        m_codedAdapterService = new CodedAdapterServiceImpl(m_adapterManager, m_bundle, this.getClass(), m_subsystem, m_deviceInterface, "/tmp");
         m_adapterUrl = getClass().getResource(ADAPTER_XML_PATH);
         m_featuresUrl = getClass().getResource(DEFAULT_FEATURES_PATH);
         m_deviationsUrl = getClass().getResource(DEFAULT_DEVIATIONS_PATH);
         m_defaultConfigUrl = getClass().getResource(DEFAULT_CONFIG_XML_PATH);
+        m_defaultIpfixMappingFileUrl = getClass().getResource(DEFAULT_IPFIX_MAPPING_FILE_PATH);
         m_expectedDefaultXml = "<data>\n" +
                 "    <if:interfaces\n" +
                 "            xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\"\n" +
@@ -87,6 +90,7 @@ public class CodedServiceImplTest {
         when(m_bundle.getResource(DEFAULT_FEATURES_PATH)).thenReturn(m_featuresUrl);
         when(m_bundle.getResource(DEFAULT_DEVIATIONS_PATH)).thenReturn(m_deviationsUrl);
         when(m_bundle.getResource(DEFAULT_CONFIG_XML_PATH)).thenReturn(m_defaultConfigUrl);
+        when(m_bundle.getResource(DEFAULT_IPFIX_MAPPING_FILE_PATH)).thenReturn(m_defaultIpfixMappingFileUrl);
     }
 
     private URL revisePathForWindow(URL orginalUrl) throws IOException {

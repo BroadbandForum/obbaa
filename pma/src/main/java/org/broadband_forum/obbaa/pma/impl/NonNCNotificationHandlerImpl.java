@@ -58,10 +58,17 @@ public class NonNCNotificationHandlerImpl implements NonNCNotificationHandler {
     private Device getDeviceFromIpAndPort(String ip, String port) {
         List<Device> devices = m_deviceManager.getAllDevices();
         for (Device device : devices) {
-            if (!device.isCallhome()) {
+            if (!device.isCallhome() && !device.isSnmp()) {
                 if ((device.getDeviceManagement().getDeviceConnection().getPasswordAuth().getAuthentication().getAddress().equals(ip))
                         && (device.getDeviceManagement().getDeviceConnection().getPasswordAuth().getAuthentication()
                         .getManagementPort().equals(port))) {
+                    return device;
+                }
+            }
+            if (device.isSnmp()) {
+                if ((device.getDeviceManagement().getDeviceConnection().getSnmpAuth().getSnmpAuthentication().getAddress().equals(ip))
+                        && (device.getDeviceManagement().getDeviceConnection().getSnmpAuth().getSnmpAuthentication()
+                        .getTrapPort().equals(port))) {
                     return device;
                 }
             }

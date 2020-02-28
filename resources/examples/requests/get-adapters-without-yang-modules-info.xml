@@ -33,6 +33,7 @@
             <push-pma-configuration-to-device />
             <in-use />
             <devices-related />
+            <factory-garment-tag />
           </device-adapter>
         </device-adapters>
       </network-manager>

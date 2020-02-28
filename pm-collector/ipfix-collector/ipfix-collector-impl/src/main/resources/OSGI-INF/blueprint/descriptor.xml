@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0"
+           xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.2.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
+           default-activation="eager">
+    <jpa:enable/>
+    <tx:enable-annotations/>
+    <reference id="dataHandlerService" interface="org.broadband_forum.obbaa.pm.service.DataHandlerService" availability="mandatory"/>
+
+    <bean id="informationElementCache"
+          class="org.broadband_forum.obbaa.ipfix.collector.service.ie.InformationElementCache">
+    </bean>
+
+    <bean id="informationElementService"
+          class="org.broadband_forum.obbaa.ipfix.collector.service.impl.InformationElementServiceImpl">
+        <argument ref="informationElementCache"/>
+    </bean>
+
+    <bean id="decodeMethodFactory" class="org.broadband_forum.obbaa.ipfix.collector.service.ie.DecodeMethodFactory">
+    </bean>
+
+
+    <bean id="ieIdMappingCacheService" class="org.broadband_forum.obbaa.ipfix.collector.service.impl.IEMappingCacheServiceImpl">
+        <argument ref="informationElementService"/>
+        <argument ref="deviceFamilyCacheService"/>
+    </bean>
+
+
+    <bean id="decodingDataRecordService"
+          class="org.broadband_forum.obbaa.ipfix.collector.service.impl.DecodingDataRecordServiceImpl">
+        <argument ref="informationElementService"/>
+        <argument ref="decodeMethodFactory"/>
+        <argument ref="deviceFamilyCacheService"/>
+    </bean>
+
+    <bean id="ipfixfeCachingService" class="org.broadband_forum.obbaa.ipfix.collector.service.impl.IpfixCachingServiceImpl"
+          destroy-method="destroy" init-method="initialize">
+    </bean>
+
+    <bean id="collectingService" class="org.broadband_forum.obbaa.ipfix.collector.service.impl.CollectingServiceImpl">
+        <argument ref="decodingDataRecordService"/>
+        <argument ref="ipfixfeCachingService"/>
+        <argument ref="dataHandlerService"/>
+        <argument ref="deviceFamilyCacheService"/>
+    </bean>
+
+    <bean id="deviceFamilyCacheService" class="org.broadband_forum.obbaa.ipfix.collector.service.impl.DeviceCacheServiceImpl">
+          <!--destroy-method="destroy" init-method="initialize">-->
+        <!--<argument ref="pmaRegistry"/>-->
+    </bean>
+
+    <bean id="ipfixTask" class="org.broadband_forum.obbaa.ipfix.collector.threadpool.IpfixCollectorService"
+          init-method="init" destroy-method="destroy">
+        <argument ref="collectingService"/>
+        <argument ref="ipfixThreadPool"/>
+        <argument ref="ipfixProcessingThreadPool"/>
+
+    </bean>
+
+    <bean id="ipfixThreadPool" class="java.util.concurrent.ThreadPoolExecutor">
+        <argument value="1"/>
+        <argument value="20"/>
+        <argument value="60"/>
+        <argument>
+            <value type="java.util.concurrent.TimeUnit">SECONDS</value>
+        </argument>
+        <argument>
+            <bean class="java.util.concurrent.ArrayBlockingQueue">
+                <argument value="50"/>
+            </bean>
+        </argument>
+    </bean>
+
+    <bean id="ipfixProcessingThreadPool" class="java.util.concurrent.ThreadPoolExecutor">
+        <argument value="1"/> <!-- corePoolSize  -->
+        <argument value="20"/> <!-- maximumPoolSize  -->
+        <argument value="60"/> <!-- keepAliveTime  -->
+        <argument>
+            <value type="java.util.concurrent.TimeUnit">SECONDS</value>
+        </argument>
+        <argument>
+            <bean class="java.util.concurrent.ArrayBlockingQueue">
+                <argument value="50"/>
+            </bean>
+        </argument>
+    </bean>
+
+</blueprint>

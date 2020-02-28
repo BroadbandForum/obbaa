@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<Adapter type="DPU" interfaceVersion="1.0" model="4LT" vendor="VENDOR1" stdAdapterIntVersion="2.0"
+<Adapter type="DPU" interfaceVersion="1.0" model="4LT" vendor="sample" stdAdapterIntVersion="2.0"
          xmlns="http://www.bbf.org/obbaa/schemas/adapter/1.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.bbf.org/obbaa/schemas/adapter/1.0

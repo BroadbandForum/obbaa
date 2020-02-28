@@ -23,26 +23,26 @@
 
     <feature name="pma-feature" version="${project.version}" description="PMAA Feature">
         <feature version="${project.version}">third-party-libs</feature>
-        <bundle>mvn:org.bbf.obbaa.netconf/netconf-api/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/netconf-client/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/auth-spi/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/netconf-persistence-app/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/stack-logging-api/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/netconf-server/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/stack-api/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/stack-logging-api/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/netconf-server-modelnode-fwk/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa.netconf/netconf-notification-app/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-api/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-client/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/auth-spi/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-persistence-app/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/stack-logging-api/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-server/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/stack-api/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/stack-logging-api/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-server-modelnode-fwk/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-notification-app/${project.version}</bundle>
 
-        <bundle>mvn:org.bbf.obbaa/netconf-alarm-app/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa/device-adapter-fwk/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa/device-manager-entities/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa/sbi-connectors/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa/device-manager/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa/pma/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa/aggregator/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa/nbi-adapter/${project.version}</bundle>
-        <bundle>mvn:org.bbf.obbaa/library-consult/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/netconf-alarm-app/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/device-adapter-fwk/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/device-manager-entities/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/sbi-connectors/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/device-manager/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/pma/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/aggregator/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/nbi-adapter/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/library-consult/${project.version}</bundle>
     </feature>
 
     <feature name="third-party-libs" version="${project.version}" description="Third party Libraries">
@@ -59,6 +59,7 @@
         <feature version="${pax-http-whiteboard.version}">pax-http-whiteboard</feature>
         <feature>jndi</feature>
         <feature>jdbc</feature>
+        <bundle><![CDATA[wrap:mvn:org.snmp4j/snmp4j/${snmp4j.version}$Bundle-SymbolicName=snmp4j&Bundle-Version=${snmp4j.version}]]></bundle>
         <bundle><![CDATA[wrap:mvn:net.sf.ehcache/ehcache-core/${ehcache-core.version}$Bundle-SymbolicName=ehcache-core&Bundle-Version=${ehcache-core.version}&Import-Package=javax.management;resolution:=optional,javax.management.openmbean;resolution:=optional,javax.naming;resolution:=optional,javax.servlet;resolution:=optional,javax.transaction;resolution:=optional,javax.transaction.xa;resolution:=optional,javax.xml.parsers;resolution:=optional,org.hibernate,org.hibernate.cache,org.hibernate.cache.spi,org.hibernate.cache.access;resolution:=optional,org.hibernate.cfg;resolution:=optional,org.hibernate.impl;resolution:=optional,org.hibernate.stat;resolution:=optional,org.hibernate.transaction;resolution:=optional,org.slf4j;resolution:=optional,org.xml.sax;resolution:=optional,org.xml.sax.helpers;resolution:=optional]]></bundle>
         <bundle start-level="70">mvn:org.hibernate/hibernate-ehcache/${hibernate.version}</bundle>
 

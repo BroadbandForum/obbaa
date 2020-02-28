@@ -96,17 +96,17 @@ public class AlarmManagementCallbackRegistrator implements StandardAdapterModelR
             DeviceAdapterId deviceAdapterId = adapter.getDeviceAdapterId();
             Set<QName> notificationTypeNames = new HashSet<>();
             notificationTypeNames.add(m_alarmNotificationQName);
-            LOGGER.info("Invoked undeploy to unregister alarm callback %s", notificationTypeNames);
+            LOGGER.info(String.format("Invoked undeploy to unregister alarm callback %s", notificationTypeNames));
             m_alarmService.removeAlarmNotificationQNameToAdapterTypeVersion(m_alarmNotificationQName,
                     deviceAdapterId.getType() + "." + deviceAdapterId.getInterfaceVersion() + "."
                             + deviceAdapterId.getModel() + "." + deviceAdapterId.getVendor());
-            LOGGER.info("Registering alarmCallBack if not already registered while adapter %s deployment", deviceAdapterId);
+            LOGGER.info(String.format("Registering alarmCallBack if not already registered while adapter %s deployment", deviceAdapterId));
             List<NotificationCallBackInfo> adapterCallbacks = m_callbackMapPerAdapter.get(deviceAdapterId);
             if (adapterCallbacks != null) {
                 for (NotificationCallBackInfo notificationCallBackInfo : adapterCallbacks) {
                     m_notificationService.unregisterCallBackInfo(notificationCallBackInfo);
-                    LOGGER.info("notification callback is unregistered for notification type names %s for deviceAdatperId %s ",
-                            notificationTypeNames, deviceAdapterId);
+                    LOGGER.info(String.format("notification callback is unregistered for notification type names %s "
+                            + "for deviceAdatperId %s ", notificationTypeNames, deviceAdapterId));
                 }
             }
             m_callbackMapPerAdapter.remove(deviceAdapterId);

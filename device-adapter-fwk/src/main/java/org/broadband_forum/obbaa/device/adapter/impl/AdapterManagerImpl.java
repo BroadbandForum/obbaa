@@ -16,6 +16,8 @@
 
 package org.broadband_forum.obbaa.device.adapter.impl;
 
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.BBF;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD;
 import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getStandardAdapterContext;
 import static org.broadband_forum.obbaa.netconf.api.util.DocumentUtils.createDocument;
 
@@ -23,14 +25,18 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
@@ -39,6 +45,7 @@ import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
+import org.broadband_forum.obbaa.device.adapter.FactoryGarmentTag;
 import org.broadband_forum.obbaa.device.registrator.impl.StandardModelRegistrator;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigErrorOptions;
@@ -72,7 +79,10 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.util.WriteLockTemplate;
 import org.broadband_forum.obbaa.netconf.server.rpc.RequestType;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -83,16 +93,18 @@ import org.w3c.dom.Element;
 
 public class AdapterManagerImpl implements AdapterManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdapterManagerImpl.class);
-
+    public static boolean ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL = Boolean.parseBoolean(SystemPropertyUtils.getInstance()
+            .getFromEnvOrSysProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "True"));
+    private final EventAdmin m_eventAdmin;
     private ModelNodeDataStoreManager m_dataStoreManager;
     private ReadWriteLockService m_readWriteLockService;
     private EntityRegistry m_entityRegistry;
     private Map<DeviceAdapterId, AdapterContext> m_adapterContextRegistry = new ConcurrentHashMap<>();
     private Map<DeviceAdapterId, DeviceAdapter> m_adapterMap = new HashMap<DeviceAdapterId, DeviceAdapter>();
     private Map<DeviceAdapterId, EditConfigRequest> m_defaultConfigReqMap = new HashMap<>();
+    private Map<DeviceAdapter, FactoryGarmentTag> m_garmentTagMap = new HashMap<DeviceAdapter, FactoryGarmentTag>();
     private int m_maxAllowedAdapterVersions = Integer.parseInt(SystemPropertyUtils.getInstance().getFromEnvOrSysProperty(
             "MAXIMUM_ALLOWED_ADAPTER_VERSIONS", "3"));
-    private final EventAdmin m_eventAdmin;
     private StandardModelRegistrator m_standardModelRegistrator;
 
     public AdapterManagerImpl(ModelNodeDataStoreManager dataStoreManager, ReadWriteLockService readWriteLockService,
@@ -120,6 +132,10 @@ public class AdapterManagerImpl implements AdapterManager {
                         m_standardModelRegistrator.setOldIdentities(SchemaRegistryUtil.getAllIdentities(
                                 adapterContext.getSchemaRegistry()));
                         deployAdapter(adapter, adapterContext, componentId, subSystem, klass);
+                        if ((ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL)
+                                && (!adapter.getModel().equalsIgnoreCase(STANDARD) && !adapter.getVendor().equalsIgnoreCase(BBF))) {
+                            computeFactoryGarmentTag(adapter, adapterContext);
+                        }
                         m_adapterContextRegistry.putIfAbsent(adapterId, adapterContext);
                         m_adapterMap.putIfAbsent(adapterId, adapter);
                         EditConfigRequest editReq = validateDefaultXmlAndGenerateEditConfig(adapter, adapterContext);
@@ -169,6 +185,9 @@ public class AdapterManagerImpl implements AdapterManager {
                     m_adapterContextRegistry.remove(deviceAdapterId);
                     m_defaultConfigReqMap.remove(deviceAdapterId);
                     m_standardModelRegistrator.onUndeployed(adapter, getAdapterContext(deviceAdapterId));
+                    if (m_garmentTagMap.containsKey(adapter)) {
+                        m_garmentTagMap.remove(adapter);
+                    }
                     return null;
                 }
             });
@@ -243,6 +262,64 @@ public class AdapterManagerImpl implements AdapterManager {
         }
     }
 
+    private AdapterContext getStdAdapterContextFromDeviceAdapter(DeviceAdapter adapter) {
+        AdapterContext stdAdapterContext = getStandardAdapterContext(this, adapter);
+        return stdAdapterContext;
+    }
+
+    protected void computeFactoryGarmentTag(DeviceAdapter adapter, AdapterContext vendorAdapterContext) {
+        AdapterContext stdAdapterContext = getStdAdapterContextFromDeviceAdapter(adapter);
+        SchemaRegistry stdAdapterSchemaRegistry = stdAdapterContext.getSchemaRegistry();
+        SchemaRegistry vdaSchemaRegistry = vendorAdapterContext.getSchemaRegistry();
+        Set<Module> stdModules = stdAdapterSchemaRegistry.getAllModules();
+        Set<Module> vdaModules = vdaSchemaRegistry.getAllModules();
+        Set<Module> nonStdVdaModules = new HashSet<>(vdaModules);
+
+        nonStdVdaModules.removeAll(stdModules);
+        List<Module> reusedModules = stdModules.stream().filter(stdModule -> vdaModules.contains(stdModule))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        int numberOfStandardModules = stdModules.size();
+        int numberOfModulesOfVendorAdapter = vdaModules.size();
+        int numberOfReUsedStModules = reusedModules.size();
+
+        List<String> deviatedStdModules = deriveDeviatedStandardModules(vdaSchemaRegistry, reusedModules);
+        List<String> augmentedStandardModules = deriveAugmentedStandardModules(nonStdVdaModules, stdAdapterSchemaRegistry);
+
+        m_garmentTagMap.put(adapter, new FactoryGarmentTag(numberOfStandardModules, numberOfModulesOfVendorAdapter,
+                numberOfReUsedStModules, deviatedStdModules, augmentedStandardModules));
+    }
+
+    private List<String> deriveDeviatedStandardModules(SchemaRegistry vdaSchemaRegistry, List<Module> reusedModules) {
+        Map<ModuleIdentifier, Set<QName>> supportedDeviations = vdaSchemaRegistry.getSupportedDeviations();
+        Set<ModuleIdentifier> moduleIdentifiers = supportedDeviations.keySet();
+        ArrayList<String> deviatedModules = moduleIdentifiers.stream().map(ModuleIdentifier::getName)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        return reusedModules.stream().filter(module -> deviatedModules.contains(module.getName())).map(module -> module.getName())
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private List<String> deriveAugmentedStandardModules(Set<Module> nonStdVdaModules,
+                                                        SchemaRegistry stdAdapterSchemaRegistry) {
+        Set<AugmentationSchemaNode> augmentationSchemaNodeSet = new HashSet<AugmentationSchemaNode>();
+        Set<URI> augmentedNamespaceUri = new HashSet<URI>();
+        for (Module nonStdVdaModule : nonStdVdaModules) {
+            augmentationSchemaNodeSet = nonStdVdaModule.getAugmentations();
+            augmentationSchemaNodeSet.forEach(augmentationSchemaNode -> {
+                augmentedNamespaceUri.add(augmentationSchemaNode.getTargetPath().getLastComponent().getModule().getNamespace());
+            });
+        }
+        ArrayList<String> augmentedStdModules = new ArrayList<>();
+        for (URI uri : augmentedNamespaceUri) {
+            String module = stdAdapterSchemaRegistry.getModuleNameByNamespace(String.valueOf(uri));
+            if (module != null) {
+                augmentedStdModules.add(module);
+            }
+        }
+        return augmentedStdModules;
+    }
+
     private Document fetchDefaultData(DeviceAdapter adapter) {
         Document doc;
         try (InputStream defaultXml = new ByteArrayInputStream(adapter.getDefaultXmlBytes())) {
@@ -281,6 +358,10 @@ public class AdapterManagerImpl implements AdapterManager {
     @Override
     public EditConfigRequest getEditRequestForAdapter(DeviceAdapterId adapterId) {
         return m_defaultConfigReqMap.get(adapterId);
+    }
+
+    public FactoryGarmentTag getFactoryGarmentTag(DeviceAdapter adapter) {
+        return m_garmentTagMap.get(adapter);
     }
 
     private void buildSchemaRegistry(SchemaRegistry schemaRegistry, String componentId, DeviceAdapter deviceAdapter) throws IOException {
@@ -330,6 +411,7 @@ public class AdapterManagerImpl implements AdapterManager {
         return rootNodeMap;
     }
 
+
     private boolean isMaxAllowedAdaptersInstalled(DeviceAdapter adapter) {
         boolean isMaxAdaptersInstalled = false;
         DeviceAdapterId adapterId = adapter.getDeviceAdapterId();
@@ -350,8 +432,8 @@ public class AdapterManagerImpl implements AdapterManager {
     }
 
     private boolean compareAdapterDetails(DeviceAdapterId adapterId, DeviceAdapterId deployedAdapterId) {
-        return !deployedAdapterId.getModel().equals(AdapterSpecificConstants.STANDARD)
-                && !deployedAdapterId.getVendor().equals(AdapterSpecificConstants.BBF)
+        return !deployedAdapterId.getModel().equals(STANDARD)
+                && !deployedAdapterId.getVendor().equals(BBF)
                 && deployedAdapterId.getModel().equals(adapterId.getModel()) && deployedAdapterId.getType().equals(adapterId.getType())
                 && deployedAdapterId.getVendor().equals(adapterId.getVendor());
     }
@@ -378,5 +460,6 @@ public class AdapterManagerImpl implements AdapterManager {
                     m_maxAllowedAdapterVersions, adapterId));
         }
     }
+
 
 }

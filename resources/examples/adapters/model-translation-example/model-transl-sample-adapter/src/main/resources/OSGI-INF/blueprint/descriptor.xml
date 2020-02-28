@@ -27,6 +27,7 @@
         </argument>
         <argument ref="deviceSubsystem"/>
         <argument ref="modelTlsConfigAlign"/>
+        <argument value="/baa/stores/ipfix"/>
     </bean>
 
     <bean id="modelTlsConfigAlign" class="org.broadband_forum.obbaa.model.tls.ModelTranslDeviceInterface">

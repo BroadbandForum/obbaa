@@ -19,12 +19,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>yang</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>aggregator-yang</artifactId>
     <packaging>jar</packaging>
     <name>OB-BAA/Resources/Models/YANG Modules/Aggregator YANG Modules</name>

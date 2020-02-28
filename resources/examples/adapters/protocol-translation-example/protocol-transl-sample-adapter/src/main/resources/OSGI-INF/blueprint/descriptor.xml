@@ -28,6 +28,7 @@
         </argument>
         <argument ref="deviceSubsystem"/>
         <argument ref="modelAdapter"/>
+        <argument value="/baa/stores/ipfix"/>
     </bean>
 
     <bean id="modelAdapter" class="org.broadband_forum.obbaa.protocol.tls.ProtocolTranslDevInterface">

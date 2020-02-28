@@ -4,40 +4,40 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>baa-root-pom</artifactId>
-        <groupId>org.bbf.obbaa</groupId>
-        <version>${obbaa-release.version}</version>
+        <groupId>org.broadband-forum.obbaa</groupId>
+        <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>library-consult</artifactId>
     <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/Library Consult</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.bbf.obbaa.netconf</groupId>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>device-adapter-fwk</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.bbf.obbaa.netconf</groupId>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
             <type>test-jar</type>
         </dependency>
 
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>device-manager</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>pma</artifactId>
             <version>${project.version}</version>
         </dependency>

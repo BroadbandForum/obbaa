@@ -37,5 +37,7 @@ public interface AdapterManager {
 
     EditConfigRequest getEditRequestForAdapter(DeviceAdapterId adapterId);
 
+    FactoryGarmentTag getFactoryGarmentTag(DeviceAdapter adapter);
+
     String EVENT_TOPIC = "com/bbf/obbaa/AdapterManager/Event";
 }

@@ -119,7 +119,7 @@ public class AlarmsDocumentTransformerTest extends AbstractAlarmSetup {
                 TEST_RESOURCE, now, AlarmSeverity.CRITICAL,
                 "Test", AlarmCondition.ALARM_ON, MOUNT_KEY, null);
         Element alarmNotificationElement = new AlarmsDocumentTransformer(m_schemaRegistry, null)
-                .getAlarmNotificationElement(Arrays.asList(notification));
+                .getAlarmNotificationElement(notification);
         assertXMLEquals(expectedAlarmNotificationElement, alarmNotificationElement, m_ignoreElements);
     }
 
@@ -133,7 +133,7 @@ public class AlarmsDocumentTransformerTest extends AbstractAlarmSetup {
                 null, now, AlarmSeverity.CRITICAL,
                 "Test", AlarmCondition.ALARM_ON, MOUNT_KEY, NON_YANG_RESOURCE_STRING);
         Element alarmNotificationElement = new AlarmsDocumentTransformer(m_schemaRegistry, null)
-                .getAlarmNotificationElement(Arrays.asList(notification));
+                .getAlarmNotificationElement(notification);
         assertXMLEquals(expectedAlarmNotificationElement, alarmNotificationElement, m_ignoreElements);
     }
 
@@ -147,7 +147,7 @@ public class AlarmsDocumentTransformerTest extends AbstractAlarmSetup {
                 "{xyz-al}(urn:broadband-forum-org:yang:dpu-alarm-types)xdsl-fe-los",
                 INTF_MODEL_NODE_ID_IDENTIFICATION, now, AlarmSeverity.MAJOR,
                 "dummyText", AlarmCondition.ALARM_ON, MOUNT_KEY, null);
-        Element alarmNotificationElement = new AlarmsDocumentTransformer(m_schemaRegistry, m_dsm).buildAlarmNotification(Arrays.asList(notification), "urn:ietf:params:xml:ns:yang:ietf-alarms");
+        Element alarmNotificationElement = new AlarmsDocumentTransformer(m_schemaRegistry, m_dsm).buildAlarmNotification(notification, "urn:ietf:params:xml:ns:yang:ietf-alarms");
         assertXMLEquals(expectedAlarmNotificationElement, alarmNotificationElement, m_ignoreElements);
     }
 
@@ -159,7 +159,7 @@ public class AlarmsDocumentTransformerTest extends AbstractAlarmSetup {
         AlarmNotification notification = new AlarmNotification("{baa-network-manager}" + AlarmTestConstants.ALARM_TYPE_ID_FOR_DEVICE,
                 "{xyz-al}(urn:broadband-forum-org:yang:dpu-alarm-types)xdsl-fe-los", INTF_MODEL_NODE_ID, now, AlarmSeverity.MAJOR,
                 "dummyText", AlarmCondition.ALARM_ON, MOUNT_KEY, null);
-        Element alarmNotificationElement = new AlarmsDocumentTransformer(m_schemaRegistry, m_dsm).buildAlarmNotification(Arrays.asList(notification), "urn:ietf:params:xml:ns:yang:ietf-alarms");
+        Element alarmNotificationElement = new AlarmsDocumentTransformer(m_schemaRegistry, m_dsm).buildAlarmNotification(notification, "urn:ietf:params:xml:ns:yang:ietf-alarms");
         assertXMLEquals(expectedAlarmNotificationElement, alarmNotificationElement, m_ignoreElements);
     }
 

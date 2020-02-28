@@ -18,28 +18,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>pma</artifactId>
     <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/Persistence Management Agent</name>
     <dependencies>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>standard-adapters</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>device-manager</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa.netconf</groupId>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
         </dependency>
         <dependency>
@@ -47,7 +47,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa.netconf</groupId>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
             <type>test-jar</type>
         </dependency>
@@ -67,7 +67,7 @@
             <artifactId>mockito-all</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>device-adapter-fwk</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -126,6 +126,5 @@
     </plugin>
     </plugins>
     </build>
-
 </project>
 

@@ -81,7 +81,7 @@ public class NetworkManagerRpc {
         Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
 
         ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier("network-manager",
-                AggregatorMessage.NS_OBBAA_NETWORK_MANAGER, "2018-05-07");
+                AggregatorMessage.NS_OBBAA_NETWORK_MANAGER, "2020-02-19");
         moduleIdentifiers.add(moduleIdentifier);
 
         return moduleIdentifiers;

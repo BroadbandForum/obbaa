@@ -184,7 +184,7 @@
 
     <bean id="deviceManagerService" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service.BundleContextAwareModelService">
         <property name="moduleName" value="bbf-obbaa-network-manager"/>
-        <property name="moduleRevision" value="2018-05-07"/>
+        <property name="moduleRevision" value="2020-02-19"/>
         <property name="defaultSubsystem" ref="deviceManagementSubSystem"/>
         <property name="defaultXmlPath" value="/model/pma/device-manager-default.xml"/>
         <property name="modelNodeDSM" ref="annotationBasedDSM"/>

@@ -5,12 +5,14 @@ Architecture
 ============
 
 The OB-BAA software architecture is based on the logical system
-architecture where northbound interfaces are defined for management
-(M<sub>inf\_xxx</sub>), control (M<sub>fc\_xxx</sub>). The management interface is further
+architecture where standardized northbound interfaces are defined for management
+(M<sub>inf\_xxx</sub>) and control (M<sub>fc\_xxx</sub>). The standardized management interface is further
 broken down in the BAA layer administration (M<sub>inf\_net-map</sub>,
 M<sub>inf\_eq-inv</sub>) and the device management interfaces (M<sub>inf\_Lxxx</sub>). The
 representation of the AN is exposed through each of the interfaces using
 access control to restrict access to parts of the AN.
+
+While most northbound interfaces used by OB-BAA are standardized, several interfaces (e.g., Data Lake) are used that haven't been standardized or are in the process of standardization.
 
 <p align="center">
  <img width="600px" height="400px" src="{{site.url}}/architecture/system_interfaces.png">
@@ -72,7 +74,7 @@ communication with Device.
 
 OB-BAA implements a NETCONF Connection Manager (NCM) in this release. If
 required additional connection managers for specific protocols will be
-implemented (e.g. SNMP connection manager). The NETCONF Connection
+implemented (e.g., SNMP connection manager). The NETCONF Connection
 Manager is responsible for establishing, maintaining and tearing down
 NETCONF sessions with the managed devices. It also maintains the
 connection state of the device.
@@ -83,20 +85,18 @@ The NETCONF Stack component Implements the NETCONF Client and provides
 an API to the NETCONF Connection Manager for interactions with managed
 device.
 
-### NAI & BAA Core 
+### NAI & BAA Core
 
 BAA-Core addresses the functional requirements identified under Section
 7.1 & 7.4 in the OB-BAA system description. These components are
 responsible for implementing the functionality needed by the various BAA
-deployment modes (i.e, BAA Actuator, UAM)
+deployment modes (i.e., BAA Actuator, UAM)
 
 Primary blocks in this component include the following:
 
 1.  Aggregator
 
 2.  Network Topology and Equipment Inventory (NTEI)
-
-3.  L1 Engine
 
 #### Aggregator
 
@@ -114,8 +114,8 @@ ability to:
     component with-in the BAA Core
 
 -   Forward notifications and events coming from lower layers to one or
-    more SDN Managers and Controllers connected via the NBI Adapter
-    
+    more SDN Managers and Controllers connected via the NBI Adapter. In particular, more information on Alarm filtering is available [here](alarm/index.md#alarm_filtering)
+
 [For more information on the Aggregator Component](aggregator/index.md#aggregator)
 
 #### Network Topology and Equipment Inventory (NTEI)
@@ -142,44 +142,6 @@ maintain connectivity with the device.
 The Aggregator component directs device administration requests from the
 NBI towards the Device Manager component where the Device Manager
 persists the information in the Device Admin Store.
-
-##### vAN Registry
-
-The BAA layer represents the managed device as a pAN where the pAN
-provides a common data model for each type of device. Included within
-the pAN data model is the data model that represents the pAN as a vAN.
-When deployed as a BAA Actuator, the BAA Layer simply uses the same vAN
-data model across all types of devices, requiring the Device Adapters to
-provide the adaptation of the device specific data modules into the pAN
-and its vAN.
-
-When deployed as a UAM, the vAN Registry component is used to represent
-the vAN in more complex implementations where the vAN data model is
-different than the data model that is represented in the NAI. In this
-scenario the vAN instance that is exposed via the NAI is different but
-correlated with the pAN instance exposed via the SAI. As such vAN
-Registry component is responsible for the management of vAN instances.
-
-When deployed as a UAM, the Aggregator component directs vAN requests
-from the NBI towards the vAN Registry component. Likewise, vAN
-notifications and events are directed by the Device Adapters to this
-component.
-
-On receiving requests from Aggregator component, the vAN Registry
-component does the following:
-
-1.  Validates the semantics of the request
-
-2.  Persists information in the AN Config Store
-
-3.  Redirects the request to \"Engine\" for further processing
-
-On receiving abstracted notifications from lower layers, vAN Registry
-does the following:
-
-1.  Updates the AN Config Store (if required)
-
-2.  Forwards to the Aggregator Component
 
 ##### PMA Registry
 
@@ -211,8 +173,9 @@ the PMA Registry component passes them to the right Device Adapter for
 further normalization to pAN YANG data model. The PMA Registry component then
 propagates the normalized notification or event to layers above it. When
 deployed as a BAA Actuator, the notification and events will be passed
-to the Aggregator component.When deployed as a UAM the notification and
-events are directed to the L1 Engine component.
+to the Aggregator component.
+
+Further information on how Alarm notifications are reported is available [here](alarm/index.md#alarm_forwarding).
 
 ###### Interaction with SBI Connectors
 
@@ -221,42 +184,15 @@ Connector reference for the Device Adapter that is used by the managed
 device and subscribes to Connection Manager\'s call back interface for
 receiving notifications and events from devices.
 
-#### Device Adapter Framework
+#### Device Adapter
 
-The Device Adapter Framework performs translation of device specific
-data models into the data models identified to the BAA layer\'s SAI
-component.
+The Device Adapter component performs translation of device specific data models into the data models identified to the BAA layer\'s SAI component.
 
--   The Device Adapter Framework receives requests from PMA registry
-    which it translates to device specific request and uses a
-    protocol specific Connection Manager to deploy the request into
-    the managed device.
+-	The Device Adapter component receives requests from PMA registry which it translates to device specific request and uses supported protocol specific Connection Manager to deploy the instruction into the managed device.
 
--   The Device Adapter Framework also normalizes the device specific
-    notifications and events to the data model supported by the BAA
-    layer\'s SAI component for that type of device and then forwards the
-    notification and event to the PAM Registry component
+- The Device Adapter component also normalizes the device specific notifications and events to the data model supported by the BAA layer\'s SAI component for that type of device and then forwards the notification and event to the PAM Registry component.
 
-[For more information on the Device Adapter Framework](device_adapter/index.md#device_adapter)
-
-#### L1 Engine
-
-When deployed as an UAM, the L1 Engine component performs algorithms and
-profiling to maintain an translate between pAN and vAN instances.
-
-On receiving requests from the vAN Registry component, the L1 Engine
-component:
-
--   Generates the equivalent pAN request by applying the L1 profile
-    corresponding to the provisioning use-case
-
--   Passes the pAN request to PMA Registry component
-
-On receiving notification and events from the PMA Registry component,
-the L1 Engine component:
-
--   Translates the pAN instance into the vAN instance using the
-    respective data models and translation logic.
+[For more information on the Device Adapter](device_adapter/index.md#device_adapter)
 
 ### NBI Adapter
 
@@ -272,8 +208,8 @@ component to:
 -   Relay requests originating from the North
 
 -   Registers to callback for notification and events from the
-    Aggregator component; forwarding them to the respective SND Manager
-    and Controllers.
+    Aggregator component; forwarding them to the respective SDN Manager
+    and Controllers
 
 ### Infrastructure
 
@@ -295,7 +231,33 @@ utilities like YANG module handling, security etc.
 
 #### Debugging
 
-Provides debugging utilities for application trouble shooting.
+Provides debugging utilities for application troubleshooting.
+
+## PM Service
+OB-BAA supports IPFIX (RFC 7011) based PM Collection from AN. PM data collection function in BAA is realized as a dedicated micro-service.
+
+It has two architectural components:
+-	PM Collector module
+-	DataHandler module
+
+### PM Collector
+The PM Collector is responsible for collecting performance monitoring data (IPFIX messages) from managed pANs, The PM Collector will decode and provide formatted data to data handlers for further processing and storage of data. The IPFIX PM Data Collector (IPFIX Collector) is based on IETF\'s RFC 7011 IPFIX protocol specification and mechanisms as IPFIX is the method defined by the BBF\'s TR-383 specification.
+
+IPFIX collector decodes IPFIX messages into the requisite Information Elements (IE) and their associated values. This is then forwarded to Data Handler(s) (IpfixDataHandler) that subscribes to IPFIX Collector.
+
+[For more information on the PM Collector](pm_collector/index.md#pm_collection)
+
+### PM DataHandler(s)
+PM DataHandlers are karaf modules plugged into the PM micro-service and subscribes to the PM Collector for the counter stream. Several PM DataHandlers can be implemented depending on the post processing needs. The OB-BAA reference implementation comes with two reference Data Handlers.
+
+#### Persistence Manager Data Handler
+Persistence Manager is a reference PM Datahandler which subscribes to IPFIX collection stream and updates them into a common data lake. OB-BAA uses InfluxDB as its common data lake. The Persistence Manager does reformatting of the incoming counter stream into tags & counters before updating them into the persistence store. Once in the persistence store, counter information can be queried from the data store by management and control elements using the interface provided by InfluxDB.
+
+#### Logger Data Handler
+The Logger is another reference PM DataHandler which subscribes to IPFIX collection stream and logs it into the BAA application log.
+
+## Data Lake
+OB-BAA bundles InfluxDB as its common data lake for storing PM Counters. InfluxDB is a time series database, hence ideal for maintaining PM counters which is tracked based on time. InfluxDB provides a HTTP based API interface for querying data which can be used by SDN M&C and other management entities. It also provides a graphical user interface for data visualization purpose.
 
 [<--Overview](../overview/index.md#overview)
 

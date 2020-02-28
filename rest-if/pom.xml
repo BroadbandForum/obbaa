@@ -18,23 +18,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>rest-if</artifactId>
     <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/REST Interface</name>
     <dependencies>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>device-manager</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>pma</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -74,11 +74,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>aggregator</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
 </project>
 

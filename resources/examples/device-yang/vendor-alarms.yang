@@ -1,0 +1,34 @@
+module vendor-alarms {
+   namespace "urn:vendorA:vendor-alarms";
+   prefix vendor-alarms;
+   
+   import ietf-alarms { 
+      prefix al; 
+   }
+   organization
+      "vendor A";
+   
+   description
+      "example vendor alarm module";
+   
+   revision 2019-11-21 {
+      description
+         "Initial revision.";
+   }
+   
+   identity vendor-alarms {
+      base al:alarm-type-id;
+   }
+   identity communications-alarm {
+      base vendor-alarms;
+   }
+   identity los {
+      base communications-alarm;
+   }
+   identity link-down {
+      base communications-alarm;
+   }
+   identity sfp-fail {
+      base communications-alarm;
+   }
+}

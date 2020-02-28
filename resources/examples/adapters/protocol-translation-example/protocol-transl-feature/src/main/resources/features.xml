@@ -18,7 +18,7 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="${project.artifactId}-${project.version}">
 
     <feature name="${project.artifactId}" version="${project.version}" description="protocol translation feature">
-        <bundle>mvn:org.bbf.obbaa/protocol-transl-sample-adapter/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/protocol-transl-sample-adapter/${project.version}</bundle>
         <bundle><![CDATA[wrap:mvn:com.jcraft/jsch/${jsch.version}$Bundle-SymbolicName=jsch&Bundle-Version=${jsch.version}]]></bundle>
     </feature>
 

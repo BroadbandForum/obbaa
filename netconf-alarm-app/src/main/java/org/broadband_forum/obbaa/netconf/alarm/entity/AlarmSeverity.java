@@ -20,8 +20,8 @@ public enum AlarmSeverity {
 
     CLEAR("cleared", 1),
     INDETERMINATE("indeterminate", 2),
-    MINOR("minor", 3),
-    WARNING("warning", 4),
+    WARNING("warning", 3),
+    MINOR("minor", 4),
     MAJOR("major", 5),
     CRITICAL("critical", 6);
 

@@ -46,9 +46,9 @@ public class AlarmManagementCallbackRegistratorTest {
         Module module = mock(Module.class);
         String alarmNS = "urn:ietf:params:xml:ns:yang:ietf-alarms";
         String alarmNotification = "alarm-notification";
-        String moduleCapabilityString = "urn:ietf:params:xml:ns:yang:ietf-alarms?module=ietf-alarms&revision=2018-11-22";
+        String moduleCapabilityString = "urn:ietf:params:xml:ns:yang:ietf-alarms?module=ietf-alarms&revision=2019-09-11";
         QName alarmNotificationQName = QName.create(alarmNS, alarmNotification);
-        QNameModule qNameModule = QNameModule.create(new URI("urn:ietf:params:xml:ns:yang:ietf-alarms"), Revision.of("2018-11-22"));
+        QNameModule qNameModule = QNameModule.create(new URI("urn:ietf:params:xml:ns:yang:ietf-alarms"), Revision.of("2019-09-11"));
         when(module.getNamespace()).thenReturn(new URI(alarmNS));
         when(module.getName()).thenReturn("ietf-alarms");
         when(module.getQNameModule()).thenReturn(qNameModule);

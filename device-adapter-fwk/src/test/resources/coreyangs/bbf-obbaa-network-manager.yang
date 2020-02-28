@@ -42,6 +42,11 @@ module bbf-obbaa-network-manager {
        limitations under the License.
       ";
 
+    revision 2020-02-19 {
+        description
+          "Added support for SNMP connection model Authentication.";
+    }
+
     revision 2018-05-07 {
         description
           "Initial revision.";
@@ -56,9 +61,10 @@ module bbf-obbaa-network-manager {
             type enumeration {
                 enum call-home;
                 enum direct;
+                enum snmp;
             }
             description
-              "whether the connection is call-home or direct.";
+              "whether the connection is call-home/direct/snmp.";
         }
         choice protocol {
             mandatory true;
@@ -92,6 +98,112 @@ module bbf-obbaa-network-manager {
                         type string;
                         description
                           "The password of the user.";
+                    }
+                }
+            }
+            container snmp-auth {
+                when "../connection-model = 'snmp'";
+                description
+                    "Information when a device managed by BAA on SNMP. When user
+                    creates a device by BAA, the information below would be mandatory.";
+                container snmp-authentication {
+                    description
+                        "Mandatory information when BAA tries to create an SNMP device.";
+                    leaf address {
+                        type inet:ip-address;
+                        mandatory true;
+                        description
+                          "Device IP address.";
+                    }
+                    leaf agent-port {
+                        type inet:port-number;
+                        description
+                          "The snmp port of the device.";
+                    }
+                    leaf trap-port {
+                        type inet:port-number;
+                        description
+                          "The snmp trap listening port of manager.";
+                    }
+                    leaf snmp-version {
+                        type enumeration {
+                          enum v1;
+                          enum v2c;
+                          enum v3;
+                        }
+                        description
+                          "SNMP version";
+                    }
+                    choice auth-info {
+                      leaf community-string {
+                          when "(../snmp-version = 'v1') or
+                               (../snmp-version = 'v2c')";
+                          type string;
+                          description
+                            "SNMP community string";
+                      }
+                      container snmpv3-auth {
+                        when "../snmp-version = 'v3'";
+                        leaf user-name {
+                          type string;
+                          description
+                            "SNMP V3 username";
+                        }
+
+                        leaf security-level {
+                          type enumeration {
+                            enum noAuthNoPriv;
+                            enum authNoPriv;
+                            enum authPriv;
+                          }
+                          description
+                            "Security level";
+                        }
+
+                        leaf auth-protocol {
+                          when "../security-level != 'noAuthNoPriv'";
+                          type enumeration {
+                            enum AuthMD5;
+                            enum AuthSHA;
+                            enum AuthHMAC192SHA256;
+                            enum AuthHMAC384SHA512;
+                          }
+                          description
+                            "Authentication protocol";
+                        }
+
+                        leaf auth-password {
+                          when "../security-level != 'noAuthNoPriv'";
+                          type string {
+                            length "1..max";
+                          }
+                          description
+                            "Passphrase for authentication protocol";
+                        }
+
+                        leaf priv-protocol {
+                          when "../security-level = 'authPriv'";
+                          type enumeration {
+                            enum PrivDES;
+                            enum PrivAES;
+                            enum PrivAES128;
+                            enum PrivAES192;
+                            enum PrivAES256;
+                            enum Priv3DES;
+                          }
+                          description
+                            "Privacy protocol";
+                        }
+
+                        leaf priv-password {
+                          when "../security-level = 'authPriv'";
+                          type string {
+                            length "1..max";
+                          }
+                          description
+                            "Passphrase for privacy protocol";
+                        }
+                      }
                     }
                 }
             }

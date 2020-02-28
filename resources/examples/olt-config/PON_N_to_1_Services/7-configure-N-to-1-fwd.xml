@@ -28,7 +28,7 @@
                      <!-- sub interface configuration -->
                      <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
                         <!-- Single tag at the V interface -->
-                        <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                        <if:interface xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="merge">
                            <if:name>network1.500</if:name>
                            <if:type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</if:type>
                            <bbf-subif:subif-lower-layer xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">

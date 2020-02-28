@@ -35,7 +35,63 @@ services:
             #Possible Values for PMA_SESSION_FACTORY_TYPE are REGULAR,TRANSPARENT, Default value is REGULAR
             - PMA_SESSION_FACTORY_TYPE=REGULAR
             - MAXIMUM_ALLOWED_ADAPTER_VERSIONS=3
+            - ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL=True
         volumes:
             - /baa/stores:/baa/stores
+        networks:
+            - baadist_default
+
+    ipfix-collector:
+        image: ipfix-collector
+        container_name: ipfix-collector
+        restart: always
+        ports:
+            - "8005:5005"
+            - "4494:4494"
+            - "5051:5051"
+        environment:
+            - IPFIX_COLLECTOR_PORT=4494
+            - IPFIX_IE_MAPPING_DIR=/ipfix/ie-mapping/
+            - IPFIX_COLLECTOR_MAX_CONNECTION=10000
+            - BAA_HOST=baa
+            - BAA_SSH_PORT=9292
+            - BAA_USERNAME=admin
+            - BAA_PASSWORD=password
+            - DEBUG=true
+            - INFLUXDB_ORGANISATION=broadband_forum
+            - INFLUXDB_BUCKETID=pm-collection
+            - INFLUXDB_API_URL=http://obbaa-influxdb:9999
+            - INFLUXDB_TOKEN=_6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
+            - PMD_MAX_BUFFERED_POINTS=5000
+            - PMD_MAX_BUFFERED_MEASUREMENTS=100
+            - PMD_TIMEOUT_BUFFERED_POINTS=60
+            - PMD_NBI_PORT=5051
+        volumes:
+            - /baa/stores/ipfix:/ipfix/ie-mapping/
+        depends_on:
+            - baa
+        networks:
+            - baadist_default
+
+    influxdb:
+        image: broadbandforum/influxdb:2.0.0-beta.2-3
+        container_name: obbaa-influxdb
+        command: --bolt-path /var/opt/influxdb/influxd.bolt --engine-path /var/opt/influxdb/engine --reporting-disabled
+        restart: on-failure
+        ports:
+            - "0.0.0.0:9999:9999"
+        environment:
+            - DEBUG=true
+            - INFLUX_USER=influxdb
+            - INFLUX_PW=influxdb
+            - INFLUX_ORG=broadband_forum
+            - INFLUX_BUCKET=pm-collection
+            - INFLUX_RETENTION=720
+            - INFLUX_PORT=9999
+            - INFLUX_ROOT=/var/opt/influxdb
+        volumes:
+            - /baa/stores/influxdb:/var/opt/influxdb
+        depends_on:
+            - baa
         networks:
             - baadist_default

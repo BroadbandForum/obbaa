@@ -21,14 +21,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>examples</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>${revision}</version>
     </parent>
 
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>olt-config</artifactId>
-    <version>${obbaa-release.version}</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <modules>
         <module>PON_1_to_1_Services</module>

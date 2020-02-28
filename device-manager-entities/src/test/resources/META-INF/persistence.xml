@@ -28,6 +28,9 @@
         <class>org.broadband_forum.obbaa.dmyang.entities.ManagedDevices</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.NetworkManager</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.PasswordAuth</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.SnmpAuth</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.SnmpAuthentication</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.Snmpv3Auth</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.DbVersion</class>
 
         <properties>

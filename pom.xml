@@ -18,9 +18,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>baa-root-pom</artifactId>
-    <version>${obbaa-release.version}</version>
+    <version>3.0.0</version>
     <packaging>pom</packaging>
     <name>Broadband Access Abstraction</name>
 
@@ -39,10 +39,11 @@
         <module>baa-dist</module>
         <module>library-consult</module>
         <module>baa-maven-plugin</module>
+        <module>pm-collector</module>
     </modules>
 
     <properties>
-        <obbaa-release.version>2.1.1</obbaa-release.version>
+        <obbaa-release.version>3.0.0</obbaa-release.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <java.source.version>1.8</java.source.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
@@ -66,7 +67,7 @@
         <jackson-jaxrs.version>1.9.13</jackson-jaxrs.version>
         <commons-pool2.version>2.4.2</commons-pool2.version>
         <log4j.version>1.2.16</log4j.version>
-        <gson.version>2.2.2</gson.version>
+        <gson.version>2.8.2</gson.version>
         <guava.version>23.6.1-jre</guava.version>
         <junit.version>4.12</junit.version>
         <xmlunit.version>1.5</xmlunit.version>
@@ -100,12 +101,16 @@
         <commons-collection.version>3.2.1</commons-collection.version>
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-lang3.version>3.5</commons-lang3.version>
+        <commons-collections4.version>4.1</commons-collections4.version>
         <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
         <jdom.version>1.1.3</jdom.version>
         <commons-jxpath.version>1.3</commons-jxpath.version>
         <apache.servicemix.bundles.aopalliance.version>1.0_6</apache.servicemix.bundles.aopalliance.version>
         <org.apache.servicemix.specs.stax-api-1.2.version>2.5.0</org.apache.servicemix.specs.stax-api-1.2.version>
         <org.apache.servicemix.bundles.xmlbeans.version>2.6.0_2</org.apache.servicemix.bundles.xmlbeans.version>
+        <apache.xmlresolver.version>1.2_5</apache.xmlresolver.version>
+        <jaxp.ri.version>1.4.5_1</jaxp.ri.version>
+        <sm-osgi.xbean.version>2.6.0_2</sm-osgi.xbean.version>
         <xmlbeans.version>2.6.0</xmlbeans.version>
         <maven.plugin.api.version>2.0</maven.plugin.api.version>
         <maven.project.version>2.0</maven.project.version>
@@ -118,32 +123,86 @@
         <jacoco.agent.version>0.7.7.201606060606</jacoco.agent.version>
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <flatten-maven-plugin.version>1.0.1</flatten-maven-plugin.version>
+        <javacsv.version>2.1</javacsv.version>
+        <ehcache.version>2.10.3</ehcache.version>
+        <woodstox.core.asl.version>4.4.1</woodstox.core.asl.version>
+        <stax2.api.version>3.1.4</stax2.api.version>
+        <slf4j.version>1.7.7</slf4j.version>
+        <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
+        <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
+        <protoc-gen-grpc-java.version>1.24.2</protoc-gen-grpc-java.version>
+        <selenium-java.version>2.44.0</selenium-java.version>
+        <operadriver.version>1.5</operadriver.version>
+        <system-rules.version>1.19.0</system-rules.version>
+        <protobuf.version>3.11.1</protobuf.version>
+        <grpc.version>1.26.0</grpc.version>
+        <okio.version>1.17.3</okio.version>
+        <influxdb-client.version>1.3.0</influxdb-client.version>
+        <json.version>20190722</json.version>
+        <google-auth.version>0.20.0</google-auth.version>
+        <snmp4j.version>2.7.0</snmp4j.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.bbf.obbaa.netconf</groupId>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.2.0</version>
+                </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.2.0</version>
+                </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.2.0</version>
+                </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-guava</artifactId>
+                <version>2.2.0</version>
+                </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+                </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>protoc-gen-grpc-java</artifactId>
+                <version>${grpc.version}</version>
+                </dependency>
+            <dependency>
+                <groupId>com.influxdb</groupId>
+                <artifactId>influxdb-client-java</artifactId>
+                <version>${influxdb-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.broadband-forum.obbaa.netconf</groupId>
                 <artifactId>netconf-api</artifactId>
                 <version>${netconf-lib.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.bbf.obbaa.netconf</groupId>
+                <groupId>org.broadband-forum.obbaa.netconf</groupId>
                 <artifactId>netconf-client</artifactId>
                 <version>${netconf-lib.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.bbf.obbaa.netconf</groupId>
+                <groupId>org.broadband-forum.obbaa.netconf</groupId>
                 <artifactId>netconf-server</artifactId>
                 <version>${netconf-lib.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.bbf.obbaa.netconf</groupId>
+                <groupId>org.broadband-forum.obbaa.netconf</groupId>
                 <artifactId>netconf-notification-app</artifactId>
                 <version>${netconf-lib.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.bbf.obbaa.netconf</groupId>
+                <groupId>org.broadband-forum.obbaa.netconf</groupId>
                 <artifactId>netconf-server-modelnode-fwk</artifactId>
                 <version>${netconf-fwk.version}</version>
                 <exclusions>
@@ -158,7 +217,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.bbf.obbaa.netconf</groupId>
+                <groupId>org.broadband-forum.obbaa.netconf</groupId>
                 <artifactId>netconf-server-modelnode-fwk</artifactId>
                 <type>test-jar</type>
                 <scope>test</scope>
@@ -483,7 +542,7 @@
                     <version>${jacoco.maven.plugin}</version>
                     <configuration>
                         <includes>
-                            <include>org.broadband_forum.obbaa.*</include>
+                            <include>org.broadband-forum.obbaa.*</include>
                         </includes>
                         <destFile>${sonar.jacoco.reportPath}</destFile>
                         <propertyName>jacoco.agent.argLine</propertyName>
@@ -526,6 +585,11 @@
             <id>com.springsource.repository.bundles.external</id>
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
+        </repository>
+        <repository>
+            <id>net.sourceforge.javacsv</id>
+            <name>Replacement for SourceForge JavaCSV</name>
+            <url>https://repo.boundlessgeo.com/main/</url>
         </repository>
     </repositories>
     <pluginRepositories>

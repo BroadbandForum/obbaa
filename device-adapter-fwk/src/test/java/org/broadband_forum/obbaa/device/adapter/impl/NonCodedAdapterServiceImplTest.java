@@ -96,7 +96,7 @@ public class NonCodedAdapterServiceImplTest {
         CommonFileUtil.unpackToSpecificDirectory(m_dir
                 + STAGED_AREA_ARCHIVE_PATH, m_dir + File.separator + adapterId);
 
-        m_nonCodedAdapterService.deployAdapter(adapterId, m_subsystem, this.getClass(), m_dir, m_devInterface);
+        m_nonCodedAdapterService.deployAdapter(adapterId, m_subsystem, this.getClass(), m_dir, m_dir, m_devInterface);
         verify(m_adapterManager).deploy(devAdapter.capture(), eq(m_subsystem), eq(this.getClass()), eq(m_devInterface));
         DeviceAdapter actualAdapter = devAdapter.getValue();
         assertEquals(m_expectedAdapterId, actualAdapter.getDeviceAdapterId());

@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 public interface DeviceManagerNSConstants {
     String PREFIX = "baa-network-manager";
     String NS = "urn:bbf:yang:obbaa:network-manager";
-    String REVISION = "2018-05-07";
+    String REVISION = "2020-02-19";
     String NETWORK_MANAGER = "network-manager";
     String MANAGED_DEVICES = "managed-devices";
     String NEW_DEVICES = "new-devices";
@@ -42,6 +42,10 @@ public interface DeviceManagerNSConstants {
             + "/container=device/name=direct-device"
             + "/container=device-management/container=device-connection"
             + "/container=password-auth/container=authentication", NS);
+    ModelNodeId SNMP_AUTH_ID_TEMPLATE = new ModelNodeId("/container=network-manager/container=managed-devices"
+            + "/container=device/name=snmp-device"
+            + "/container=device-management/container=device-connection"
+            + "/container=snmp-auth/container=snmp-authentication", NS);
     String CONTAINER_DEVICE_TEMPLATE = "/container=device/name=";
     String DEVICE_MANAGEMENT = "device-management";
     ModelNodeId DEVICE_ID_TEMPLATE = new ModelNodeId("/container=network-manager/container=" + MANAGED_DEVICES
@@ -66,7 +70,7 @@ public interface DeviceManagerNSConstants {
     String UPLOAD_DATE = "upload-date";
     String PUSH_PMA_CONFIGURATION_TO_DEVICE = "push-pma-configuration-to-device";
     String DEVICE_CONNECTION = "device-connection";
-    String NS_REVISION = "2018-05-07";
+    String NS_REVISION = "2020-02-19";
     String DEVICE_STATE = "device-state";
     String DEVICE = "device";
     String CONNECTION_MODEL = "connection-model";
@@ -89,6 +93,7 @@ public interface DeviceManagerNSConstants {
     String NOT_ALIGNED = "Not Aligned";
     String NEVER_ALIGNED = "Never Aligned";
     String CALL_HOME = "call-home";
+    String SNMP = "snmp";
     String DEVICES_RELATED = "devices-related";
     String DEVICE_COUNT = "device-count";
     String IN_USE = "in-use";
@@ -96,4 +101,24 @@ public interface DeviceManagerNSConstants {
     String YANG_MODULES = "yang-modules";
     String MODULE = "module";
     String DEVICE_ADAPTER_COUNT = "device-adapter-count";
+    String SNMP_AUTH = "snmp-auth";
+    String SNMP_AUTHENTICATION = "snmp-authentication";
+    String AGENT_PORT = "agent-port";
+    String TRAP_PORT = "trap-port";
+    String SNMP_VERSION = "snmp-version";
+    String COMMUNITY_STRING = "community-string";
+    String SNMPV3_AUTH = "snmpv3-auth";
+    String SECURITY_LEVEL = "security-level";
+    String AUTH_PROTOCOL = "auth-protocol";
+    String AUTH_PASSWORD = "auth-password";
+    String PRIV_PROTOCOL = "priv-protocol";
+    String PRIV_PASSWORD = "priv-password";
+    String FACTORY_GARMENT_TAG = "factory-garment-tag";
+    String ADHERENCE_TO_STD_MODULES = "percentage-adherence-to-standard-module";
+    String DEVIATED_STD_MODULE = "deviated-standard-module";
+    String PERCENTAGE_STD_MODULES_HAVING_DEVIATION = "percentage-of-standard-modules-having-deviation";
+    String AUGMENTED_STD_MODULES = "augmented-standard-module";
+    String PERCENTAGE_STD_MODULES_HAVING_AUGMENTS = "percentage-of-standard-modules-having-augments";
+    String NUMBER_OF_MODULES_PRESENT_IN_STD_ADAPTERS = "number-of-modules-present-in-standard-adapter";
+    String NUMBER_OF_MODULES_PRESENT_IN_VENDOR_ADAPTERS = "total-number-of-modules-present";
 }

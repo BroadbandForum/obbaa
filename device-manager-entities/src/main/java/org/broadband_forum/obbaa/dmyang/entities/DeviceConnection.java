@@ -55,6 +55,10 @@ public class DeviceConnection {
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
     private PasswordAuth passwordAuth;
 
+    @YangChild
+    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    private SnmpAuth snmpAuth;
+
     @YangAttribute(name = DUID)
     @Column(name = "duid")
     private String duid;
@@ -92,6 +96,14 @@ public class DeviceConnection {
         this.passwordAuth = passwordAuth;
     }
 
+    public SnmpAuth getSnmpAuth() {
+        return snmpAuth;
+    }
+
+    public void setSnmpAuth(SnmpAuth snmpAuth) {
+        this.snmpAuth = snmpAuth;
+    }
+
     public String getDuid() {
         return duid;
     }
@@ -123,6 +135,9 @@ public class DeviceConnection {
         if (passwordAuth != null ? !passwordAuth.equals(that.passwordAuth) : that.passwordAuth != null) {
             return false;
         }
+        if (snmpAuth != null ? !snmpAuth.equals(that.snmpAuth) : that.snmpAuth != null) {
+            return false;
+        }
         return duid != null ? duid.equals(that.duid) : that.duid == null;
 
     }
@@ -133,6 +148,7 @@ public class DeviceConnection {
         result = 31 * result + (schemaPath != null ? schemaPath.hashCode() : 0);
         result = 31 * result + (connectionModel != null ? connectionModel.hashCode() : 0);
         result = 31 * result + (passwordAuth != null ? passwordAuth.hashCode() : 0);
+        result = 31 * result + (snmpAuth != null ? snmpAuth.hashCode() : 0);
         result = 31 * result + (duid != null ? duid.hashCode() : 0);
         return result;
     }

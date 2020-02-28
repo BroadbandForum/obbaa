@@ -21,17 +21,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>protocol-translation-example</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>${revision}</version>
     </parent>
 
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>protocol-transl-feature</artifactId>
-    <version>${obbaa-release.version}</version>
     <dependencies>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>protocol-transl-sample-adapter</artifactId>
             <version>${project.version}</version>
         </dependency>

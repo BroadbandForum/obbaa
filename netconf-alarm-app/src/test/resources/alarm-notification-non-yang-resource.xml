@@ -1,11 +1,9 @@
 <alarms:alarm-notification xmlns:alarms="urn:ietf:params:xml:ns:yang:ietf-alarms">
-    <alarms:alarm>
-        <alarms:resource>ams:mobject-manager/prefix=XDSL port/ne=myNE/agent=ICAM/relative=R1.S1.LT1.P1</alarms:resource>
-        <alarms:alarm-type-id>baa-network-manager:testId
-        </alarms:alarm-type-id>
-        <alarms:alarm-type-qualifier/>
-        <alarms:time>2016-06-15T10:34:57.648+05:30</alarms:time>
-        <alarms:perceived-severity>critical</alarms:perceived-severity>
-        <alarms:alarm-text>Test</alarms:alarm-text>
-    </alarms:alarm>
+    <alarms:resource>ams:mobject-manager/prefix=XDSL port/ne=myNE/agent=ICAM/relative=R1.S1.LT1.P1</alarms:resource>
+    <alarms:alarm-type-id>baa-network-manager:testId
+    </alarms:alarm-type-id>
+    <alarms:alarm-type-qualifier/>
+    <alarms:time>2016-06-15T10:34:57.648+05:30</alarms:time>
+    <alarms:perceived-severity>critical</alarms:perceived-severity>
+    <alarms:alarm-text>Test</alarms:alarm-text>
 </alarms:alarm-notification>

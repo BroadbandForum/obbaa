@@ -145,4 +145,10 @@ Legend:
 
 -   eth \- Ethernet interface
 
+Performance collection configuration
+=================
+
+An example for configuring an IPFIX exporting process on an access node is provided in resources/examples/requests/ipfix-configuration-example.xml. 
+To run the example, it is assumed that a device named deviceA with an interface called eth0 is already created.
+
 [<--Using OB-BAA](../index.md#using)

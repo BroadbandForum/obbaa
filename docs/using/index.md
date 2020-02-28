@@ -19,8 +19,11 @@ OB-BAA:
 -   [Monitoring operations for Device Adapters](mda/index.md#mda)
 
 -   [Creation and deployment of Vendor Device Adapters](dvda/index.md#dvda)
+	-   [Create and deploy a SNMP Vendor Device Adapter](snmpvda/index.md#snmpvda)
 
 -   [Using NETCONF Event Notifications in the BAA layer](notif/index.md#notif)
+
+-   [Deployment of the IPFIX Performance Monitoring Collector and Data Handler](ipfixpm/index.md#ipfixpmc)
 
 [<--Installing OB-BAA](../installing/index.md#installing)
     

@@ -236,29 +236,23 @@ public class AlarmsDocumentTransformer extends PojoToDocumentTransformer {
     /**
      * Build a document of format
      * <alarm-notification>
-     * <alarm>
      * <resource/>
      * <alarm-type-id/>
      * <last-status-change/>
      * <last-perceived-severity/>
      * <last-alarm-text/>
      * <last-alarm-condition/>
-     * </alarm>
-     * <alarm>
-     * .....
-     * .....
-     * </alarm>
      * </alarm-notification>
      *
-     * @param alarmNotifs<AlarmNotification> List of alarm notification
+     * @param alarmNotif An alarm notification
      * @return org.w3c.dom.Element
      * @throws NetconfMessageBuilderException : Exception while building netconf message
      */
-    public Element getAlarmNotificationElement(List<AlarmNotification> alarmNotifs) throws NetconfMessageBuilderException {
-        return buildAlarmNotification(alarmNotifs, AlarmConstants.ALARM_NAMESPACE);
+    public Element getAlarmNotificationElement(AlarmNotification alarmNotif) throws NetconfMessageBuilderException {
+        return buildAlarmNotification(alarmNotif, AlarmConstants.ALARM_NAMESPACE);
     }
 
-    public Element buildAlarmNotification(List<AlarmNotification> alarmNotifs, String alarmNS) throws NetconfMessageBuilderException {
+    public Element buildAlarmNotification(AlarmNotification alarmNotif, String alarmNS) throws NetconfMessageBuilderException {
         try {
             m_doc = DocumentUtils.getNewDocument();
         } catch (ParserConfigurationException e) {
@@ -276,13 +270,9 @@ public class AlarmsDocumentTransformer extends PojoToDocumentTransformer {
         Element alarmNotificationElement = m_doc.createElementNS(alarmNS,
                 buildLocalName(prefix, AlarmConstants.ALARM_NOTIFICATION));
 
-        for (AlarmNotification notification : alarmNotifs) {
-            Element alarm = buildAlarmParameters(alarmNS, prefix, notification);
+        buildAlarmParameters(alarmNS, prefix, alarmNotif, alarmNotificationElement);
+        LOGGER.debug(null, "Processed alarmNotification-%s ", alarmNotif.toString());
 
-            alarmNotificationElement.appendChild(alarm);
-
-            LOGGER.debug(null, "Processed alarmNotification-%s ", notification.toString());
-        }
         return alarmNotificationElement;
     }
 

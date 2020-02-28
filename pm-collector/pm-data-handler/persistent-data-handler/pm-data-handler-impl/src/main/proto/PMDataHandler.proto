@@ -1,0 +1,108 @@
+//
+// Copyright 2020 Broadband Forum
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.broadband_forum.obbaa.pmcollection.nbi";
+option java_outer_classname = "PMDataHandlerProto";
+
+package pmDataRequest;
+
+// This documents the integer values of the map keys in the Filter.
+// Since protobuf3 does not support enums as map keys, the integer value should
+// be used in the Filter message.
+enum TagEnum {
+  F_SOURCEIP = 0;
+  F_HOSTNAME = 1;
+  F_DEVICE_ADAPTER = 2;
+  F_TEMPLATEID = 3;
+  F_OBSERVATIONDOMAIN = 4;
+}
+
+// Filter values.
+//
+// Filter expression is build using filterTag == filterItemValues
+// joined using the 'or' operator.
+message FilterValues {
+  repeated string filterItemValues = 1;
+}
+
+// Filter definition.
+//
+// The keys in the map are the TagEnum integer values.
+// The values are a list of tag values.
+//
+// All filterExpression are joined using the 'and' operator.
+//
+// E.g. F_HOSTNAME: dup1, dpu2, dpu3
+//      F_OBSERVATIONDOMAIN: 5
+// result in (HOSTNAME == dpu1 or HOSTNAME == dpu2 or HOSTNAME == dpu3)
+//           and
+//           (OBSERVATIONDOMAIN == 5)
+message Filter {
+  map<uint32, FilterValues> filterExpressions = 1;
+}
+
+// Union holding the value of a time series data point
+// Only four types are supported in the NBI. The actual IPIFX data types should
+// be taken from the IPFIX templateID.
+message ValueUnion {
+  oneof value {
+    uint64 lvalue = 1;
+    double dvalue = 2;
+    string svalue = 3;
+    bool bvalue = 4;
+  }
+}
+
+// Time series point definition.
+//
+// measurement: the name of the measurement. It is build using the templateID
+// timestamp: seconds since the epoch
+// tags: searchable name value pairs that address the ts points
+// fields: list of name/value pairs holding the name and the value of the metric
+message TimeSeriesPoint {
+  string measurement = 1;
+  int32 timestamp = 2;
+  map<string, string> tags = 3;
+  map<string, ValueUnion> fields = 4;
+}
+
+// The request message defining the query
+message QueryRequest {
+  string measurement = 1;
+  int32 startTime = 2;
+  int32 stopTime = 3;
+  Filter filter = 4;
+}
+
+// The reply message with the result of the query
+message QueryReply {
+  repeated TimeSeriesPoint tsPoints = 1;
+}
+
+// PMDataRequest service
+service PMDataRequest {
+  // Query time series data
+  rpc Query(QueryRequest) returns(stream QueryReply) {}
+}
+
+// PMData stream service
+service PMDataStream {
+  // Streams time series data
+  rpc QueryStream(QueryRequest) returns(stream QueryReply) {}
+}

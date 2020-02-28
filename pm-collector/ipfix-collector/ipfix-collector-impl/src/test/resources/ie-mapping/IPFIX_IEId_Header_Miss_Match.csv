@@ -1,0 +1,2 @@
+MissMatchHeader,ElementID,Name,Data Type,Data Type Semantics,Status,Description,Units,Range,References,Requester,Revision,Date
+1,/if:interfaces/if:interface/if:name,string,default,current,"A short name uniquely describing an interface, eg ""Eth1/0"".",,,See [RFC2863] for the definition of the ifName object.,,0,20-11-2019

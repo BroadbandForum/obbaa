@@ -78,7 +78,7 @@ which is covered between in the Simulator setup section.
 
 #### Docker
 
-OB-BAA is realized as a micro service under a docker engine.
+OB-BAA is realized as a micro-service under a docker engine.
 
 ```
 Install docker:
@@ -190,15 +190,28 @@ Build NetConf stack
 Build OBBAA
   Change directory obbaa
   mvn clean install -DskipTests
+  
+Build OBBAA with Unit Test (UT)
+  Pre-requisite: Start InfluxDB docker container using the command:
+     docker-compose -f ~obbaa/pm-collector/pm-data-handler/persistent-data-handler/influxdb-impl/bamboo-docker/obbaa-influxdb.yml up -d
+  If InfluxDB is not running there will be UT failures in pm-collector modules. 
+  This step is required only if you are going to run UT in your local environment.
+    Change directory obbaa
+    mvn clean install
 ```
 
 #### Build docker image:
 
-The next step is to build docker image from the generated jars.
+The next step is to build docker images from the generated jars.
 
 ```
-  cd obbaa/baa-dist
-  docker build -t baa .
+Build BAA Docker Image
+	cd <obbaa>/baa-dist
+	docker build -t baa .
+
+Build IPFIX-Collector Docker Image
+    cd <obbaa>/pm-collector/ipfix-collector/ipfix-collector-dist
+	docker build -t ipfix-collector .
 ```
 
 [<--Installing](../index.md#installing)

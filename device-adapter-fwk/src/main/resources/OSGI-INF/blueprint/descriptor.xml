@@ -204,6 +204,8 @@
         <argument ref="ncConnectionMgr"/>
     </bean>
 
+    <bean id="TrapListener" class="org.broadband_forum.obbaa.device.listener.TrapListener" init-method="startup" destroy-method="shutdown"/>
+
     <service ref="lockService" interface="org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService"/>
     <service ref="nonCodedAdapterService" interface="org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService"/>
     <service ref="entityRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry"/>
@@ -217,4 +219,5 @@
     <service ref="jpaModelServiceDeployer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service.ModelServiceDeployer"/>
     <service ref="modelNodeHelperRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry" />
     <service ref="subsystemRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry" />
+    <service ref="TrapListener" interface="org.broadband_forum.obbaa.device.listener.RegisterTrapCallback" />
 </blueprint>

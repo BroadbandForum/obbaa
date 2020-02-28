@@ -9,4 +9,5 @@
 **/.tmp/
 **/dist/
 /**/.idea/
+**/.flattened-pom.xml
 

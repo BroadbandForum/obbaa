@@ -57,11 +57,11 @@ public class NetconfMessageUtilTest {
     @Test
     public void buildModuleCapabilityTest() throws Exception {
         ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier("network-manager",
-                AggregatorMessage.NS_OBBAA_NETWORK_MANAGER,"2018-05-07");
+                AggregatorMessage.NS_OBBAA_NETWORK_MANAGER,"2020-02-19");
 
         String result = NetconfMessageUtil.buildModuleCapability(moduleIdentifier);
         assertFalse(result.isEmpty());
-        assertEquals("urn:bbf:yang:obbaa:network-manager?module=network-manager&revision=2018-05-07", result);
+        assertEquals("urn:bbf:yang:obbaa:network-manager?module=network-manager&revision=2020-02-19", result);
     }
 
 }

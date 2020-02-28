@@ -180,6 +180,7 @@
         <argument ref="nonCodedAdapterService"/>
         <argument ref="deviceSubsystem"/>
         <argument value="/baa/baa-dist/standardAdapters"/>
+        <argument value="/baa/stores/ipfix"/>
         <argument ref="nonCodedConfigAlign"/>
     </bean>
 

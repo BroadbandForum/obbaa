@@ -188,7 +188,7 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
         manager.beginTransaction();
         List<Alarm> alarms = manager.findAll(Alarm.class);
         manager.commitTransaction();
-        verify(m_notificationService).sendNotification(eq(AlarmConstants.ALARM_STREAM_NAME), any(DefaultAlarmStateChangeNotification.class));
+        verify(m_notificationService, times(2)).sendNotification(eq(AlarmConstants.ALARM_STREAM_NAME), any(DefaultAlarmStateChangeNotification.class));
         assertEquals(2, m_internalAlarmService.getRaisedAlarms());
         assertEquals(2, alarms.size());
 
@@ -250,9 +250,7 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
 
         // verify the notification
         DefaultAlarmStateChangeNotification notification = m_internalAlarmService.getNotification();
-        List<AlarmNotification> alarmNotifications = notification.getAlarmNotification();
-        assertEquals(1, alarmNotifications.size());
-        AlarmNotification alarmNotification = alarmNotifications.get(0);
+        AlarmNotification alarmNotification = notification.getAlarmNotification();
         assertEquals(AlarmCondition.ALARM_ON, alarmNotification.getAlarmCondition());
         assertEquals(alarmInfo.getTime(), alarmNotification.getLastStatusChange());
 
@@ -323,9 +321,7 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
 
         // verify the notification
         notification = m_internalAlarmService.getNotification();
-        alarmNotifications = notification.getAlarmNotification();
-        assertEquals(1, alarmNotifications.size());
-        alarmNotification = alarmNotifications.get(0);
+        alarmNotification = notification.getAlarmNotification();
         assertEquals(AlarmCondition.ALARM_OFF, alarmNotification.getAlarmCondition());
         assertEquals(alarmInfo.getTime(), alarmNotification.getLastStatusChange());
 
@@ -347,7 +343,7 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
         manager.beginTransaction();
         m_alarmQueue.clearQueue();
         manager.commitTransaction();
-        verify(m_notificationService).sendNotification(eq(AlarmConstants.ALARM_STREAM_NAME), any(DefaultAlarmStateChangeNotification.class));
+        verify(m_notificationService, times(2)).sendNotification(eq(AlarmConstants.ALARM_STREAM_NAME), any(DefaultAlarmStateChangeNotification.class));
         assertEquals(2, m_internalAlarmService.getRaisedAlarms());
 
         manager.beginTransaction();
@@ -360,7 +356,7 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
         manager.beginTransaction();
         m_alarmQueue.clearQueue();
         manager.commitTransaction();
-        verify(m_notificationService).sendNotification(eq(AlarmConstants.ALARM_STREAM_NAME), any(DefaultAlarmStateChangeNotification.class));
+        verify(m_notificationService, times(3)).sendNotification(eq(AlarmConstants.ALARM_STREAM_NAME), any(DefaultAlarmStateChangeNotification.class));
         assertEquals(3, m_internalAlarmService.getRaisedAlarms());
         assertEquals(1, m_internalAlarmService.getUpdatedAlarms());
         assertEquals(1, m_internalAlarmService.getClearedAlarms());
@@ -408,8 +404,7 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
         assertEquals(m_dsm, actualDsm);
         Element actualNotificationElement = notification.getNotificationElement();
         TestUtil.assertXMLEquals(getExpectedNotificationElement(), actualNotificationElement, m_ignoreElements);
-        Element alarmElement = (Element) actualNotificationElement.getElementsByTagNameNS(AlarmConstants.ALARM_NAMESPACE, AlarmConstants.ALARM_ELEMENT).item(0);
-        Element resourceElement = (Element) alarmElement.getElementsByTagNameNS(AlarmConstants.ALARM_NAMESPACE, AlarmConstants.ALARM_RESOURCE).item(0);
+        Element resourceElement = (Element) actualNotificationElement.getElementsByTagNameNS(AlarmConstants.ALARM_NAMESPACE, AlarmConstants.ALARM_RESOURCE).item(0);
         assertEquals(resourceString, resourceElement.getTextContent());
         assertEquals(AlarmTestConstants.BAA_NAMESPACE, resourceElement.lookupNamespaceURI("baa"));
         assertEquals(AlarmTestConstants.NETWORK_MANAGER_NAMESPACE, resourceElement.lookupNamespaceURI("baa-network-manager"));
@@ -447,14 +442,12 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
 
     private Element getExpectedNotificationElement() {
         String notificationString = "<alarms:alarm-notification xmlns:alarms=\"urn:ietf:params:xml:ns:yang:ietf-alarms\">"
-                + "<alarms:alarm>"
                 + "<alarms:resource xmlns:network-manager=\"http://www.example.com/network-manager/managed-devices\"  xmlns:baa=\"http://www.example.com/network-manager/baa\" xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">/baa:device-manager/network-manager:device[network-manager:name='R1.S1.LT1.P1.ONT1']/network-manager:device-specific-data/if:interfaces/if:interface[if:name='xdsl-line:1/1/1/1']</alarms:resource>"
                 + "<alarms:alarm-type-id xmlns:baa-network-manager=\"http://www.example.com/network-manager/managed-devices\">baa-network-manager:device-alarm</alarms:alarm-type-id>"
                 + "<alarms:alarm-type-qualifier xmlns:baa-network-manager=\"http://www.example.com/network-manager/managed-devices\">baa-network-manager:fast-ftu-r-loss-of-margin</alarms:alarm-type-qualifier>"
                 + "<alarms:time>2018-11-08T17:08:19.151+05:30</alarms:time>"
                 + "<alarms:perceived-severity>critical</alarms:perceived-severity>"
                 + "<alarms:alarm-text>text1</alarms:alarm-text>"
-                + "</alarms:alarm>"
                 + "</alarms:alarm-notification>";
         return TestUtil.transformToElement(notificationString);
     }
@@ -678,9 +671,7 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
         ModelNodeDataStoreManager actualDsm = notification.getModelNodeDSM();
         assertNotNull(actualDsm);
         assertEquals(m_dsm, actualDsm);
-        List<AlarmNotification> alarmNotifications = notification.getAlarmNotification();
-        assertEquals(1, alarmNotifications.size());
-        AlarmNotification alarmNotification = alarmNotifications.get(0);
+        AlarmNotification alarmNotification = notification.getAlarmNotification();
         assertEquals(AlarmCondition.ALARM_OFF, alarmNotification.getAlarmCondition());
 
         destroyAlarms();

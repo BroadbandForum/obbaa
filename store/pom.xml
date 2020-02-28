@@ -18,12 +18,12 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>store</artifactId>
     <packaging>jar</packaging>
     <name>Broadband Access Abstraction/Store</name>
@@ -51,7 +51,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>
 
 

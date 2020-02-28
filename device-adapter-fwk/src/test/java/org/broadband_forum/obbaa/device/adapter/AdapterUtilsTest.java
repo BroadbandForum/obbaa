@@ -25,7 +25,6 @@ import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getStandardA
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,10 +70,8 @@ public class AdapterUtilsTest {
     private SubSystem m_subSystem;
     @Mock
     private DeviceInterface m_deviceInterface;
-
     @Mock
     private StandardModelRegistrator m_standardModelRegistrator;
-    private ArgumentCaptor<DeviceAdapterId> m_devAdapterId;
 
     public AdapterUtilsTest() {
 
@@ -84,17 +81,31 @@ public class AdapterUtilsTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         m_readWriteLockService = spy(new ReadWriteLockServiceImpl());
-        m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator));
-        createAndDeployAdapter("/model/device-adapter1.xml");
-        createAndDeployAdapter("/model/device-adapter2.xml");
+        Map<DeviceAdapter, FactoryGarmentTag> garmentTagMap = new HashMap<DeviceAdapter, FactoryGarmentTag>();
+        ArrayList<String> deviatedStdModules = new ArrayList<>();
+        deviatedStdModules.add(0, "ietf-interfaces");
+        ArrayList<String> augmentedStdModules = new ArrayList<>();
+        augmentedStdModules.add(0, "iana-interfaces");
+        m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator) {
+            @Override
+            protected void computeFactoryGarmentTag(DeviceAdapter adapter, AdapterContext vendorAdapterContext) {
+                garmentTagMap.put(adapter, new FactoryGarmentTag(10, 3, 2, deviatedStdModules, augmentedStdModules));
+            }
+        });
+        //install standard dpu adapters
+        createAndDeployAdapter("/model/device-adapter11.xml");
         createAndDeployAdapter("/model/device-adapter4.xml");
-        createAndDeployAdapter("/model/device-adapter5.xml");
-        createAndDeployAdapter("/model/device-adapter6.xml");
+        //install standard olt adapters
         createAndDeployAdapter("/model/device-adapter7.xml");
         createAndDeployAdapter("/model/device-adapter8.xml");
-        createAndDeployAdapter("/model/device-adapter9.xml");
+        //install other adapters
+        createAndDeployAdapter("/model/device-adapter1.xml");
+        createAndDeployAdapter("/model/device-adapter2.xml");
+        createAndDeployAdapter("/model/device-adapter5.xml");
+        createAndDeployAdapter("/model/device-adapter6.xml");
         createAndDeployAdapter("/model/device-adapter3.xml");
-
+        createAndDeployAdapter("/model/device-adapter9.xml");
+        createAndDeployAdapter("/model/device-adapter11.xml");
     }
 
     @After
@@ -104,9 +115,9 @@ public class AdapterUtilsTest {
     @Test
     public void testGetStandardAdapterContextForDpuWhenStdAdapterIntVersionIsNotNull() {
         //when stdAdapterIntVersion != null i.e 2.0
-        m_device = setDeviceAttributes("DPU", "4LT", "1.0", "VENDOR1");
+        m_device = setDeviceAttributes("DPU", "4LT", "1.0", "sample");
         getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-        verifyCorrectStdAdapter(DPU, "2.0", STANDARD, BBF);
+        verifyCorrectStdAdapter(m_device, DPU, "2.0", STANDARD, BBF);
     }
 
 
@@ -115,7 +126,7 @@ public class AdapterUtilsTest {
         //when stdAdapterIntVersion == null i.e pick oldest version 1.0
         m_device = setDeviceAttributes("DPU", "8LT", "2.0", "VENDOR2");
         getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-        verifyCorrectStdAdapter(DPU, STD_ADAPTER_OLDEST_VERSION, STANDARD, BBF);
+        verifyCorrectStdAdapter(m_device, DPU, STD_ADAPTER_OLDEST_VERSION, STANDARD, BBF);
     }
 
     @Test
@@ -123,7 +134,7 @@ public class AdapterUtilsTest {
         //when stdAdapterIntVersion != null i.e 2.0
         m_device = setDeviceAttributes("OLT", "4LT", "1.0", "VENDOR1");
         getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-        verifyCorrectStdAdapter(OLT, "2.0", STANDARD, BBF);
+        verifyCorrectStdAdapter(m_device, OLT, "2.0", STANDARD, BBF);
     }
 
     @Test
@@ -131,7 +142,7 @@ public class AdapterUtilsTest {
         //when stdAdapterIntVersion == null i.e pick oldest version 1.0
         m_device = setDeviceAttributes("OLT", "8LT", "2.0", "VENDOR2");
         getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-        verifyCorrectStdAdapter(OLT, STD_ADAPTER_OLDEST_VERSION, STANDARD, BBF);
+        verifyCorrectStdAdapter(m_device, OLT, STD_ADAPTER_OLDEST_VERSION, STANDARD, BBF);
     }
 
     @Test
@@ -139,7 +150,7 @@ public class AdapterUtilsTest {
         //when adapter is standard, it picks up the standard adapter version
         m_device = setDeviceAttributes("OLT", "standard", "1.0", "BBF");
         getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-        verifyCorrectStdAdapter(OLT, "1.0", STANDARD, BBF);
+        verifyCorrectStdAdapter(m_device, OLT, "1.0", STANDARD, BBF);
     }
 
     @Test
@@ -147,7 +158,7 @@ public class AdapterUtilsTest {
         //when adapter is standard, it picks up the standard adapter version
         m_device = setDeviceAttributes("DPU", "standard", "1.0", "BBF");
         getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-        verifyCorrectStdAdapter(DPU, "1.0", STANDARD, BBF);
+        verifyCorrectStdAdapter(m_device, DPU, "1.0", STANDARD, BBF);
     }
 
     @Test
@@ -204,14 +215,15 @@ public class AdapterUtilsTest {
         m_adapterManager.deploy(m_deviceAdapter, m_subSystem, getClass(), m_deviceInterface);
     }
 
-    private void verifyCorrectStdAdapter(String expectedType, String expectedInterfaceVersion, String expectedModel, String expectedVendor) {
-        ArgumentCaptor<DeviceAdapterId> devAdapterId = ArgumentCaptor.forClass(DeviceAdapterId.class);
-        verify(m_adapterManager).getAdapterContext(devAdapterId.capture());
-        DeviceAdapterId actualAdapterId = devAdapterId.getValue();
-        assertEquals(expectedType, actualAdapterId.getType());
-        assertEquals(expectedInterfaceVersion, actualAdapterId.getInterfaceVersion());
-        assertEquals(expectedModel, actualAdapterId.getModel());
-        assertEquals(expectedVendor, actualAdapterId.getVendor());
+    private void verifyCorrectStdAdapter(Device givenDevice, String expectedType, String expectedInterfaceVersion, String expectedModel, String expectedVendor) {
+        DeviceAdapter adapter = AdapterUtils.getAdapter(givenDevice, m_adapterManager);
+        if (!adapter.getModel().equalsIgnoreCase(BBF) && adapter.getStdAdapterIntVersion() != null) {
+            assertEquals(expectedType, adapter.getType());
+            assertEquals(expectedInterfaceVersion, adapter.getStdAdapterIntVersion());
+        } else {
+            assertEquals(expectedType, adapter.getType());
+            assertEquals(expectedInterfaceVersion, STD_ADAPTER_OLDEST_VERSION);
+        }
     }
 
 }

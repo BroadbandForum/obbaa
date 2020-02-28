@@ -21,23 +21,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.bbf.obbaa</groupId>
+        <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>${obbaa-release.version}</version>
+        <version>3.0.0</version>
     </parent>
 
-    <groupId>org.bbf.obbaa</groupId>
+    <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>device-adapter-fwk</artifactId>
     <packaging>bundle</packaging>
     <name>Broadband Access Abstraction/Device Adapter framework</name>
-
     <dependencies>
         <dependency>
-            <groupId>org.bbf.obbaa.netconf</groupId>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>adapter-schema-fwk</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -60,27 +59,27 @@
             <artifactId>org.osgi.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>device-manager-entities</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>netconf-alarm-app</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa.netconf</groupId>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-notification-app</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa</groupId>
+            <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>sbi-connectors</artifactId>
-            <version>${obbaa-release.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bbf.obbaa.netconf</groupId>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
             <type>test-jar</type>
         </dependency>
@@ -88,6 +87,11 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <version>5.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.snmp4j</groupId>
+            <artifactId>snmp4j</artifactId>
+            <version>${snmp4j.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -146,6 +150,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

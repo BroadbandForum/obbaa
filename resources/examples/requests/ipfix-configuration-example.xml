@@ -1,0 +1,128 @@
+<rpc
+	xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907169">
+	<edit-config>
+		<target>
+			<running/>
+		</target>
+		<config>
+			<network-manager
+				xmlns="urn:bbf:yang:obbaa:network-manager">
+				<managed-devices>
+					<device>
+						<name>deviceA</name>
+						<root>
+							<ipfix
+								xmlns="urn:ietf:params:xml:ns:yang:ietf-ipfix-psamp">
+								<observationPoint>
+									<name>OP at eth0 (ingress)</name>
+									<observationDomainId>123</observationDomainId>
+									<ifName>eth0</ifName>
+									<direction>ingress</direction>
+									<selectionProcess>Count-based packet selection</selectionProcess>
+								</observationPoint>
+								<observationPoint>
+									<name>OP at eth1</name>
+									<observationDomainId>456</observationDomainId>
+									<ifName>eth1</ifName>
+									<selectionProcess>All packet selection</selectionProcess>
+								</observationPoint>
+								<selectionProcess>
+									<name>Count-based packet selection</name>
+									<selector>
+										<name>Count-based sampler</name>
+										<sampCountBased>
+											<packetInterval>1</packetInterval>
+											<packetSpace>99</packetSpace>
+										</sampCountBased>
+									</selector>
+									<cache>Flow cache</cache>
+								</selectionProcess>
+								<selectionProcess>
+									<name>All packet selection</name>
+									<selector>
+										<name>Select all</name>
+										<selectAll/>
+									</selector>
+									<cache>Flow cache</cache>
+								</selectionProcess>
+								<cache>
+									<name>Flow cache</name>
+									<permanentCache>
+										<maxFlows>4096</maxFlows>
+										<exportInterval>900</exportInterval>
+										<cacheLayout>
+											<cacheField>
+												<name>Field 1</name>
+												<ieName>sourceIPv4Address</ieName>
+												<isFlowKey/>
+											</cacheField>
+											<cacheField>
+												<name>Field 2</name>
+												<ieName>destinationIPv4Address</ieName>
+												<isFlowKey/>
+											</cacheField>
+											<cacheField>
+												<name>Field 3</name>
+												<ieName>protocolIdentifier</ieName>
+												<isFlowKey/>
+											</cacheField>
+											<cacheField>
+												<name>Field 4</name>
+												<ieName>sourceTransportPort</ieName>
+												<isFlowKey/>
+											</cacheField>
+											<cacheField>
+												<name>Field 5</name>
+												<ieName>destinationTransportPort</ieName>
+												<isFlowKey/>
+											</cacheField>
+											<cacheField>
+												<name>Field 6</name>
+												<ieName>flowStartMilliseconds</ieName>
+											</cacheField>
+											<cacheField>
+												<name>Field 7</name>
+												<ieName>flowEndSeconds</ieName>
+											</cacheField>
+											<cacheField>
+												<name>Field 8</name>
+												<ieName>octetDeltaCount</ieName>
+											</cacheField>
+											<cacheField>
+												<name>Field 9</name>
+												<ieName>packetDeltaCount</ieName>
+											</cacheField>
+										</cacheLayout>
+									</permanentCache>
+									<exportingProcess>TCP export</exportingProcess>
+								</cache>
+								<exportingProcess>
+									<name>TCP export</name>
+									<destination>
+										<name>TCP destination</name>
+										<tcpExporter>
+											<sourceIPAddress>192.0.0.1</sourceIPAddress>
+											<destinationPort>4739</destinationPort>
+											<destinationIPAddress>192.0.2.2</destinationIPAddress>
+											<ipfixVersion>9</ipfixVersion>
+										</tcpExporter>
+									</destination>
+									<options>
+										<name>Options 1</name>
+										<optionsType>selectionSequence</optionsType>
+										<optionsTimeout>0</optionsTimeout>
+									</options>
+									<options>
+										<name>Options 2</name>
+										<optionsType>exportingReliability</optionsType>
+										<optionsTimeout>60000</optionsTimeout>
+									</options>
+								</exportingProcess>
+							</ipfix>
+						</root>
+					</device>
+				</managed-devices>
+			</network-manager>
+		</config>
+	</edit-config>
+</rpc>

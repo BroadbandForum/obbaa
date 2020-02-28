@@ -16,8 +16,6 @@
 
 package org.broadband_forum.obbaa.netconf.alarm.api;
 
-import java.util.List;
-
 import org.broadband_forum.obbaa.netconf.alarm.util.AlarmConstants;
 import org.broadband_forum.obbaa.netconf.alarm.util.AlarmsDocumentTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
@@ -34,7 +32,7 @@ public class DefaultAlarmStateChangeNotification extends NetconfNotification {
     public static final QName TYPE = QName.create(AlarmConstants.ALARM_NAMESPACE, "alarm-notification");
     private static final AdvancedLogger LOGGER = AdvancedLoggerUtil.getGlobalDebugLogger(DefaultAlarmStateChangeNotification.class,
             LogAppNames.NETCONF_ALARM);
-    private List<AlarmNotification> m_alarms;
+    private AlarmNotification m_alarm;
 
     private SchemaRegistry m_schemaRegistry;
     private ModelNodeDataStoreManager m_dsm;
@@ -44,12 +42,12 @@ public class DefaultAlarmStateChangeNotification extends NetconfNotification {
         m_dsm = dsm;
     }
 
-    public List<AlarmNotification> getAlarmNotification() {
-        return m_alarms;
+    public AlarmNotification getAlarmNotification() {
+        return m_alarm;
     }
 
-    public void setAlarmNotification(List<AlarmNotification> alarms) {
-        this.m_alarms = alarms;
+    public void setAlarmNotification(AlarmNotification alarms) {
+        this.m_alarm = alarms;
     }
 
     @Override
@@ -65,7 +63,7 @@ public class DefaultAlarmStateChangeNotification extends NetconfNotification {
     private Element getAlarmNotificationElement() {
         try {
             AlarmsDocumentTransformer transformer = new AlarmsDocumentTransformer(m_schemaRegistry, m_dsm);
-            return transformer.getAlarmNotificationElement(m_alarms);
+            return transformer.getAlarmNotificationElement(m_alarm);
         } catch (NetconfMessageBuilderException e) {
             LOGGER.error(null, "Error while getting alarm notification element. ", e);
         }
@@ -74,7 +72,7 @@ public class DefaultAlarmStateChangeNotification extends NetconfNotification {
 
     @Override
     public String toString() {
-        return "DefaultAlarmStateChangeNotification [alarms=" + m_alarms + "]";
+        return "DefaultAlarmStateChangeNotification [alarm=" + m_alarm + "]";
     }
 
     @Override

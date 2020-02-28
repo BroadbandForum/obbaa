@@ -17,6 +17,6 @@
 
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="${project.artifactId}-${project.version}">
     <feature name="${project.artifactId}" version="${project.version}" description="model translation feature">
-        <bundle>mvn:org.bbf.obbaa/model-transl-sample-adapter/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/model-transl-sample-adapter/${project.version}</bundle>
     </feature>
 </features>

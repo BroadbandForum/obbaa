@@ -54,6 +54,7 @@ import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
+import org.broadband_forum.obbaa.device.adapter.FactoryGarmentTag;
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
@@ -65,6 +66,7 @@ import org.broadband_forum.obbaa.netconf.api.parser.YangParserUtil;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
+import org.broadband_forum.obbaa.netconf.api.utils.SystemPropertyUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaBuildException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ChangeNotification;
@@ -92,16 +94,16 @@ import org.w3c.dom.Element;
 public class DeviceManagementSubsystemTest {
 
     public static final String DEVICE_A = "deviceA";
-    private static final ModelNodeId DEVICE_A_ID_TEMPLATE = new ModelNodeId("/container=" + NETWORK_MANAGER + "/container=" + MANAGED_DEVICES
-        + CONTAINER_DEVICE_TEMPLATE + DEVICE_A + "/container=" + DEVICE_MANAGEMENT, NS);
     public static final String DEVICE_B = "deviceB";
+    private static final ModelNodeId DEVICE_A_ID_TEMPLATE = new ModelNodeId("/container=" + NETWORK_MANAGER + "/container=" + MANAGED_DEVICES
+            + CONTAINER_DEVICE_TEMPLATE + DEVICE_A + "/container=" + DEVICE_MANAGEMENT, NS);
     private static final ModelNodeId DEVICE_B_ID_TEMPLATE = new ModelNodeId("/container=" + NETWORK_MANAGER + "/container=" + MANAGED_DEVICES
-        + CONTAINER_DEVICE_TEMPLATE + DEVICE_B + "/container=" + DEVICE_MANAGEMENT, NS);
+            + CONTAINER_DEVICE_TEMPLATE + DEVICE_B + "/container=" + DEVICE_MANAGEMENT, NS);
+    Date m_now = new Date();
     private DeviceManagementSubsystem m_deviceManagementSubsystem;
     private SchemaRegistryImpl m_schemaRegistry;
     @Mock
     private DeviceManager m_deviceManager;
-    Date m_now = new Date();
     @Mock
     private NetconfConnectionManager m_connectionManager;
     @Mock
@@ -119,6 +121,7 @@ public class DeviceManagementSubsystemTest {
     @Before
     public void setup() throws SchemaBuildException {
         MockitoAnnotations.initMocks(this);
+        System.setProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "True");
         m_schemaRegistry = getSchemaRegistry();
         m_deviceManagementSubsystem = new DeviceManagementSubsystem(m_schemaRegistry, m_adapterManager);
         m_deviceManagementSubsystem.setDeviceManager(m_deviceManager);
@@ -172,13 +175,13 @@ public class DeviceManagementSubsystemTest {
         when(m_adapterManager.getAdapterSize()).thenReturn(2);
         Collection<DeviceAdapter> adapters = new ArrayList<>();
         DeviceAdapter adapter1 = AdapterBuilder.createAdapterBuilder()
-                .setDeviceAdapterId(new DeviceAdapterId("type1", "interface1", "model1", "vendor1"))
+                .setDeviceAdapterId(new DeviceAdapterId("dpu", "interface1", "model1", "vendor1"))
                 .build();
         adapter1.setNetconf(false);
         DeviceAdapter adapter2 = AdapterBuilder.createAdapterBuilder()
-                .setDeviceAdapterId(new DeviceAdapterId("type2", "interface2", "model2", "vendor2"))
+                .setDeviceAdapterId(new DeviceAdapterId("olt", "interface2", "model2", "vendor2"))
                 .build();
-        adapter2.setDeveloper("bbf");
+        adapter2.setDeveloper("test");
         adapter2.setLastUpdateTime(DateTime.parse("2019-01-01T00:00:00Z"));
         List revisionList = new ArrayList<Calendar>();
         revisionList.add(new XmlCalendar("2019-01-02T08:00:00Z"));
@@ -186,6 +189,21 @@ public class DeviceManagementSubsystemTest {
         adapters.add(adapter1);
         adapters.add(adapter2);
         when(m_adapterManager.getAllDeviceAdapters()).thenReturn(adapters);
+        if (Boolean.parseBoolean(SystemPropertyUtils.getInstance()
+                .getFromEnvOrSysProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL"))) {
+            ArrayList<String> adapter1DeviatedStdModules = new ArrayList<>();
+            adapter1DeviatedStdModules.add(0, "ietf-hardware");
+            adapter1DeviatedStdModules.add(1, "iana-hardware");
+            ArrayList<String> adapter2DeviatedStdModules = new ArrayList<>();
+            adapter2DeviatedStdModules.add(0, "ietf-interfaces");
+            ArrayList<String> adapter1AugmentedStdModules = new ArrayList<>();
+            adapter1AugmentedStdModules.add(0, "ietf-hardware");
+            adapter1AugmentedStdModules.add(1, "iana-hardware");
+            ArrayList<String> adapter2AugmentedStdModules = new ArrayList<>();
+            adapter2AugmentedStdModules.add(0, "ietf-interfaces");
+            when(m_adapterManager.getFactoryGarmentTag(adapter1)).thenReturn(new FactoryGarmentTag(12, 15, 10, adapter1DeviatedStdModules, adapter1AugmentedStdModules));
+            when(m_adapterManager.getFactoryGarmentTag(adapter2)).thenReturn(new FactoryGarmentTag(15, 20, 10, adapter2DeviatedStdModules, adapter2AugmentedStdModules));
+        }
     }
 
     private List<YangTextSchemaSource> getByteSources(List<String> yangFiles) {
@@ -214,27 +232,27 @@ public class DeviceManagementSubsystemTest {
 
     private Document getDeviceStateDocumentWithConnectionStateFilter(String name) throws Exception {
         return DocumentUtils.stringToDocument(
-            "<device-state xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-                "<connection-state>\n" +
-                "<connected>true</connected>\n" +
-                "<connection-creation-time>" + NetconfResources.DATE_TIME_WITH_TZ_WITHOUT_MS.print(new DateTime(m_now)) + "</connection-creation-time>\n" +
-                "<device-capability>" + name + "caps1</device-capability>\n" +
-                "<device-capability>" + name + "caps2</device-capability>\n" +
-                "</connection-state>\n" +
-                "</device-state>\n");
+                "<device-state xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+                        "<connection-state>\n" +
+                        "<connected>true</connected>\n" +
+                        "<connection-creation-time>" + NetconfResources.DATE_TIME_WITH_TZ_WITHOUT_MS.print(new DateTime(m_now)) + "</connection-creation-time>\n" +
+                        "<device-capability>" + name + "caps1</device-capability>\n" +
+                        "<device-capability>" + name + "caps2</device-capability>\n" +
+                        "</connection-state>\n" +
+                        "</device-state>\n");
     }
 
     private Document getDeviceStateDocument(String name) throws Exception {
         return DocumentUtils.stringToDocument(
-            "<device-state xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-                "<configuration-alignment-state>Aligned</configuration-alignment-state>\n" +
-                "<connection-state>\n" +
-                "<connected>true</connected>\n" +
-                "<connection-creation-time>" + NetconfResources.DATE_TIME_WITH_TZ_WITHOUT_MS.print(new DateTime(m_now)) + "</connection-creation-time>\n" +
-                "<device-capability>" + name + "caps1</device-capability>\n" +
-                "<device-capability>" + name + "caps2</device-capability>\n" +
-                "</connection-state>\n" +
-                "</device-state>\n");
+                "<device-state xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+                        "<configuration-alignment-state>Aligned</configuration-alignment-state>\n" +
+                        "<connection-state>\n" +
+                        "<connected>true</connected>\n" +
+                        "<connection-creation-time>" + NetconfResources.DATE_TIME_WITH_TZ_WITHOUT_MS.print(new DateTime(m_now)) + "</connection-creation-time>\n" +
+                        "<device-capability>" + name + "caps1</device-capability>\n" +
+                        "<device-capability>" + name + "caps2</device-capability>\n" +
+                        "</connection-state>\n" +
+                        "</device-state>\n");
     }
 
     private FilterNode getFilterNode(Document filterDoc) throws Exception {
@@ -361,13 +379,13 @@ public class DeviceManagementSubsystemTest {
         List<ChangeNotification> notifs = new ArrayList<>();
         ModelNodeId nodeId = new ModelNodeId("/container=network-manager/container=" + MANAGED_DEVICES, NS);
         EditContainmentNode editContainmentNode = new EditContainmentNode(QName.create(NS, DEVICE), EditConfigOperations.CREATE);
-        editContainmentNode.addMatchNode(QName.create(NS, DEVICE),new GenericConfigAttribute("device", NS, DEVICE_A));
+        editContainmentNode.addMatchNode(QName.create(NS, DEVICE), new GenericConfigAttribute("device", NS, DEVICE_A));
         ModelNodeChange change = new ModelNodeChange(ModelNodeChangeType.create, editContainmentNode);
-        notifs.add(new EditConfigChangeNotification(nodeId , change , StandardDataStores.RUNNING,mock(ModelNode.class)));
+        notifs.add(new EditConfigChangeNotification(nodeId, change, StandardDataStores.RUNNING, mock(ModelNode.class)));
         m_deviceManagementSubsystem.notifyChanged(notifs);
         verify(m_deviceManager).deviceAdded(DEVICE_A);
-        verify(m_deviceManager , never()).deviceRemoved(DEVICE_A);
-        verify(m_deviceManager , never()).devicePropertyChanged(DEVICE_A);
+        verify(m_deviceManager, never()).deviceRemoved(DEVICE_A);
+        verify(m_deviceManager, never()).devicePropertyChanged(DEVICE_A);
     }
 
     @Test
@@ -375,29 +393,29 @@ public class DeviceManagementSubsystemTest {
         List<ChangeNotification> notifs = new ArrayList<>();
         ModelNodeId nodeId = new ModelNodeId("/container=network-manager/container=" + MANAGED_DEVICES, NS);
         EditContainmentNode editContainmentNode = new EditContainmentNode(QName.create(NS, DEVICE), EditConfigOperations.DELETE);
-        editContainmentNode.addMatchNode(QName.create(NS, DEVICE),new GenericConfigAttribute("device", NS, DEVICE_A));
+        editContainmentNode.addMatchNode(QName.create(NS, DEVICE), new GenericConfigAttribute("device", NS, DEVICE_A));
         ModelNodeChange change = new ModelNodeChange(ModelNodeChangeType.delete, editContainmentNode);
-        notifs.add(new EditConfigChangeNotification(nodeId , change , StandardDataStores.RUNNING,mock(ModelNode.class)));
+        notifs.add(new EditConfigChangeNotification(nodeId, change, StandardDataStores.RUNNING, mock(ModelNode.class)));
         m_deviceManagementSubsystem.notifyChanged(notifs);
         verify(m_deviceManager).deviceRemoved(DEVICE_A);
-        verify(m_deviceManager , never()).deviceAdded(DEVICE_A);
-        verify(m_deviceManager , never()).devicePropertyChanged(DEVICE_A);
+        verify(m_deviceManager, never()).deviceAdded(DEVICE_A);
+        verify(m_deviceManager, never()).devicePropertyChanged(DEVICE_A);
     }
 
     @Test
     public void testNotifyChangedDevicePropertyChanged() {
         List<ChangeNotification> notifs = new ArrayList<>();
         ModelNodeId nodeId = new ModelNodeId("/container=network-manager/container=managed-devices"
-            + "/container=device/name=" + DEVICE_A
-            + "/container=device-management/container=device-connection"
-            + "/container=password-auth/container=authentication", NS);
+                + "/container=device/name=" + DEVICE_A
+                + "/container=device-management/container=device-connection"
+                + "/container=password-auth/container=authentication", NS);
         EditContainmentNode editContainmentNode = new EditContainmentNode(QName.create(NS, AUTHENTICATION), EditConfigOperations.MERGE);
-        editContainmentNode.addLeafChangeNode(QName.create(NS, MANAGEMENT_PORT),new GenericConfigAttribute(MANAGEMENT_PORT, NS, String.valueOf(30)));
+        editContainmentNode.addLeafChangeNode(QName.create(NS, MANAGEMENT_PORT), new GenericConfigAttribute(MANAGEMENT_PORT, NS, String.valueOf(30)));
         ModelNodeChange change = new ModelNodeChange(ModelNodeChangeType.merge, editContainmentNode);
-        notifs.add(new EditConfigChangeNotification(nodeId , change , StandardDataStores.RUNNING,mock(ModelNode.class)));
+        notifs.add(new EditConfigChangeNotification(nodeId, change, StandardDataStores.RUNNING, mock(ModelNode.class)));
         m_deviceManagementSubsystem.notifyChanged(notifs);
-        verify(m_deviceManager , never()).deviceRemoved(DEVICE_A);
-        verify(m_deviceManager , never()).deviceAdded(DEVICE_A);
+        verify(m_deviceManager, never()).deviceRemoved(DEVICE_A);
+        verify(m_deviceManager, never()).deviceAdded(DEVICE_A);
         verify(m_deviceManager).devicePropertyChanged(DEVICE_A);
     }
 
@@ -415,14 +433,13 @@ public class DeviceManagementSubsystemTest {
 
     private void prepareDevicesForAdapterInUseTest() {
         List<Device> deviceList = new ArrayList<>();
-        Device deviceA = createDirectDevicesForAdapterInUseTest("DeviceA(BasedAdapter1)", "interface1", "model1", "type1", "vendor1");
+        Device deviceA = createDirectDevicesForAdapterInUseTest("DeviceA(BasedAdapter1)", "interface1", "model1", "dpu", "vendor1");
         deviceList.add(deviceA);
         when(m_deviceManager.getAllDevices()).thenReturn(deviceList);
     }
 
     @Test
     public void retrieveStateAttributesDeviceAdaptersWithInUseFilter() throws Exception {
-
         prepareDevicesForAdapterInUseTest();
         Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> mapAttributes = new HashMap<>();
         Document filterDeviceAdapterWithType = DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter-with-inuse.xml"));
@@ -436,7 +453,6 @@ public class DeviceManagementSubsystemTest {
 
     @Test
     public void retrieveStateAttributesDeviceAdaptersWithoutFilter() throws Exception {
-
         prepareDevicesForAdapterInUseTest();
         Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> mapAttributes = new HashMap<>();
         Document filterDeviceAdapterWithType = DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter.xml"));
@@ -475,4 +491,44 @@ public class DeviceManagementSubsystemTest {
         assertEquals(expectedDeviceState, DocumentUtils.documentToPrettyString(deviceAState.get(0)).trim());
         assertEquals(expectedDeviceState, DocumentUtils.documentToPrettyString(deviceBState.get(0)).trim());
     }
+
+    @Test
+    public void retrieveStateAttributesDeviceAdaptersWithInUseFilterFactoryGarmentTagRetrievalDisabled() throws Exception {
+        System.setProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "false");
+        prepareDevicesForAdapterInUseTest();
+        Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> mapAttributes = new HashMap<>();
+        Document filterDeviceAdapterWithType = DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter-with-inuse.xml"));
+        mapAttributes.put(NETWORK_MANAGER_ID_TEMPLATE, new Pair<>(Collections.emptyList(), Arrays.asList(getFilterNode(filterDeviceAdapterWithType))));
+        Map<ModelNodeId, List<Element>> stateInfo = m_deviceManagementSubsystem.retrieveStateAttributes(mapAttributes);
+        assertEquals(1, stateInfo.size());
+        List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
+        assertEquals(1, deviceAdapter.size());
+        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/device-adapters-inuse-response-garment-tag-disabled.xml")).getDocumentElement(), deviceAdapter.get(0));
+    }
+
+    @Test
+    public void retrieveStateAttributesDeviceAdaptersWithoutFilterFactoryGarmentTagRetrievalDisabled() throws Exception {
+        System.setProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "false");
+        prepareDevicesForAdapterInUseTest();
+        Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> mapAttributes = new HashMap<>();
+        Document filterDeviceAdapterWithType = DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter.xml"));
+        mapAttributes.put(NETWORK_MANAGER_ID_TEMPLATE, new Pair<>(Collections.emptyList(), Arrays.asList(getFilterNode(filterDeviceAdapterWithType))));
+        Map<ModelNodeId, List<Element>> stateInfo = m_deviceManagementSubsystem.retrieveStateAttributes(mapAttributes);
+        assertEquals(1, stateInfo.size());
+        List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
+        assertEquals(1, deviceAdapter.size());
+        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter-response-garment-tag-disabled.xml")).getDocumentElement(), deviceAdapter.get(0));
+    }
+
+    @Test
+    public void retrieveStateAttributesAllDeviceAdaptersFactoryGarmentTagRetrievalDisabled() throws Exception {
+        System.setProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "false");
+        Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> mapAttributes = new HashMap<>();
+        Document filterDeviceAdapterWithType = DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/get-device-adapters.xml"));
+        mapAttributes.put(NETWORK_MANAGER_ID_TEMPLATE, new Pair<>(Collections.emptyList(), Arrays.asList(getFilterNode(filterDeviceAdapterWithType))));
+        Map<ModelNodeId, List<Element>> stateInfo = m_deviceManagementSubsystem.retrieveStateAttributes(mapAttributes);
+        List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
+        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/get-device-adapters-response-garment-tag-disabled.xml")).getDocumentElement(), deviceAdapter.get(0));
+    }
+
 }

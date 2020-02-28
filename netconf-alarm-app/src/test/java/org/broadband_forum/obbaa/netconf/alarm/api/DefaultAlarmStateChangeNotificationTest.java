@@ -37,7 +37,6 @@ public class DefaultAlarmStateChangeNotificationTest {
     private DefaultAlarmStateChangeNotification m_alarmStateChangeNotification;
     private AlarmNotification m_alarmNotification;
     private ModelNodeDataStoreManager m_dsm;
-    private List<AlarmNotification> m_listOfAlarms = new ArrayList<>();
 
     @Before
     public void initialize() {
@@ -57,8 +56,7 @@ public class DefaultAlarmStateChangeNotificationTest {
         when(m_schemaRegistry.getModuleByNamespace(AlarmTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(deviceHolderModule);
         m_alarmStateChangeNotification = new DefaultAlarmStateChangeNotification(m_schemaRegistry, m_dsm);
         m_alarmNotification = mock(AlarmNotification.class);
-        m_listOfAlarms.add(m_alarmNotification);
-        m_alarmStateChangeNotification.setAlarmNotification(m_listOfAlarms);
+        m_alarmStateChangeNotification.setAlarmNotification(m_alarmNotification);
     }
 
     @Test
@@ -78,7 +76,7 @@ public class DefaultAlarmStateChangeNotificationTest {
 
     @Test
     public void testToString() {
-        assertEquals("DefaultAlarmStateChangeNotification [alarms=" + m_listOfAlarms + "]", m_alarmStateChangeNotification.toString());
+        assertEquals("DefaultAlarmStateChangeNotification [alarm=" + m_alarmNotification + "]", m_alarmStateChangeNotification.toString());
     }
 
     @Test

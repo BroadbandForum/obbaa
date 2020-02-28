@@ -16,25 +16,6 @@
 
 package org.broadband_forum.obbaa.device.adapter.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
@@ -58,14 +39,33 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.EventAdmin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 public class AdapterManagerImplTest {
 
+    Map<URL, InputStream> m_moduleStream = new HashMap<>();
     private AdapterManager m_adapterManager;
     @Mock
     private ModelNodeDataStoreManager m_modelNodeDataStoreManager;
     private ReadWriteLockService m_readWriteLockService;
     private InputStream m_inputStream;
-    Map<URL, InputStream> m_moduleStream = new HashMap<>();
     private InputStream m_inputStream2;
     private InputStream m_inputStream3;
     private byte[] m_defaultConfig1;
@@ -74,7 +74,8 @@ public class AdapterManagerImplTest {
     private DeviceAdapter m_deviceAdapter1;
     private DeviceAdapter m_deviceAdapter2;
     private DeviceAdapter m_deviceAdapter3;
-    private DeviceAdapter m_stdAdapter;
+    private DeviceAdapter m_stdAdapterv2;
+    private DeviceAdapter m_stdAdapterv1;
     @Mock
     private EntityRegistry m_entityRegistry;
     @Mock
@@ -83,7 +84,8 @@ public class AdapterManagerImplTest {
     private SubSystem m_subSystem;
     @Mock
     private DeviceInterface m_deviceInterface;
-    private InputStream m_inputStreamStdAdapter;
+    private InputStream m_inputStreamStdAdapterv2;
+    private InputStream m_inputStreamStdAdapterv1;
 
     @Mock
     private StandardModelRegistrator m_standardModelRegistrator;
@@ -96,25 +98,35 @@ public class AdapterManagerImplTest {
         MockitoAnnotations.initMocks(this);
         System.setProperty("MAXIMUM_ALLOWED_ADAPTER_VERSIONS", "1");
         m_readWriteLockService = spy(new ReadWriteLockServiceImpl());
+        AdapterManagerImpl.ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL=false;
         m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator));
         m_inputStream = getClass().getResourceAsStream("/model/device-adapter1.xml");
         m_inputStream2 = getClass().getResourceAsStream("/model/device-adapter2.xml");
         m_inputStream3 = getClass().getResourceAsStream("/model/device-adapter10.xml");
-        m_inputStreamStdAdapter = getClass().getResourceAsStream("/model/device-adapter4.xml");
+        m_inputStreamStdAdapterv2 = getClass().getResourceAsStream("/model/device-adapter4.xml");
+        m_inputStreamStdAdapterv1 = getClass().getResourceAsStream("/model/device-adapter11.xml");
         m_defaultConfig1 = IOUtils.toByteArray(getClass().getResourceAsStream("/model/default-config1.xml"));
         m_defaultConfig2 = IOUtils.toByteArray(getClass().getResourceAsStream("/model/default-config2.xml"));
         m_defaultConfig3 = IOUtils.toByteArray(getClass().getResourceAsStream("/model/default-config2.xml"));
         List<String> cap1 = new ArrayList<>();
         cap1.add("capability1-adapter1");
         cap1.add("capability2-adapter1");
-        m_stdAdapter =  AdapterBuilder.createAdapterBuilder()
+        m_stdAdapterv2 = AdapterBuilder.createAdapterBuilder()
                 .setCaps(cap1)
                 .setModuleStream(getStreamMapForStd())
-                .setDeviceXml(m_inputStreamStdAdapter)
+                .setDeviceXml(m_inputStreamStdAdapterv2)
                 .setDefaultxmlBytes(m_defaultConfig1)
                 .setSupportedFeatures(CommonFileUtil.getAdapterFeaturesFromFile(getInputStream("model/supported-features.txt")))
                 .build();
-        m_stdAdapter.init();
+        m_stdAdapterv2.init();
+        m_stdAdapterv1 = AdapterBuilder.createAdapterBuilder()
+                .setCaps(cap1)
+                .setModuleStream(getStreamMapForStd())
+                .setDeviceXml(m_inputStreamStdAdapterv1)
+                .setDefaultxmlBytes(m_defaultConfig1)
+                .setSupportedFeatures(CommonFileUtil.getAdapterFeaturesFromFile(getInputStream("model/supported-features.txt")))
+                .build();
+        m_stdAdapterv1.init();
         m_deviceAdapter1 = AdapterBuilder.createAdapterBuilder()
                 .setCaps(cap1)
                 .setModuleStream(getStreamMap())
@@ -146,27 +158,41 @@ public class AdapterManagerImplTest {
 
     @Test
     public void testAdapterCount() {
-        assertNull(m_stdAdapter.getLastUpdateTime());
+        assertNull(m_stdAdapterv2.getLastUpdateTime());
         assertNull(m_deviceAdapter1.getLastUpdateTime());
         assertNull(m_deviceAdapter2.getLastUpdateTime());
-        m_adapterManager.deploy(m_stdAdapter, m_subSystem, getClass(), m_deviceInterface);
+        m_adapterManager.deploy(m_stdAdapterv1, m_subSystem, getClass(), m_deviceInterface);
+        m_adapterManager.deploy(m_stdAdapterv2, m_subSystem, getClass(), m_deviceInterface);
         m_adapterManager.deploy(m_deviceAdapter1, m_subSystem, getClass(), m_deviceInterface);
         m_adapterManager.deploy(m_deviceAdapter2, m_subSystem, getClass(), m_deviceInterface);
-        assertEquals(3, m_adapterManager.getAdapterSize());
-        assertNotNull(m_stdAdapter.getLastUpdateTime());
+        assertEquals(4, m_adapterManager.getAdapterSize());
+        assertNotNull(m_stdAdapterv2.getLastUpdateTime());
         assertNotNull(m_deviceAdapter1.getLastUpdateTime());
         assertNotNull(m_deviceAdapter2.getLastUpdateTime());
+        m_adapterManager.undeploy(m_deviceAdapter2);
+        assertEquals(3, m_adapterManager.getAdapterSize());
     }
 
     @Test
     public void testAddAdapters() {
         assertEquals(0, m_adapterManager.getAdapterSize());
-        m_adapterManager.deploy(m_stdAdapter, m_subSystem, getClass(), m_deviceInterface);
+        m_adapterManager.deploy(m_stdAdapterv1, m_subSystem, getClass(), m_deviceInterface);
         assertEquals(1, m_adapterManager.getAdapterSize());
-        m_adapterManager.deploy(m_deviceAdapter1, m_subSystem, getClass(), m_deviceInterface);
+        m_adapterManager.deploy(m_stdAdapterv2, m_subSystem, getClass(), m_deviceInterface);
         assertEquals(2, m_adapterManager.getAdapterSize());
-        m_adapterManager.deploy(m_deviceAdapter2, m_subSystem, getClass(), m_deviceInterface);
+        m_adapterManager.deploy(m_deviceAdapter1, m_subSystem, getClass(), m_deviceInterface);
         assertEquals(3, m_adapterManager.getAdapterSize());
+        m_adapterManager.deploy(m_deviceAdapter2, m_subSystem, getClass(), m_deviceInterface);
+        assertEquals(4, m_adapterManager.getAdapterSize());
+    }
+
+    @Test
+    public void testFactoryGarmentTagWhenRetrievalDisabled() {
+        m_adapterManager.getFactoryGarmentTag(m_deviceAdapter1);
+        m_adapterManager.deploy(m_stdAdapterv1, m_subSystem, getClass(), m_deviceInterface);
+        assertNull(m_adapterManager.getFactoryGarmentTag(m_stdAdapterv1));
+        m_adapterManager.deploy(m_deviceAdapter2, m_subSystem, getClass(), m_deviceInterface);
+        assertNull(m_adapterManager.getFactoryGarmentTag(m_deviceAdapter2));
     }
 
     @Test
@@ -176,7 +202,7 @@ public class AdapterManagerImplTest {
             m_adapterManager.deploy(m_deviceAdapter3, m_subSystem, getClass(), m_deviceInterface);
             fail("Expected an Exception");
         } catch (Exception e) {
-            String expectedMessage = "Adapter deployment failed!! Reason : maximum allowed versions(1) reached for the specified adapter(DeviceAdapterId{m_type='DPU, m_interfaceVersion='2.0, m_model='4LT, m_vendor='VENDOR1}), Uninstall any older version to proceed";
+            String expectedMessage = "Adapter deployment failed!! Reason : maximum allowed versions(1) reached for the specified adapter(DeviceAdapterId{m_type='DPU, m_interfaceVersion='2.0, m_model='4LT, m_vendor='sample}), Uninstall any older version to proceed";
             assertEquals(expectedMessage, e.getCause().getMessage());
         }
 
@@ -184,35 +210,35 @@ public class AdapterManagerImplTest {
 
     @Test
     public void testRemoveAdapter() {
-        m_adapterManager.deploy(m_stdAdapter, m_subSystem, getClass(), m_deviceInterface);
+        m_adapterManager.deploy(m_stdAdapterv2, m_subSystem, getClass(), m_deviceInterface);
         assertEquals(1, m_adapterManager.getAdapterSize());
-        m_adapterManager.undeploy(m_stdAdapter);
+        m_adapterManager.undeploy(m_stdAdapterv2);
         assertEquals(0, m_adapterManager.getAdapterSize());
-        assertNull(SystemProperty.getInstance().get(m_stdAdapter.genAdapterLastUpdateTimeKey()));
+        assertNull(SystemProperty.getInstance().get(m_stdAdapterv2.genAdapterLastUpdateTimeKey()));
     }
 
     @Test
     public void testUndeployedCalledRemoveContext() {
-        m_adapterManager.deploy(m_stdAdapter, m_subSystem, getClass(), m_deviceInterface);
-        DeviceAdapterId deviceAdapterId = new DeviceAdapterId(m_stdAdapter.getType(),
-                m_stdAdapter.getInterfaceVersion(), m_stdAdapter.getModel(), m_stdAdapter.getVendor());
+        m_adapterManager.deploy(m_stdAdapterv2, m_subSystem, getClass(), m_deviceInterface);
+        DeviceAdapterId deviceAdapterId = new DeviceAdapterId(m_stdAdapterv2.getType(),
+                m_stdAdapterv2.getInterfaceVersion(), m_stdAdapterv2.getModel(), m_stdAdapterv2.getVendor());
         AdapterContext adapterContext = spy(m_adapterManager.getAdapterContext(deviceAdapterId));
         when(m_adapterManager.getAdapterContext(deviceAdapterId)).thenReturn(adapterContext);
         verify(adapterContext, never()).undeployed();
-        m_adapterManager.undeploy(m_stdAdapter);
+        m_adapterManager.undeploy(m_stdAdapterv2);
         verify(adapterContext).undeployed();
     }
 
     @Test
     public void testGetEditReqForDefaultConfig() throws IOException, NetconfMessageBuilderException {
-        m_adapterManager.deploy(m_stdAdapter, m_subSystem, getClass(), m_deviceInterface);
+        m_adapterManager.deploy(m_stdAdapterv1, m_subSystem, getClass(), m_deviceInterface);
         m_adapterManager.deploy(m_deviceAdapter2, m_subSystem, getClass(), m_deviceInterface);
         assertEquals(IOUtils.toString(getInputStream("expectedEditReq.xml")), DocumentUtils.documentToPrettyString
-                (m_adapterManager.getEditRequestForAdapter(m_stdAdapter.getDeviceAdapterId()).getConfigElement().getXmlElement()));
+                (m_adapterManager.getEditRequestForAdapter(m_stdAdapterv1.getDeviceAdapterId()).getConfigElement().getXmlElement()));
         assertNull(m_adapterManager.getEditRequestForAdapter(m_deviceAdapter2.getDeviceAdapterId()));
         //after undeploy verify that the values dont exist in the map
-        m_adapterManager.undeploy(m_stdAdapter);
-        assertNull(m_adapterManager.getEditRequestForAdapter(m_stdAdapter.getDeviceAdapterId()));
+        m_adapterManager.undeploy(m_stdAdapterv1);
+        assertNull(m_adapterManager.getEditRequestForAdapter(m_stdAdapterv2.getDeviceAdapterId()));
         m_adapterManager.undeploy(m_deviceAdapter2);
         assertNull(m_adapterManager.getEditRequestForAdapter(m_deviceAdapter2.getDeviceAdapterId()));
     }
@@ -235,7 +261,7 @@ public class AdapterManagerImplTest {
                 .build();
         adapter.setStdAdapterIntVersion("2.0");
         try {
-            m_adapterManager.deploy(m_stdAdapter, m_subSystem, getClass(), m_deviceInterface);
+            m_adapterManager.deploy(m_stdAdapterv2, m_subSystem, getClass(), m_deviceInterface);
             m_adapterManager.deploy(adapter, m_subSystem, getClass(), m_deviceInterface);
         } catch (Exception e) {
             assertEquals("Error while deploying adapter", e.getMessage());
@@ -277,6 +303,7 @@ public class AdapterManagerImplTest {
         files.add("noncodedadapter/yang/ietf-interfaces.yang");
         files.add("noncodedadapter/yang/ietf-yang-types.yang");
         files.add("noncodedadapter/yang/sample-ietf-interfaces-dev.yang");
+        files.add("noncodedadapter/yang/sample-ietf-interfaces-aug.yang");
         for (String file : files) {
             URL fileUrl = cl.getResource(file);
             if (System.getProperty("os.name").startsWith("Windows")) {

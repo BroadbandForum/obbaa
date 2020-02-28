@@ -3,9 +3,12 @@
 
 Notifications in the BAA Layer
 ===============================
-This topic provides information regarding how to use NETCONF event notifications in the BAA layer, specifically:
+This topic provides information regarding how to use NETCONF event
+notifications in the BAA layer as defined in IETF RFC 5277,
+specifically:
 
--   How a SDN M&C can subscribe to an event notification
+-   How a SDN M&C can subscribe to an event notification including
+    subscriptions to the Alarm stream
 
 -   What the event notification looks like
 
@@ -87,6 +90,64 @@ and the response will be something similar like below:
 </data>
 ```
 
+Create a Subscription for an Alarm Notification
+===============================================
+
+NETCONF alarm notifications are subscribed to by subscribing to the
+ALARM stream. The SDN M&C can select specific alarms(e.g., resource,
+severity) by applying subtree filtering according to rules defined in
+IETF RFC 5277.
+
+Below is an example of an alarm subscription that receives all major and
+critical alarms, all alarms from interface eth0 of device A and
+additionally link-down alarms from eth1 from deviceA.
+
+**Create Alarm Subscription**
+
+```
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="">
+  <create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+    <stream>ALARM</stream>
+    <filter type="subtree">
+         <alarm-notification xmlns="urn:ietf:params:xml:ns:yang:ietf-alarms">
+              <resource xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager" xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='deviceA']/baa-network-manager:root/if:interfaces/if:interface[if:name='eth.0']</resource>
+         </alarm-notification>
+
+         <alarm-notification xmlns="urn:ietf:params:xml:ns:yang:ietf-alarms">
+              <resource xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager" xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='deviceA']/baa-network-manager:root/if:interfaces/if:interface[if:name='eth.1']</resource>
+              <alarm-type-id
+                 xmlns:vendor-alarms="urn:vendor:vendor-alarms">vendor-alarms:link-down</alarm-type-id>
+         </alarm-notification>
+
+
+         <alarm-notification xmlns="urn:ietf:params:xml:ns:yang:ietf-alarms">
+              <perceived-severity>major</perceived-severity>
+         </alarm-notification>
+
+         <alarm-notification xmlns="urn:ietf:params:xml:ns:yang:ietf-alarms">
+              <perceived-severity>critical</perceived-severity>
+         </alarm-notification>
+
+
+    </filter>
+  </create-subscription>
+</rpc>
+```
+
+In the following table we can see which notifications that would be received accordingly to the filter:
+
+| Interface | Severity | Alarm | Should be | Rule |
+| :--- | :--- | :---: | :---: |:--- |
+|eth0|minor|los|yes|Receive all alarms from eth0|
+|eth0|major|link-down|yes|Receive all alarms from eth0|
+|eth0|major|sfp-fail|yes|Receive all alarms from eth0|
+|eth1|minor|los|no|Don\'t receive minor alarms by default|
+|eth1|minor|link-down|yes|Receive link-down alarm from eth1|
+|eth1|major|sfp-fail|yes|Receive all major alarms|
+|eth2|minor|los|no|Don\'t receive minor alarms by default|
+|eth2|major|link-down|yes|Receive all major alarms by default|
+|eth2|minor|sfp-fail|yes|Don\'t receive minor alarms by default|
+
 ## Example Event Notifications
 
 The following are examples of typical event notifications that get emitted through the BAA layer.
@@ -104,7 +165,7 @@ The following are examples of typical event notifications that get emitted throu
     </changed-by>
     <edit>
       <target xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager"
-xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='deviceB']/baa-network-manager:root/if:interfaces/if:interface[if:name='interfaceB']</target>
+              xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='deviceB']/baa-network-manager:root/if:interfaces/if:interface[if:name='interfaceB']</target>
       <operation>create</operation>
     </edit>
   </netconf-config-change>
@@ -139,85 +200,5 @@ xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">/baa-network-manager:netw
   </network-manager>
 </notification>
 ```
-
-## Example Alarm Notification
-
-If a user/operator wants to receive alarm notifications at NBI,
-operator/administrator should be subscribed to ALARM stream to receive
-only alarm notification. Note: If the subscription was successful, the
-BAA layer responds with an \<ok-response\>.
-
-**Subscribe to the alarm stream**
-
-```
-<create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
-  <stream>ALARM</stream>
-</create-subscription>
-```
-
-Example of notification received at NBI:
-
-**Device\'s alarm-notification**
-
-```
-<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
-  <eventTime>2019-07-19T06:09:40+00:00</eventTime>
-  <alarms:alarm-notification xmlns:alarms="urn:ietf:params:xml:ns:yang:ietf-alarms">
-    <alarms:alarm>
-      <alarms:resource xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager"
-xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='DPU1-callhome']/baa-network-manager:root/if:interfaces/if:interface[if:name='xdsl-line:1/1/1/1']</alarms:resource>
-      <alarms:alarm-type-id xmlns:sample-al="urn:broadband-forum-org:yang:sample-dpu-alarm-types">sample-al:alarm-type1</alarms:alarm-type-id>
-      <alarms:alarm-type-qualifier/>
-      <alarms:time>2019-07-19T06:09:40.000Z</alarms:time>
-      <alarms:perceived-severity>minor</alarms:perceived-severity>
-      <alarms:alarm-text>raisealarm</alarms:alarm-text>
-    </alarms:alarm>
-  </alarms:alarm-notification>
-</notification>
-```
-
-## Example ONU state change notification
-
-For an ONU state change onu-state-change) notification, the stream used is STATE_CHANGE.
-
-**Subscribe to the state change stream**
-```
-<create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
-  <stream>STATE_CHANGE</stream>
-</create-subscription>
-```
-
-Example of notification received at NBI:
-
-**ONU state change notification received at the NBI**
-
-```
-<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
-  <eventTime>2019-07-25T05:53:36+00:00</eventTime>
-  <bbf-xpon-onu-states:onu-state-change xmlns:bbf-xpon-onu-states="urn:bbf:yang:bbf-xpon-onu-states">
-    <bbf-xpon-onu-states:detected-serial-number>ABCD0P5S6T7Y</bbf-xpon-onu-states:detected-serial-number>
-    <bbf-xpon-onu-states:channel-termination-ref>Int1</bbf-xpon-onu-states:channel-termination-ref>
-    <bbf-xpon-onu-states:onu-state-last-change>2019-07-25T05:51:36+00:00</bbf-xpon-onu-states:onu-state-last-change>
-    <bbf-xpon-onu-states:onu-state xmlns:bbf-xpon-onu-types="urn:bbf:yang:bbf-xpon-more-types">bbf-xpon-onu-types:onu-present</bbf-xpon-onu-states:onu-state>
-    <bbf-xpon-onu-states:onu-id>25</bbf-xpon-onu-states:onu-id>
-    <bbf-xpon-onu-states:detected-registration-id>device1-slot1-port1</bbf-xpon-onu-states:detected-registration-id>
-  </bbf-xpon-onu-states:onu-state-change>
-</notification>
-
-```
-
-**Note: The detected-registration-id is in the format: OltName-OltSlot-OltPort. The value is auto-generated by OB-BAA framework using the device's datastore configuration to the slot and port corresponding to the channel-termination-ref received in the notification.**
-
-## Notification support in OB-BAA 
--	OB-BAA supports only the ietf-alarm structure, if the device supports any other alarm structure, 
-the vendor has to convert/normalize their specific alarm notifications to IETF alarm structure which is defined in ietf-alarms@2018-11-22.yang.
--	OB-BAA currently supports notifications of type alarm-notification (from ietf-alarms) and onu-state-change (from bbf-xpon-onu-states) notification callback. Other notification types received by OB-BAA are not processed..
-
-<p align="center">
- <img width="400px" height="280px" src="{{site.url}}/using/notif/notif_interface.png">
-</p>
-<p align="center">
- <img width="400px" height="600px" src="{{site.url}}/using/notif/onu_state_change_notification.png">
-</p>
 
 [<--Using OB-BAA](../index.md#using)

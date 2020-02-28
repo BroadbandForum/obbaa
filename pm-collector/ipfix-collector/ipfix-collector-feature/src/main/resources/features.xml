@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright 2018 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="ipfix-collector-features">
+
+    <repository>mvn:org.opendaylight.yangtools/features-yangtools/${opendaylight-yangtools.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/enterprise/${apache.karaf.version}/xml/features</repository>
+    <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax-jdbc.version}/xml/features</repository>
+
+
+    <feature name="ipfix-feature" version="${project.version}" description="IPFIX Collector feature">
+        <feature version="${project.version}">third-party-libs-ipfix</feature>
+        <feature version="${project.version}">pm-data-handler-feature</feature>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-api/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/stack-logging-api/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-client/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/pm-service/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.pm-collector.pm-data-handler/pm-data-handler-example/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/ipfix-collector-impl/${project.version}</bundle>
+    </feature>
+
+    <feature name="third-party-libs-ipfix" version="${project.version}" description="Third party dependencies for IPFIX">
+        <feature version="${opendaylight-yangtools.version}">odl-yangtools-parser</feature>
+        <feature version="${transaction.version}">transaction</feature>
+        <feature version="${transaction-api.version}">transaction-api</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-config</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-h2</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-pool-dbcp2</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-mariadb</feature>
+        <feature version="${pax-jdbc.version}">pax-jdbc-hsqldb</feature>
+        <feature version="${jpa.version}">jpa</feature>
+        <feature version="${hibernate.version}" prerequisite="true">hibernate</feature>
+        <feature version="${pax-http-whiteboard.version}">pax-http-whiteboard</feature>
+        <feature>jndi</feature>
+        <feature>jdbc</feature>
+
+        <bundle>mvn:org.apache.commons/commons-pool2/${commons-pool2.version}</bundle>
+        <bundle>mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle><![CDATA[wrap:mvn:com.google.errorprone/error_prone_annotations/${errorprone.version}$Bundle-SymbolicName=errorprone-annotations&Bundle-Version=${errorprone.version}]]></bundle>
+        <bundle><![CDATA[wrap:mvn:com.google.j2objc/j2objc-annotations/${j2objc-annotations.version}$Bundle-SymbolicName=j2objc-annotations&Bundle-Version=${j2objc-annotations.version}]]></bundle>
+        <bundle><![CDATA[wrap:mvn:org.codehaus.mojo/animal-sniffer-annotations/${animal-sniffer-annotation.version}$Bundle-SymbolicName=animalsniffer-annotations&Bundle-Version=${animal-sniffer-annotation.version}]]></bundle>
+        <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-resolver/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
+        <bundle>mvn:org.bouncycastle/bcprov-jdk16/${bouncy-castle.version}</bundle>
+        <bundle>mvn:joda-time/joda-time/${joda-time.version}</bundle>
+        <bundle>mvn:org.apache.sshd/sshd-core/${mina.version}</bundle>
+        <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
+        <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
+        <bundle>mvn:commons-collections/commons-collections/${commons-collection.version}</bundle>
+        <bundle>mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
+        <bundle>mvn:org.apache.commons/commons-lang3/${commons-lang3.version}</bundle>
+        <bundle>mvn:javax.servlet/javax.servlet-api/${javax.servlet-api.version}</bundle>
+        <bundle><![CDATA[wrap:mvn:org.jdom/jdom/1.1.3$Bundle-SymbolicName=jdom&Bundle-Version=${jdom.version}]]></bundle>
+        <bundle>mvn:commons-jxpath/commons-jxpath/${commons-jxpath.version}</bundle>
+        <bundle>mvn:javax.ws.rs/javax.ws.rs-api/${javax.ws.rs-api.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${apache.servicemix.bundles.aopalliance.version}</bundle>
+        <bundle start-level="20" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlbeans/${org.apache.servicemix.bundles.xmlbeans.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${apache.xmlresolver.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxp-ri/${jaxp.ri.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlbeans/${sm-osgi.xbean.version}</bundle>
+        <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
+        <bundle>wrap:mvn:net.sourceforge.javacsv/javacsv/${javacsv.version}</bundle>
+        <bundle><![CDATA[wrap:mvn:org.apache.commons/commons-collections4/${commons-collections4.version}$Bundle-SymbolicName=commons-collections4&Bundle-Version=${commons-collections4.version}]]></bundle>
+        <bundle>mvn:net.sf.ehcache/ehcache/${ehcache.version}</bundle>
+    </feature>
+
+    <feature name="pm-data-handler-feature" version="${project.version}" description="PM Data Handler">
+        <bundle>wrap:mvn:org.broadband-forum.obbaa.pm-collector.pm-data-handler.persistent-data-handler/db-interface/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.pm-collector.pm-data-handler.persistent-data-handler/influxdb-impl/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.pm-collector.pm-data-handler.persistent-data-handler/pm-data-handler-impl/${project.version}</bundle>
+        <feature version="${project.version}">third-party-libs-pm-data-handler-feature</feature>
+    </feature>
+
+    <feature name="netty-feature" version="${project.version}" description="Netty dependencies">
+        <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec-http/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec-http2/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-resolver/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+    </feature>
+
+    <feature name="grpc-feature" version="${project.version}" description="gRPC dependencies">
+        <feature version="${project.version}">netty-feature</feature>
+
+        <bundle>wrap:mvn:com.google.auth/google-auth-library-credentials/${google-auth.version}$Bundle-SymbolicName=com.google.auth.google-auth-library-credentials&amp;Bundle-Version=${google-auth.version}</bundle>
+        <bundle>wrap:mvn:com.google.auth/google-auth-library-oauth2-http/${google-auth.version}$Bundle-SymbolicName=com.google.auth.google-auth-library-oauth2-http&amp;Bundle-Version=${google-auth.version}</bundle>
+
+        <bundle>wrap:mvn:io.grpc/grpc-api/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-api&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc;version=${grpc.version}&amp;SPI-Consumer=*</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-auth/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-auth&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.auth;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-context/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-context&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-core/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-core&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.inprocess,io.grpc.util,io.grpc.internal;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version}&amp;SPI-Provider=*</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-netty/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-netty&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.netty;version=${grpc.version}&amp;Import-Package=io.grpc,io.grpc.internal;version=${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-okhttp/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-okhttp&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.okhttp,io.grpc.okhttp.internal;version=${grpc.version}&amp;Import-Package=io.grpc,io.grpc.internal,io.grpc.okhttp.internal;version=${grpc.version}&amp;SPI-Provider=*</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-protobuf/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-protobuf&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.protobuf;version=${grpc.version},io.grpc.protobuf.services;version=${grpc.version},io.grpc.services;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version},io.grpc.stub;version=${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-stub/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-stub&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.stub.*;version=${grpc.version};version=${grpc.version},io.grpc.stub.annotations;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version}</bundle>
+    </feature>
+
+    <!--
+    <feature name="grpc-simple-feature" version="${project.version}" description="gRPC dependencies">
+        <feature version="${project.version}">netty-feature</feature>
+
+        <bundle>wrap:mvn:com.google.auth/google-auth-library-credentials/${google-auth.version}$Bundle-SymbolicName=com.google.auth.google-auth-library-credentials&amp;Bundle-Version=${google-auth.version}</bundle>
+        <bundle>wrap:mvn:com.google.auth/google-auth-library-oauth2-http/${google-auth.version}$Bundle-SymbolicName=com.google.auth.google-auth-library-oauth2-http&amp;Bundle-Version=${google-auth.version}</bundle>
+
+        <bundle>wrap:mvn:io.grpc/grpc-api/${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-auth/${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-context/${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-core/${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-netty/${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-okhttp/${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-protobuf/${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-stub/${grpc.version}</bundle>
+    </feature>
+    -->
+
+    <feature name="third-party-libs-pm-data-handler-feature" version="${project.version}" description="Third party dependencies for PM Data Handler">
+        <feature version="${project.version}">netty-feature</feature>
+        <feature version="${project.version}">grpc-feature</feature>
+
+        <bundle>mvn:org.json/json/${json.version}</bundle>
+        <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
+
+        <bundle>wrap:mvn:com.influxdb/influxdb-client-core/${influxdb-client.version}</bundle>
+        <bundle>wrap:mvn:com.influxdb/influxdb-client-java/${influxdb-client.version}</bundle>
+        <bundle>wrap:mvn:com.squareup.okhttp3/okhttp/3.13.1</bundle>
+        <bundle>wrap:mvn:com.squareup.okhttp3/logging-interceptor/3.13.1</bundle>
+        <bundle>wrap:mvn:com.squareup.okio/okio/1.17.3</bundle>
+        <bundle>wrap:mvn:com.squareup.retrofit2/retrofit/2.5.0</bundle>
+        <bundle>wrap:mvn:com.squareup.retrofit2/converter-scalars/2.5.0</bundle>
+        <bundle>wrap:mvn:com.squareup.retrofit2/converter-gson/2.5.0</bundle>
+        <bundle>wrap:mvn:io.gsonfire/gson-fire/1.8.0</bundle>
+        <bundle>wrap:mvn:io.reactivex.rxjava2/rxjava/2.2.6</bundle>
+        <bundle>wrap:mvn:org.reactivestreams/reactive-streams/1.0.2</bundle>
+    </feature>
+</features>

@@ -5,23 +5,26 @@ Overview
 ========
 
 The Open Broadband-Broadband Access Abstraction (OB-BAA) is an open
-source project that specifies the Northbound Interfaces (NBI), Core
-Components and Southbound Adapter Interfaces (SAI) for functions
-associated with the access network devices (e.g., configuration,
-reporting, alarms) that have been virtualized. Inherent in the OB-BAA
-project is the ability to pull differing access device types, including
-legacy implementations, together under a single network and service
-management &control umbrella to be exposed to management elements such
-as the SDN Management and/or Control and Element Management Systems. The
-OB-BAA project is designed to be deployed as as one or more virtualized
-network functions (VNFs) that provide a reference implementation of the
-[BBF\'s Cloud CO BAA
-layer](https://www.broadband-forum.org/projects/virtualized-broadband/cloud-central-office).
-Because the NBI and SAI utilize standardized data models and the Core
-components of the OB-BAA project are designed as virtualized
-micro-services with specified interfaces, the components of the OB-BAA
-project can also be adapted and deployed in other virtualized or
+source project that specifies the BAA layer\'s Northbound Interfaces 
+(NBI), Core Components, Southbound Adapter Interfaces (SAI) and 
+associated service elements for functions associated with the access 
+network devices (e.g., configuration, reporting, alarms) that have 
+been virtualized. Inherent in the OB-BAA project is the ability to 
+pull differing access device types, including legacy implementations, 
+together under a single network and service management and control 
+umbrella to be exposed to management elements such as the 
+SDN Management and/or Control, Element Management Systems and 
+common Data Lakes. The 
+OB-BAA project is designed to be deployed as one or more virtualized 
+or containerized network functions (VNF/CNFs) that provide a reference 
+implementation of the 
+[BBF\'s Cloud CO BAA layer](https://www.broadband-forum.org/projects/virtualized-broadband/cloud-central-office).
+Because the NBI, SAI and service elements utilize standardized data models 
+and the BAA Core component and service elements are designed as virtualized 
+micro-services with specified interfaces, the components of the OB-BAA 
+project can also be adapted and deployed in other virtualized or 
 non-virtualized environments.
+
 
 System Functionality
 ====================
@@ -108,6 +111,22 @@ allows the interworking between the Core and the SDN Management and
 Control elements to the north. For some deployment options it also
 exposes standardized technology-specific interfaces to manage physical
 layer and other AN specific attributes.
+
+Performance Monitoring Service
+------------------------------
+
+The BAA layer provides the capability to collect performance monitoring 
+(PM) data from managed pANs and then store the collected PM data as the 
+corresponding standardized data model's PM YANG data elements.
+
+The primary responsibility of the Performance Monitoring Service is to:
+-	Collect PM data from managed devices.
+-	Translate the PM data into the associated data elements defined by 
+standardized pAN\'s YANG modules defined in the BBF\'s TR-413 
+specification.
+-	Store the translated data into a Data Lake accessible to SDN Management 
+and Control (SDN M&C) elements for their specific functions 
+(e.g., analysis, troubleshooting).
 
 BAA layer Deployed as an Actuator
 ---------------------------------

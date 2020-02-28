@@ -17,9 +17,12 @@
 package org.broadband_forum.obbaa.device.adapter.impl;
 
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.ADAPTER_XML_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DASH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_CONFIG_XML_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_DEVIATIONS_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_FEATURES_PATH;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_IPFIX_MAPPING_FILE;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DEFAULT_IPFIX_MAPPING_FILE_PATH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.MODEL;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.SLASH;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.YANG_LIB_FILE;
@@ -28,6 +31,7 @@ import static org.broadband_forum.obbaa.device.adapter.CommonFileUtil.getAdapter
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
@@ -46,9 +51,11 @@ import org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService;
 import org.broadband_forum.obbaa.device.adapter.util.VariantFileUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NonCodedAdapterServiceImpl implements NonCodedAdapterService {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(NonCodedAdapterServiceImpl.class);
     private AdapterManager m_manager;
 
     public NonCodedAdapterServiceImpl(AdapterManager manager) {
@@ -57,13 +64,14 @@ public class NonCodedAdapterServiceImpl implements NonCodedAdapterService {
 
     @Override
     public void deployAdapter(String deviceAdapterId, SubSystem subSystem, Class klass, String stagingArea,
-                              DeviceInterface deviceInterface) throws Exception {
+                              String ipfixStagingArea, DeviceInterface deviceInterface) throws Exception {
         String destDirname = stagingArea + File.separator + deviceAdapterId;
         String deviceXmlPath = destDirname + ADAPTER_XML_PATH;
         String yangXmlPath = destDirname + File.separator + YANG_LIB_FILE;
         String supportedFeaturesPath = destDirname + DEFAULT_FEATURES_PATH;
         String supportedDeviationPath = destDirname + DEFAULT_DEVIATIONS_PATH;
         String defaultXml = destDirname + DEFAULT_CONFIG_XML_PATH;
+        String ipfixIeMappingFile = destDirname + File.separator + DEFAULT_IPFIX_MAPPING_FILE_PATH;
         File deviceFile = new File(deviceXmlPath);
         List<String> modulePaths = new ArrayList<>();
         Map<URL, InputStream> moduleStream = CommonFileUtil.buildModuleStreamMap(destDirname, modulePaths);
@@ -83,6 +91,7 @@ public class NonCodedAdapterServiceImpl implements NonCodedAdapterService {
                     .setDefaultxmlBytes(defaultXmlbytes)
                     .build();
             adapter.init();
+            moveIpfixMappingFileToStagingArea(ipfixIeMappingFile, ipfixStagingArea, adapter.getDeviceAdapterId());
             m_manager.deploy(adapter, subSystem, klass, deviceInterface);
         }
     }
@@ -96,6 +105,30 @@ public class NonCodedAdapterServiceImpl implements NonCodedAdapterService {
     @Override
     public DeviceAdapterId getNonCodedAdapterId(String adapterArchiveFileName, String deviceXmlpath) throws Exception {
         return CommonFileUtil.parseAdapterXMLFile(adapterArchiveFileName, deviceXmlpath);
+    }
+
+    private void moveIpfixMappingFileToStagingArea(String ipfixMappingFileName, String ipfixStagingArea,
+                                                   DeviceAdapterId deviceAdapterId) {
+        File ipfixMappingFile = new File(ipfixMappingFileName);
+        if (ipfixMappingFile.exists()) {
+            String deviceAdapter = deviceAdapterId.getVendor() + DASH
+                    + deviceAdapterId.getType() + DASH
+                    + deviceAdapterId.getModel() + DASH
+                    + deviceAdapterId.getInterfaceVersion();
+            String destDir = ipfixStagingArea + File.separator + deviceAdapter;
+            File ipfixMappingFileDestDir = new File(destDir);
+            if (!ipfixMappingFileDestDir.exists()) {
+                ipfixMappingFileDestDir.mkdirs();
+            } else if (!ipfixMappingFileDestDir.isDirectory()) {
+                throw new RuntimeException(ipfixMappingFileDestDir + " is not a directory");
+            }
+            File ipfixMappingDestFile = new File(ipfixMappingFileDestDir, DEFAULT_IPFIX_MAPPING_FILE);
+            try {
+                FileUtils.copyFile(ipfixMappingFile, ipfixMappingDestFile);
+            } catch (IOException e) {
+                LOGGER.error("Error while copying IPFIX IE mapping file for adapter:" + deviceAdapter, e);
+            }
+        }
     }
 
 }

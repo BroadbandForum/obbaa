@@ -1,0 +1,90 @@
+#!/bin/bash
+
+repository="broadbandforum/influxdb"
+version="2.0.0-beta.2"
+releaseSetup="0"
+release="3"
+testDB="false"
+data=influxdb_data
+
+check()
+{
+  docker image ls -a | grep "influxdb.*${version}-${releaseSetup}" >/dev/null
+  if [ $? -eq 0 ]; then
+    echo "Image influxdb:${version}-${release} already exists."
+    exit 1
+  fi
+  docker image ls -a | grep "influxdb.*${version}-${release}" >/dev/null
+  if [ $? -eq 0 ]; then
+    echo "Image influxdb:${version}-${release} already exists."
+    exit 1
+  fi
+
+  if [ -d ./${data}/influxdb/engine -o -f ./${data}/influxdb/influxd.bolt ]; then
+    echo "./${data}/influxdb exists. Please remove directory and restart."
+    exit 1
+  fi
+}
+
+arg=""
+if [ "${https_proxy}" != "" ]; then
+  arg="--build-arg https_proxy=${https_proxy}"
+fi
+if [ "${http_proxy}" != "" ]; then
+  if [ "${arg}" = "" ]; then
+    arg="--build-arg http_proxy=${http_proxy}"
+  else
+    arg="${arg} --build-arg http_proxy=${http_proxy}"
+  fi
+fi
+
+check
+
+docker image build -f Dockerfile-setup ${arg} -t ${repository}:${version}-${releaseSetup} .
+if [ $? -ne 0 ]; then
+  echo "Failed to build image."
+  exit 1
+fi
+
+docker-compose -f obbaa-influxdb-setup.yml up -d
+if [ $? -ne 0 ]; then
+  echo "Failed to execute docker-compose."
+  exit 1
+fi
+
+cid=`docker container ls --filter=ancestor=${repository}:${version}-${releaseSetup} --format "{{.ID}}"`
+while true; do
+  status=`docker ps -a --filter=ancestor=${repository}:${version}-${releaseSetup} --filter=status=exited --format "{{.Status}}"`
+  if [[ "${status}" =~ "Exited" ]]; then
+    echo "db setup done."
+    break
+  fi
+  echo "Waiting for db setup ready"
+  sleep 1
+done
+
+sudo tar -Sczf influxdbfiles.tgz -C ${data} influxdb
+sudo chown ${USER}.${GROUP} influxdbfiles.tgz
+
+docker container rm ${cid}
+if [ $? -ne 0 ]; then
+  echo "Failed to execute remove container ${cid}."
+  exit 1
+fi
+docker image rm ${repository}:${version}-${releaseSetup}
+if [ $? -ne 0 ]; then
+  echo "Failed to execute remove image ${repository}:${version}-${releaseSetup}."
+  exit 1
+fi
+sudo rm -rf ${data}
+
+docker image build -f Dockerfile ${arg} -t ${repository}:${version}-${release} .
+if [ $? -ne 0 ]; then
+  echo "Failed to build image."
+  exit 1
+fi
+exit 0
+
+# push to Docker Hub
+docker login --username ${USER}
+docker push ${repository}:${version}-${release}

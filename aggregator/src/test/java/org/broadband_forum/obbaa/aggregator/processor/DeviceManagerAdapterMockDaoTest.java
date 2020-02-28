@@ -554,13 +554,13 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
         deviceManagement.setDeviceInterfaceVersion(interfaceVersion);
         deviceManagement.setDeviceVendor(vendor);
         deviceManagement.setParentId("/container=network-manager/container=managed-devices/container=device/name=" + name + "\"");
-        deviceManagement.setSchemaPath("urn:bbf:yang:obbaa:network-manager,2018-05-07,network-manager,urn:bbf:yang:obbaa:network-manager,2018-05-07,managed-devices,urn:bbf:yang:obbaa:network-manager,2018-05-07,device," +
-                "urn:bbf:yang:obbaa:network-manager,2018-05-07,device-management,");
+        deviceManagement.setSchemaPath("urn:bbf:yang:obbaa:network-manager,2020-02-19,network-manager,urn:bbf:yang:obbaa:network-manager,2020-02-19,managed-devices,urn:bbf:yang:obbaa:network-manager,2020-02-19,device," +
+                "urn:bbf:yang:obbaa:network-manager,2020-02-19,device-management,");
         deviceManagement.setDeviceState(deviceState);
         Device device = new Device();
         device.setParentId("/container=network-manager/container=managed-devices");
         device.setDeviceName(name);
-        device.setSchemaPath("urn:bbf:yang:obbaa:network-manager,2018-05-07,network-manager,urn:bbf:yang:obbaa:network-manager,2018-05-07,managed-devices,urn:bbf:yang:obbaa:network-manager,2018-05-07,device,");
+        device.setSchemaPath("urn:bbf:yang:obbaa:network-manager,2020-02-19,network-manager,urn:bbf:yang:obbaa:network-manager,2020-02-19,managed-devices,urn:bbf:yang:obbaa:network-manager,2020-02-19,device,");
         device.setDeviceManagement(deviceManagement);
         return device;
     }

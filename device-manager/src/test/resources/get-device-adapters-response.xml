@@ -16,13 +16,24 @@
 
 <device-adapters xmlns="urn:bbf:yang:obbaa:network-manager">
     <device-adapter>
-        <description>This is an adapter for model1.type1 provided by vendor1</description>
+        <description>This is an adapter for model1.dpu provided by vendor1</description>
         <in-use>false</in-use>
         <interface-version>interface1</interface-version>
         <model>model1</model>
-        <type>type1</type>
+        <type>dpu</type>
         <vendor>vendor1</vendor>
         <is-netconf>false</is-netconf>
+        <factory-garment-tag>
+            <percentage-adherence-to-standard-module>83%</percentage-adherence-to-standard-module>
+            <augmented-standard-module>ietf-hardware</augmented-standard-module>
+            <augmented-standard-module>iana-hardware</augmented-standard-module>
+            <deviated-standard-module>ietf-hardware</deviated-standard-module>
+            <deviated-standard-module>iana-hardware</deviated-standard-module>
+            <number-of-modules-present-in-standard-adapter>12</number-of-modules-present-in-standard-adapter>
+            <total-number-of-modules-present>15</total-number-of-modules-present>
+            <percentage-of-standard-modules-having-deviation>20%</percentage-of-standard-modules-having-deviation>
+            <percentage-of-standard-modules-having-augments>20%</percentage-of-standard-modules-having-augments>
+        </factory-garment-tag>
         <yang-modules>
             <module>
                 <name>bbf-obbaa-device-adapters</name>
@@ -38,7 +49,7 @@
             </module>
             <module>
                 <name>bbf-obbaa-network-manager</name>
-                <revision>2018-05-07</revision>
+                <revision>2020-02-19</revision>
             </module>
             <module>
                 <name>bbf-obbaa-pma-device-config</name>
@@ -75,16 +86,25 @@
         </yang-modules>
     </device-adapter>
     <device-adapter>
-        <description>This is an adapter for model2.type2 provided by vendor2</description>
-        <developer>bbf</developer>
+        <description>This is an adapter for model2.olt provided by vendor2</description>
+        <developer>test</developer>
         <in-use>false</in-use>
         <interface-version>interface2</interface-version>
         <model>model2</model>
         <revision>2019-01-02</revision>
-        <type>type2</type>
+        <type>olt</type>
         <is-netconf>true</is-netconf>
         <upload-date>2019-01-01T00:00:00.000Z</upload-date>
         <vendor>vendor2</vendor>
+        <factory-garment-tag>
+            <percentage-adherence-to-standard-module>66%</percentage-adherence-to-standard-module>
+            <augmented-standard-module>ietf-interfaces</augmented-standard-module>
+            <deviated-standard-module>ietf-interfaces</deviated-standard-module>
+            <number-of-modules-present-in-standard-adapter>15</number-of-modules-present-in-standard-adapter>
+            <total-number-of-modules-present>20</total-number-of-modules-present>
+            <percentage-of-standard-modules-having-deviation>10%</percentage-of-standard-modules-having-deviation>
+            <percentage-of-standard-modules-having-augments>10%</percentage-of-standard-modules-having-augments>
+        </factory-garment-tag>
         <yang-modules>
             <module>
                 <name>bbf-obbaa-device-adapters</name>
@@ -100,7 +120,7 @@
             </module>
             <module>
                 <name>bbf-obbaa-network-manager</name>
-                <revision>2018-05-07</revision>
+                <revision>2020-02-19</revision>
             </module>
             <module>
                 <name>bbf-obbaa-pma-device-config</name>

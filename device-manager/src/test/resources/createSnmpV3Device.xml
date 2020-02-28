@@ -1,0 +1,41 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1">
+  <edit-config>
+    <target>
+      <running />
+    </target>
+    <config>
+      <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+        <managed-devices>
+          <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+            <name>deviceA</name>
+            <device-management>
+              <type>OLT</type>
+              <interface-version>1.0</interface-version>
+              <vendor>sample</vendor>
+              <model>protocolsnmp</model>
+              <device-connection>
+                <connection-model>snmp</connection-model>
+                <snmp-auth>
+                  <snmp-authentication>
+                    <address>192.168.169.1</address>
+                    <agent-port>161</agent-port>
+                    <trap-port>162</trap-port>
+                    <snmp-version>v3</snmp-version>
+                    <snmpv3-auth>
+                      <user-name>user</user-name>
+                      <security-level>authPriv</security-level>
+                      <auth-protocol>AuthSHA</auth-protocol>
+                      <auth-password>my_authpass</auth-password>
+                      <priv-protocol>PrivAES</priv-protocol>
+                      <priv-password>my_privpass</priv-password>
+                    </snmpv3-auth>
+                  </snmp-authentication>
+                </snmp-auth>
+              </device-connection>
+            </device-management>
+          </device>
+        </managed-devices>
+      </network-manager>
+    </config>
+  </edit-config>
+</rpc>
