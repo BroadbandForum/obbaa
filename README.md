@@ -1,4 +1,29 @@
-# OB-BAA R2 Release Notes (31 July 2019)
+# OB-BAA R3 Release Notes (29 February 2020)
+
+<a name="rel_3_0_0"></a>
+
+Release 3.0.0 Highlights:
+=========================
+
+This release enhances the existing OB-BAA software by added now functionality that:
+
+-	provides the capability that permits clients to subscribe to a set of events for notification purposes.
+-	enhances the existing notification capabilities alarm relay and reporting.
+-	enhances the adaptation framework to allow upgrade of Access Nodes.
+-	provides the capability to check the conformance of a vendor\'s adapter with standard adapters.
+-	enhances the adaptation framework to provide a conformance grade for adaptor\'s support of YANG modules for the type of node.
+-	includes the Performance Monitoring (PM) collection framework with a PM collector for IPFIX exporters.
+-	includes the basic SNMP adapter for use in vendor specific SNMP implementations.
+
+
+In addition, this release includes:
+
+-	a simulator that acts as an IPFIX exporter that can be used with the PM framework.
+-	a time-series database, InfluxDB, that can be uses a the PM framework\'s data lake.
+
+
+## Restrictions:
+Same as release 2.1.0.
 
 <a name="rel_2_1_0"></a>
 
@@ -14,18 +39,18 @@ This release provides additional enhancements for:
 -   Examples related to the usage of the [NETCONF stack](https://github.com/BroadbandForum/obbaa-netconf-stack) used in OB-BAA
 
 ## Restrictions:
-Same as release 2.0.0 but a workaround for restriction 1 that provided with the OLT Standard Device Adapter.
+Same as release 2.1.1.
 
 <a name="rel_2_0_0"></a>
 
 Release 2.0.0 Highlights:
 =========================
 
-This release enhances the existing OB-BAA software by added now
+This release enhances the existing OB-BAA software by adding
 functionality that:
 
 -   provides the capability for vendors of access nodes that use
-    protocols other than NETCONF/YANG to be used in OB-BAA
+    protocols other than NETCONF/YANG to be used in OB-BAA.
 
 -   provides the ability for service providers to define the YANG
     modules that comprise a type of Access Node (e.g., OLT, DPU). The
@@ -36,7 +61,7 @@ functionality that:
     the type of access node.
 
 -   includes the basic framework for support NETCONF notifications
-    needed in future releases of OB-BAA
+    needed in future releases of OB-BAA.
 
 In addition to the new functionality, the OB-BAA distribution can be
 download as a docker directly from the [Broadband Forum\'s public docker
