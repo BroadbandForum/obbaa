@@ -5,7 +5,7 @@
 Release 3.0.0 Highlights:
 =========================
 
-This release enhances the existing OB-BAA software by added now functionality that:
+This release enhances the existing OB-BAA software with new functionality that:
 
 -	provides the capability that permits clients to subscribe to a set of events for notification purposes.
 -	enhances the existing notification capabilities alarm relay and reporting.
