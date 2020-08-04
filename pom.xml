@@ -124,7 +124,7 @@
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <flatten-maven-plugin.version>1.0.1</flatten-maven-plugin.version>
-        <javacsv.version>2.1</javacsv.version>
+        <javacsv.version>2.0</javacsv.version>
         <ehcache.version>2.10.3</ehcache.version>
         <woodstox.core.asl.version>4.4.1</woodstox.core.asl.version>
         <stax2.api.version>3.1.4</stax2.api.version>
@@ -585,11 +585,6 @@
             <id>com.springsource.repository.bundles.external</id>
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
-        </repository>
-        <repository>
-            <id>net.sourceforge.javacsv</id>
-            <name>Replacement for SourceForge JavaCSV</name>
-            <url>https://repo.boundlessgeo.com/main/</url>
         </repository>
     </repositories>
     <pluginRepositories>
