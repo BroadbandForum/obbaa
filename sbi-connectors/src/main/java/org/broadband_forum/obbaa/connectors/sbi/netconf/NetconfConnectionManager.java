@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
 
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 
@@ -103,5 +104,9 @@ public interface NetconfConnectionManager {
     void registerDeviceConnectionListener(ConnectionListener connectionListener);
 
     void unregisterDeviceConnectionListener(ConnectionListener connectionListener);
+
+    void addMediatedDeviceNetconfSession(Device device, NetconfClientSession deviceSession);
+
+    NetconfClientSession getMediatedDeviceSession(Device device);
 
 }

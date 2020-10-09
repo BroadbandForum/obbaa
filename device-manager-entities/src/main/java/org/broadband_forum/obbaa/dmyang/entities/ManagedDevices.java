@@ -19,7 +19,7 @@ package org.broadband_forum.obbaa.dmyang.entities;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.MANAGED_DEVICES;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NETWORK_MANAGER_SP;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NS;
-import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NS_REVISION;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.REVISION;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,7 +32,7 @@ import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangSchemaPath;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 @Entity
-@YangContainer(name = MANAGED_DEVICES, namespace = NS, revision = NS_REVISION)
+@YangContainer(name = MANAGED_DEVICES, namespace = NS, revision = REVISION)
 public class ManagedDevices {
     @Id
     @YangParentId

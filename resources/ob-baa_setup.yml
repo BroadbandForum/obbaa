@@ -1,0 +1,177 @@
+###########################################################################
+# Copyright 2018 Broadband Forum
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###########################################################################
+version: '3.5'
+networks:
+    baadist_default:
+        driver: bridge
+        name: baadist_default
+services:
+    baa:
+        image: broadbandforum/baa:latest
+        container_name: baa
+        restart: always
+        ports:
+            - "8080:8080"
+            - "5005:5005"
+            - "9292:9292"
+            - "4335:4335"
+            - "162:162/udp"
+        environment:
+            - BAA_USER=admin
+            - BAA_USER_PASSWORD=password
+            #Possible Values for PMA_SESSION_FACTORY_TYPE are REGULAR,TRANSPARENT, Default value is REGULAR
+            - PMA_SESSION_FACTORY_TYPE=REGULAR
+            - MAXIMUM_ALLOWED_ADAPTER_VERSIONS=3
+        volumes:
+            - /baa/stores:/baa/stores
+        networks:
+            - baadist_default
+        depends_on:
+            - kafka
+            - zookeeper
+
+    ipfix-collector:
+        image: broadbandforum/ipfix-collector:latest
+        container_name: ipfix-collector
+        restart: always
+        ports:
+            - "8005:5005"
+            - "4494:4494"
+            - "5051:5051"
+        environment:
+            - IPFIX_COLLECTOR_PORT=4494
+            - IPFIX_IE_MAPPING_DIR=/ipfix/ie-mapping/
+            - IPFIX_COLLECTOR_MAX_CONNECTION=10000
+            - BAA_HOST=baa
+            - BAA_SSH_PORT=9292
+            - BAA_USERNAME=admin
+            - BAA_PASSWORD=password
+            - DEBUG=true
+            - INFLUXDB_ORGANISATION=broadband_forum
+            - INFLUXDB_BUCKETID=pm-collection
+            - INFLUXDB_API_URL=http://obbaa-influxdb:9999
+            - INFLUXDB_TOKEN=_6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
+            - PMD_MAX_BUFFERED_POINTS=5000
+            - PMD_MAX_BUFFERED_MEASUREMENTS=100
+            - PMD_TIMEOUT_BUFFERED_POINTS=60
+            - PMD_NBI_PORT=5051
+        volumes:
+            - /baa/stores/ipfix:/ipfix/ie-mapping/
+        depends_on:
+            - baa
+        networks:
+            - baadist_default
+
+    influxdb:
+        image: broadbandforum/influxdb:2.0.0-beta.2-3
+        container_name: obbaa-influxdb
+        command: --bolt-path /var/opt/influxdb/influxd.bolt --engine-path /var/opt/influxdb/engine --reporting-disabled
+        restart: on-failure
+        ports:
+            - "0.0.0.0:9999:9999"
+        environment:
+            - DEBUG=true
+            - INFLUX_USER=influxdb
+            - INFLUX_PW=influxdb
+            - INFLUX_ORG=broadband_forum
+            - INFLUX_BUCKET=pm-collection
+            - INFLUX_RETENTION=720
+            - INFLUX_PORT=9999
+            - INFLUX_ROOT=/var/opt/influxdb
+        volumes:
+            - /baa/stores/influxdb:/var/opt/influxdb
+        depends_on:
+            - baa
+        networks:
+            - baadist_default
+
+    zookeeper:
+        image: confluentinc/cp-zookeeper:5.5.0
+        hostname: zookeeper
+        container_name: zookeeper
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+        networks:
+            - baadist_default
+
+    kafka:
+        image: confluentinc/cp-kafka:5.5.0
+        hostname: kafka
+        container_name: kafka
+        depends_on:
+            - zookeeper
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+        networks:
+            - baadist_default
+    vomci:
+        image: broadbandforum/obbaa-vomci:latest
+        hostname: obbaa-vomci
+        container_name: obbaa-vomci
+        ports:
+            - 8801:8801
+        environment:
+            GRPC_SERVER_NAME: vOMCIProxy
+            LOCAL_GRPC_SERVER_PORT: 58433
+        networks:
+            - baadist_default
+        depends_on:
+            - zookeeper
+            - kafka
+    vproxy:
+        image: broadbandforum/obbaa-vproxy:latest
+        hostname: obbaa-vproxy
+        container_name: obbaa-vproxy
+        ports:
+            - 8433:8433
+        environment:
+            LOCAL_GRPC_SERVER_PORT: 8433
+            REMOTE_GRPC_SERVER_PORT: 58433
+            REMOTE_GRPC_SERVER_ADDR: obbaa-vomci
+        networks:
+            - baadist_default
+        depends_on:
+            - vomci
+
+    control_relay:
+        image: broadbandforum/obbaa-control-relay:latest
+        container_name: obbaa-control-relay
+        restart: always
+        ports:
+            - "50052:50052"
+            - "50055:50055"
+        environment:
+            - CONTROL_RELAY_HELLO_NAME=control_relay_service
+            - PLUGIN_PORT=50052
+            - SDN_MC_SERVER_PORT=
+            - SDN_MC_SERVER_LIST=
+            - CONTROL_RELAY_PORT=50055
+            - OBBAA_ADDRESS=baa
+            - OBBAA_PORT=9292
+            - SSH_USER=admin
+            - SSH_PASSWORD=password
+            - SHARED_FOLDER=./plugin-repo
+            - PRIVATE_FOLDER=./plugin-enabled
+        volumes:
+            - /baa/control-relay/plugins:/control_relay/plugin-repo
+        depends_on:
+            - baa

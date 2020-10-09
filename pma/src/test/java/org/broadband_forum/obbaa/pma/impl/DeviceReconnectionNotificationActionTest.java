@@ -34,6 +34,8 @@ import org.broadband_forum.obbaa.netconf.api.client.NotificationListener;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.pma.DeviceNotificationClientListener;
+import org.broadband_forum.obbaa.pma.DeviceNotificationListenerService;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +50,7 @@ public class DeviceReconnectionNotificationActionTest {
     private DeviceReconnectionNotificationAction m_deviceReconnectNotificationAction;
     private AdapterManager m_adapterManager;
     private PmaRegistry m_pmaRegistry;
+    private DeviceNotificationListenerService m_deviceNotificationClientListener;
 
     @Before
     public void setUp() {
@@ -55,7 +58,8 @@ public class DeviceReconnectionNotificationActionTest {
         m_netconfConnectionManager = mock(NetconfConnectionManager.class);
         m_adapterManager = mock(AdapterManager.class);
         m_pmaRegistry = mock(PmaRegistry.class);
-        m_deviceReconnectNotificationAction = new DeviceReconnectionNotificationAction(m_notificationService, m_netconfConnectionManager, m_adapterManager, m_pmaRegistry);
+        m_deviceNotificationClientListener = mock(DeviceNotificationClientListenerRegistry.class);
+        m_deviceReconnectNotificationAction = new DeviceReconnectionNotificationAction(m_notificationService, m_netconfConnectionManager, m_adapterManager, m_pmaRegistry, m_deviceNotificationClientListener);
     }
 
     @Test

@@ -188,12 +188,15 @@
        <argument ref="adapterManager"/>
     </bean>
 
+    <bean id="deviceNotificationClientListenerRegistry" class="org.broadband_forum.obbaa.pma.impl.DeviceNotificationClientListenerRegistry" />
+
     <bean id="deviceReconnectionNotificationAction" class="org.broadband_forum.obbaa.pma.impl.DeviceReconnectionNotificationAction"
           init-method="init" destroy-method="destroy">
         <argument ref="notificationService"/>
         <argument ref="ncConnectionMgr"/>
         <argument ref="adapterManager"/>
         <argument ref="pmaRegistry"/>
+        <argument ref="deviceNotificationClientListenerRegistry"/>
     </bean>
 
     <bean id="deviceReconnectionNotificationListener" class="org.broadband_forum.obbaa.pma.impl.DeviceReconnectionNotificationListener"
@@ -213,6 +216,7 @@
         <argument ref="adapterManager"/>
         <argument ref="pmaRegistry"/>
         <argument ref="deviceManager"/>
+        <argument ref="deviceNotificationClientListenerRegistry"/>
     </bean>
 
     <service ref="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry"/>
@@ -220,4 +224,5 @@
     <service ref="adapterActionHandler" interface="org.broadband_forum.obbaa.adapter.AdapterDeployer"/>
     <service ref="deviceSubsystem" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem"/>
     <service ref="nonNCNotificationHandler" interface="org.broadband_forum.obbaa.pma.NonNCNotificationHandler"/>
+    <service ref="deviceNotificationClientListenerRegistry" interface="org.broadband_forum.obbaa.pma.DeviceNotificationListenerService"/>
 </blueprint>

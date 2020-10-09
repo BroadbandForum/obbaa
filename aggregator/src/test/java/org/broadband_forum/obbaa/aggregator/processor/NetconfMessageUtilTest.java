@@ -16,6 +16,7 @@
 
 package org.broadband_forum.obbaa.aggregator.processor;
 
+import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.junit.Test;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.w3c.dom.Document;
@@ -57,11 +58,11 @@ public class NetconfMessageUtilTest {
     @Test
     public void buildModuleCapabilityTest() throws Exception {
         ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier("network-manager",
-                AggregatorMessage.NS_OBBAA_NETWORK_MANAGER,"2020-02-19");
+                AggregatorMessage.NS_OBBAA_NETWORK_MANAGER, DeviceManagerNSConstants.REVISION);
 
         String result = NetconfMessageUtil.buildModuleCapability(moduleIdentifier);
         assertFalse(result.isEmpty());
-        assertEquals("urn:bbf:yang:obbaa:network-manager?module=network-manager&revision=2020-02-19", result);
+        assertEquals("urn:bbf:yang:obbaa:network-manager?module=network-manager&revision="+ DeviceManagerNSConstants.REVISION +"", result);
     }
 
 }

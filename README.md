@@ -1,4 +1,28 @@
-# OB-BAA R3 Release Notes (29 February 2020)
+# OB-BAA R4 Release Notes (30 September 2020)
+
+<a name="rel_4_0_0"></a>
+
+Release 4.0.0 Highlights:
+=========================
+
+This release enhances the existing OB-BAA software by added now functionality that:
+
+-	provides management of ONUs using virtualized OMCI message processing capabilities that includes YANG to OMCI message translation as a separate microservice and capabilities to proxy OMCI sessions between the OLT and the OMCI message translation service.
+-	enhanced ONU management to include flexible ONU discovery and authentication capabilities.
+-	capabilities to relay user and control plane packets between Access Nodes and SDN M&C control plane functions. The relay of user and control plane packets can be done via standard and/or vendor proprietary control adapters.
+-	full support (FCAPS + Control Relay + vOMCI (OLT) capabilties for whitesboxes using standard interfaces.
+-   the ability to dynamically create and deploy standard device adapters for new types of devices
+
+
+In addition, this release includes:
+
+-	a simulator for OLTs and ONUs that can be used for virtualized ONU management when developing OMCI message translation services.
+
+
+## Restrictions:
+Same as release 3.0.0.
+
+<a name="rel_2_1_0"></a>
 
 <a name="rel_3_0_0"></a>
 
@@ -24,8 +48,6 @@ In addition, this release includes:
 
 ## Restrictions:
 Same as release 2.1.0.
-
-<a name="rel_2_1_0"></a>
 
 Release 2.1.0 Highlights:
 =========================

@@ -42,6 +42,11 @@ module bbf-obbaa-network-manager {
        limitations under the License.
       ";
 
+    revision 2020-07-23 {
+        description
+          "Added support for vOMCI managed ONUs.";
+    }
+    
     revision 2020-02-19 {
         description
           "Added support for SNMP connection model Authentication.";
@@ -62,9 +67,11 @@ module bbf-obbaa-network-manager {
                 enum call-home;
                 enum direct;
                 enum snmp;
+                enum mediated-session;
             }
             description
-              "whether the connection is call-home/direct/snmp.";
+              "whether the connection is call-home/direct/snmp 
+               or a session mediated through another device.";
         }
         choice protocol {
             mandatory true;
@@ -216,6 +223,19 @@ module bbf-obbaa-network-manager {
                   "A globally unique value for a DUID (DHCP Unique Identifier)
                    as defined in RFC 3315.";
             }
+            
+            leaf mediated-protocol {
+                when "../connection-model = 'mediated-session'";
+                type enumeration {
+                     enum vomci {
+                      description
+                        "This value applies to vOMCI managed ONUs";
+                    }
+                }
+                description
+                  "The protocol being mediated.";
+            }
+            
         }
     }
 
@@ -474,6 +494,53 @@ module bbf-obbaa-network-manager {
                             description
                             "A reference to yang module revision";
                         }
+                    }
+                }
+                container factory-garment-tag {
+                    when "../model != 'standard'";
+                    description
+                        "This container contains a list of items which was specific to the VDA";
+                    leaf total-number-of-modules-present {
+                        config false;
+                        type string;
+                        description
+                            "Total number of modules present in corresponding standard adapter";
+                    }
+                    leaf number-of-modules-present-in-standard-adapter {
+                        config false;
+                        type string;
+                        description
+                            "Total number of modules present in corresponding standard adapter";
+                    }
+                    leaf percentage-adherence-to-standard-module {
+                        config false;
+                        type string;
+                        description
+                            "VDA's adherence percentage to standard modules";
+                    }
+                    leaf-list deviated-standard-module {
+                        config false;
+                        type string;
+                        description
+                            "list of standard modules that are having deviations";
+                    }
+                    leaf percentage-of-standard-modules-having-deviation {
+                        config false;
+                        type string;
+                        description
+                            "percentage of standard modules that are having deviations added in vda";
+                    }
+                    leaf-list augmented-standard-module {
+                        config false;
+                        type string;
+                        description
+                            "list of standard modules that are having augmentations";
+                    }
+                    leaf percentage-of-standard-modules-having-augments {
+                        config false;
+                        type string;
+                        description
+                            "percentage of standard modules that are having deviations added in vda";
                     }
                 }
             }

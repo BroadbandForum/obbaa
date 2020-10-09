@@ -16,11 +16,8 @@
 
 package org.broadband_forum.obbaa.device.adapter;
 
-import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.BBF;
-import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DPU;
-import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.OLT;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD;
-import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STD_ADAPTER_OLDEST_VERSION;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD_ADAPTER_OLDEST_VERSION;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,7 +31,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 public final class AdapterUtils {
 
@@ -55,25 +51,29 @@ public final class AdapterUtils {
     }
 
     public static AdapterContext getStandardAdapterContext(AdapterManager adapterManager, DeviceAdapter deviceAdapter) {
-        String adapterType = deviceAdapter.getType();
-        if (deviceAdapter.getStdAdapterIntVersion() != null
-                && !deviceAdapter.getModel().equals(STANDARD) && !deviceAdapter.getVendor().equals(BBF)) {
-            return getStdAdapterContext(adapterType, adapterManager, deviceAdapter.getStdAdapterIntVersion());
+        if (deviceAdapter != null) {
+            String adapterType = deviceAdapter.getType();
+            AdapterContext stdAdapterContext = null;
+            if (deviceAdapter.getStdAdapterIntVersion() != null && !deviceAdapter.getModel().equals(STANDARD)) {
+                stdAdapterContext = getStdAdapterContext(adapterType, adapterManager, deviceAdapter.getStdAdapterIntVersion());
 
-        } else if (deviceAdapter.getStdAdapterIntVersion() == null
-                && !deviceAdapter.getModel().equals(STANDARD) && !deviceAdapter.getVendor().equals(BBF)) {
-            return getStdAdapterContext(adapterType, adapterManager, STD_ADAPTER_OLDEST_VERSION);
+            } else if (deviceAdapter.getStdAdapterIntVersion() == null && !deviceAdapter.getModel().equals(STANDARD)) {
+                stdAdapterContext = getStdAdapterContext(adapterType, adapterManager, STANDARD_ADAPTER_OLDEST_VERSION);
+
+            } else if (deviceAdapter.getModel().equalsIgnoreCase(STANDARD) && deviceAdapter.getStdAdapterIntVersion() == null) {
+                stdAdapterContext = adapterManager.getAdapterContext(deviceAdapter.getDeviceAdapterId());
+
+            }
+            return stdAdapterContext;
         } else {
-            //device is std
-            return getStdAdapterContext(adapterType, adapterManager, deviceAdapter.getInterfaceVersion());
+            throw new RuntimeException("Given device adapter is not installed");
         }
-
     }
 
-    private static AdapterContext getStdAdapterContext(String adapterType, AdapterManager adapterManager, String adapterVersion) {
-        if (adapterType.equalsIgnoreCase(DPU) || adapterType.equalsIgnoreCase(OLT)) {
-            AdapterContext adapterContext = adapterManager.getAdapterContext(new DeviceAdapterId(adapterType,
-                    adapterVersion, STANDARD, BBF));
+    private static AdapterContext getStdAdapterContext(String adapterType, AdapterManager adapterManager, String stdAdapterVersion) {
+        if (isStandardAdapterDeployed(adapterManager, adapterType, stdAdapterVersion)) {
+            String stdAdapterKey = adapterType.concat("-").concat(stdAdapterVersion);
+            AdapterContext adapterContext = adapterManager.getStdAdapterContextRegistry().get(stdAdapterKey);
             if (adapterContext == null) {
                 throw new RuntimeException("no standard adapterContext deployed for : " + adapterType);
             }
@@ -139,4 +139,15 @@ public final class AdapterUtils {
             bw.newLine();
         }
     }
+
+    private static boolean isStandardAdapterDeployed(AdapterManager adapterManager, String givenVendorAdapterType,
+                                                     String stdAdapterInterfaceVersion) {
+        boolean stdAdapterInstalled = false;
+        String stdAdapterKey = givenVendorAdapterType.concat("-").concat(stdAdapterInterfaceVersion);
+        if (adapterManager.getStdAdapterContextRegistry().containsKey(stdAdapterKey)) {
+            stdAdapterInstalled = true;
+        }
+        return stdAdapterInstalled;
+    }
+
 }

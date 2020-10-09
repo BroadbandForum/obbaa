@@ -12,10 +12,10 @@ M<sub>inf\_eq-inv</sub>) and the device management interfaces (M<sub>inf\_Lxxx</
 representation of the AN is exposed through each of the interfaces using
 access control to restrict access to parts of the AN.
 
-While most northbound interfaces used by OB-BAA are standardized, several interfaces (e.g., Data Lake) are used that haven't been standardized or are in the process of standardization.
+While most northbound interfaces used by OB-BAA are standardized, several interfaces (e.g., Data Lake, M<sub>fc_relay</sub>) are used that haven't been standardized or are in the process of standardization.
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/system_interfaces.png">
+ <img width="800px" height="500px" src="{{site.url}}/architecture/system_interfaces.png">
 </p>
 
 ANs interact with the BAA layer through the adapters of the SBI. These
@@ -30,7 +30,7 @@ A high-level software architecture is depicted below that implements the
 logical system architecture described in the previous section.
 
 <p align="center">
- <img width="1000px" height="700px" src="{{site.url}}/architecture/system_architecture.png">
+ <img width="1100px" height="1000px" src="{{site.url}}/architecture/system_architecture.png">
 </p>
 
 The roles and responsibilities of each of these components are as
@@ -72,18 +72,45 @@ connectivity details and also regularly updates the connectivity status.
 An instance of SBI Connector is required for each supported protocol for
 communication with Device.
 
-OB-BAA implements a NETCONF Connection Manager (NCM) in this release. If
-required additional connection managers for specific protocols will be
-implemented (e.g., SNMP connection manager). The NETCONF Connection
-Manager is responsible for establishing, maintaining and tearing down
-NETCONF sessions with the managed devices. It also maintains the
+The NETCONF Connection Manager is responsible for establishing, maintaining and tearing down NETCONF sessions with the managed devices. It also maintains the
 connection state of the device.
 
 #### NETCONF Stack
 
-The NETCONF Stack component Implements the NETCONF Client and provides
-an API to the NETCONF Connection Manager for interactions with managed
-device.
+The NETCONF Stack component implements the NETCONF Client and provides
+APIs to the NETCONF Connection Manager for interactions with managed
+devices.
+
+### SNMP Stack
+
+The SNMP stack component implements the SNMP client and provides API to
+device adapters for interactions with managed device.
+
+### vOLTMF - vOLT Management Function
+
+The vOLT Management Function (vOLTMF) is responsible for:
+
+-   Receiving notifications from the OLT regarding the detection state
+    of the ONU.
+
+-   Notifying the vOMCI function whenever an ONU is detected or
+    undetected.
+
+-   Receiving management and control requests from the Access SDN M&C.
+
+-   After detecting on-line ONUs, generating and sending requests for
+    OLT configuration via the interface with OLT, and ONU requests that
+    use the OLT's OMCI channel via the interface with the vOMCI proxy.
+
+-   Receiving connectivity information between the OLT and vOMCI
+    function and proxy from the Access SDN M&C and sending the
+    connectivity information to the vOMCI function and/or vOMCI proxy.
+
+-   Receiving notifications including events and alarms from the OLT,
+    vOMCI proxy and vOMCI function and sending notifications to the
+    Access SDN M&C.
+
+[For more information about the vOLT Management Function](voltmf/index.md#voltmf)
 
 ### NAI & BAA Core
 
@@ -233,31 +260,90 @@ utilities like YANG module handling, security etc.
 
 Provides debugging utilities for application troubleshooting.
 
-## PM Service
+## BAA Services
+The BAA layer has several services that provide needed functionality to
+manage and control Access Nodes (AN). In this release the following
+services are provided:
+
+-   PM Service
+
+-   Data Lake
+
+-   vOMCI Function
+
+-   vOMCI Proxy
+
+-   Control Relay Service
+
+### PM Service
 OB-BAA supports IPFIX (RFC 7011) based PM Collection from AN. PM data collection function in BAA is realized as a dedicated micro-service.
 
 It has two architectural components:
+
 -	PM Collector module
+
 -	DataHandler module
 
-### PM Collector
+#### PM Collector
 The PM Collector is responsible for collecting performance monitoring data (IPFIX messages) from managed pANs, The PM Collector will decode and provide formatted data to data handlers for further processing and storage of data. The IPFIX PM Data Collector (IPFIX Collector) is based on IETF\'s RFC 7011 IPFIX protocol specification and mechanisms as IPFIX is the method defined by the BBF\'s TR-383 specification.
 
 IPFIX collector decodes IPFIX messages into the requisite Information Elements (IE) and their associated values. This is then forwarded to Data Handler(s) (IpfixDataHandler) that subscribes to IPFIX Collector.
 
 [For more information on the PM Collector](pm_collector/index.md#pm_collection)
 
-### PM DataHandler(s)
+#### PM DataHandler(s)
 PM DataHandlers are karaf modules plugged into the PM micro-service and subscribes to the PM Collector for the counter stream. Several PM DataHandlers can be implemented depending on the post processing needs. The OB-BAA reference implementation comes with two reference Data Handlers.
 
-#### Persistence Manager Data Handler
+##### Persistence Manager Data Handler
 Persistence Manager is a reference PM Datahandler which subscribes to IPFIX collection stream and updates them into a common data lake. OB-BAA uses InfluxDB as its common data lake. The Persistence Manager does reformatting of the incoming counter stream into tags & counters before updating them into the persistence store. Once in the persistence store, counter information can be queried from the data store by management and control elements using the interface provided by InfluxDB.
 
-#### Logger Data Handler
+##### Logger Data Handler
 The Logger is another reference PM DataHandler which subscribes to IPFIX collection stream and logs it into the BAA application log.
 
-## Data Lake
+### Data Lake
 OB-BAA bundles InfluxDB as its common data lake for storing PM Counters. InfluxDB is a time series database, hence ideal for maintaining PM counters which is tracked based on time. InfluxDB provides a HTTP based API interface for querying data which can be used by SDN M&C and other management entities. It also provides a graphical user interface for data visualization purpose.
+
+### vOMCI Function
+
+The vOMCI function is responsible for:
+
+-   Receiving service configurations from the vOLT Management function
+
+-   Translating the received configurations into ITU G.988 OMCI
+    management entities (ME) and formatting them into OMCI messages
+
+-   Encapsulating and sending above formatted OMCI messages through the
+    OLT to the attached ONU
+
+-   Translating the received ONU\'s operational data from the OLT and
+    sending it to the vOLT Management function
+
+[For more information on the vOMCI Function](vomcipf/index.md#vomcipf)
+
+### vOMCI Proxy
+
+The vOMCI Proxy works as an aggregation and interception point that
+avoids the need for an OLT to directly connect to individual vOMCI
+Functions and can act as a control/interception point between the OLT
+and vOMCI function that is useful for troubleshooting and other
+management purposes (e.g., security). As the aggregration/interception
+point, the vOMCI Proxy is responsible for maintaining the associations
+between OLTs and the corresponding vOMCI functions.
+
+[For more information on the vOMCI Proxy](vomcipf/index.md#vomcipf)
+
+### Control Relay Service
+
+The Control Relay Service along with the AN Control and Control Protocol
+Adapters provides the capability to relay packets from an AN to an
+application endpoint in the  SDN Management and Control functional
+layer.
+
+The determination of which packets are relayed between the access node
+and SDN M&C application endpoint is configurable through the M<sub>fc-conf</sub> reference point.
+
+[For more information on the Control Relay Service](control_relay/index.md#control_relay)
+
 
 [<--Overview](../overview/index.md#overview)
 

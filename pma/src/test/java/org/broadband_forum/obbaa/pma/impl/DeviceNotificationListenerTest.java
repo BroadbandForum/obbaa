@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationCon
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.pma.DeviceNotificationClientListener;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,10 +67,12 @@ public class DeviceNotificationListenerTest {
     @Captor
     private ArgumentCaptor<Notification> m_notificationCaptor;
 
+    private List<DeviceNotificationClientListener> m_deviceNotificationClientListeners = new ArrayList<>();
+
     @Before
     public void setUp() throws NetconfMessageBuilderException, ExecutionException {
         MockitoAnnotations.initMocks(this);
-        m_deviceNotificationListener = new DeviceNotificationListener(m_device, m_deviceAdapterId, m_notificationService, m_adapterContext, m_pmaRegistry);
+        m_deviceNotificationListener = new DeviceNotificationListener(m_device, m_deviceAdapterId, m_notificationService, m_adapterContext, m_pmaRegistry, m_deviceNotificationClientListeners);
         when(m_device.getDeviceName()).thenReturn(m_deviceName);
         String notifStr = "<notification xmlns=\"urn:ietf:params:xml:ns:netconf:notification:1.0\">\n" +
                 "\t<eventTime>2019-07-08T10:19:49+00:00</eventTime>\n" +
@@ -123,6 +127,12 @@ public class DeviceNotificationListenerTest {
         Map<NetConfResponse, List<Notification>> map = new HashMap<>();
         map.put(netConfResponse, Collections.emptyList());
         when(m_pmaRegistry.executeNC(any(), any())).thenReturn(map);
+        m_deviceNotificationClientListeners.add(new DeviceNotificationClientListener() {
+            @Override
+            public void deviceNotificationReceived(Device device, Notification notification) {
+                // Testing purpose
+            }
+        });
     }
 
     @Test

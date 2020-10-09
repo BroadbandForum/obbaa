@@ -21,6 +21,7 @@ import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.CALL_HOME;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.IN_ERROR;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.MANAGED_DEVICES_SP;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.MEDIATED_SESSION;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NAME;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NEVER_ALIGNED;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NS;
@@ -174,6 +175,10 @@ public class Device implements Comparable<Device> {
 
     public boolean isSnmp() {
         return deviceManagement.getDeviceConnection().getConnectionModel().equals(SNMP);
+    }
+
+    public boolean isMediatedSession() {
+        return deviceManagement.getDeviceConnection().getConnectionModel().equals(MEDIATED_SESSION);
     }
 
     public AlignmentOption getAlignmentOption() {

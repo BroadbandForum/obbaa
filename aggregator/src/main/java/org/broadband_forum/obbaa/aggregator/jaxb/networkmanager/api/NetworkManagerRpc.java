@@ -35,6 +35,7 @@ import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.NetworkMa
 import org.broadband_forum.obbaa.aggregator.jaxb.utils.JaxbUtils;
 import org.broadband_forum.obbaa.aggregator.processor.AggregatorMessage;
 import org.broadband_forum.obbaa.aggregator.processor.NetconfMessageUtil;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
@@ -81,7 +82,7 @@ public class NetworkManagerRpc {
         Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
 
         ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier("network-manager",
-                AggregatorMessage.NS_OBBAA_NETWORK_MANAGER, "2020-02-19");
+                AggregatorMessage.NS_OBBAA_NETWORK_MANAGER, DeviceManagerNSConstants.REVISION);
         moduleIdentifiers.add(moduleIdentifier);
 
         return moduleIdentifiers;

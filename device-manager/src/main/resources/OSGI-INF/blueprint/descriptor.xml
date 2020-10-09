@@ -184,7 +184,7 @@
 
     <bean id="deviceManagerService" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service.BundleContextAwareModelService">
         <property name="moduleName" value="bbf-obbaa-network-manager"/>
-        <property name="moduleRevision" value="2020-02-19"/>
+        <property name="moduleRevision" value="2020-07-23"/>
         <property name="defaultSubsystem" ref="deviceManagementSubSystem"/>
         <property name="defaultXmlPath" value="/model/pma/device-manager-default.xml"/>
         <property name="modelNodeDSM" ref="annotationBasedDSM"/>
@@ -199,6 +199,13 @@
                 <value>/yangs/ietf-yang-types.yang</value>
                 <value>/yangs/ietf-yang-library@2016-06-21.yang</value>
                 <value>/yangs/ietf-datastores@2017-08-17.yang</value>
+                <value>/yangs/bbf-obbaa-onu-management.yang</value>
+                <value>/yangs/bbf-xpon-types.yang</value>
+                <value>/yangs/bbf-xpon-if-type.yang</value>
+                <value>/yangs/bbf-if-type.yang</value>
+                <value>/yangs/iana-if-type.yang</value>
+                <value>/yangs/bbf-xpon-onu-types.yang</value>
+                <value>/yangs/ietf-interfaces.yang</value>
             </list>
         </property>
         <property name="entityClasses">

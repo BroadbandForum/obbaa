@@ -21,7 +21,7 @@ Users should be able to understand:
 
 Before deploying OB-BAA the environment has to be prepared, you can find out how to install and run OB-BAA in a bare metal environment or a virtualized machine (VM) [here](./#platform).
 
-For developers and users the easiest way to get started with OB-BAA is to download OB-BAA from the [Broadband Forum's baa docker hub artifactory](https://hub.docker.com/r/broadbandforum/baa).
+For developers and users the easiest way to get started with OB-BAA is to download the OB-BAA micro-services from the [Broadband Forum's baa docker hub artifactory](https://hub.docker.com/r/broadbandforum/baa). Instructions for using OB-BAA micro-services can be found [here](./#artifactory)
 
 If developers require additional access to the source code, the source code can be downloaded and OB-BAA can be built using the instructions found [here](./#source).
 
@@ -78,7 +78,7 @@ which is covered between in the Simulator setup section.
 
 #### Docker
 
-OB-BAA is realized as a micro-service under a docker engine.
+OB-BAA services are realized as a micro-services under a docker engine and requires docker and docker-compose applications to be installed.
 
 ```
 Install docker:
@@ -93,7 +93,7 @@ Install Docker Compose:
   sudo apt-get install docker-compose
 ```
 
-### Running BAA
+### Running OB-BAA
 
 Once the baa image has been downloaded or built using the source code and the docker daemon is running
 (ps -ef|grep dockerd should return a valid process), you can run the baa image using the following:
@@ -102,15 +102,41 @@ Once the baa image has been downloaded or built using the source code and the do
   cd obbaa/baa-dist
   docker-compose -f docker-compose.yml up -d
 
+Note: As the docker-compose.yml file now have ipfix-collector, influxDB, zookeeper and kafka containers added, it will also bring up the mentioned ipfix-collector, influxDB, zookeeper and kafka microservices along with BAA.
+
 The following commands displays the BAA application logs:
    docker exec -it baa bash
    cd /baa/baa-dist/data/log
    tail -f karaf.log (the file is moved to ".1" extension after reaching certain size and a new file is created)
 ```
 
+
+<a id="artifactory" />
+## Deploying OB-BAA micro-services from the Broadband Forum\'s public docker artifactory
+This section of the document provides information of how to deploy (pull and run) an OB-BAA distribution from the Broadband Forum\'s public docker registry.
+
+Obtain the OB-BAA source code:
+Instructions for obtaining the OB-BAA source code can be found [here](./#source).
+
+Running OB-BAA micro-services from the public docker registry:
+
+```
+cd obbaa/resources
+Pull images from public docker registry using command "docker-compose -f ob-baa_setup.yml pull"
+Start the docker containers using command "docker-compose -f ob-baa_setup.yml up -d"
+
+Note: As the ob-baa_setup.yml file now have ipfix-collector, influxDB, zookeeper,
+      kafka, and vomci and vproxy containers added, the ob-baa_setup.yml file will 
+      also bring up the mentioned ipfix collector, influxDB, zookeeper, kafka, 
+      vomci and vproxy microservices along with baa.
+
+```
+
 <a id="source" />
 ## Building OB-BAA Using the Source Code
 This section of the document describes how to obtain access to the source code repository for OB-BAA and then use the source code to build the baa image.
+
+**Warning:** When building OB-BAA from the Source Code, the build of the baa image is required prior to building any submodules (e.g., Vendor Device Adapters).
 
 ### Platform Requirements
 #### Git
@@ -168,6 +194,18 @@ The code base is split across two repositories:
   git clone https://github.com/BroadbandForum/obbaa.git
 ```
 
+##### Clone OB-BAA obbaa-vomci repository
+
+```
+  git clone https://github.com/BroadbandForum/obbaa-vomci.git
+```
+
+##### Clone OB0BAA Control Relay service repository
+
+```
+  git clone https://github.com/BroadbandForum/obbaa-fc-relay.git
+```
+
 ### Build OB-BAA
 
 Building OB-BAA to generate the docker image along with its compose file is
@@ -183,12 +221,12 @@ For compilation the sequence is to first compile the NETCONF stack and
 then obbaa.
 
 ```
-Build NetConf stack
+Build NETCONF stack
   Change directory to obbaa-netconf-stack
   mvn clean install -DskipTests
 
 Build OBBAA
-  Change directory obbaa
+  Change directory to obbaa
   mvn clean install -DskipTests
   
 Build OBBAA with Unit Test (UT)
@@ -198,6 +236,7 @@ Build OBBAA with Unit Test (UT)
   This step is required only if you are going to run UT in your local environment.
     Change directory obbaa
     mvn clean install
+
 ```
 
 #### Build docker image:
@@ -205,13 +244,53 @@ Build OBBAA with Unit Test (UT)
 The next step is to build docker images from the generated jars.
 
 ```
-Build BAA Docker Image
+Build OBBAA Docker Image
 	cd <obbaa>/baa-dist
 	docker build -t baa .
 
 Build IPFIX-Collector Docker Image
-    cd <obbaa>/pm-collector/ipfix-collector/ipfix-collector-dist
+   cd <obbaa>/pm-collector/ipfix-collector/ipfix-collector-dist
 	docker build -t ipfix-collector .
+
+Build vOMCI and vProxy Docker Images
+   cd <obbaa-vomci>
+   make docker-build
+
+Note: The docker-build make command builds the docker images for
+      obbaa-vomci and obbaa-vproxy.
+
+Build Control Relay Service Docker Image
+   cd <obbaa-fc-relay>/control-relay
+   Follow the instructions in the [BBF public github obbaa-fc-relay repository](https://github.com/BroadbandForum/obbaa-fc-relay) readme
+   or use the following command:
+     docker build . -f single-command-build.dockerfile -t obbaa-control-relay
+
+   Contents of the file single-command-build.dockerfile:
+		FROM golang:1.14.4 AS builder
+		
+		RUN apt update && apt-get install protobuf-compiler unzip -y
+		RUN go get -u github.com/golang/protobuf/protoc-gen-go
+		WORKDIR /opt/control-relay
+		COPY . .
+		
+		RUN protoc --proto_path=proto --go_out=plugins=grpc:pb --go_opt=paths=source_relative ./proto/control_relay_packet_filter_service.v1.proto ./proto/control_relay_service.proto
+		RUN go build -buildmode=plugin -o bin/plugin-standard/BBF-OLT-standard-1.0.so plugins/standard/BBF-OLT-standard-1.0.go
+		RUN go build -o bin/control-relay
+		RUN chmod +x create-bundle.sh && ./create-bundle.sh
+		
+		FROM ubuntu:18.04
+		
+		RUN apt-get update && \
+		    apt-get upgrade -y
+		
+		WORKDIR /control_relay
+		
+		COPY --from=builder /opt/control-relay/dist/control-relay.tgz /control_relay
+		RUN tar xvfz control-relay.tgz
+		RUN rm control-relay.tgz
+		
+		CMD ["./control-relay"]    
+
 ```
 
 [<--Installing](../index.md#installing)

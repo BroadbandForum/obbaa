@@ -80,6 +80,10 @@
 
 ## Revision History
 
+### Release 4
+
+* [OB-BAA release 4.0.0 (September 2020)]({{ site.obbaa_readme }}#rel_4_0_0)
+
 ### Release 3
 
 * [OB-BAA release 3.0.0 (February 2020)]({{ site.obbaa_readme }}#rel_3_0_0)
@@ -97,9 +101,10 @@
 ## Participants
 
 | :---: | :---: | :---: | :---: | :---: |
-|![Altice](assets/img/altice.jpg){: width="100px" height="80px"}|![Altran](assets/img/altran.png){: width="100px" height="100px"}|![ATT](assets/img/att.png){: width="90px" height="80px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|![BT](assets/img/bt.png){: width="100px" height="100px"}|
-|![Calix](assets/img/calix.png){: width="100px" height="100px"}|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaMobile](assets/img/china-mobile.png){: width="100px" height="100px"}|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|
-|![DZS](assets/img/dzs.png){: width="100px" height="100px"}|![Fiberhome](assets/img/fiberhome.jpg){: width="100px" height="60px"}|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|
+|![Altice](assets/img/altice.jpg){: width="100px" height="80px"}|![Altran](assets/img/altran.png){: width="100px" height="100px"}|![ATT](assets/img/att.png){: width="90px" height="80px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|
+![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaMobile](assets/img/china-mobile.png){: width="100px" height="100px"}|
+|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|![DZS](assets/img/dzs.png){: width="100px" height="100px"}|![Fiberhome](assets/img/fiberhome.jpg){: width="100px" height="60px"}|
+|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Orange](assets/img/orange.png){: width="100px" height="100px"}|
 |![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|![TelecomItalia](assets/img/tim.png){: width="100px" height="60px"}|![UNH](assets/img/iol.png){: width="100px" height="45px"}|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="60px"}||
 
 
@@ -162,5 +167,9 @@ The following tools are used in  and delivered by the OB-BAA project
 |JSch|Simple adapter|JCraft|Open Source|BSD|<a href="http://www.jcraft.com/jsch/">Documentation link</a>|
 |SNMP4j|Sample SNMP adapter|SNMP4j|Open Source|Apache 2.0|<a href="http://www.snmp4j.org/html/documentation.html">Documentation link</a>|
 |InfluxDBv2|Time series DB|InfluxData|Open Source|MIT|<a href="https://github.com/influxdata/influxdb/">Repository link</a>|
+|Kakfa|Distributed Streaming platform|Apache|Open Source|Apache 2.0|<a href="https://kafka.apache.org/">Documentation link</a>|
+|ZooKeeper|Highly reliable distributed coordination|Apache|Open Source|Apache 2.0|<a href="https://zookeeper.apache.org/">Documentation link</a>|
+|Python|Programming Language|PSF|Open Source|BSD|<a href="https://docs.python.org/3/license.html">Documentation link</a>|
+|kafka-python|Kafka-Python Implementation|kafka-python|Open Source|Apache 2.0|<a href="https://pypi.org/project/kafka-python/">Documentation link</a>|
 
 [Overview -->](./overview/index.md#overview)

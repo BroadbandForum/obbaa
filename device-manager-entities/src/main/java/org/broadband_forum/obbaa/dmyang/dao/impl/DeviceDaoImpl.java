@@ -25,8 +25,10 @@ import javax.transaction.Transactional;
 
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.dmyang.entities.DevicePK;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceState;
+import org.broadband_forum.obbaa.dmyang.entities.OnuStateInfo;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
 import org.broadband_forum.obbaa.netconf.persistence.jpa.JPAEntityDataStoreManager;
@@ -76,6 +78,36 @@ public class DeviceDaoImpl extends AbstractDao<Device, DevicePK> implements Devi
     }
 
     @Override
+    public Device findDeviceWithSerialNumber(String serialNumber) {
+        EntityDataStoreManager entityDataStoreManager = getPersistenceManager();
+        List<Device> devices = entityDataStoreManager.findAll(Device.class);
+
+        for (Device device : devices) {
+            if (device.getDeviceManagement().getDeviceType().equals(DeviceManagerNSConstants.DEVICE_TYPE_ONU)) {
+                if (device.getDeviceManagement().getOnuConfigInfo().getSerialNumber().equals(serialNumber)) {
+                    return device;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Device findDeviceWithRegistrationId(String registrationId) {
+        EntityDataStoreManager entityDataStoreManager = getPersistenceManager();
+        List<Device> devices = entityDataStoreManager.findAll(Device.class);
+
+        for (Device device : devices) {
+            if (device.getDeviceManagement().getDeviceType().equals(DeviceManagerNSConstants.DEVICE_TYPE_ONU)) {
+                if (device.getDeviceManagement().getOnuConfigInfo().getRegistrationId().equals(registrationId)) {
+                    return device;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
     public DeviceState getDeviceState(String deviceName) {
         EntityDataStoreManager entityDataStoreManager = getPersistenceManager();
         if (deviceName != null) {
@@ -89,6 +121,12 @@ public class DeviceDaoImpl extends AbstractDao<Device, DevicePK> implements Devi
     public void updateDeviceAlignmentState(String deviceName, String verdict) {
         DeviceState deviceState = getDeviceState(deviceName);
         deviceState.setConfigAlignmentState(verdict);
+    }
+
+    @Override
+    public void updateOnuStateInfo(String deviceName, OnuStateInfo onuStateInfo) {
+        DeviceState deviceState = getDeviceState(deviceName);
+        deviceState.setOnuStateInfo(onuStateInfo);
     }
 
 

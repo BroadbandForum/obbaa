@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigOperations;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcError;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.EditConfigException;
@@ -60,11 +61,11 @@ public class DeviceConfigInterceptorTest {
     DeviceAdapter m_deviceAdapter;
 
     private static final String ERROR_ON_ROLLBACK = "error-on-rollback";
-    private static final QName TYPE_QNAME = QName.create(NS, "2020-02-19", TYPE);
-    private static final QName INTERFACE_VERSION_QNAME = QName.create(NS, "2020-02-19", INTERFACE_VERSION);
-    private static final QName VENDOR_QNAME = QName.create(NS, "2020-02-19", VENDOR);
-    private static final QName MODEL_QNAME = QName.create(NS, "2020-02-19", MODEL);
-    private static final QName DEVICE_MANAGEMENT_QNAME = QName.create(NS, "2020-02-19", DEVICE_MANAGEMENT);
+    private static final QName TYPE_QNAME = QName.create(NS, DeviceManagerNSConstants.REVISION, TYPE);
+    private static final QName INTERFACE_VERSION_QNAME = QName.create(NS, DeviceManagerNSConstants.REVISION, INTERFACE_VERSION);
+    private static final QName VENDOR_QNAME = QName.create(NS, DeviceManagerNSConstants.REVISION, VENDOR);
+    private static final QName MODEL_QNAME = QName.create(NS, DeviceManagerNSConstants.REVISION, MODEL);
+    private static final QName DEVICE_MANAGEMENT_QNAME = QName.create(NS, DeviceManagerNSConstants.REVISION, DEVICE_MANAGEMENT);
 
     @Before
     public void setup() {

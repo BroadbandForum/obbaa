@@ -44,7 +44,7 @@ public interface AdapterSpecificConstants {
     String OLT = "OLT";
     String STANDARD = "standard";
     String BBF = "BBF";
-    String STD_ADAPTER_OLDEST_VERSION = "1.0";
+    String STANDARD_ADAPTER_OLDEST_VERSION = "1.0";
     String PERCENTAGE = "%";
     String NOT_APPLICABLE = "Not Applicable";
 }

@@ -21,6 +21,7 @@ import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.INTERFACE_VERSION;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.MODEL;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NS;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.ONU_CONFIG_INFO;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.PUSH_PMA_CONFIGURATION_TO_DEVICE;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.TYPE;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.VENDOR;
@@ -73,6 +74,10 @@ public class DeviceMgmt {
     @YangChild
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
     private DeviceConnection deviceConnection;
+
+    @YangChild(name = ONU_CONFIG_INFO)
+    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    private OnuConfigInfo onuConfigInfo;
 
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
     private DeviceState deviceState = new DeviceState();
@@ -144,6 +149,14 @@ public class DeviceMgmt {
         this.deviceConnection = deviceConnection;
     }
 
+    public OnuConfigInfo getOnuConfigInfo() {
+        return onuConfigInfo;
+    }
+
+    public void setOnuConfigInfo(OnuConfigInfo onuConfigInfo) {
+        this.onuConfigInfo = onuConfigInfo;
+    }
+
     public DeviceState getDeviceState() {
         return deviceState;
     }
@@ -190,6 +203,9 @@ public class DeviceMgmt {
         if (deviceVendor != null ? !deviceVendor.equals(that.deviceVendor) : that.deviceVendor != null) {
             return false;
         }
+        if (onuConfigInfo != null ? !onuConfigInfo.equals(that.onuConfigInfo) : that.onuConfigInfo != null) {
+            return false;
+        }
         return pushPmaConfigurationToDevice != null
             ? pushPmaConfigurationToDevice.equals(that.pushPmaConfigurationToDevice)
             : that.pushPmaConfigurationToDevice == null;
@@ -204,6 +220,7 @@ public class DeviceMgmt {
         result = 31 * result + (deviceInterfaceVersion != null ? deviceInterfaceVersion.hashCode() : 0);
         result = 31 * result + (deviceModel != null ? deviceModel.hashCode() : 0);
         result = 31 * result + (deviceVendor != null ? deviceVendor.hashCode() : 0);
+        result = 31 * result + (onuConfigInfo != null ? onuConfigInfo.hashCode() : 0);
         result = 31 * result + (pushPmaConfigurationToDevice != null ? pushPmaConfigurationToDevice.hashCode() : 0);
         return result;
     }
@@ -220,6 +237,7 @@ public class DeviceMgmt {
         sb.append(", pushPmaConfigurationToDevice='").append(pushPmaConfigurationToDevice).append('\'');
         sb.append(", deviceConnection=").append(deviceConnection);
         sb.append(", deviceState=").append(deviceState);
+        sb.append(", onuConfigInfo=").append(onuConfigInfo);
         sb.append('}');
         return sb.toString();
     }

@@ -198,6 +198,7 @@
     </bean>
     <bean id="nonCodedAdapterService" class="org.broadband_forum.obbaa.device.adapter.impl.NonCodedAdapterServiceImpl">
         <argument ref="adapterManager"/>
+        <argument ref="ncConnectionMgr"/>
     </bean>
 
     <bean id="nonCodedConfigAlign" class="org.broadband_forum.obbaa.device.adapter.impl.NcCompliantAdapterDeviceInterface">
@@ -220,4 +221,5 @@
     <service ref="modelNodeHelperRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry" />
     <service ref="subsystemRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry" />
     <service ref="TrapListener" interface="org.broadband_forum.obbaa.device.listener.RegisterTrapCallback" />
+    <service ref="alarmService" interface="org.broadband_forum.obbaa.netconf.alarm.api.AlarmService" />
 </blueprint>

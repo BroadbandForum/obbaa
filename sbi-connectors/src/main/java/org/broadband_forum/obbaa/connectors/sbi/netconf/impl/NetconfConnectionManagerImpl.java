@@ -83,6 +83,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     private static final String DUID_PATTERN = "DUID/";
     private static final int DUID_VALUE_START_INDEX = 5;
     private Map<Device, NetconfClientSession> m_callHomeSessions = new ConcurrentHashMap<>();
+    private Map<Device, NetconfClientSession> m_mediatedSessions = new ConcurrentHashMap<>();
     private Map<String, NewDeviceInfo> m_newDeviceInfos = new ConcurrentHashMap<>();
     private List<ConnectionListener> m_connectionListeners = new ArrayList<>();
 
@@ -212,6 +213,10 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
 
     public Map<String, List<DefaultPooledObjectInfo>> getAllSessions() {
         return m_connPool.listAllObjects();
+    }
+
+    public NetconfClientSession getMediatedDeviceSession(Device device) {
+        return m_mediatedSessions.get(device);
     }
 
     @Override
@@ -356,6 +361,25 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         });
     }
 
+    public void addMediatedDeviceNetconfSession(Device device, NetconfClientSession deviceSession) {
+        m_mediatedSessions.put(device, deviceSession);
+        notifyDeviceConnected(device, deviceSession);
+        deviceSession.addSessionListener(i -> {
+            m_connPool.clear(device);
+            notifyDeviceDisconnected(device, deviceSession);
+        });
+        NetconfClientSession borrowedSession = null;
+        try {
+            borrowedSession = m_connPool.borrowObject(device);
+        } catch (Exception e) {
+            LOGGER.error("Error while borrowing mediated session", e);
+        } finally {
+            if (borrowedSession != null) {
+                m_connPool.returnObject(device, borrowedSession);
+            }
+        }
+    }
+
     public String extractDuid(X509Certificate x509Certificate, String ipAddress, Integer port) {
         LOGGER.debug(String.format("Retrieving DUID of call home device from Certificate : %s", x509Certificate
                 .getSubjectDN()));
@@ -414,6 +438,8 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
             m_allKeys.add(key);
             if (key.isCallhome()) {
                 return m_callHomeSessions.get(key);
+            } else if (key.isMediatedSession()) {
+                return m_mediatedSessions.get(key);
             }
             NetconfClientSession sessionToDevice = createSessionToDevice(key);
             if (sessionToDevice != null) {
@@ -438,6 +464,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
             }
             m_allKeys.remove(key);
             m_callHomeSessions.remove(key);
+            m_mediatedSessions.remove(key);
         }
 
         @Override

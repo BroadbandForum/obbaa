@@ -63,7 +63,6 @@ public class FactoryGarmentTagTest {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         m_readWriteLockService = spy(new ReadWriteLockServiceImpl());
-        AdapterManagerImpl.ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL = true;
         m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator));
         m_inputStream = getClass().getResourceAsStream("/model/device-adapter1.xml");
         m_inputStream2 = getClass().getResourceAsStream("/model/device-adapter2.xml");

@@ -19,6 +19,7 @@ package org.broadband_forum.obbaa.dm;
 import java.util.List;
 
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.OnuStateInfo;
 
 /**
  * <p>
@@ -30,6 +31,10 @@ import org.broadband_forum.obbaa.dmyang.entities.Device;
 public interface DeviceManager {
 
     Device getDevice(String deviceName);
+
+    Device getDeviceWithSerialNumber(String serialNumber);
+
+    Device getDeviceWithRegistrationId(String registrationId);
 
     List<Device> getAllDevices();
 
@@ -44,4 +49,6 @@ public interface DeviceManager {
     void devicePropertyChanged(String deviceName);
 
     void updateConfigAlignmentState(String deviceName, String verdict);
+
+    void updateOnuStateInfo(String deviceName, OnuStateInfo onuStateInfo);
 }

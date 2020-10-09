@@ -21,6 +21,7 @@ import java.util.List;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DevicePK;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceState;
+import org.broadband_forum.obbaa.dmyang.entities.OnuStateInfo;
 import org.broadband_forum.obbaa.netconf.persistence.jpa.dao.EntityDAO;
 
 public interface DeviceDao extends EntityDAO<Device, DevicePK> {
@@ -31,7 +32,13 @@ public interface DeviceDao extends EntityDAO<Device, DevicePK> {
 
     Device findDeviceWithDuid(String duid);
 
+    Device findDeviceWithSerialNumber(String serialNumber);
+
+    Device findDeviceWithRegistrationId(String registrationId);
+
     DeviceState getDeviceState(String deviceName);
 
     void updateDeviceAlignmentState(String deviceName, String verdict);
+
+    void updateOnuStateInfo(String deviceName, OnuStateInfo onuStateInfo);
 }

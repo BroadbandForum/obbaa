@@ -32,6 +32,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
+import org.broadband_forum.obbaa.pma.DeviceNotificationListenerService;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.joda.time.DateTime;
 
@@ -39,7 +40,7 @@ public class DeviceReconnectionNotificationAction implements ConnectionListener 
 
     private static final Logger LOGGER = Logger.getLogger(DeviceReconnectionNotificationAction.class);
     private final PmaRegistry m_pmaRegistry;
-
+    private final DeviceNotificationListenerService m_deviceNotificationListenerRegistry;
 
     private NotificationService m_notificationService;
 
@@ -48,11 +49,13 @@ public class DeviceReconnectionNotificationAction implements ConnectionListener 
 
     public DeviceReconnectionNotificationAction(NotificationService notificationService,
                                                 NetconfConnectionManager netconfConnectionManager, AdapterManager adapterManager,
-                                                PmaRegistry pmaRegistry) {
+                                                PmaRegistry pmaRegistry,
+                                                DeviceNotificationListenerService deviceNotificationClientListenerRegistry) {
         m_notificationService = notificationService;
         m_netconfConnectionManager = netconfConnectionManager;
         m_adapterManager = adapterManager;
         m_pmaRegistry = pmaRegistry;
+        m_deviceNotificationListenerRegistry = deviceNotificationClientListenerRegistry;
     }
 
     public void init() {
@@ -95,7 +98,7 @@ public class DeviceReconnectionNotificationAction implements ConnectionListener 
         AdapterContext adapterContext = AdapterUtils.getAdapterContext(device, m_adapterManager);
 
         DeviceNotificationListener subscriber = new DeviceNotificationListener(device, deviceAdapterId, m_notificationService,
-                adapterContext, m_pmaRegistry);
+                adapterContext, m_pmaRegistry, m_deviceNotificationListenerRegistry.getDeviceNotificationClientListeners());
 
         Date timeOfLastSentEvent = NetconfResources.parseDateTime("1970-01-01T00:00:00+00:00").toDate();
         String timeFormat = NetconfResources.DATE_TIME_WITH_TZ_WITHOUT_MS.print(new DateTime(timeOfLastSentEvent));

@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -94,8 +95,8 @@ public class CodedAdapterServiceImpl implements CodedAdapterService {
     public void unDeployAdapter() throws Exception {
         DeviceAdapterId adapterId = CommonFileUtil.parseAdapterXMLFile(ADAPTER_XML_PATH, m_bundle);
         m_adapterManager.undeploy(m_adapterManager.getDeviceAdapter(adapterId));
+        removeIpfixMappingFiles(adapterId);
     }
-
 
     protected Map<URL, InputStream> buildModuleStreamMap(String yangPath) throws IOException {
         Map<URL, InputStream> moduleStream = new HashMap<URL, InputStream>();
@@ -141,6 +142,23 @@ public class CodedAdapterServiceImpl implements CodedAdapterService {
             } catch (Exception e) {
                 LOGGER.error("Error while copying IPFIX IE mapping file of adapter:" + deviceAdapter, e);
             }
+        }
+    }
+
+    private void removeIpfixMappingFiles(DeviceAdapterId adapterId) {
+        StringBuffer deviceAdapter = new StringBuffer();
+        deviceAdapter = deviceAdapter.append(adapterId.getVendor())
+                .append(AdapterSpecificConstants.DASH).append(adapterId.getType())
+                .append(AdapterSpecificConstants.DASH).append(adapterId.getModel())
+                .append(AdapterSpecificConstants.DASH).append(adapterId.getInterfaceVersion());
+        String ipfixMappingFilePath = m_ipfixStagingArea + File.separator + deviceAdapter;
+        try {
+            File ipfixMappingFileDir = new File(ipfixMappingFilePath);
+            if (ipfixMappingFileDir.exists()) {
+                FileUtils.forceDelete(ipfixMappingFileDir);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error while deleting ipfix file for " + deviceAdapter, e);
         }
     }
 }

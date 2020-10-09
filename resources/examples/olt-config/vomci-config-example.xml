@@ -1,0 +1,88 @@
+<!--
+   ~ Copyright 2018 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="34566755">
+   <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <target>
+         <running />
+      </target>
+      <config>
+         <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+               <device>
+                  <name>deviceB</name>
+                  <root>
+                      <remote-nf-settings xmlns="urn:bbf:yang:bbf-polt-vomci">
+                        <nf-client>
+                            <enabled>true</enabled>
+                            <client-parameters>
+                                <nf-initiate>
+                                    <remote-endpoints>
+                                        <name>vOMCI-proxy</name>
+                                        <type>vOMCI-nf</type>
+                                        <remote-endpoint>
+                                            <access-points>
+                                                <name>vOMCIProxy</name>
+                                                <grpc>
+                                                    <grpc-client-parameters>
+
+                                                            <remote-address>www.example.com</remote-address>
+                                                            <remote-port>443</remote-port>
+                                                            <local-address>0.0.0.0</local-address>
+                                                            <local-port>0</local-port>
+                                                            <keepalives>
+                                                                <idle-time>15</idle-time>
+                                                                <max-probes>3</max-probes>
+                                                                <probe-interval>30</probe-interval>
+                                                            </keepalives>
+
+                                                    </grpc-client-parameters>
+                                                </grpc>
+                                            </access-points>
+                                        </remote-endpoint>
+                                    </remote-endpoints>
+                                </nf-initiate>
+                            </client-parameters>
+                            <nf-endpoint-filter>
+                                <rule>
+                                    <name>rule1</name>
+                                    <priority>1</priority>
+                                    <flexible-match>
+                                        <onu-vendor>PTIN</onu-vendor>
+                                    </flexible-match>
+                                </rule>
+                            </nf-endpoint-filter>
+                        </nf-client>
+                        <nf-server>
+                            <!--  if at least one rule does not exist an error will be thrown -->
+                            <nf-endpoint-filter>
+                              <rule>
+                                  <name>rule1</name>
+                                  <priority>1</priority>
+                                  <flexible-match>
+                                      <onu-vendor>none</onu-vendor>
+                                  </flexible-match>
+                              </rule>
+                            </nf-endpoint-filter>
+                        </nf-server>
+                    </remote-nf-settings>
+                  </root>
+               </device>
+            </managed-devices>
+         </network-manager>
+      </config>
+   </edit-config>
+</rpc>

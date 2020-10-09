@@ -32,6 +32,11 @@
         <class>org.broadband_forum.obbaa.dmyang.entities.SnmpAuthentication</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.Snmpv3Auth</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.DbVersion</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.OnuConfigInfo</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.AttachmentPoint</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.OnuStateInfo</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.ActualAttachmentPoint</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.SoftwareImage</class>
 
         <properties>
             <!-- Configuring JDBC properties -->

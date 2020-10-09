@@ -1,0 +1,135 @@
+submodule bbf-software-image-management-base {
+  yang-version 1.1;
+  belongs-to bbf-software-image-management {
+    prefix bbf-sim;
+  }
+  
+  import ietf-hardware {
+    prefix hw;
+  }
+  
+  import bbf-yang-types {
+    prefix bbf-yang;
+  }
+  
+  include bbf-software-image-management-download-body;
+  include bbf-software-image-management-revision-body;
+    
+  organization
+    "Broadband Forum Common YANG Work Area";
+
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      TBD
+     
+     WA Director: William Lupton, Broadband Forum
+                  <mailto:wlupton@broadband-forum.org>
+
+     WA Director: Michael Shaffer
+                  <mailto:michael.shaffer@nokia.com>";
+
+  description
+    "This submodule contains a collection of YANG definitions for 
+     the overall structure of software image management on hardware
+     components as defined by ietf-hardware.
+
+     Copyright (c) 2016, Broadband Forum
+     All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-355; see
+     the TR itself for full legal notices.";
+
+  revision 2017-03-08 {
+    description
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  augment "/hw:hardware-state/hw:component" {
+    description 
+      "An augmentation of a physical entity to add support for the 
+       management of software. The usage of such software can be for
+       a variety of purposes. For eaxmple, one software may provide 
+       the firmware image for an onboard chip while another provides 
+       the application software.";
+       
+    container software {
+      description
+        "Physical entity state data, actions and notifications 
+         associated with software.";
+
+      list software {
+        key "name";
+        description 
+          "A list of software on this physical entity.";
+          
+        leaf name {
+          type bbf-yang:string-ascii64;
+          description
+            "The name associated with this software. For a given
+             physical entity, there may be more than one type of 
+             software being managed, e.g. application software, 
+             firmware or FPGA firmware. The name should represent
+             this association, e.g. 'firmware'.";
+        }  
+          
+        container download {
+          description
+            "Information and actions regarding downloading of new
+             software.";
+
+          uses download-software;
+        }  
+        
+        container revisions {
+          description
+            "Information and actions regarding all software 
+             revisions.";
+          
+          uses revisions;
+        }         
+      }
+    }
+  }
+}
+

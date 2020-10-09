@@ -31,6 +31,12 @@
                 <exclude>dpu-config/pom.xml</exclude>
                 <exclude>olt-config/PON_1_to_1_Services/pom.xml</exclude>
                 <exclude>olt-config/PON_N_to_1_Services/pom.xml</exclude>
+                <exclude>onu-config/pom.xml</exclude>
+                <exclude>requests/.flattened-pom.xml</exclude>
+                <exclude>dpu-config/.flattened-pom.xml</exclude>
+                <exclude>olt-config/PON_1_to_1_Services/.flattened-pom.xml</exclude>
+                <exclude>olt-config/PON_N_to_1_Services/.flattened-pom.xml</exclude>
+                <exclude>onu-config/.flattened-pom.xml</exclude>
             </excludes>
             <includes>
                 <include>adapters/adapterExample.zip</include>
@@ -39,6 +45,7 @@
                 <include>dpu-config/*.xml</include>
                 <include>olt-config/PON_1_to_1_Services/*.xml</include>
                 <include>olt-config/PON_N_to_1_Services/*.xml</include>
+                <include>onu-config/*.xml</include>
             </includes>
         </fileSet>
         <fileSet>
@@ -48,13 +55,14 @@
                 <include>yang/aggregator-yang/*.yang</include>
                 <include>standard-adapters/bbf-dpu-standard-*.zip</include>
                 <include>standard-adapters/bbf-olt-standard-*.zip</include>
+                <include>standard-adapters/bbf-onu-standard-*.zip</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>../${project.basedir}</directory>
             <outputDirectory>setup_file</outputDirectory>
             <includes>
-                <include>baa_setup.yml</include>
+                <include>ob-baa_setup.yml</include>
             </includes>
         </fileSet>
     </fileSets>

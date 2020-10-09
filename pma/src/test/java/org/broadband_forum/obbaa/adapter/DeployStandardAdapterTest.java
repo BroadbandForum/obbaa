@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.FileUtils;
+import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService;
@@ -58,14 +59,16 @@ public class DeployStandardAdapterTest {
     private SubSystem m_subsystem;
     private File m_tempDir;
     private String m_dir;
+    private NetconfConnectionManager m_connectionManager;
 
     @Before
     public void setup() throws Exception {
         m_tempDir = createTempDir();
         m_dir = m_tempDir.getAbsolutePath();
         m_adapterManager = mock(AdapterManagerImpl.class);
+        m_connectionManager = mock(NetconfConnectionManager.class);
         m_subsystem = mock(DeviceSubsystem.class);
-        m_nonCodedAdapterService = new NonCodedAdapterServiceImpl(m_adapterManager);
+        m_nonCodedAdapterService = new NonCodedAdapterServiceImpl(m_adapterManager, m_connectionManager);
         m_adaptersDeployer = new StandardAdaptersDeployer(m_nonCodedAdapterService, m_subsystem, m_dir, m_dir, null);
     }
 

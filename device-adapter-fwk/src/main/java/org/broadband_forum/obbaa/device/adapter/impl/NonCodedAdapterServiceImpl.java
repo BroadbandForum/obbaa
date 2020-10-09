@@ -41,6 +41,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.CommonFileUtil;
@@ -48,6 +49,7 @@ import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService;
+import org.broadband_forum.obbaa.device.adapter.VomciAdapterDeviceInterface;
 import org.broadband_forum.obbaa.device.adapter.util.VariantFileUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -56,10 +58,12 @@ import org.slf4j.LoggerFactory;
 
 public class NonCodedAdapterServiceImpl implements NonCodedAdapterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NonCodedAdapterServiceImpl.class);
+    private final NetconfConnectionManager m_netconfConnManager;
     private AdapterManager m_manager;
 
-    public NonCodedAdapterServiceImpl(AdapterManager manager) {
+    public NonCodedAdapterServiceImpl(AdapterManager manager, NetconfConnectionManager netconfConnManager) {
         m_manager = manager;
+        m_netconfConnManager = netconfConnManager;
     }
 
     @Override
@@ -92,7 +96,12 @@ public class NonCodedAdapterServiceImpl implements NonCodedAdapterService {
                     .build();
             adapter.init();
             moveIpfixMappingFileToStagingArea(ipfixIeMappingFile, ipfixStagingArea, adapter.getDeviceAdapterId());
-            m_manager.deploy(adapter, subSystem, klass, deviceInterface);
+            if (adapter.getType().equals("ONU")) {
+                VomciAdapterDeviceInterface vomciDeviceInterface = new VomciAdapterDeviceInterface(m_netconfConnManager);
+                m_manager.deploy(adapter, subSystem, klass, vomciDeviceInterface);
+            } else {
+                m_manager.deploy(adapter, subSystem, klass, deviceInterface);
+            }
         }
     }
 

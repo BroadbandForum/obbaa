@@ -16,12 +16,17 @@
 
 package org.broadband_forum.obbaa.dmyang.entities;
 
-
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NEVER_ALIGNED;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.ONU_STATE_INFO;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
+
+import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangChild;
 
 @Entity
 public class DeviceState {
@@ -31,6 +36,10 @@ public class DeviceState {
 
     @Column(name = "configuration_alignment_state", length = 100000)
     private String configAlignmentState = NEVER_ALIGNED;
+
+    @YangChild(name = ONU_STATE_INFO)
+    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    private OnuStateInfo onuStateInfo;
 
     public String getDeviceNodeId() {
         return deviceNodeId;
@@ -48,6 +57,14 @@ public class DeviceState {
         this.configAlignmentState = configAlignmentState;
     }
 
+    public OnuStateInfo getOnuStateInfo() {
+        return onuStateInfo;
+    }
+
+    public void setOnuStateInfo(OnuStateInfo onuStateInfo) {
+        this.onuStateInfo = onuStateInfo;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -62,6 +79,9 @@ public class DeviceState {
         if (deviceNodeId != null ? !deviceNodeId.equals(that.deviceNodeId) : that.deviceNodeId != null) {
             return false;
         }
+        if (onuStateInfo != null ? !onuStateInfo.equals(that.onuStateInfo) : that.onuStateInfo != null) {
+            return false;
+        }
         return configAlignmentState != null ? configAlignmentState.equals(that.configAlignmentState) : that.configAlignmentState == null;
 
     }
@@ -69,6 +89,7 @@ public class DeviceState {
     @Override
     public int hashCode() {
         int result = deviceNodeId != null ? deviceNodeId.hashCode() : 0;
+        result = 31 * result + (onuStateInfo != null ? onuStateInfo.hashCode() : 0);
         result = 31 * result + (configAlignmentState != null ? configAlignmentState.hashCode() : 0);
         return result;
     }
@@ -77,6 +98,7 @@ public class DeviceState {
     public String toString() {
         final StringBuilder sb = new StringBuilder("DeviceState{");
         sb.append("deviceNodeId='").append(deviceNodeId).append('\'');
+        sb.append("onuStateInfo='").append(onuStateInfo).append('\'');
         sb.append(", configAlignmentState='").append(configAlignmentState).append('\'');
         sb.append('}');
         return sb.toString();

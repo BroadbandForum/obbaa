@@ -32,7 +32,7 @@ The PM Collection Framework is a generalized framework that permits
 collection of PM data using various protocols and mechanisms (e.g.,
 IPFIX, SFTP).
 
-The determination of which PM Collector is used by the a pAN is
+The determination of which PM Collector is used by the pAN is
 accomplished by configuring the pAN with the associated PM collection
 template that includes information on what PM data the pAN is to
 collect; the interval schedule to collect and report the collected PM
@@ -54,7 +54,7 @@ TR-383 specification.
 
 The IPFIX PM Data Collector (IPFIX Collector) is based standardized
 within the BBF\'s TR-383 Common YANG specification for Access Nodes
-and is based on the IETF\'s [RFC 7011](http://Specification) IPFIX
+and is based on the IETF\'s [RFC 7011](http://Specification) IPFIX
 protocol specification.
 
 <p align="center">
@@ -89,7 +89,7 @@ into corresponding standard pAN YANG leaf nodes and instances.
 #### Decoding of IPFIX Messages
 
 The IPFIX Collector receives IPFIX messages and based on the IPFIX Set
-ID, decodes the information within the message. 
+ID, decodes the information within the message.
 
 | Set ID | Set Type |
 | :--- | :--- |
@@ -106,7 +106,7 @@ The decoding procedure is specific to the Set Type.
 We will support IPFIX decoding only when the Enterprise bit is enabled.
 In that case vendor specific mappings will be considered for the IE ID
 mapping and OBBAA will not be bundled with any default IEid mapping
-file. The name of this mapping file should be IPFIX\_IEId.csv and should
+file. The name of this mapping file should be IPFIX\_IEId.csv and should
 be included with the southbound adapter used by the pAN. Whenever an
 adapter is deployed, the adapter should be unzipped to find the
 IPFIX\_IEid.csv mapping file and be placed in a folder that is named
@@ -133,7 +133,7 @@ Range|Some Information Elements may only be able to take on a restricted set of 
 |Revision|The revision number of an Information Element, starting at 0 for Information Elements at time of definition and incremented by one for each revision.|
 |Date|The date of the entry of this revision of the Information Element into the registry.|
 
-ElementID, Name and Abstract Data Type are mandatory fields that needs
+ElementID, Name and Abstract Data Type are mandatory fields that needs
 to be filled for any particular Information element.
 
 Note: We will not support decoding of Template/Option Template Sets if
@@ -150,7 +150,7 @@ deviceName of the device. IPFIX collector will make a netconf request to
 OBBAA to retrieve the device details such as deviceType,
 deviceInterfaceVersion and deviceVendor. Based on the device details it
 will retrieve the IPFIX\_IEId.csv file
-from \<vendor\>-\<model\>-\<type\>-\<interfaceVersion\> folder from
+from \<vendor\>-\<model\>-\<type\>-\<interfaceVersion\> folder from
 within the common mount point. If the IPFIX\_IEId.csv file is missing in
 the IPFIX\_IE\_MAPPING\_DIR, then the collector will log an error
 message that the mapping file for the IPFIX messages are missing.
@@ -263,12 +263,12 @@ protocol that is useful in understanding how to the IPFIX Collector in
 the BAA layer and IPFIX exporter in the pAN establish sessions and
 exchange information.
 
-RFC Link : <https://tools.ietf.org/html/rfc7011>
+RFC Link : <https://tools.ietf.org/html/rfc7011>
 
 The IPFIX messages from the pAN can be either data set, template set or
 options template
-set → <https://tools.ietf.org/html/rfc7011#section-3> with examples
-presented in <https://tools.ietf.org/html/rfc7011#appendix-A>.
+set <https://tools.ietf.org/html/rfc7011#section-3> with examples
+presented in <https://tools.ietf.org/html/rfc7011#appendix-A>.
 
 <p align="center">
  <img width="600px" height="300px" src="{{site.url}}/architecture//pm_collector/ipfix_message.png">

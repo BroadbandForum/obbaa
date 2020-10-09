@@ -36,7 +36,6 @@ import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
-import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemValidationException;
@@ -46,8 +45,6 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 
 public class ProtocolTranslDevInterface implements DeviceInterface {
@@ -58,7 +55,6 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
             + "  <ok/>\n"
             + "</rpc-reply>";
     private SnmpTransport m_snmp = null;
-    private SnmpTransportTest m_tester = null;
     private final NonNCNotificationHandler m_nonNCNotificationHandler;
     private final RegisterTrapCallback m_trapHandle;
 
@@ -66,28 +62,14 @@ public class ProtocolTranslDevInterface implements DeviceInterface {
         m_bundle = bundle;
         m_nonNCNotificationHandler = nonNCNotificationHandler;
         m_trapHandle = trapListener;
-        m_tester = new SnmpTransportTest();
     }
 
     @Override
     public Future<NetConfResponse> align(Device device, EditConfigRequest request, NetConfResponse getConfigResponse)
             throws ExecutionException {
         if (isConnected(device)) {
-            try {
-                NodeList listOfNodes = request.getConfigElement().getXmlElement().getChildNodes();
-                for (int i = 0; i < listOfNodes.getLength(); i++) {
-                    if (listOfNodes.item(i).getLocalName().equalsIgnoreCase("system")) {
-                        for (Element element : DocumentUtils.getChildElements(listOfNodes.item(i))) {
-                            if (element.getLocalName().equalsIgnoreCase("location")) {
-                                m_tester.testSnmp(m_snmp, element.getTextContent());
-                                break;
-                            }
-                        }
-                    }
-                }
-            } catch (NetconfMessageBuilderException e) {
-                LOGGER.error("NetconfMessageBuilderException", e);
-            }
+            Mapper mapper = new Mapper(m_snmp);
+            mapper.mapAndSendSnmp(request);
             return executeRequest(device);
         } else {
             throw new IllegalStateException(String.format("Device not connected %s", device.getDeviceName()));

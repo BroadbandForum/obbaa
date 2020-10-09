@@ -11,7 +11,7 @@ up and running. It includes:
 
     -   Platform requirements and running the baa image
 
-    -   Installing OB-BAA from the Broadband Forum\'s baa image on the
+    -   Using OB-BAA micro-services from the Broadband Forum\'s 
         public docker artifactory
 
     -   Source code access and building using the source code

@@ -16,7 +16,6 @@
 
 package org.broadband_forum.obbaa.dm;
 
-import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.BBF;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.PERCENTAGE;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.ADAPTER_REVISION;
@@ -89,7 +88,6 @@ import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceState;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
-import org.broadband_forum.obbaa.netconf.api.utils.SystemPropertyUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.AbstractSubSystem;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ChangeNotification;
@@ -176,7 +174,6 @@ public class DeviceManagementSubsystem extends AbstractSubSystem {
 
             LOGGER.debug(null, "Device delete identified for ModelNodeId[{}] with notification[{}]", nodeId, editNotif);
             m_deviceManager.deviceRemoved(deviceId);
-
         }
     }
 
@@ -244,15 +241,12 @@ public class DeviceManagementSubsystem extends AbstractSubSystem {
     }
 
     private Element buildAdaptersStateElement(Document document, List<DeviceAdapter> adapters) {
-        boolean enableFactoryGarmentTagRetrieval = Boolean.parseBoolean(SystemPropertyUtils.getInstance()
-                .getFromEnvOrSysProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "True"));
         Element deviceAdapters = document.createElementNS(NS, DEVICE_ADAPTERS);
         appendElement(document, deviceAdapters, DEVICE_ADAPTER_COUNT, String.valueOf(adapters.size()));
         for (DeviceAdapter info : adapters) {
             Element deviceAdapter = document.createElementNS(NS, DEVICE_ADAPTER);
             buildAdapterBasicInfo(document, deviceAdapter, info);
-            if ((enableFactoryGarmentTagRetrieval)
-                    && (!info.getModel().equalsIgnoreCase(STANDARD)) && (!info.getVendor().equalsIgnoreCase(BBF))) {
+            if (!info.getModel().equalsIgnoreCase(STANDARD)) {
                 Element factoryGarmentTag = document.createElementNS(NS, FACTORY_GARMENT_TAG);
                 buildAdapterFactoryGarmentTagInfo(document, factoryGarmentTag, info);
                 deviceAdapter.appendChild(factoryGarmentTag);

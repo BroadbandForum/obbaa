@@ -1,0 +1,229 @@
+submodule bbf-software-image-management-revision-body {
+  yang-version 1.1;
+  belongs-to bbf-software-image-management {
+    prefix bbf-sim;
+  }
+  
+  import ietf-yang-types {
+    prefix yang;
+  }
+  
+  include bbf-software-image-management-common-body;
+  
+  organization
+    "Broadband Forum Common YANG Work Area";
+
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      TBD
+     
+     WA Director: William Lupton, Broadband Forum
+                  <mailto:wlupton@broadband-forum.org>
+
+     WA Director: Michael Shaffer
+                  <mailto:michael.shaffer@nokia.com>";
+
+  description
+    "This submodule contains a collection of YANG definitions 
+     associated with all software revisions.
+
+     Copyright (c) 2016, Broadband Forum
+     All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-355; see
+     the TR itself for full legal notices.";
+
+  revision 2017-03-08 {
+    description
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  grouping revisions {
+    description
+      "State data associated with all software revisions.";
+      
+    notification revision-deleted {
+      description
+        "Indicates that a particular software revision was deleted
+         from the list of available revisions.";
+      
+      leaf name {
+        type software-name;
+        description
+          "The name of the software revision that was deleted.";
+      }    
+    } 
+
+    list revision {
+      must
+        "count(../revision[is-active = 'true']) = 1 and 
+         count(../revision[is-committed = 'true']) = 1" {
+        description
+          "Only one active and one committed image are allowed.";
+      }
+      key "name";
+
+      description 
+        "A list of revisions available on the physical entity for 
+         a given software managed on that physical entity.";
+
+      leaf name {
+        type software-name;
+        description 
+          "The name of the software revision. This is the name used
+           when the software was downloaded, e.g. filename.";
+      }
+      
+      leaf download-timestamp {
+        type yang:date-and-time;
+        description
+          "The time and date when the software was downloaded.";
+      }
+
+      leaf version {
+        type string;
+        description 
+         "Reports the version of the software revision.";
+      }
+      
+      leaf is-valid {
+        type boolean;
+        description 
+          "Reports whether the stored software revision is 
+           valid ('true') or invalid ('false').";
+      }
+
+      leaf is-committed {
+        type boolean;
+        description 
+          "Reports whether the associated software revision is 
+           committed ('true') or uncommitted ('false').";
+      }
+
+      leaf is-active {
+        type boolean;
+        description 
+          "Reports whether the associated software revision is 
+           active ('true') or inactive ('false').";
+      }
+      
+      container activate-revision {
+        when "../is-valid = 'true'" {
+          description
+            "Only valid revisions can be activated.";
+        }
+        description
+          "Actions and notifications associated with activating 
+           a software revision.";
+        
+        action activate {
+          if-feature software-actions;
+          description
+            "Activate this revision.";
+        }
+        
+        notification revision-activated {
+          description
+            "Indicates that the specified revision has successfully 
+             activated on the target physical entity.";
+        }
+    
+        notification activate-failed {
+          description
+            "Indicates that the specified revision failed to activate 
+             on its target physical entity.";
+             
+          uses failure;
+        }
+      }
+      
+      container commit-revision {
+        when "../is-valid = 'true'" {
+          description
+            "Only valid revisions can be committed.";
+        }
+        description
+          "Actions and notifications associated with committing 
+           a software revision.";
+        
+        action commit {
+          if-feature software-actions;
+          description
+            "Commit this revision.";
+        }
+
+        notification revision-committed {
+          description
+            "Indicates that the specified revision has successfully 
+             committed on the target physical entity.";
+        }
+        
+        notification commit-failed {
+          description
+            "Indicates that the revision software failed to commit 
+             on its target physical entity.";
+
+          uses failure;
+        }
+      }
+      
+      container delete-revision {
+        when "../is-active = 'false' and ../is-committed = 'false'" {
+          description
+            "Active and/or committed revisions cannot be explicitly
+             deleted.";
+        }
+        description
+          "Action associated with deleting a software revision.";
+      
+        action delete {
+          if-feature software-actions;
+          description
+            "Delete this revision from the stored software 
+             revisions.";
+        }
+      }
+    }
+  }
+}

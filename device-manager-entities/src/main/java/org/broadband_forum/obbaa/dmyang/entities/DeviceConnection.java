@@ -20,6 +20,7 @@ package org.broadband_forum.obbaa.dmyang.entities;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.CONNECTION_MODEL;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.DEVICE_CONNECTION;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.DUID;
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.MEDIATED_PROTOCOL;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NS;
 
 import javax.persistence.CascadeType;
@@ -62,6 +63,10 @@ public class DeviceConnection {
     @YangAttribute(name = DUID)
     @Column(name = "duid")
     private String duid;
+
+    @YangAttribute(name = MEDIATED_PROTOCOL)
+    @Column(name = "mediatedProtocol")
+    private String mediatedProtocol;
 
 
     public String getParentId() {
@@ -112,6 +117,14 @@ public class DeviceConnection {
         this.duid = duid;
     }
 
+    public String getMediatedProtocol() {
+        return mediatedProtocol;
+    }
+
+    public void setMediatedProtocol(String mediatedProtocol) {
+        this.mediatedProtocol = mediatedProtocol;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -138,6 +151,9 @@ public class DeviceConnection {
         if (snmpAuth != null ? !snmpAuth.equals(that.snmpAuth) : that.snmpAuth != null) {
             return false;
         }
+        if (mediatedProtocol != null ? !mediatedProtocol.equals(that.mediatedProtocol) : that.mediatedProtocol != null) {
+            return false;
+        }
         return duid != null ? duid.equals(that.duid) : that.duid == null;
 
     }
@@ -149,6 +165,7 @@ public class DeviceConnection {
         result = 31 * result + (connectionModel != null ? connectionModel.hashCode() : 0);
         result = 31 * result + (passwordAuth != null ? passwordAuth.hashCode() : 0);
         result = 31 * result + (snmpAuth != null ? snmpAuth.hashCode() : 0);
+        result = 31 * result + (mediatedProtocol != null ? mediatedProtocol.hashCode() : 0);
         result = 31 * result + (duid != null ? duid.hashCode() : 0);
         return result;
     }

@@ -111,60 +111,7 @@ provides metrics about the model alignment with the standard model set.
 
 Precondition:
 -------------
-
-Factory Garment tag shall be calculated/retrieved only when the
-environment variable **ENABLE\_FACTORY\_GARMENT\_TAG\_RETRIEVAL** in
-the baa docker-compose file is set to **True**. 
-Below is the snapshot of the updated baa docker-compose file:
-
-```
-###########################################################################
-# Copyright 2018-2020 Broadband Forum
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-###########################################################################
-version: '3.5'
-networks:
-    baadist_default:
-        driver: bridge
-        name: baadist_default
-services:
-    baa:
-        image: baa
-        container_name: baa
-        restart: always
-        ports:
-            - "8080:8080"
-            - "5005:5005"
-            - "9292:9292"
-            - "4335:4335"
-            - "162:162/udp"
-        environment:
-            - BAA_USER=admin
-            - BAA_USER_PASSWORD=password
-            #Possible Values for PMA_SESSION_FACTORY_TYPE are REGULAR,TRANSPARENT, Default value is REGULAR
-            - PMA_SESSION_FACTORY_TYPE=REGULAR
-            - MAXIMUM_ALLOWED_ADAPTER_VERSIONS=3
-            - ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL=True
-        volumes:
-            - /baa/stores:/baa/stores
-        networks:
-            - baadist_default
-```
-
-**Info:** If the environment variable **ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL** 
-          not present in the docker-compose file then default value of the same 
-          shall be considered as **"True"**.
+Vendor specific device adapters should be loaded/deployed to the BAA system.
 
 ### Factory Garment Tag Parameters
 The parameters of the Factory Garment Tags are defined below:

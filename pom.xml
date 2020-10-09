@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>baa-root-pom</artifactId>
-    <version>3.0.0</version>
+    <version>4.0.0</version>
     <packaging>pom</packaging>
     <name>Broadband Access Abstraction</name>
 
@@ -35,6 +35,7 @@
         <module>pma</module>
         <module>aggregator</module>
         <module>nbi-adapter</module>
+        <module>voltmf</module>
         <module>baa-feature</module>
         <module>baa-dist</module>
         <module>library-consult</module>
@@ -43,7 +44,7 @@
     </modules>
 
     <properties>
-        <obbaa-release.version>3.0.0</obbaa-release.version>
+        <obbaa-release.version>4.0.0</obbaa-release.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <java.source.version>1.8</java.source.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
@@ -142,6 +143,8 @@
         <json.version>20190722</json.version>
         <google-auth.version>0.20.0</google-auth.version>
         <snmp4j.version>2.7.0</snmp4j.version>
+        <kafka.client.version>2.5.0</kafka.client.version>
+        <kafka-json-serializer.version>5.5.1</kafka-json-serializer.version>
     </properties>
 
     <dependencyManagement>

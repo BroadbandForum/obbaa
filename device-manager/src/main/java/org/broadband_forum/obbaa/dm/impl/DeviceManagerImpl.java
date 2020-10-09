@@ -26,6 +26,7 @@ import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dm.DeviceStateProvider;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.OnuStateInfo;
 
 /**
  * Created by kbhatk on 29/9/17.
@@ -61,6 +62,26 @@ public class DeviceManagerImpl implements DeviceManager {
 
     @Override
     @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
+    public Device getDeviceWithSerialNumber(String serialNumber) {
+        Device device = m_deviceDao.findDeviceWithSerialNumber(serialNumber);
+        if (device == null) {
+            throw new IllegalArgumentException("Device with serial-number " + serialNumber + " does not exist");
+        }
+        return device;
+    }
+
+    @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
+    public Device getDeviceWithRegistrationId(String registrationId) {
+        Device device = m_deviceDao.findDeviceWithRegistrationId(registrationId);
+        if (device == null) {
+            throw new IllegalArgumentException("Device with registration id " + registrationId + " does not exist");
+        }
+        return device;
+    }
+
+    @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
     public List<Device> getAllDevices() {
         List<Device> allDevices = m_deviceDao.findAllDevices();
         return allDevices;
@@ -83,6 +104,11 @@ public class DeviceManagerImpl implements DeviceManager {
     @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
     public void updateConfigAlignmentState(String deviceName, String verdict) {
         m_deviceDao.updateDeviceAlignmentState(deviceName, verdict);
+    }
+
+    @Override
+    public void updateOnuStateInfo(String deviceName, OnuStateInfo onuStateInfo) {
+        m_deviceDao.updateOnuStateInfo(deviceName, onuStateInfo);
     }
 
     @Override

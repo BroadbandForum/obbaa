@@ -43,6 +43,7 @@
         <bundle>mvn:org.broadband-forum.obbaa/aggregator/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/nbi-adapter/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/library-consult/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/voltmf/${project.version}</bundle>
     </feature>
 
     <feature name="third-party-libs" version="${project.version}" description="Third party Libraries">
@@ -87,7 +88,9 @@
         <bundle>mvn:commons-jxpath/commons-jxpath/${commons-jxpath.version}</bundle>
         <bundle>mvn:javax.ws.rs/javax.ws.rs-api/${javax.ws.rs-api.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${apache.servicemix.bundles.aopalliance.version}</bundle>
+        <bundle>mvn:org.json/json/${json.version}</bundle>
         <bundle start-level="30" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlbeans/${org.apache.servicemix.bundles.xmlbeans.version}</bundle>
+        <bundle><![CDATA[wrap:mvn:org.apache.kafka/kafka-clients/${kafka.client.version}$Bundle-SymbolicName=kafka-client&Bundle-Version=${kafka.client.version}]]></bundle>
     </feature>
 
 </features>

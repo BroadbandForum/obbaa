@@ -20,10 +20,14 @@ OB-BAA:
 
 -   [Creation and deployment of Vendor Device Adapters](dvda/index.md#dvda)
 	-   [Create and deploy a SNMP Vendor Device Adapter](snmpvda/index.md#snmpvda)
+	-   [Dynamically create and deploy a Standard Device Adapter](sda/index.md#sda)
 
 -   [Using NETCONF Event Notifications in the BAA layer](notif/index.md#notif)
 
 -   [Deployment of the IPFIX Performance Monitoring Collector and Data Handler](ipfixpm/index.md#ipfixpmc)
 
+-   [Integration of whitebox solutions](wbs/index.md#wbs)
+
+-   [Examples for using Control Adapters](control_relay/index.md#using_control_adapter)
+
 [<--Installing OB-BAA](../installing/index.md#installing)
-    

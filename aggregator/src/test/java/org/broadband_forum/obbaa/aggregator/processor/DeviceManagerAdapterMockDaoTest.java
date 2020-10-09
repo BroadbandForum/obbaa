@@ -47,6 +47,7 @@ import org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl;
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceState;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
@@ -554,13 +555,13 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
         deviceManagement.setDeviceInterfaceVersion(interfaceVersion);
         deviceManagement.setDeviceVendor(vendor);
         deviceManagement.setParentId("/container=network-manager/container=managed-devices/container=device/name=" + name + "\"");
-        deviceManagement.setSchemaPath("urn:bbf:yang:obbaa:network-manager,2020-02-19,network-manager,urn:bbf:yang:obbaa:network-manager,2020-02-19,managed-devices,urn:bbf:yang:obbaa:network-manager,2020-02-19,device," +
-                "urn:bbf:yang:obbaa:network-manager,2020-02-19,device-management,");
+        deviceManagement.setSchemaPath("urn:bbf:yang:obbaa:network-manager,"+ DeviceManagerNSConstants.REVISION + ",network-manager,urn:bbf:yang:obbaa:network-manager,"+ DeviceManagerNSConstants.REVISION + ",managed-devices,urn:bbf:yang:obbaa:network-manager,"+ DeviceManagerNSConstants.REVISION + ",device," +
+                "urn:bbf:yang:obbaa:network-manager,"+ DeviceManagerNSConstants.REVISION + ",device-management,");
         deviceManagement.setDeviceState(deviceState);
         Device device = new Device();
         device.setParentId("/container=network-manager/container=managed-devices");
         device.setDeviceName(name);
-        device.setSchemaPath("urn:bbf:yang:obbaa:network-manager,2020-02-19,network-manager,urn:bbf:yang:obbaa:network-manager,2020-02-19,managed-devices,urn:bbf:yang:obbaa:network-manager,2020-02-19,device,");
+        device.setSchemaPath("urn:bbf:yang:obbaa:network-manager,"+ DeviceManagerNSConstants.REVISION + ",network-manager,urn:bbf:yang:obbaa:network-manager,"+ DeviceManagerNSConstants.REVISION + ",managed-devices,urn:bbf:yang:obbaa:network-manager,"+ DeviceManagerNSConstants.REVISION + ",device,");
         device.setDeviceManagement(deviceManagement);
         return device;
     }

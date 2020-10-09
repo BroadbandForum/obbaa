@@ -67,4 +67,13 @@
     <suppress files="DeviceCacheServiceImpl.java" checks="IllegalCatch"/>
     <suppress files="PMDataHandler.java" checks="IllegalCatch"/>
     <suppress files="CollectingServiceImpl.java" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.onu.entity.*" checks="MemberName"/>
+    <suppress files="org.broadband_forum.obbaa.onu.UnknownONUHandler" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.onu.MediatedDeviceNetconfSession" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.onu.impl.VOLTManagementImpl" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.onu.notification.ONUNotification" checks="MemberName"/>
+    <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="ArrayTypeStyle"/>
+    <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="LocalVariableName"/>
+    <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="VariableDeclarationUsageDistance"/>
 </suppressions>

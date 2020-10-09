@@ -68,6 +68,7 @@ public class AdapterManagerImplTest {
     private InputStream m_inputStream;
     private InputStream m_inputStream2;
     private InputStream m_inputStream3;
+    private InputStream m_inputStreamThirdType;
     private byte[] m_defaultConfig1;
     private byte[] m_defaultConfig2;
     private byte[] m_defaultConfig3;
@@ -76,6 +77,8 @@ public class AdapterManagerImplTest {
     private DeviceAdapter m_deviceAdapter3;
     private DeviceAdapter m_stdAdapterv2;
     private DeviceAdapter m_stdAdapterv1;
+    private DeviceAdapter m_codedStdAdapterv1;
+    private DeviceAdapter m_deviceAdapterThirdType;
     @Mock
     private EntityRegistry m_entityRegistry;
     @Mock
@@ -86,6 +89,7 @@ public class AdapterManagerImplTest {
     private DeviceInterface m_deviceInterface;
     private InputStream m_inputStreamStdAdapterv2;
     private InputStream m_inputStreamStdAdapterv1;
+    private InputStream m_inputStreamCodedStdAdapterv1;
 
     @Mock
     private StandardModelRegistrator m_standardModelRegistrator;
@@ -98,13 +102,14 @@ public class AdapterManagerImplTest {
         MockitoAnnotations.initMocks(this);
         System.setProperty("MAXIMUM_ALLOWED_ADAPTER_VERSIONS", "1");
         m_readWriteLockService = spy(new ReadWriteLockServiceImpl());
-        AdapterManagerImpl.ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL=false;
         m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator));
         m_inputStream = getClass().getResourceAsStream("/model/device-adapter1.xml");
         m_inputStream2 = getClass().getResourceAsStream("/model/device-adapter2.xml");
         m_inputStream3 = getClass().getResourceAsStream("/model/device-adapter10.xml");
+        m_inputStreamThirdType = getClass().getResourceAsStream("/model/device-adapter13.xml");
         m_inputStreamStdAdapterv2 = getClass().getResourceAsStream("/model/device-adapter4.xml");
         m_inputStreamStdAdapterv1 = getClass().getResourceAsStream("/model/device-adapter11.xml");
+        m_inputStreamCodedStdAdapterv1 = getClass().getResourceAsStream("/model/device-adapter12.xml");
         m_defaultConfig1 = IOUtils.toByteArray(getClass().getResourceAsStream("/model/default-config1.xml"));
         m_defaultConfig2 = IOUtils.toByteArray(getClass().getResourceAsStream("/model/default-config2.xml"));
         m_defaultConfig3 = IOUtils.toByteArray(getClass().getResourceAsStream("/model/default-config2.xml"));
@@ -127,6 +132,14 @@ public class AdapterManagerImplTest {
                 .setSupportedFeatures(CommonFileUtil.getAdapterFeaturesFromFile(getInputStream("model/supported-features.txt")))
                 .build();
         m_stdAdapterv1.init();
+        m_codedStdAdapterv1 = AdapterBuilder.createAdapterBuilder()
+                .setCaps(cap1)
+                .setModuleStream(getStreamMapForStd())
+                .setDeviceXml(m_inputStreamCodedStdAdapterv1)
+                .setDefaultxmlBytes(m_defaultConfig1)
+                .setSupportedFeatures(CommonFileUtil.getAdapterFeaturesFromFile(getInputStream("model/supported-features.txt")))
+                .build();
+        m_codedStdAdapterv1.init();
         m_deviceAdapter1 = AdapterBuilder.createAdapterBuilder()
                 .setCaps(cap1)
                 .setModuleStream(getStreamMap())
@@ -153,6 +166,13 @@ public class AdapterManagerImplTest {
                 .setDefaultxmlBytes(m_defaultConfig3)
                 .build();
         m_deviceAdapter3.init();
+        m_deviceAdapterThirdType = AdapterBuilder.createAdapterBuilder()
+                .setCaps(cap2)
+                .setModuleStream(m_moduleStream)
+                .setDeviceXml(m_inputStreamThirdType)
+                .setDefaultxmlBytes(m_defaultConfig1)
+                .build();
+        m_deviceAdapterThirdType.init();
 
     }
 
@@ -187,12 +207,53 @@ public class AdapterManagerImplTest {
     }
 
     @Test
-    public void testFactoryGarmentTagWhenRetrievalDisabled() {
-        m_adapterManager.getFactoryGarmentTag(m_deviceAdapter1);
+    public void testAddCodedStdAdapters() {
+        assertEquals(0, m_adapterManager.getAdapterSize());
+        m_adapterManager.deploy(m_codedStdAdapterv1, m_subSystem, getClass(), m_deviceInterface);
+        assertEquals(1, m_adapterManager.getAdapterSize());
+        m_adapterManager.deploy(m_deviceAdapterThirdType, m_subSystem, getClass(), m_deviceInterface);
+        assertEquals(2, m_adapterManager.getAdapterSize());
+    }
+
+    @Test
+    public void testRemoveThirdTypeStdAdapter() throws Exception {
+        assertEquals(0, m_adapterManager.getAdapterSize());
+        m_adapterManager.deploy(m_codedStdAdapterv1, m_subSystem, getClass(), m_deviceInterface);
+        assertEquals(1, m_adapterManager.getAdapterSize());
+        m_adapterManager.undeploy(m_codedStdAdapterv1);
+        assertEquals(0, m_adapterManager.getAdapterSize());
+        try {
+            m_adapterManager.deploy(m_deviceAdapterThirdType, m_subSystem, getClass(), m_deviceInterface);
+            fail("Expected an Exception");
+        } catch (Exception e) {
+            String expectedMessage = "no standard adapter found for this type of device : THIRDTYPE";
+            assertEquals(expectedMessage, e.getCause().getMessage());
+        }
+    }
+
+    @Test
+    public void testRemoveStdAdapter() throws Exception {
+        assertEquals(0, m_adapterManager.getAdapterSize());
         m_adapterManager.deploy(m_stdAdapterv1, m_subSystem, getClass(), m_deviceInterface);
-        assertNull(m_adapterManager.getFactoryGarmentTag(m_stdAdapterv1));
-        m_adapterManager.deploy(m_deviceAdapter2, m_subSystem, getClass(), m_deviceInterface);
-        assertNull(m_adapterManager.getFactoryGarmentTag(m_deviceAdapter2));
+        assertEquals(1, m_adapterManager.getAdapterSize());
+        m_adapterManager.undeploy(m_stdAdapterv1);
+        assertEquals(0, m_adapterManager.getAdapterSize());
+    }
+
+    @Test
+    public void testRemoveThirdTypeStdAdapterInUse() throws Exception {
+        assertEquals(0, m_adapterManager.getAdapterSize());
+        m_adapterManager.deploy(m_codedStdAdapterv1, m_subSystem, getClass(), m_deviceInterface);
+        assertEquals(1, m_adapterManager.getAdapterSize());
+        m_adapterManager.deploy(m_deviceAdapterThirdType, m_subSystem, getClass(), m_deviceInterface);
+        assertEquals(2, m_adapterManager.getAdapterSize());
+        try {
+            m_adapterManager.undeploy(m_codedStdAdapterv1);
+            fail("Expected an Exception");
+        } catch (Exception e) {
+            String expectedMessage = "Given standard adapter is in use, undeploy operation is not allowed";
+            assertEquals(expectedMessage, e.getCause().getMessage());
+        }
     }
 
     @Test
@@ -237,10 +298,10 @@ public class AdapterManagerImplTest {
                 (m_adapterManager.getEditRequestForAdapter(m_stdAdapterv1.getDeviceAdapterId()).getConfigElement().getXmlElement()));
         assertNull(m_adapterManager.getEditRequestForAdapter(m_deviceAdapter2.getDeviceAdapterId()));
         //after undeploy verify that the values dont exist in the map
-        m_adapterManager.undeploy(m_stdAdapterv1);
-        assertNull(m_adapterManager.getEditRequestForAdapter(m_stdAdapterv2.getDeviceAdapterId()));
         m_adapterManager.undeploy(m_deviceAdapter2);
         assertNull(m_adapterManager.getEditRequestForAdapter(m_deviceAdapter2.getDeviceAdapterId()));
+        m_adapterManager.undeploy(m_stdAdapterv1);
+        assertNull(m_adapterManager.getEditRequestForAdapter(m_stdAdapterv2.getDeviceAdapterId()));
     }
 
     @Test

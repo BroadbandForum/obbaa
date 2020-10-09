@@ -5,11 +5,16 @@ import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.dm.DeviceManager;
-import org.broadband_forum.obbaa.dmyang.entities.*;
+import org.broadband_forum.obbaa.dmyang.entities.Authentication;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceConnection;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
+import org.broadband_forum.obbaa.dmyang.entities.PasswordAuth;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.pma.DeviceNotificationListenerService;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.junit.After;
 import org.junit.Before;
@@ -37,6 +42,8 @@ public class NonNCNotificationHandlerImplTest {
     private Device m_device;
     @Mock
     private DeviceNotificationListener m_deviceNotificationListener;
+    @Mock
+    private DeviceNotificationListenerService m_deviceNotificationClientService;
     private NonNCNotificationHandlerImpl m_nonNetconfDeviceAdapter;
     private String ip_address;
     private String port;
@@ -56,7 +63,8 @@ public class NonNCNotificationHandlerImplTest {
         ip_address = "192.0.0.1";
         port = "9008";
         notification = new NetconfNotification(DocumentUtils.stringToDocument(getNotificationString()));
-        m_nonNetconfDeviceAdapter = new NonNCNotificationHandlerImpl(m_notificationService, m_adapterManager, m_pmaRegistry, m_deviceManager);
+        m_nonNetconfDeviceAdapter = new NonNCNotificationHandlerImpl(m_notificationService, m_adapterManager,
+                m_pmaRegistry, m_deviceManager, m_deviceNotificationClientService);
         m_deviceMgmt = new DeviceMgmt();
         m_deviceMgmt.setDeviceType("OLT");
         m_deviceMgmt.setDeviceInterfaceVersion("1.0");
@@ -82,6 +90,7 @@ public class NonNCNotificationHandlerImplTest {
         DeviceInterface deviceInterface = mock(DeviceInterface.class);
         when(m_adapterManager.getAdapterContext(any(DeviceAdapterId.class))).thenReturn(adapterContext);
         when(adapterContext.getDeviceInterface()).thenReturn(deviceInterface);
+        when(m_deviceNotificationClientService.getDeviceNotificationClientListeners()).thenReturn(new ArrayList<>());
         m_nonNetconfDeviceAdapter.handleNotification(ip_address, port, notification);
         verify(notification).notificationToString();
     }

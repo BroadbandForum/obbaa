@@ -33,6 +33,7 @@
         <module>model-translation-example</module>
         <module>protocol-translation-example</module>
         <module>protocol-translation-snmp</module>
+        <module>coded-standard-adapter-example</module>
     </modules>
     <properties>
         <jsch.version>0.1.54</jsch.version>

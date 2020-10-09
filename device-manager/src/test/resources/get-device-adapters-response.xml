@@ -36,6 +36,10 @@
         </factory-garment-tag>
         <yang-modules>
             <module>
+                <name>bbf-if-type</name>
+                <revision>2020-05-11</revision>
+            </module>
+            <module>
                 <name>bbf-obbaa-device-adapters</name>
                 <revision>2018-08-31</revision>
             </module>
@@ -49,31 +53,59 @@
             </module>
             <module>
                 <name>bbf-obbaa-network-manager</name>
-                <revision>2020-02-19</revision>
+                <revision>2020-07-23</revision>
+            </module>
+            <module>
+                <name>bbf-obbaa-onu-management</name>
+                <revision>2020-07-15</revision>
             </module>
             <module>
                 <name>bbf-obbaa-pma-device-config</name>
                 <revision>2018-06-15</revision>
             </module>
             <module>
-                <name>ietf-datastores</name>
-                <revision>2017-08-17</revision>
+                <name>bbf-xpon-if-type</name>
+                <revision>2020-05-11</revision>
             </module>
             <module>
-                <name>ietf-inet-types</name>
-                <revision>2013-07-15</revision>
+                <name>bbf-xpon-onu-types</name>
+                <revision>2020-05-11</revision>
             </module>
             <module>
-                <name>ietf-netconf</name>
-                <revision>2011-06-01</revision>
+                <name>bbf-xpon-types</name>
+                <revision>2020-05-11</revision>
             </module>
             <module>
-                <name>ietf-netconf-notifications</name>
-                <revision>2012-02-06</revision>
+                <name>bbf-yang-types</name>
+                <revision>2020-05-11</revision>
             </module>
             <module>
-                <name>ietf-yang-library</name>
-                <revision>2016-06-21</revision>
+                 <name>iana-if-type</name>
+                 <revision>2017-01-19</revision>
+            </module>
+            <module>
+                 <name>ietf-datastores</name>
+                 <revision>2017-08-17</revision>
+            </module>
+            <module>
+                 <name>ietf-inet-types</name>
+                 <revision>2013-07-15</revision>
+            </module>
+            <module>
+                 <name>ietf-interfaces</name>
+                 <revision>2018-02-20</revision>
+            </module>
+            <module>
+                 <name>ietf-netconf</name>
+                 <revision>2011-06-01</revision>
+            </module>
+            <module>
+                 <name>ietf-netconf-notifications</name>
+                 <revision>2012-02-06</revision>
+            </module>
+            <module>
+                 <name>ietf-yang-library</name>
+                 <revision>2016-06-21</revision>
             </module>
             <module>
                 <name>ietf-yang-schema-mount</name>
@@ -106,6 +138,10 @@
             <percentage-of-standard-modules-having-augments>10%</percentage-of-standard-modules-having-augments>
         </factory-garment-tag>
         <yang-modules>
+                        <module>
+                <name>bbf-if-type</name>
+                <revision>2020-05-11</revision>
+            </module>
             <module>
                 <name>bbf-obbaa-device-adapters</name>
                 <revision>2018-08-31</revision>
@@ -120,31 +156,59 @@
             </module>
             <module>
                 <name>bbf-obbaa-network-manager</name>
-                <revision>2020-02-19</revision>
+                <revision>2020-07-23</revision>
+            </module>
+            <module>
+                <name>bbf-obbaa-onu-management</name>
+                <revision>2020-07-15</revision>
             </module>
             <module>
                 <name>bbf-obbaa-pma-device-config</name>
                 <revision>2018-06-15</revision>
             </module>
             <module>
-                <name>ietf-datastores</name>
-                <revision>2017-08-17</revision>
+                <name>bbf-xpon-if-type</name>
+                <revision>2020-05-11</revision>
             </module>
             <module>
-                <name>ietf-inet-types</name>
-                <revision>2013-07-15</revision>
+                <name>bbf-xpon-onu-types</name>
+                <revision>2020-05-11</revision>
             </module>
             <module>
-                <name>ietf-netconf</name>
-                <revision>2011-06-01</revision>
+                <name>bbf-xpon-types</name>
+                <revision>2020-05-11</revision>
             </module>
             <module>
-                <name>ietf-netconf-notifications</name>
-                <revision>2012-02-06</revision>
+                <name>bbf-yang-types</name>
+                <revision>2020-05-11</revision>
             </module>
             <module>
-                <name>ietf-yang-library</name>
-                <revision>2016-06-21</revision>
+                 <name>iana-if-type</name>
+                 <revision>2017-01-19</revision>
+            </module>
+            <module>
+                 <name>ietf-datastores</name>
+                 <revision>2017-08-17</revision>
+            </module>
+            <module>
+                 <name>ietf-inet-types</name>
+                 <revision>2013-07-15</revision>
+            </module>
+            <module>
+                 <name>ietf-interfaces</name>
+                 <revision>2018-02-20</revision>
+            </module>
+            <module>
+                 <name>ietf-netconf</name>
+                 <revision>2011-06-01</revision>
+            </module>
+            <module>
+                 <name>ietf-netconf-notifications</name>
+                 <revision>2012-02-06</revision>
+            </module>
+            <module>
+                 <name>ietf-yang-library</name>
+                 <revision>2016-06-21</revision>
             </module>
             <module>
                 <name>ietf-yang-schema-mount</name>

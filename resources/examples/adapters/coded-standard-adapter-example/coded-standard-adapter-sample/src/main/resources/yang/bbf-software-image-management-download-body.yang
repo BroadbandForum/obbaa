@@ -1,0 +1,332 @@
+submodule bbf-software-image-management-download-body {
+  yang-version 1.1;
+  belongs-to bbf-software-image-management {
+    prefix bbf-sim;
+  }
+  
+  import ietf-inet-types {
+    prefix inet;
+  }
+  
+  import ietf-yang-types {
+    prefix yang;
+  }
+  
+  include bbf-software-image-management-common-body;
+  
+  organization
+    "Broadband Forum Common YANG Work Area";
+
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      TBD
+     
+     WA Director: William Lupton, Broadband Forum
+                  <mailto:wlupton@broadband-forum.org>
+
+     WA Director: Michael Shaffer
+                  <mailto:michael.shaffer@nokia.com>";
+
+  description
+    "This submodule contains a collection of YANG definitions 
+     associated with the process of downloading software.
+
+     Copyright (c) 2016, Broadband Forum
+     All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-355; see
+     the TR itself for full legal notices.";
+
+  revision 2017-03-08 {
+    description
+      "Initial revision.";
+    reference
+      "TBD";
+  }
+  
+  identity download-state {
+    description
+      "Base identity to represent the state of a software download.";
+  }
+  
+  identity idle {
+    base download-state;
+    description
+      "The download is currently idle. No software download has ever
+       taken place.";
+  }
+  
+  identity in-progress {
+    base download-state;
+    description
+      "A software download is in progress.";
+  }
+
+  identity successful {
+    base download-state;
+    description
+      "The last software download was successful.";
+  }
+
+  identity failed {
+    base download-state;
+    description
+      "The last software download failed to complete.";
+  }
+
+  identity aborted {
+    base download-state;
+    description
+      "The last software download aborted either through an 
+       explicit action or some other means.";
+  }
+  
+  
+  identity download-failure-reason {
+    description
+      "The reason the download failed.";
+  }
+  
+  identity download-general-error {
+    base download-failure-reason;
+    description
+      "A general error occurred in the download.";
+  }
+  
+  grouping download-software {
+    description
+      "State data, actions and notifications associated with valid 
+       software.";
+
+    container current-state {
+      description
+        "Objects associated with the current state of the download
+         state machine.";
+     
+      leaf state {
+        type enumeration {
+          enum idle {
+            description
+              "No download is currently in progress.";
+          }
+          enum in-progress {
+            description
+              "Download in progress.";
+          }
+        }
+        description
+          "The current state of a software download.";
+      }
+      
+      leaf timestamp {
+        type yang:date-and-time;
+        description
+          "The time at which the download state machine entered
+           its current state.";
+      }
+      
+      leaf software-name {
+        when "../state = 'in-progress'" {
+          description
+            "The software name is only valid when a download is in 
+             progress.";
+        }
+        type software-name;
+        description
+          "The name of the software revision currently being 
+           downloaded.";
+      }
+    }
+
+    container last-download-state {
+      description
+        "Objects associated with the last attempt at a software
+         download.";
+     
+      leaf state {
+        type enumeration {
+          enum none-attempted {
+            description
+              "No software download has been attempted.";
+          }
+          enum successful {
+            description
+              "The last software download was successful.";
+          }
+          enum failed {
+            description
+              "The last software download failed to complete.";
+          }
+          enum aborted {
+            description
+              "The last software download aborted either through an 
+               explicit action or some other means.";
+          }
+        }
+        description
+          "The result of the last software download.";
+      }
+      
+      container failure {
+        when "../state = 'failed'" {
+          description
+            "Only applicable if a download failed.";
+        }
+        description
+          "Objects asssociated with a download failure.";
+        
+        uses failure;
+      }
+
+      leaf timestamp {
+        type yang:date-and-time;
+        description
+          "The time at which the download state machine entered
+           its current state.";
+      }
+      
+      leaf software-name {
+        when "../state != 'none-attempted'" {
+          description
+            "The software name is only valid when a download has been
+             attempted.";
+        }
+        type software-name;
+        description
+          "The name of the software revision associated with the
+           last download attempt.";
+      }
+    }
+
+    
+  
+    action download-software {
+      if-feature software-actions;
+      description
+        "Download specified software to this physical entity.";
+        
+      input {
+        choice download-method {
+          description
+            "Method for retrieving the file.";
+
+          case url {
+            leaf url {
+              type inet:uri;
+              description
+                "URL containing the information required to 
+                 download the specified software included 
+                 protocol, IP address, filepath, etc..";
+            }
+          }
+        }
+        
+        leaf name {
+          type software-name;
+          description
+            "The name of the software to be downloaded. For example,
+             the file name associated with the software to download
+             from the specified URL.";
+        }
+      }
+      
+      output {
+        uses failure;
+      }
+    }
+    
+    notification software-downloaded {
+      description
+        "Indicates that the specified software has successfully 
+         downloaded to the target physical entity.";
+
+      leaf name {
+        type software-name;
+        description
+          "The name of the software that was successfully 
+           downloaded.";
+      }
+    }
+    
+    notification download-software-failed {
+      description
+        "Indicates that the specified software failed to download 
+         to its target physical entity.";
+         
+      leaf name {
+        type software-name;
+        description
+          "The name of the software.";
+      }
+     
+      uses failure;
+    }
+
+    action abort-download {
+      if-feature software-actions;
+      description
+        "Abort the download process.";
+      
+      input {
+        leaf name {
+          type software-name;
+          description
+            "The name of the software that is currently 
+             downloading.";
+        }
+      }
+    }
+
+    notification download-software-aborted {
+      description
+        "Indicates that the download of the specified software has
+         been successfully aborted.";
+
+      leaf name {
+        type software-name;
+        description
+          "The name of the software.";
+      }
+    }
+  }
+}  
+

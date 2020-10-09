@@ -13,6 +13,7 @@ import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
+import org.broadband_forum.obbaa.pma.DeviceNotificationListenerService;
 import org.broadband_forum.obbaa.pma.NonNCNotificationHandler;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 
@@ -23,14 +24,17 @@ public class NonNCNotificationHandlerImpl implements NonNCNotificationHandler {
     private final PmaRegistry m_pmaRegistry;
     private Map<String, DeviceNotificationListener> m_deviceNotificationListenerMap;
     private DeviceManager m_deviceManager;
+    private DeviceNotificationListenerService m_deviceNotificationListenerService;
 
     public NonNCNotificationHandlerImpl(NotificationService notificationService, AdapterManager adapterManager,
-                                        PmaRegistry pmaRegistry, DeviceManager deviceManager) {
+                                        PmaRegistry pmaRegistry, DeviceManager deviceManager,
+                                        DeviceNotificationListenerService deviceNotificationListenerService) {
         this.m_notificationService = notificationService;
         this.m_adapterManager = adapterManager;
         this.m_pmaRegistry = pmaRegistry;
         this.m_deviceManager = deviceManager;
         this.m_deviceNotificationListenerMap = new HashMap<>();
+        this.m_deviceNotificationListenerService = deviceNotificationListenerService;
     }
 
     public void handleNotification(String ip, String port, Notification notification) {
@@ -46,7 +50,7 @@ public class NonNCNotificationHandlerImpl implements NonNCNotificationHandler {
             } else {
                 AdapterContext adapterContext = AdapterUtils.getAdapterContext(device, m_adapterManager);
                 deviceListener = new DeviceNotificationListener(device, deviceAdapterId, m_notificationService,
-                        adapterContext, m_pmaRegistry);
+                        adapterContext, m_pmaRegistry, m_deviceNotificationListenerService.getDeviceNotificationClientListeners());
                 m_deviceNotificationListenerMap.put(deviceName, deviceListener);
             }
             deviceListener.notificationReceived(notification);

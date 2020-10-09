@@ -91,8 +91,8 @@ public class OnuStateChangeCallbackRegistrator implements StandardAdapterModelRe
         if (adapterCallBacks != null) {
             for (NotificationCallBackInfo notificationCallBackInfo : adapterCallBacks) {
                 m_notificationService.unregisterCallBackInfo(notificationCallBackInfo);
-                LOGGER.info("notification callback/s is unregistered for notification type names %s for deviceAdatperId %s ",
-                        getOnuStateChangeNotificationQName(ONU_STATE_CHANGE_NS), adapter.getDeviceAdapterId());
+                LOGGER.info(String.format("notification callback/s is unregistered for notification type names %s for deviceAdatperId %s ",
+                        getOnuStateChangeNotificationQName(ONU_STATE_CHANGE_NS), adapter.getDeviceAdapterId()));
             }
         }
         m_callbackMapPerAdapter.remove(adapter.getDeviceAdapterId());

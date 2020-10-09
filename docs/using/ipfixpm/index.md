@@ -11,7 +11,7 @@ further processing and storage of data. The IPFIX PM Data Collector
 (IPFIX Collector) is based on IETF\'s [RFC
 7011](http://specification%20of%20the%20ip%20flow%20information%20e/) IPFIX
 protocol specification and mechanisms as IPFIX is the method defined by
-the BBF\'s TR-383 specification.
+the BBF\'s TR-413 specification.
 
 ## Pre-requisites for supporting an IPFIX stream
 

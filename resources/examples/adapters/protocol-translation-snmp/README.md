@@ -123,26 +123,29 @@ To create an SNMP V3 device
 
 Command to test the SNMP transport class
 ----------------------------------------
-
-<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907169">
-    <edit-config>
-        <target>
-            <running/>
-        </target>
-        <config>
-            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
-                <managed-devices>
-                    <device>
-                        <name>[DEVICE NAME]</name>
-                        <root>
-                            <sys:system xmlns:sys="urn:ietf:params:xml:ns:yang:ietf-system">
-                                    <sys:location>"[LOCATION]"</sys:location>
-                            </sys:system>
-                        </root>
-                    </device>
-                </managed-devices>
-            </network-manager>
-        </config>
-    </edit-config>
-</rpc>
+<edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <target>
+    <running/>
+  </target>
+  <config>
+    <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+      <managed-devices>
+        <device>
+          <name>deviceA</name>
+          <root>
+            <hardware xmlns="urn:ietf:params:xml:ns:yang:ietf-hardware">
+              <component xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                <name>fan_1</name> <!-- should be of format [a-zA-Z]*_[0-9]+ .digits comes after underscore is mapped to entPhysicalIndex of entity MIB in this sample implementation-->
+                <class xmlns:ianahw="urn:ietf:params:xml:ns:yang:iana-hardware">ianahw:fan</class>
+                <serial-num>W0929174</serial-num>
+                <alias>fanA</alias>
+                <asset-id>hwc8972</asset-id>
+              </component>
+            </hardware>
+          </root>
+        </device>
+      </managed-devices>
+    </network-manager>
+  </config>
+</edit-config>
 ```

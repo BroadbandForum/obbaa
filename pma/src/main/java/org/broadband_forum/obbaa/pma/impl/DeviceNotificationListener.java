@@ -27,6 +27,7 @@ import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationCon
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.server.RequestScope;
+import org.broadband_forum.obbaa.pma.DeviceNotificationClientListener;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
@@ -51,14 +52,17 @@ public class DeviceNotificationListener implements NotificationListener {
     private DeviceAdapterId m_deviceAdapterId;
     private AdapterContext m_adapterContext;
     private PmaRegistry m_pmaRegistry;
+    private List<DeviceNotificationClientListener> m_deviceNotificationClientListeners;
 
     public DeviceNotificationListener(Device device, DeviceAdapterId deviceAdapterId, NotificationService notificationService,
-                                      AdapterContext adapterContext, PmaRegistry pmaRegistry) {
+                                      AdapterContext adapterContext, PmaRegistry pmaRegistry,
+                                      List<DeviceNotificationClientListener> clientListeners) {
         m_device = device;
         m_notificationService = notificationService;
         m_deviceAdapterId = deviceAdapterId;
         m_adapterContext = adapterContext;
         m_pmaRegistry = pmaRegistry;
+        m_deviceNotificationClientListeners = clientListeners;
     }
 
     @Override
@@ -75,6 +79,11 @@ public class DeviceNotificationListener implements NotificationListener {
                         context.put(Device.class.getSimpleName(), m_device);
                         context.put(DeviceAdapterId.class.getSimpleName(), m_deviceAdapterId);
                         QName onuStateChangeNotification = QName.create(ONU_STATE_CHANGE_NS, "onu-state-change");
+                        if (normalizedNotification.getType() != null) {
+                            for (DeviceNotificationClientListener listener : m_deviceNotificationClientListeners) {
+                                listener.deviceNotificationReceived(m_device, normalizedNotification);
+                            }
+                        }
                         if (onuStateChangeNotification.equals(normalizedNotification.getType())) {
                             getDeviceSlotAndPort(m_device.getDeviceName(), normalizedNotification);
                         }

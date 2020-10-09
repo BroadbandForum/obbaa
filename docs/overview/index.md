@@ -47,7 +47,7 @@ abstraction interfaces at the northbound and device adaptation
 interfaces at the southbound edge of the BAA Core.
 
 The Northbound Abstraction Interface (NAI) and SAI are combined with
-protocol‑specific adapters and, in the case of SAI, also device‑specific
+protocol specific adapters and, in the case of SAI, also device specific
 adapters to express the BAA NBIs and Soutbound Interfaces (SBI), i.e.
 the external interfaces that allow the interaction with the SDN Manager
 and Controller and the Access Nodes respectively.
@@ -62,16 +62,16 @@ Southbound (SB) layer
 
 The Southbound layer (SB) contains device adapters that support
 communication with the access devices in the network. These adapters may
-be device‑specific in that they provide a low-level interface to device
+be device specific in that they provide a low-level interface to device
 hardware or accommodate vendor variations between devices.
 Alternatively, they may be a generic device adapter designed to
 interface with devices from multiple vendors. In either case, the device
-adapter must comply with the SAI API which is the standards‑based
+adapter must comply with the SAI API which is the standards based
 interface between the BAA Core and the access devices. This interface is
 specified via the required data models and procedures, which in turn
 govern the interworking between systems from different sources. Since
 communication with specific a Access Node relies on device adapter, the
-interface between the adapter and the Access Node is device‑specific and
+interface between the adapter and the Access Node is device specific and
 is not considered a point of interworking. Device adapters may use
 southbound protocol libraries provided as common resources, or they can
 embed their own protocols as needed.
@@ -127,6 +127,16 @@ specification.
 -	Store the translated data into a Data Lake accessible to SDN Management 
 and Control (SDN M&C) elements for their specific functions 
 (e.g., analysis, troubleshooting).
+
+Control Relay Service
+------------------------------
+The Control Relay Service provides the capability to relay packets from an Access Node (AN) to an application endpoint in the  SDN Management and Control functional
+layer.
+
+vOMCI Function/vOMCI Proxy Services
+------------------------------
+
+The BAA layer provides the capability to manage ONU via vOMCI Services. The vOMCI Function provides translation capabilities between ONU YANG data models and the corresponding ITU-T G.988 OMCI messages. The vOMCI Proxy Service provides an aggregration and interception point betwen the OLT and the vOMCI Function.
 
 BAA layer Deployed as an Actuator
 ---------------------------------

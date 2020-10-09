@@ -16,9 +16,13 @@
 
 package org.broadband_forum.obbaa.adapter.handler;
 
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.karaf.kar.KarService;
@@ -54,9 +58,23 @@ public class DeviceAdapterActionHandlerImpl implements AdapterDeployer, EventHan
         }
         File dir = new File(m_stagingArea);
         File[] files = dir.listFiles((directory, name) -> name.endsWith(".kar"));
+        Collections.sort(Arrays.asList(files));
+        installStdCodedAdapters(files);
         if (files != null) {
             for (File file : files) {
-                deployAdapter(file.getName());
+                if (!file.getName().contains(STANDARD)) {
+                    deployAdapter(file.getName());
+                }
+            }
+        }
+    }
+
+    private void installStdCodedAdapters(File[] files) throws Exception {
+        if (files != null) {
+            for (File stdFile : files) {
+                if (stdFile.getName().contains(STANDARD)) {
+                    deployAdapter(stdFile.getName());
+                }
             }
         }
     }

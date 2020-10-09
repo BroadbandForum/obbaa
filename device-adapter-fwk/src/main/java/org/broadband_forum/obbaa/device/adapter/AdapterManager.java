@@ -18,6 +18,7 @@ package org.broadband_forum.obbaa.device.adapter;
 
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
@@ -38,6 +39,8 @@ public interface AdapterManager {
     EditConfigRequest getEditRequestForAdapter(DeviceAdapterId adapterId);
 
     FactoryGarmentTag getFactoryGarmentTag(DeviceAdapter adapter);
+
+    Map<String, AdapterContext> getStdAdapterContextRegistry();
 
     String EVENT_TOPIC = "com/bbf/obbaa/AdapterManager/Event";
 }

@@ -21,6 +21,8 @@ networks:
 services:
     baa:
         image: baa
+        hostname: baa
+        build: ./
         container_name: baa
         restart: always
         ports:
@@ -35,11 +37,13 @@ services:
             #Possible Values for PMA_SESSION_FACTORY_TYPE are REGULAR,TRANSPARENT, Default value is REGULAR
             - PMA_SESSION_FACTORY_TYPE=REGULAR
             - MAXIMUM_ALLOWED_ADAPTER_VERSIONS=3
-            - ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL=True
         volumes:
             - /baa/stores:/baa/stores
         networks:
             - baadist_default
+        depends_on:
+          - kafka
+          - zookeeper
 
     ipfix-collector:
         image: ipfix-collector
@@ -95,3 +99,83 @@ services:
             - baa
         networks:
             - baadist_default
+
+    zookeeper:
+      image: confluentinc/cp-zookeeper:5.5.0
+      hostname: zookeeper
+      container_name: zookeeper
+      environment:
+        ZOOKEEPER_CLIENT_PORT: 2181
+        ZOOKEEPER_TICK_TIME: 2000
+      networks:
+        - baadist_default
+
+    kafka:
+      image: confluentinc/cp-kafka:5.5.0
+      hostname: kafka
+      container_name: kafka
+      depends_on:
+        - zookeeper
+      environment:
+        KAFKA_BROKER_ID: 1
+        KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+        KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      networks:
+        - baadist_default
+
+    vomci:
+      image: obbaa-vomci
+      hostname: obbaa-vomci
+      container_name: obbaa-vomci
+      ports:
+        - 8801:8801
+      environment:
+        GRPC_SERVER_NAME: vOMCIProxy
+        LOCAL_GRPC_SERVER_PORT: 58433
+      networks:
+        - baadist_default
+      depends_on:
+        - zookeeper
+        - kafka
+
+    vproxy:
+      image: obbaa-vproxy
+      hostname: obbaa-vproxy
+      container_name: obbaa-vproxy
+      ports:
+        - 8433:8433
+      environment:
+        LOCAL_GRPC_SERVER_PORT: 8433
+        REMOTE_GRPC_SERVER_PORT: 58433
+        REMOTE_GRPC_SERVER_ADDR: obbaa-vomci
+      networks:
+        - baadist_default
+      depends_on:
+        - vomci
+
+    control_relay:
+      image: obbaa-control-relay
+      container_name: obbaa-control-relay
+      restart: always
+      ports:
+        - "50052:50052"
+        - "50055:50055"
+      environment:
+        - CONTROL_RELAY_HELLO_NAME=control_relay_service
+        - PLUGIN_PORT=50052
+        - SDN_MC_SERVER_PORT=
+        - SDN_MC_SERVER_LIST=
+        - CONTROL_RELAY_PORT=50055
+        - OBBAA_ADDRESS=baa
+        - OBBAA_PORT=9292
+        - SSH_USER=admin
+        - SSH_PASSWORD=password
+        - SHARED_FOLDER=./plugin-repo
+        - PRIVATE_FOLDER=./plugin-enabled
+      volumes:
+        - /baa/control-relay/plugins:/control_relay/plugin-repo
+      depends_on:
+        - baa

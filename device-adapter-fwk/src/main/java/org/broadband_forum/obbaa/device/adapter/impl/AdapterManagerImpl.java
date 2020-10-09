@@ -18,6 +18,7 @@ package org.broadband_forum.obbaa.device.adapter.impl;
 
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.BBF;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD_ADAPTER_OLDEST_VERSION;
 import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getStandardAdapterContext;
 import static org.broadband_forum.obbaa.netconf.api.util.DocumentUtils.createDocument;
 
@@ -93,9 +94,8 @@ import org.w3c.dom.Element;
 
 public class AdapterManagerImpl implements AdapterManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdapterManagerImpl.class);
-    public static boolean ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL = Boolean.parseBoolean(SystemPropertyUtils.getInstance()
-            .getFromEnvOrSysProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "True"));
     private final EventAdmin m_eventAdmin;
+    private Map<String, AdapterContext> m_stdAdapterContextRegistry = new ConcurrentHashMap<>();
     private ModelNodeDataStoreManager m_dataStoreManager;
     private ReadWriteLockService m_readWriteLockService;
     private EntityRegistry m_entityRegistry;
@@ -132,16 +132,20 @@ public class AdapterManagerImpl implements AdapterManager {
                         m_standardModelRegistrator.setOldIdentities(SchemaRegistryUtil.getAllIdentities(
                                 adapterContext.getSchemaRegistry()));
                         deployAdapter(adapter, adapterContext, componentId, subSystem, klass);
-                        if ((ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL)
-                                && (!adapter.getModel().equalsIgnoreCase(STANDARD) && !adapter.getVendor().equalsIgnoreCase(BBF))) {
+                        if (!adapter.getModel().equalsIgnoreCase(STANDARD)) {
                             computeFactoryGarmentTag(adapter, adapterContext);
                         }
                         m_adapterContextRegistry.putIfAbsent(adapterId, adapterContext);
                         m_adapterMap.putIfAbsent(adapterId, adapter);
+                        if (adapterId.getModel().equalsIgnoreCase(STANDARD)) {
+                            String stdAdapterKey = adapterId.getType().concat("-").concat(adapterId.getInterfaceVersion().toLowerCase());
+                            m_stdAdapterContextRegistry.put(stdAdapterKey, getAdapterContext(adapterId));
+                        }
                         EditConfigRequest editReq = validateDefaultXmlAndGenerateEditConfig(adapter, adapterContext);
                         m_defaultConfigReqMap.putIfAbsent(adapterId, editReq);
                         adapter.setLastUpdateTime(DateTime.now().toDateTime(DateTimeZone.UTC));
                         m_standardModelRegistrator.onDeployed(adapter, adapterContext);
+
                     } catch (Exception e) {
                         try {
                             AdapterUtils.logErrorToFile(e.toString(), adapter);
@@ -182,12 +186,19 @@ public class AdapterManagerImpl implements AdapterManager {
                         throw new RuntimeException(e);
                     }
                     m_adapterMap.remove(deviceAdapterId);
+                    if (adapter.getModel().equalsIgnoreCase(STANDARD)) {
+                        String stdAdapterKey = adapter.getType().concat("-").concat(adapter.getInterfaceVersion());
+                        if (m_stdAdapterContextRegistry.containsKey(stdAdapterKey)) {
+                            m_stdAdapterContextRegistry.remove(stdAdapterKey);
+                        }
+                    }
                     m_adapterContextRegistry.remove(deviceAdapterId);
                     m_defaultConfigReqMap.remove(deviceAdapterId);
                     m_standardModelRegistrator.onUndeployed(adapter, getAdapterContext(deviceAdapterId));
                     if (m_garmentTagMap.containsKey(adapter)) {
                         m_garmentTagMap.remove(adapter);
                     }
+
                     return null;
                 }
             });
@@ -196,8 +207,11 @@ public class AdapterManagerImpl implements AdapterManager {
         }
     }
 
-    private void unDeployAdapter(DeviceAdapter adapter) throws ModelNodeInitException {
+    private void unDeployAdapter(DeviceAdapter adapter) throws Exception {
         LOGGER.info("undeploying device adapter: " + adapter.getDeviceAdapterId().toString());
+        if (adapter.getModel().equalsIgnoreCase(STANDARD) && isStandardAdapterInUse()) {
+            throw new Exception("Given standard adapter is in use, undeploy operation is not allowed");
+        }
         String componentId = getComponentId(adapter);
         AdapterContext context = getAdapterContext(new DeviceAdapterId(adapter.getType(),
                 adapter.getInterfaceVersion(), adapter.getModel(), adapter.getVendor()));
@@ -210,6 +224,7 @@ public class AdapterManagerImpl implements AdapterManager {
             throw new ModelNodeInitException("Error while undeploying device adapter " + adapter, e);
         }
         context.undeployed();
+
     }
 
     private void deployAdapter(DeviceAdapter adapter, AdapterContext adapterContext, String componentId, SubSystem subSystem, Class klass)
@@ -364,6 +379,10 @@ public class AdapterManagerImpl implements AdapterManager {
         return m_garmentTagMap.get(adapter);
     }
 
+    public Map<String, AdapterContext> getStdAdapterContextRegistry() {
+        return m_stdAdapterContextRegistry;
+    }
+
     private void buildSchemaRegistry(SchemaRegistry schemaRegistry, String componentId, DeviceAdapter deviceAdapter) throws IOException {
         try {
             schemaRegistry.loadSchemaContext(componentId, deviceAdapter.getModuleByteSources(), deviceAdapter.getSupportedFeatures(),
@@ -436,6 +455,28 @@ public class AdapterManagerImpl implements AdapterManager {
                 && !deployedAdapterId.getVendor().equals(BBF)
                 && deployedAdapterId.getModel().equals(adapterId.getModel()) && deployedAdapterId.getType().equals(adapterId.getType())
                 && deployedAdapterId.getVendor().equals(adapterId.getVendor());
+    }
+
+    private boolean isStandardAdapterInUse() {
+        Collection<DeviceAdapter> adapters = getAllDeviceAdapters();
+        String intVersion = null;
+        boolean stdAdapterInUse = false;
+        for (DeviceAdapter deployedAdapter : adapters) {
+            if (!deployedAdapter.getModel().equalsIgnoreCase(STANDARD)) {
+                String type = deployedAdapter.getType();
+                if (deployedAdapter.getStdAdapterIntVersion() == null) {
+                    intVersion = STANDARD_ADAPTER_OLDEST_VERSION;
+                } else {
+                    intVersion = deployedAdapter.getStdAdapterIntVersion();
+                }
+                String adapterKey = type.concat("-").concat(intVersion);
+                if (m_stdAdapterContextRegistry.containsKey(adapterKey)) {
+                    stdAdapterInUse = true;
+                    break;
+                }
+            }
+        }
+        return stdAdapterInUse;
     }
 
     private String prepareArchiveName(DeviceAdapter adapter) {

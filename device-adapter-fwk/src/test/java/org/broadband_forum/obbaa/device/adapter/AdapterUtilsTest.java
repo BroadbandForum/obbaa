@@ -20,7 +20,7 @@ import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.DPU;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.OLT;
 import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD;
-import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STD_ADAPTER_OLDEST_VERSION;
+import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.STANDARD_ADAPTER_OLDEST_VERSION;
 import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getStandardAdapterContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -46,8 +46,8 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.EventAdmin;
@@ -105,7 +105,6 @@ public class AdapterUtilsTest {
         createAndDeployAdapter("/model/device-adapter6.xml");
         createAndDeployAdapter("/model/device-adapter3.xml");
         createAndDeployAdapter("/model/device-adapter9.xml");
-        createAndDeployAdapter("/model/device-adapter11.xml");
     }
 
     @After
@@ -126,7 +125,7 @@ public class AdapterUtilsTest {
         //when stdAdapterIntVersion == null i.e pick oldest version 1.0
         m_device = setDeviceAttributes("DPU", "8LT", "2.0", "VENDOR2");
         getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-        verifyCorrectStdAdapter(m_device, DPU, STD_ADAPTER_OLDEST_VERSION, STANDARD, BBF);
+        verifyCorrectStdAdapter(m_device, DPU, STANDARD_ADAPTER_OLDEST_VERSION, STANDARD, BBF);
     }
 
     @Test
@@ -142,7 +141,7 @@ public class AdapterUtilsTest {
         //when stdAdapterIntVersion == null i.e pick oldest version 1.0
         m_device = setDeviceAttributes("OLT", "8LT", "2.0", "VENDOR2");
         getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-        verifyCorrectStdAdapter(m_device, OLT, STD_ADAPTER_OLDEST_VERSION, STANDARD, BBF);
+        verifyCorrectStdAdapter(m_device, OLT, STANDARD_ADAPTER_OLDEST_VERSION, STANDARD, BBF);
     }
 
     @Test
@@ -174,18 +173,33 @@ public class AdapterUtilsTest {
     }
 
     @Test
-    public void testGetStdAdapterContextWhenNoStdAdapterInstalled() {
+    @Ignore
+    public void testGetStdAdapterContextWhenStdAdapterContextIsNull() {
         //Error case when no standard adapter installed for the device type
         m_device = setDeviceAttributes("DPU", "8LT", "2.0", "VENDOR2");
         try {
             m_adapterManager.undeploy(m_deviceAdapter);
             getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
-            fail("Expected a runtimeException");
-
+            fail("Expected an Exception");
         } catch (Exception e) {
             assertEquals("no standard adapterContext deployed for : DPU", e.getMessage());
         }
     }
+
+    @Test
+    public void testGetStdAdapterContextWhenGivenAdapterUndeployed() {
+        //Error case when no adapter installed for the device type
+        m_device = setDeviceAttributes("OLT", "dummy", "1.0", "sample");
+        try {
+            createAndDeployAdapter("/model/device-adapter14.xml");
+            m_adapterManager.undeploy(m_deviceAdapter);
+            getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
+            fail("Expected an Exception");
+        } catch (Exception e) {
+            assertEquals("Given device adapter is not installed", e.getMessage());
+        }
+    }
+
 
     private Device setDeviceAttributes(String type, String model, String ifVersion, String vendor) {
         m_device = new Device();
@@ -222,7 +236,7 @@ public class AdapterUtilsTest {
             assertEquals(expectedInterfaceVersion, adapter.getStdAdapterIntVersion());
         } else {
             assertEquals(expectedType, adapter.getType());
-            assertEquals(expectedInterfaceVersion, STD_ADAPTER_OLDEST_VERSION);
+            assertEquals(expectedInterfaceVersion, STANDARD_ADAPTER_OLDEST_VERSION);
         }
     }
 

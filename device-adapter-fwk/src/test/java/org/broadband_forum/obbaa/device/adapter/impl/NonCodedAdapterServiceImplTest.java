@@ -33,6 +33,7 @@ import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants;
 import org.broadband_forum.obbaa.device.adapter.CommonFileUtil;
@@ -60,6 +61,8 @@ public class NonCodedAdapterServiceImplTest {
     private SubSystem m_subsystem;
     @Mock
     private DeviceInterface m_devInterface;
+    @Mock
+    private NetconfConnectionManager m_connectionManager;
     private String m_expectedDefaultXml;
 
     @Before
@@ -67,7 +70,7 @@ public class NonCodedAdapterServiceImplTest {
         m_tempDir = createTempDir();
         m_dir = m_tempDir.getAbsolutePath();
         m_adapterManager = mock(AdapterManagerImpl.class);
-        m_nonCodedAdapterService = new NonCodedAdapterServiceImpl(m_adapterManager);
+        m_nonCodedAdapterService = new NonCodedAdapterServiceImpl(m_adapterManager, m_connectionManager);
         m_expectedAdapterId = new DeviceAdapterId("DPU","1.0", "example", "UT");
         m_expectedDefaultXml = "<data>" + System.lineSeparator() +
                 "\t<if:interfaces" + System.lineSeparator() +

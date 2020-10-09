@@ -117,11 +117,11 @@ public class DeviceManagementSubsystemTest {
     private AdapterManager m_adapterManager;
     @Mock
     private AdapterContext m_context;
+    private List<String> m_ignoreElements;
 
     @Before
     public void setup() throws SchemaBuildException {
         MockitoAnnotations.initMocks(this);
-        System.setProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "True");
         m_schemaRegistry = getSchemaRegistry();
         m_deviceManagementSubsystem = new DeviceManagementSubsystem(m_schemaRegistry, m_adapterManager);
         m_deviceManagementSubsystem.setDeviceManager(m_deviceManager);
@@ -133,6 +133,8 @@ public class DeviceManagementSubsystemTest {
         when(m_adapterManager.getAdapterContext(any())).thenReturn(m_context);
         when(m_context.getDeviceInterface()).thenReturn(m_devInterface);
         when(m_context.getSchemaRegistry()).thenReturn(m_schemaRegistry);
+        m_ignoreElements = new ArrayList<String>();
+        m_ignoreElements.add("revision");
     }
 
     private void setupNewDevices() {
@@ -189,21 +191,18 @@ public class DeviceManagementSubsystemTest {
         adapters.add(adapter1);
         adapters.add(adapter2);
         when(m_adapterManager.getAllDeviceAdapters()).thenReturn(adapters);
-        if (Boolean.parseBoolean(SystemPropertyUtils.getInstance()
-                .getFromEnvOrSysProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL"))) {
-            ArrayList<String> adapter1DeviatedStdModules = new ArrayList<>();
-            adapter1DeviatedStdModules.add(0, "ietf-hardware");
-            adapter1DeviatedStdModules.add(1, "iana-hardware");
-            ArrayList<String> adapter2DeviatedStdModules = new ArrayList<>();
-            adapter2DeviatedStdModules.add(0, "ietf-interfaces");
-            ArrayList<String> adapter1AugmentedStdModules = new ArrayList<>();
-            adapter1AugmentedStdModules.add(0, "ietf-hardware");
-            adapter1AugmentedStdModules.add(1, "iana-hardware");
-            ArrayList<String> adapter2AugmentedStdModules = new ArrayList<>();
-            adapter2AugmentedStdModules.add(0, "ietf-interfaces");
-            when(m_adapterManager.getFactoryGarmentTag(adapter1)).thenReturn(new FactoryGarmentTag(12, 15, 10, adapter1DeviatedStdModules, adapter1AugmentedStdModules));
-            when(m_adapterManager.getFactoryGarmentTag(adapter2)).thenReturn(new FactoryGarmentTag(15, 20, 10, adapter2DeviatedStdModules, adapter2AugmentedStdModules));
-        }
+        ArrayList<String> adapter1DeviatedStdModules = new ArrayList<>();
+        adapter1DeviatedStdModules.add(0, "ietf-hardware");
+        adapter1DeviatedStdModules.add(1, "iana-hardware");
+        ArrayList<String> adapter2DeviatedStdModules = new ArrayList<>();
+        adapter2DeviatedStdModules.add(0, "ietf-interfaces");
+        ArrayList<String> adapter1AugmentedStdModules = new ArrayList<>();
+        adapter1AugmentedStdModules.add(0, "ietf-hardware");
+        adapter1AugmentedStdModules.add(1, "iana-hardware");
+        ArrayList<String> adapter2AugmentedStdModules = new ArrayList<>();
+        adapter2AugmentedStdModules.add(0, "ietf-interfaces");
+        when(m_adapterManager.getFactoryGarmentTag(adapter1)).thenReturn(new FactoryGarmentTag(12, 15, 10, adapter1DeviatedStdModules, adapter1AugmentedStdModules));
+        when(m_adapterManager.getFactoryGarmentTag(adapter2)).thenReturn(new FactoryGarmentTag(15, 20, 10, adapter2DeviatedStdModules, adapter2AugmentedStdModules));
     }
 
     private List<YangTextSchemaSource> getByteSources(List<String> yangFiles) {
@@ -448,7 +447,7 @@ public class DeviceManagementSubsystemTest {
         assertEquals(1, stateInfo.size());
         List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
         assertEquals(1, deviceAdapter.size());
-        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/device-adapters-inuse-response.xml")).getDocumentElement(), deviceAdapter.get(0));
+        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/device-adapters-inuse-response.xml")).getDocumentElement(), deviceAdapter.get(0), m_ignoreElements);
     }
 
     @Test
@@ -461,7 +460,7 @@ public class DeviceManagementSubsystemTest {
         assertEquals(1, stateInfo.size());
         List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
         assertEquals(1, deviceAdapter.size());
-        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter-response.xml")).getDocumentElement(), deviceAdapter.get(0));
+        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter-response.xml")).getDocumentElement(), deviceAdapter.get(0), m_ignoreElements);
     }
 
     @Test
@@ -471,7 +470,7 @@ public class DeviceManagementSubsystemTest {
         mapAttributes.put(NETWORK_MANAGER_ID_TEMPLATE, new Pair<>(Collections.emptyList(), Arrays.asList(getFilterNode(filterDeviceAdapterWithType))));
         Map<ModelNodeId, List<Element>> stateInfo = m_deviceManagementSubsystem.retrieveStateAttributes(mapAttributes);
         List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
-        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/get-device-adapters-response.xml")).getDocumentElement(), deviceAdapter.get(0));
+        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/get-device-adapters-response.xml")).getDocumentElement(), deviceAdapter.get(0), m_ignoreElements);
     }
 
     @Test
@@ -490,45 +489,6 @@ public class DeviceManagementSubsystemTest {
         String expectedDeviceState = "<device-state xmlns=\"urn:bbf:yang:obbaa:network-manager\"/>";
         assertEquals(expectedDeviceState, DocumentUtils.documentToPrettyString(deviceAState.get(0)).trim());
         assertEquals(expectedDeviceState, DocumentUtils.documentToPrettyString(deviceBState.get(0)).trim());
-    }
-
-    @Test
-    public void retrieveStateAttributesDeviceAdaptersWithInUseFilterFactoryGarmentTagRetrievalDisabled() throws Exception {
-        System.setProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "false");
-        prepareDevicesForAdapterInUseTest();
-        Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> mapAttributes = new HashMap<>();
-        Document filterDeviceAdapterWithType = DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter-with-inuse.xml"));
-        mapAttributes.put(NETWORK_MANAGER_ID_TEMPLATE, new Pair<>(Collections.emptyList(), Arrays.asList(getFilterNode(filterDeviceAdapterWithType))));
-        Map<ModelNodeId, List<Element>> stateInfo = m_deviceManagementSubsystem.retrieveStateAttributes(mapAttributes);
-        assertEquals(1, stateInfo.size());
-        List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
-        assertEquals(1, deviceAdapter.size());
-        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/device-adapters-inuse-response-garment-tag-disabled.xml")).getDocumentElement(), deviceAdapter.get(0));
-    }
-
-    @Test
-    public void retrieveStateAttributesDeviceAdaptersWithoutFilterFactoryGarmentTagRetrievalDisabled() throws Exception {
-        System.setProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "false");
-        prepareDevicesForAdapterInUseTest();
-        Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> mapAttributes = new HashMap<>();
-        Document filterDeviceAdapterWithType = DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter.xml"));
-        mapAttributes.put(NETWORK_MANAGER_ID_TEMPLATE, new Pair<>(Collections.emptyList(), Arrays.asList(getFilterNode(filterDeviceAdapterWithType))));
-        Map<ModelNodeId, List<Element>> stateInfo = m_deviceManagementSubsystem.retrieveStateAttributes(mapAttributes);
-        assertEquals(1, stateInfo.size());
-        List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
-        assertEquals(1, deviceAdapter.size());
-        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/filter-device-adapter-response-garment-tag-disabled.xml")).getDocumentElement(), deviceAdapter.get(0));
-    }
-
-    @Test
-    public void retrieveStateAttributesAllDeviceAdaptersFactoryGarmentTagRetrievalDisabled() throws Exception {
-        System.setProperty("ENABLE_FACTORY_GARMENT_TAG_RETRIEVAL", "false");
-        Map<ModelNodeId, Pair<List<QName>, List<FilterNode>>> mapAttributes = new HashMap<>();
-        Document filterDeviceAdapterWithType = DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/get-device-adapters.xml"));
-        mapAttributes.put(NETWORK_MANAGER_ID_TEMPLATE, new Pair<>(Collections.emptyList(), Arrays.asList(getFilterNode(filterDeviceAdapterWithType))));
-        Map<ModelNodeId, List<Element>> stateInfo = m_deviceManagementSubsystem.retrieveStateAttributes(mapAttributes);
-        List<Element> deviceAdapter = stateInfo.get(NETWORK_MANAGER_ID_TEMPLATE);
-        TestUtil.assertXMLEquals(DocumentUtils.loadXmlDocument(DeviceManagementSubsystemTest.class.getResourceAsStream("/get-device-adapters-response-garment-tag-disabled.xml")).getDocumentElement(), deviceAdapter.get(0));
     }
 
 }
