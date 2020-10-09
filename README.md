@@ -25,10 +25,11 @@ In addition, this release includes:
    [vOMCI](https://github.com/BroadbandForum/obbaa-vomci) repository which contains the vOMCI Function and Proxy used in the OB-BAA Implementations
 
    [Control Relay](https://github.com/BroadbandForum/obbaa-fc-relay) repository contains the control relay feature of the OB-BAA project
-
-
-## Restrictions:
-Same as release 3.0.0.
+   
+   [pOLT Simulator](https://github.com/BroadbandForum/obbaa-polt-simulator) pOLT Simulator for Broadband Forum WT-451 vOMCI project
+   
+   [ONU Simulator](https://github.com/BroadbandForum/obbaa-onu-simulator) ONU simulator and test client(Extracted from pOLT Simulator)
+   
 
 ## FAQ
 Question : What should I do if ONU DETECT nofitication is not raised in OB-BAA for a vOMCI based ONU?
