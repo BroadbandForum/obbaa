@@ -18,6 +18,10 @@ In addition, this release includes:
 
 -	a simulator for OLTs and ONUs that can be used for virtualized ONU management when developing OMCI message translation services.
 
+Release documentation:
+
+   [OBBAA](https://obbaa.broadband-forum.org/) for product documentation on System Description, Installation, Commissioning and Usage
+
 ## Other related repos of OB-BAA includes:
 
    [NETCONF stack](https://github.com/BroadbandForum/obbaa-netconf-stack) A NETCONF stack for use in OB-BAA implementations
