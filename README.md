@@ -18,9 +18,22 @@ In addition, this release includes:
 
 -	a simulator for OLTs and ONUs that can be used for virtualized ONU management when developing OMCI message translation services.
 
+## Other related repos of OB-BAA includes:
+
+   [NETCONF stack](https://github.com/BroadbandForum/obbaa-netconf-stack) A NETCONF stack for use in OB-BAA implementations
+
+   [vOMCI](https://github.com/BroadbandForum/obbaa-vomci) repository which contains the vOMCI Function and Proxy used in the OB-BAA Implementations
+
+   [Control Relay](https://github.com/BroadbandForum/obbaa-fc-relay) repository contains the control relay feature of the OB-BAA project
+
 
 ## Restrictions:
 Same as release 3.0.0.
+
+## FAQ
+Question : What should I do if ONU DETECT nofitication is not raised in OB-BAA for a vOMCI based ONU?
+
+Answer : Sometimes kafka will not have the required topics being available when it started, hence vomci functionality might not work properly in that case. as a workaround after starting OB-BAA microservices using docker compose file, we should restart vomci container (wait for a minute to have the vomci container up and running) and restart vproxy container. This would solve the problem.
 
 <a name="rel_2_1_0"></a>
 
