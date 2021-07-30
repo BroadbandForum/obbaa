@@ -21,8 +21,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.onu.VOLTManagement;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
 * <p>
@@ -31,7 +29,7 @@ import org.json.JSONObject;
 * Created by Marc Michalke on <15/07/2020>.
 */
 
-public class KafkaNotificationCallback {
+public class KafkaNotificationCallback<T> {
 
     public KafkaNotificationCallback(final VOLTManagement voltMgmt) {
         m_voltMgmt = voltMgmt;
@@ -40,29 +38,21 @@ public class KafkaNotificationCallback {
     private static final Logger LOGGER = Logger.getLogger(KafkaNotificationCallback.class);
     private VOLTManagement m_voltMgmt;
 
-    public static void onNotification(final ConsumerRecords<String, String> records,
+    public void onNotification(final ConsumerRecords<String, T> records,
             Hashtable<String, java.util.function.Consumer> callbackFunctions) {
-        for (final ConsumerRecord<String, String> record : records) {
-            final String value = record.value();
+        for (final ConsumerRecord<String, T> record : records) {
+            final T value = record.value();
             final String topic = record.topic();
             callbackFunctions.get(topic).accept(value);
         }
     }
 
-    public void processAlarm(Object obj) {
-        String msg = obj.toString();
-        //m_voltMgmt.processAlarm(msg);
-        LOGGER.debug("Sent message " + obj.toString());
+    public void processNotification(Object obj) {
+        m_voltMgmt.processNotification(obj);
     }
 
     public void processResponse(Object obj) {
-        try {
-            JSONObject jsonResponse = new JSONObject(obj.toString());
-            m_voltMgmt.processResponse(jsonResponse);
-            LOGGER.debug("Sent message " + obj.toString());
-        } catch (JSONException e) {
-            LOGGER.error("Unable to form JSONObject" + e);
-        }
+        m_voltMgmt.processResponse(obj);
     }
     //If additional callback functions have to be added, don't forget to add them to
     //OnuKafkaConsumer#addNotificationCallback() as well

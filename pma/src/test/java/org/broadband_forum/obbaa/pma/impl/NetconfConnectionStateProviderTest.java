@@ -23,11 +23,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
-import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceConnection;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

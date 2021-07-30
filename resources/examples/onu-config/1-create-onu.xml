@@ -30,16 +30,48 @@
                      <vendor>BBF</vendor>
                      <model>standard</model>
                      <device-connection>
-                        <connection-model>direct</connection-model>
-                        <password-auth>
-                           <authentication>
-                              <address>192.168.169.1</address>
-                              <management-port>92994</management-port>
-                              <user-name>ONU</user-name>
-                              <password>ONU</password>
-                           </authentication>
-                        </password-auth>
+                        <connection-model>mediated-session</connection-model>
+                        <mediated-protocol>vomci</mediated-protocol>
                      </device-connection>
+                     <onu-config-info xmlns="urn:bbf:yang:obbaa:onu-management" xmlns:onu="urn:bbf:yang:obbaa:onu-management">
+                        <expected-serial-number>ABCD12345678</expected-serial-number>
+                        <expected-attachment-point>
+                           <olt-name>OLT1</olt-name>
+                           <channel-partition-name>ChannelGroup1.ChannelPartition1</channel-partition-name>
+                        </expected-attachment-point>
+                        <xpon-technology xmlns:bbf-xpon-types="urn:bbf:yang:bbf-xpon-types">bbf-xpon-types:gpon</xpon-technology>
+                        <vomci-onu-management>
+                           <use-vomci-management>true</use-vomci-management>
+                           <vomci-function>vomci-vendor-1</vomci-function>
+                           <onu-management-chain>vomci-vendor-1</onu-management-chain>
+                           <onu-management-chain>proxy-1</onu-management-chain>
+                           <onu-management-chain>OLT1</onu-management-chain>
+                            <network-function-links>
+                             <network-function-link>
+                               <name>vOMCI-proxy</name>
+                               <termination-point-a>
+                                 <function-name>vomci-vendor-1</function-name>
+                                 <local-endpoint-name>vOMCi-grpc-1</local-endpoint-name>
+                               </termination-point-a>
+                               <termination-point-b>
+                                 <function-name>proxy-1</function-name>
+                                 <local-endpoint-name>proxy-grpc-1</local-endpoint-name>
+                               </termination-point-b>
+                             </network-function-link>
+                              <network-function-link>
+                               <name>proxy-OLT</name>
+                               <termination-point-a>
+                                 <function-name>proxy-1</function-name>
+                                 <local-endpoint-name>proxy-grpc-2</local-endpoint-name>
+                               </termination-point-a>
+                               <termination-point-b>
+                                 <function-name>OLT1</function-name>
+                                 <local-endpoint-name>olt-grpc-2</local-endpoint-name>
+                               </termination-point-b>
+                             </network-function-link>
+                           </network-function-links>
+                      </vomci-onu-management>
+                     </onu-config-info>
                   </device-management>
                </device>
             </managed-devices>

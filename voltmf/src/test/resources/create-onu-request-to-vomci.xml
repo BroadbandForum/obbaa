@@ -1,0 +1,5 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <create-onu xmlns="urn:bbf:yang:bbf-vomci-function">
+        <name>onu1</name>
+    </create-onu>
+</rpc>

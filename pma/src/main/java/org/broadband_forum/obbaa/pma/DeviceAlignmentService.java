@@ -16,7 +16,7 @@
 
 package org.broadband_forum.obbaa.pma;
 
-import org.broadband_forum.obbaa.dm.DeviceStateProvider;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceStateProvider;
 
 public interface DeviceAlignmentService extends DeviceStateProvider {
 

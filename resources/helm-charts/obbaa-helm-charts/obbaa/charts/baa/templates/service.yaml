@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: baa
+  namespace: obbaa
+spec:
+  selector:
+    app: baa
+  ports:
+    - name: port8080
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 32080  #external port
+    - name: port5005
+      protocol: TCP
+      port: 5005
+      targetPort: 5005
+      nodePort: 31005  #external port
+    - name: port9292
+      protocol: TCP
+      port: 9292
+      targetPort: 9292
+      nodePort: 31292  #external port
+    - name: port4335
+      protocol: TCP
+      port: 4335
+      targetPort: 4335
+      nodePort: 31335  #external port
+    - name: port162
+      protocol: UDP
+      port: 162
+      targetPort: 162
+      nodePort: 31162  #external port
+  type: NodePort

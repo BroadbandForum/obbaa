@@ -19,8 +19,8 @@ package org.broadband_forum.obbaa.pma.impl;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
-import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;
 

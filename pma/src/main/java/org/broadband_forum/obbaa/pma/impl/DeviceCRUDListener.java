@@ -16,8 +16,8 @@
 
 package org.broadband_forum.obbaa.pma.impl;
 
-import org.broadband_forum.obbaa.dm.DeviceManager;
-import org.broadband_forum.obbaa.dm.DeviceStateProvider;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceStateProvider;
 
 public class DeviceCRUDListener implements DeviceStateProvider {
     private final DeviceManager m_deviceManager;

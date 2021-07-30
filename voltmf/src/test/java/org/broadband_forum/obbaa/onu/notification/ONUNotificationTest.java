@@ -16,19 +16,23 @@
 
 package org.broadband_forum.obbaa.onu.notification;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
 import org.broadband_forum.obbaa.onu.ONUConstants;
+import org.broadband_forum.obbaa.onu.message.GpbFormatter;
+import org.broadband_forum.obbaa.onu.message.JsonFormatter;
+import org.broadband_forum.obbaa.onu.message.MessageFormatter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 /**
  * <p>
@@ -38,10 +42,18 @@ import static org.mockito.Mockito.when;
  */
 public class ONUNotificationTest {
     Notification notification;
-    String deviceName = "onu";
+    private final String deviceName = "onu";
+    private final String serialNum = "ABCD12345678";
+    private final String regId = "ABCD1234";
+    private final String chanTermRef = "CT-1";
+    private final String vaniRef = "onu_25";
+    private final String onuId = "25";
+    private final String onuPresentAndUnexpectedState = "onu-present-and-unexpected";
+    private final String onuPresentAndOnChannelTerm = "onu-present-and-on-intended-channel-termination";
     @Mock
     Device onuDevice;
     ONUNotification onuNotification;
+    MessageFormatter messageFormatter;
 
     @Before
     public void setUp() {
@@ -50,39 +62,42 @@ public class ONUNotificationTest {
     }
 
     @Test
-    public void testNotificationFormat() throws NetconfMessageBuilderException {
-        String serialNum = "ABCD12345678";
-        String regId = "ABCD1234";
-        String chanTermRef = "CT-1";
-        String vaniRef = "onu_25";
-        String onuId = "25";
-        String onuState = "onu-present-and-on-intended-channel-termination";
-        notification = getDetectNotification(serialNum, regId, chanTermRef, vaniRef, onuId, onuState);
-        onuNotification = new ONUNotification(notification, deviceName);
+    public void test_1_0_NotificationFormat() throws NetconfMessageBuilderException {
+        notification = getDetectNotificationFor_1_0();
+        messageFormatter = new JsonFormatter();
+        onuNotification = new ONUNotification(notification, deviceName,messageFormatter);
         assertEquals(onuNotification.getSerialNo(), serialNum);
         assertEquals(onuNotification.getChannelTermRef(), chanTermRef);
         assertEquals(onuNotification.getOnuId(), onuId);
-        assertEquals(onuNotification.getOnuState(), onuState);
-        assertEquals(onuNotification.getRegId(), regId);
-        assertEquals(onuNotification.getVAniRef(), vaniRef);
+        assertEquals(onuNotification.getOnuState(), onuPresentAndUnexpectedState);
         assertEquals(onuNotification.getMappedEvent(), ONUConstants.DETECT_EVENT);
     }
 
-    private Notification getDetectNotification(String serialNum, String regId, String chanTermref, String vaniRef,
-                                               String onuId, String onuState) throws NetconfMessageBuilderException {
-        String onuNotification = "<notification xmlns=\"urn:ietf:params:xml:ns:netconf:notification:1.0\">\n" +
-                "    <eventTime>2019-07-25T05:53:36+00:00</eventTime>\n" +
-                "    <bbf-xpon-onu-states:onu-state-change xmlns:bbf-xpon-onu-states=\"urn:bbf:yang:bbf-xpon-onu-states\">                               \n" +
-                "        <bbf-xpon-onu-states:detected-serial-number>" + serialNum + "</bbf-xpon-onu-states:detected-serial-number>\n" +
-                "        <bbf-xpon-onu-states:onu-id>" + onuId + "</bbf-xpon-onu-states:onu-id>\n" +
-                "        <bbf-xpon-onu-states:channel-termination-ref>" + chanTermref + "</bbf-xpon-onu-states:channel-termination-ref>\n" +
-                "        <bbf-xpon-onu-states:onu-state>" + onuState + "</bbf-xpon-onu-states:onu-state>\n" +
-                "        <bbf-xpon-onu-states:detected-registration-id>" + regId + "</bbf-xpon-onu-states:detected-registration-id>\n" +
-                "        <bbf-xpon-onu-states:onu-state-last-change>2019-07-25T05:53:36+00:00</bbf-xpon-onu-states:onu-state-last-change>\n" +
-                "        <bbf-xpon-onu-states:v-ani-ref>" + vaniRef + "</bbf-xpon-onu-states:v-ani-ref>\n" +
-                "    </bbf-xpon-onu-states:onu-state-change>\n" +
-                "</notification>";
-        Notification notification = new NetconfNotification(DocumentUtils.stringToDocument(onuNotification));
+    @Test
+    public void test_2_0_NotificationFormat() throws NetconfMessageBuilderException {
+        messageFormatter = new GpbFormatter();
+        notification = getDetectNotificationFor_2_0();
+        onuNotification = new ONUNotification(notification, deviceName,messageFormatter);
+        assertEquals(onuNotification.getSerialNo(), serialNum);
+        assertEquals(onuNotification.getChannelTermRef(), chanTermRef);
+        assertEquals(onuNotification.getOnuId(), onuId);
+        assertEquals(onuNotification.getOnuState(), onuPresentAndOnChannelTerm);
+        assertEquals(onuNotification.getVAniRef(), vaniRef);
+        assertEquals(onuNotification.getRegId(), regId);
+        assertEquals(onuNotification.getMappedEvent(), ONUConstants.CREATE_ONU);
+    }
+
+    private Notification getDetectNotificationFor_1_0() throws NetconfMessageBuilderException {
+        String notificationString = TestUtil.loadAsString("/onu-state-change-notification_1_0.txt");
+        notificationString = String.format(notificationString, serialNum, onuId, chanTermRef, onuPresentAndUnexpectedState, regId, vaniRef);
+        Notification notification = new NetconfNotification(DocumentUtils.stringToDocument(notificationString));
+        return notification;
+    }
+
+    private Notification getDetectNotificationFor_2_0() throws NetconfMessageBuilderException {
+        String notificationString = TestUtil.loadAsString("/onu-state-change-notification_2_0.txt");
+        notificationString = String.format(notificationString, chanTermRef, serialNum, regId, onuPresentAndOnChannelTerm, onuId, vaniRef);
+        Notification notification = new NetconfNotification(DocumentUtils.stringToDocument(notificationString));
         return notification;
     }
 }

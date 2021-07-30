@@ -16,6 +16,12 @@
 
 package org.broadband_forum.obbaa.onu.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.netconf.api.util.SchemaPathBuilder;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
@@ -28,13 +34,8 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests that tests utility service that converts JSON to XML
@@ -55,10 +56,16 @@ public class DeviceJsonUtilsTest {
     static final SchemaPath INTERFACES_STATE2_SP_WITH_SM = SchemaPathBuilder.fromString("(ns2?revision=1990-03-08)interfaces-state2");
     static final SchemaPath INTERFACES_STATE2_SP_WITHOUT_SM = SchemaPathBuilder.fromString("(urn:xxxxx-org:yang:netconf-server-dev?revision="+DeviceManagerNSConstants.REVISION+")network-maanger",
             "(urn:ietf:params:xml:ns:yang:ietf-netconf-server?revision="+DeviceManagerNSConstants.REVISION+")device,device-specific-data", "(urn:xxxxx-org:yang:netconf-server-dev/device/Mediated-Device-Type-1.0/ns2?revision=1990-03-08)interfaces-state2");
+    static final SchemaPath CREATE_ONU_RPC1_SP_WITH_SM = SchemaPathBuilder.fromString("(ns1?revision=1988-03-27)create-onu");
+    static final SchemaPath CREATE_ONU_RPC2_SP_WITH_SM = SchemaPathBuilder.fromString("(ns2?revision=1990-03-08)create-onu");
     @Mock
     private DataSchemaNode m_interfacesStateSN;
     @Mock
     private DataSchemaNode m_interfacesState2SN;
+    @Mock
+    private RpcDefinition m_rpcSchemaNode;
+    @Mock
+    private RpcDefinition m_rpcSchemaNode1;
     @Mock
     private Module m_module1;
     private QNameModule m_qnameModule1;
@@ -93,11 +100,13 @@ public class DeviceJsonUtilsTest {
         when(m_schemaRegistry.getDataSchemaNode(INTERFACES_STATE2_SP_WITH_SM)).thenReturn(m_interfacesState2SN);
         when(m_schemaRegistry.getDataSchemaNode(INTERFACES_STATE_SP_WITHOUT_SM)).thenReturn(m_interfacesStateSN);
         when(m_schemaRegistry.getDataSchemaNode(INTERFACES_STATE2_SP_WITHOUT_SM)).thenReturn(m_interfacesState2SN);
+        when(m_schemaRegistry.getRpcDefinition(CREATE_ONU_RPC1_SP_WITH_SM)).thenReturn(m_rpcSchemaNode);
+        when(m_schemaRegistry.getRpcDefinition(CREATE_ONU_RPC2_SP_WITH_SM)).thenReturn(m_rpcSchemaNode1);
     }
 
 
     @Test
-    public void testSchemaNodeIsRetrievedWithSchemaMount() {
+    public void testRootSchemaNodeIsRetrievedWithSchemaMount() {
         DataSchemaNode schemaNode = m_util.getDeviceRootSchemaNode("interfaces-state", "ns1");
         assertEquals(m_interfacesStateSN, schemaNode);
 
@@ -106,11 +115,20 @@ public class DeviceJsonUtilsTest {
     }
 
     @Test
-    public void testSchemaNodeIsRetrievedWithoutSchemaMount() {
+    public void testRootSchemaNodeIsRetrievedWithoutSchemaMount() {
         DataSchemaNode schemaNode = m_util.getDeviceRootSchemaNode("interfaces-state", "ns1");
         assertEquals(m_interfacesStateSN, schemaNode);
 
         schemaNode = m_util.getDeviceRootSchemaNode("interfaces-state2", "ns2");
         assertEquals(m_interfacesState2SN, schemaNode);
+    }
+
+    @Test
+    public void testRpcSchemaNodeIsRetrievedWithSchemaMount() {
+        RpcDefinition schemaNode = m_util.getRpcSchemaNode("create-onu", "ns1");
+        assertEquals(m_rpcSchemaNode, schemaNode);
+
+        schemaNode = m_util.getRpcSchemaNode("create-onu", "ns2");
+        assertEquals(m_rpcSchemaNode1, schemaNode);
     }
 }

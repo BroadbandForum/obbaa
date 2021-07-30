@@ -9,7 +9,6 @@
         </description>
 
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>org.broadband_forum.obbaa.netconf.alarm.entity.AlarmDefinitionInfo</class>
         <class>org.broadband_forum.obbaa.netconf.alarm.entity.Alarm</class>
 
         <properties>

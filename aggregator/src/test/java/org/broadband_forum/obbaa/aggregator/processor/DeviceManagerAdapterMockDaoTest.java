@@ -41,13 +41,10 @@ import org.broadband_forum.obbaa.connectors.sbi.netconf.impl.NetconfConnectionMa
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
-import org.broadband_forum.obbaa.dm.DeviceManagementSubsystem;
-import org.broadband_forum.obbaa.dm.DeviceManager;
-import org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl;
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
-import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceState;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
@@ -75,6 +72,9 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.yang.util.Y
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.yang.AbstractValidationTestSetup;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.NoLockService;
 import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManagementSubsystem;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
+import org.broadband_forum.obbaa.nm.devicemanager.impl.DeviceManagerImpl;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -406,11 +406,26 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
 
         m_schemaRegistry = new SchemaRegistryImpl(Collections.<YangTextSchemaSource>emptyList(), Collections.emptySet(), Collections.emptyMap(), new NoLockService());
         m_schemaRegistry.loadSchemaContext("network-manager", Arrays.asList(
-                TestUtil.getByteSource("/yangs/ietf-yang-schema-mount.yang"),
-                TestUtil.getByteSource("/yangs/ietf-inet-types.yang"),
                 TestUtil.getByteSource("/yangs/ietf-yang-types.yang"),
+                TestUtil.getByteSource("/yangs/ietf-inet-types.yang"),
+                TestUtil.getByteSource("/yangs/ietf-netconf-acm.yang"),
+                TestUtil.getByteSource("/yangs/ietf-crypto-types.yang"),
+                TestUtil.getByteSource("/yangs/ietf-yang-library@2016-06-21.yang"),
+                TestUtil.getByteSource("/yangs/ietf-yang-schema-mount.yang"),
+                TestUtil.getByteSource("/yangs/ietf-tcp-common.yang"),
+                TestUtil.getByteSource("/yangs/ietf-tcp-client.yang"),
+                TestUtil.getByteSource("/yangs/ietf-tcp-server.yang"),
+                TestUtil.getByteSource("/yangs/ietf-datastores@2017-08-17.yang"),
+                TestUtil.getByteSource("/yangs/bbf-device-types.yang"),
+                TestUtil.getByteSource("/yangs/bbf-network-function-types.yang"),
+                TestUtil.getByteSource("/yangs/bbf-xpon-types.yang"),
+                TestUtil.getByteSource("/yangs/bbf-yang-types.yang"),
+                TestUtil.getByteSource("/yangs/bbf-vomci-types.yang"),
+                TestUtil.getByteSource("/yangs/bbf-grpc-client.yang"),
+                TestUtil.getByteSource("/yangs/bbf-kafka-agent.yang"),
                 TestUtil.getByteSource("/yangs/bbf-obbaa-network-manager.yang"),
-                TestUtil.getByteSource("/yangs/ietf-yang-library@2016-06-21.yang")), Collections.emptySet(), Collections.emptyMap());
+                TestUtil.getByteSource("/yangs/bbf-network-function-client.yang"),
+                TestUtil.getByteSource("/yangs/bbf-network-function-server.yang")), Collections.emptySet(), Collections.emptyMap());
         m_modelNodeDsm = new InMemoryDSM(m_schemaRegistry);
         m_subSystemRegistry = new SubSystemRegistryImpl();
         m_modelNodeHelperRegistry = new ModelNodeHelperRegistryImpl(m_schemaRegistry);
@@ -432,7 +447,31 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
         m_expValidator = new DSExpressionValidator(m_schemaRegistry, m_modelNodeHelperRegistry , m_subSystemRegistry);
         m_integrityService = new DataStoreIntegrityServiceImpl(m_server);
         m_datastoreValidator = new DataStoreValidatorImpl(m_schemaRegistry, m_modelNodeHelperRegistry, m_modelNodeDsm, m_integrityService, m_expValidator);
-        YangUtils.deployInMemoryHelpers(yangFilePath, m_deviceSubsystem, m_modelNodeHelperRegistry,
+        String[] dependentYangFiles = {"/yangs/ietf/ietf-restconf.yang",
+                "/yangs/ietf/ietf-inet-types.yang",
+                "/yangs/ietf/ietf-yang-types.yang",
+                "/yangs/ietf/ietf-yang-schema-mount.yang",
+                "/yangs/ietf/ietf-yang-library@2016-06-21.yang",
+                "/yangs/bbf-network-function-client.yang",
+                "/yangs/bbf-network-function-server.yang",
+                "/yangs/ietf-inet-types.yang",
+                "/yangs/ietf-netconf-acm.yang",
+                "/yangs/ietf-crypto-types.yang",
+                "/yangs/ietf-yang-library@2016-06-21.yang",
+                "/yangs/ietf-yang-schema-mount.yang",
+                "/yangs/ietf-tcp-common.yang",
+                "/yangs/ietf-tcp-client.yang",
+                "/yangs/ietf-tcp-server.yang",
+                "/yangs/ietf-datastores@2017-08-17.yang",
+                "/yangs/bbf-device-types.yang",
+                "/yangs/bbf-network-function-types.yang",
+                "/yangs/bbf-xpon-types.yang",
+                "/yangs/bbf-yang-types.yang",
+                "/yangs/bbf-vomci-types.yang",
+                "/yangs/bbf-grpc-client.yang",
+                "/yangs/bbf-kafka-agent.yang"
+        };
+        YangUtils.deployInMemoryHelpers(yangFilePath, dependentYangFiles, m_deviceSubsystem, m_modelNodeHelperRegistry,
                 m_subSystemRegistry, m_schemaRegistry, m_modelNodeDsm);
 
         ContainerSchemaNode schemaNode = (ContainerSchemaNode) m_schemaRegistry.getDataSchemaNode(NETWORK_MANAGER_SP);

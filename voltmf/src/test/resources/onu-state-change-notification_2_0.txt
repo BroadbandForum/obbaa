@@ -1,0 +1,18 @@
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+    <eventTime>2021-06-25T05:47:25+00:00</eventTime>
+    <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+        <interface>
+            <name>%s</name>
+            <channel-termination xmlns="urn:bbf:yang:bbf-xpon">
+                <onu-presence-state-change xmlns="urn:bbf:yang:bbf-xpon-onu-state">
+                <detected-serial-number>%s</detected-serial-number>
+                <detected-registration-id>%s</detected-registration-id>
+                <last-change>2021-06-25T05:47:25Z</last-change>
+                <onu-presence-state xmlns:bbf-xpon-onu-types="urn:bbf:yang:bbf-xpon-onu-types">%s</onu-presence-state>
+                <onu-id>%s</onu-id>
+                <v-ani-ref>%s</v-ani-ref>
+            </onu-presence-state-change>
+            </channel-termination>
+        </interface>
+    </interfaces-state>
+</notification>

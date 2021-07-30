@@ -47,6 +47,7 @@ public class DeviceNotificationListener implements NotificationListener {
     private static final String PREFIX_PORT_REF = "bbf-if-port-ref";
     private static final String HARDWARE_NS = "urn:ietf:params:xml:ns:yang:ietf-hardware";
     private static final String PREFIX_HARDWARE = "hw";
+    private static final QName INTERFACES_STATE_QNAME = QName.create(INTERFACE_NS, "interfaces-state");
     private Device m_device;
     private NotificationService m_notificationService;
     private DeviceAdapterId m_deviceAdapterId;
@@ -84,7 +85,8 @@ public class DeviceNotificationListener implements NotificationListener {
                                 listener.deviceNotificationReceived(m_device, normalizedNotification);
                             }
                         }
-                        if (onuStateChangeNotification.equals(normalizedNotification.getType())) {
+                        if (onuStateChangeNotification.equals(normalizedNotification.getType())
+                                || INTERFACES_STATE_QNAME.equals(normalizedNotification.getType())) {
                             getDeviceSlotAndPort(m_device.getDeviceName(), normalizedNotification);
                         }
                         m_notificationService.executeCallBack(normalizedNotification, context);

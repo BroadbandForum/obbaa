@@ -80,8 +80,9 @@ Sending NETCONF requests from a SDN M&C element to an AN Instance
 -----------------------------------------------------------------
 
 In order for a SDN M&C element to send a request to an AN Instance, the
-SDN M&C has to obtain the credentials used by the BAA layer. These
-credentials are located in the docker-compose.yml file.
+SDN M&C has to obtain the credentials used by the BAA layer. If BAA
+environment is started using docker-compose file, these credentials are
+located in the docker-compose.yml file.
 
 ```
 docker-compose.yml
@@ -101,6 +102,116 @@ environment:
 - BAA_USER_PASSWORD=password <---NBI Netconf server SSH password.
 #Possible Values for PMA_SESSION_FACTORY_TYPE are REGULAR,TRANSPARENT, Default value is REGULAR
 - PMA_SESSION_FACTORY_TYPE=REGULAR
+```
+
+If the OB-BAA environment is started using Helm charts, the username and
+password for BAA NBI login can be found in  ~/obbaa/resources/helm-charts/obbaa-helm-charts/obbaa/charts/baa/templates/deployment.yaml.
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: baa
+   namespace: obbaa
+spec:
+ strategy:
+  type: Recreate
+ replicas: 1
+ selector:
+  matchLabels:
+   app: baa
+ template:
+  metadata:
+   labels:
+    app: baa
+  spec:
+   volumes:
+    - name: baa-store
+      persistentVolumeClaim:
+       claimName: baa-pvclaim
+   hostname: baa
+   containers:
+    - name: baa
+      image: broadbandforum/baa:latest
+      imagePullPolicy: IfNotPresent
+      ports:
+       - name: http
+         containerPort: 8080
+         protocol: TCP
+       - name: debug
+         containerPort: 5005
+         protocol: TCP
+       - name: ncnbissh
+         containerPort: 9292
+         protocol: TCP
+       - name: callhometls
+         containerPort: 4335
+         protocol: TCP
+       - name: snmp
+         containerPort: 162
+         protocol: UDP
+      stdin: true
+      tty: true
+      env:
+       - name: BAA_USER
+         value: admin <---------------NBI Netconf server SSH username.
+       - name: BAA_USER_PASSWORD
+         value: password <---------------NBI Netconf server SSH password.
+       - name: PMA_SESSION_FACTORY_TYPE
+         value: REGULAR
+       - name: KAFKA_LOCAL_ENDPOINT_NAME
+         value: vOLTMF_Kafka
+#      livenessProbe:
+#       httpGet:
+#        path: /
+#        port: http
+#       readinessProbe:
+#        httpGet:
+#         path: /
+#         port: http
+     volumeMounts:
+      - name: baa-store
+        mountPath: /baa/stores
+```
+
+NBI Netconf server SSH port can be found in ~/obbaa/resources/helm-charts/obbaa-helm-charts/obbaa/charts/baa/templates/service.yaml.
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+ name: baa
+ namespace: obbaa
+spec:
+  selector:
+   app: baa
+  ports:
+   - name: port8080
+     protocol: TCP
+     port: 8080
+     targetPort: 8080
+     nodePort: 32080 #external port
+    - name: port5005
+      protocol: TCP
+      port: 5005
+      targetPort: 5005
+      nodePort: 31005 #external port
+    - name: port9292
+      protocol: TCP
+      port: 9292
+      targetPort: 9292
+      nodePort: 31292 #external port <---------------NBI Netconf server SSH port.
+    - name: port4335
+      protocol: TCP
+      port: 4335
+      targetPort: 4335
+      nodePort: 31335 #external port
+    - name: port162
+      protocol: UDP
+      port: 162
+     targetPort: 162
+     nodePort: 31162 #external port
+   type: NodePort
 ```
 
 [<--Using OB-BAA](../index.md#using)

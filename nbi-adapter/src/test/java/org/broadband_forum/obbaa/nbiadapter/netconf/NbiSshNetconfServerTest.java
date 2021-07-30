@@ -16,14 +16,14 @@
 
 package org.broadband_forum.obbaa.nbiadapter.netconf;
 
+import static org.mockito.Mockito.mock;
+
 import org.broadband_forum.obbaa.netconf.api.server.NetconfServerDispatcher;
 import org.broadband_forum.obbaa.netconf.api.util.ExecutorServiceProvider;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.DynamicCapabilityProviderImpl;
 import org.broadband_forum.obbaa.netconf.server.dispatcher.NetconfServerDispatcherImpl;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.mockito.Mockito.mock;
 
 public class NbiSshNetconfServerTest {
 

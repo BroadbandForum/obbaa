@@ -83,6 +83,7 @@
 ### Release 4
 
 * [OB-BAA release 4.0.0 (September 2020)]({{ site.obbaa_readme }}#rel_4_0_0)
+* [OB-BAA release 4.1.0 (July 2021)]({{ site.obbaa_readme }}#rel_4_1_0)
 
 ### Release 3
 
@@ -100,12 +101,13 @@
 
 ## Participants
 
-| :---: | :---: | :---: | :---: | :---: |
+| :---: | :---: | :---: | :---: |
 |![Altice](assets/img/altice.jpg){: width="100px" height="80px"}|![Altran](assets/img/altran.png){: width="100px" height="100px"}|![ATT](assets/img/att.png){: width="90px" height="80px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|
-![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaMobile](assets/img/china-mobile.png){: width="100px" height="100px"}|
-|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|![DZS](assets/img/dzs.png){: width="100px" height="100px"}|![Fiberhome](assets/img/fiberhome.jpg){: width="100px" height="60px"}|
-|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Orange](assets/img/orange.png){: width="100px" height="100px"}|
-|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|![TelecomItalia](assets/img/tim.png){: width="100px" height="60px"}|![UNH](assets/img/iol.png){: width="100px" height="45px"}|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="60px"}||
+|![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaMobile](assets/img/china-mobile.png){: width="100px" height="100px"}|
+|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|![DZS](assets/img/dzs.png){: width="100px" height="100px"}|![CommScope](assets/img/commscope.jpg){: width="100px" height="30px"}|
+|![Fiberhome](assets/img/fiberhome.jpg){: width="100px" height="60px"}|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|![ISKRATEL](assets/img/iskratel.jpg){: width="100px" height="100px"}|
+|![nbn](assets/img/nbn.png){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Orange](assets/img/orange.png){: width="100px" height="100px"}|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|
+|![TelecomItalia](assets/img/tim.png){: width="100px" height="60px"}|![UNH](assets/img/iol.png){: width="100px" height="45px"}|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="60px"}||
 
 
 How to Get Involved
@@ -113,15 +115,8 @@ How to Get Involved
 
 Involvement in OB-BAA requires that you sign the Broadband Forum\'s
 [Contribution License Agreement (CLA)/Project Participation
-Agreement](https://wiki.broadband-forum.org/download/attachments/37193235/OB-BAA%20CLA%2013Dec2017.pdf?version=1&modificationDate=1516308789992&api=v2)
-(PDF), and then send the signed agreement to:
-
-Name: [Robin Mersh](https://wiki.broadband-forum.org/display/~rmersh@broadband-forum.org)
-(CEO The Broadband Forum)
-
-Email: <rmersh@broadband-forum.org>
-
-Phone contact: +1 303 596 7448
+Agreement](https://wiki.broadband-forum.org/download/attachments/87557378/OB-BAA%20CLA%2013Dec2017%20%281%29.pdf?version=1&modificationDate=1580411867544&api=v2)
+(PDF), and then send the signed agreement to: [info@broadband-forum.org](mailto:info@broadband-forum.org).
 
 Issues and bugs can be submitted using the Issues feature on the OB-BAA
 Github repository.
@@ -150,15 +145,16 @@ policy](https://www.broadband-forum.org/about-the-broadband-forum/the-bbf/intell
 
 Third Party Tools and License
 -----------------------------
-The following tools are used by the OB-BAA project
+The following tools are used by the OB-BAA project:
 
 | Software Name| Purpose | Vendor | Paid/Open Source | License | Details |
 | :--- | :--- | :--- | :--- |:--- | :--- |
 |Netopeer2|NETCONF device simulator|CESNET|Open Source|BSD-3|<a href="https://github.com/CESNET/Netopeer2">Github link</a>|
 |Atom|NETCONF client text editor|Atom|Open Source|MIT|<a href="https://atom.io">Documentation link</a>|
 |atom-netconf|NETCONF package for the Atom editor|Nokia|Open Source|MIT|<a href="https://github.com/nokia/atom-netconf">Github link</a>|
+|protoc|Protocol Buffer Compiler|gRPC Authors|Open Source|BSD-style|<a href="https://github.com/protocolbuffers/protobuf">Github link</a>|
 
-The following tools are used in  and delivered by the OB-BAA project
+The following tools are used in and delivered by the OB-BAA project:
 
 | Software Name| Purpose | Vendor | Paid/Open Source | License | Details |
 | :--- | :--- | :--- | :--- |:--- | :--- |
@@ -171,5 +167,25 @@ The following tools are used in  and delivered by the OB-BAA project
 |ZooKeeper|Highly reliable distributed coordination|Apache|Open Source|Apache 2.0|<a href="https://zookeeper.apache.org/">Documentation link</a>|
 |Python|Programming Language|PSF|Open Source|BSD|<a href="https://docs.python.org/3/license.html">Documentation link</a>|
 |kafka-python|Kafka-Python Implementation|kafka-python|Open Source|Apache 2.0|<a href="https://pypi.org/project/kafka-python/">Documentation link</a>|
+
+The following tools are used in and delivered for the Control Relay Service by the OB-BAA project:
+
+| Software Name| Purpose | Vendor | Paid/Open Source | License | Details |
+| :--- | :--- | :--- | :--- |:--- | :--- |
+|github.com/Juniper/go-netconf|Simple NETCONF client base on RFC6241 and RFC6242. Support for SSH transport|Juniper|Open Source|BSD 2|<a href="https://github.com/Juniper/go-netconf/">Github link</a>|
+|github.com/golang/mock|Mocking framework for the Go programming language|Go Project|Open Source|Apache 2.0|<a href="https://github.com/golang/mock">Github link</a>|
+|github.com/golang/protobuf|Go support for protocol buffers|Google|Open Source|BSD|<a href="https://github.com/golang/protobuf">Github link</a>|
+|github.com/google/go-cmp|For comparing whether two values are semantically equal|Go Project|Open Source|BSD 3|<a href="https://github.com/google/go-cmp">Github link</a>|
+|github.com/google/gopacket|Packet decoding|Google|Open Source|BSD|<a href="https://github.com/google/gopacket">Github link</a>|
+|github.com/kr/text|Manipulating paragraphs of text|Many|Open Source|MIT|<a href="https://github.com/kr/text">Github link</a>|
+|github.com/niemeyer/pretty|Provides colors to the logger|Many|Open Source|MIT|<a href="https://github.com/niemeyer/pretty">Github link</a>|
+|github.com/rifflock/lfshook|Local filesystem hook for Logrus|Many|Open Source|MIT|<a href="https://github.com/rifflock/lfshook">Github link</a>|
+|github.com/sirupsen/logrus|Structured logger for Go|Many|Open Source|MIT|<a href="https://github.com/sirupsen/logrus">Github link</a>|
+|github.com/stretchr/testify|Framework for testing Go code|Many|Open Source|MIT|<a href="https://github.com/stretchr/testify">Github link</a>|
+|github.com/ziutek/telnet|Provides simple interface for interacting with Telnet connection. (indirect dependency)|Michal Derkacz|Open Source|Proprietary of Michal Derkacz (BSD 3 like)|<a href="https://github.com/ziutek/telnet">Github link</a>|
+|google.golang.org/genproto|Go generated proto packages|Google|Open Source|Apache 2.0|<a href="https://github.com/googleapis/go-genproto">Github link</a>|
+|google.golang.org/grpc|The Go implementation of gRPC|Google|Open Source|Apache 2.0|<a href="https://github.com/grpc/grpc-go">Github link</a>|
+|google.golang.org/protobuf|Go support for protocol buffers|Google|Open Source|BSD|<a href="https://github.com/protocolbuffers/protobuf-go">Github link</a>|
+
 
 [Overview -->](./overview/index.md#overview)

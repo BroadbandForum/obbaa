@@ -28,10 +28,8 @@ import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.pma.NonNCNotificationHandler;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.snmp4j.CommandResponderEvent;
 
 

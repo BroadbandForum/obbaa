@@ -120,7 +120,7 @@ public class AlignmentTimer {
                                     LOGGER.debug("Upload config done");
                                     m_deviceDao.updateDeviceAlignmentState(device.getDeviceName(), ALIGNED);
                                 }
-                            } else if (!device.isAligned()) {
+                            } else if (!device.isAligned() && !device.isAlignmentUnknown()) {
                                 session.align();
                             }
                             return null;

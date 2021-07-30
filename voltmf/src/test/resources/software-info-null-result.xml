@@ -1,0 +1,8 @@
+<onu-discovery-result xmlns="urn:bbf:yang:bbf-voltmf-entity">
+<onu-serial-number>BRCM00000001</onu-serial-number>
+<discovery-result>failed-connectivity</discovery-result>
+<device-info/>
+<software-info>
+<software-images xmlns="urn:bbf:yang:obbaa:onu-management"/>
+</software-info>
+</onu-discovery-result>

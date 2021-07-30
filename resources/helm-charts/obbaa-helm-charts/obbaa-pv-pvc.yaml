@@ -1,0 +1,137 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: baa-pv
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /baa/stores
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: baa-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: baa-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: influxdb-volume
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /baa/stores/influxdb
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: influxdb-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: influxdb-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ipfix-volume
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /baa/stores/ipfix
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: ipfix-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ipfix-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: control-relay-volume
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /baa/control-relay/plugins
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: control-relay-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: control-relay-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

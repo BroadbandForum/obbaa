@@ -19,13 +19,15 @@ package org.broadband_forum.obbaa.ipfix.collector.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 
 import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElement;
 import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElementType;
-import org.broadband_forum.obbaa.ipfix.collector.exception.MissingAbstractDataTypeException;
 import org.broadband_forum.obbaa.ipfix.collector.service.IEMappingCacheService;
 import org.broadband_forum.obbaa.ipfix.collector.service.ie.InformationElementCache;
 import org.junit.Before;

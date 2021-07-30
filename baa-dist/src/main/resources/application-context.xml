@@ -41,7 +41,7 @@
 
     <bean id="swaggerDocket" class="org.broadband_forum.obbaa.SwaggerConfig" factory-method="api"/>
 
-    <bean id="deviceAdminRest" class="org.broadband_forum.obbaa.dm.rest.DeviceManagerRestEP">
+    <bean id="deviceAdminRest" class="org.broadband_forum.obbaa.nm.devicemanager.rest.DeviceManagerRestEP">
         <constructor-arg ref="deviceManager"/>
     </bean>
 
@@ -86,7 +86,7 @@
         <constructor-arg ref="schemaRegistry"/>
     </bean>
 
-    <bean id="deviceManager" class="org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl">
+    <bean id="deviceManager" class="org.broadband_forum.obbaa.nm.devicemanager.impl.DeviceManagerImpl">
         <constructor-arg ref="ncConnectionMgr"/>
     </bean>
 

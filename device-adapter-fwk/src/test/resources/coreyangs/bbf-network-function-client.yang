@@ -1,0 +1,273 @@
+module bbf-network-function-client {
+  yang-version 1.1;
+  namespace "urn:bbf:yang:bbf-network-function-client";
+  prefix bbf-nfc;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import ietf-tcp-client {
+    prefix tcpc;
+  }
+  import bbf-network-function-types {
+    prefix bbf-nf-types;
+  }
+  import bbf-grpc-client {
+    prefix bbf-grpcc;
+  }
+  import bbf-kafka-agent {
+    prefix bbf-kafkaa;
+  }
+
+  organization
+    "Broadband Forum <https://www.broadband-forum.org>
+     SDN/NFV Work Area";
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      Tim Carey, Nokia
+
+     Editor:      Dechao Zhang, China Mobile
+
+     PS Leader:   Yves Hertoghs, VMWare
+
+     WA Director: George Dobrowski, Morris Creek Consulting
+
+     WA Director: Bruno Cornaglia, Vodafone";
+  description
+    "This module contains a collection of YANG definitions needed to
+     communicate with endpoints of network functions.
+
+     Copyright (c) 2019-2021, Broadband Forum
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms
+     <https://www.broadband-forum.org/ipr-policy>.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-451; see
+     the TR itself for full legal notices.";
+
+  revision 2021-02-19 {
+    description
+      "Initial revision.";
+    reference
+      "TR-451: Section 5.5 vOMCI Function to OLT Interface";
+  }
+
+  // Features
+  feature kafka-agent-supported {
+    description
+      "Indicates that the network function client supports
+       Kafka as a message transport protocol.";
+  }
+
+  feature grpc-client-supported {
+    description
+      "Indicates that the network function client supports
+       gRPC as a message transport protocol.";
+  }
+
+  // Groupings
+  grouping nf-endpoint-grouping {
+    description
+      "Top-level grouping for network function client configuration.";
+    container nf-initiate {
+      presence "Enables network function client to initiate
+                connections to remote endpoints";
+      description
+        "Configures client initiating underlying connections.";
+      container remote-endpoints {
+        description
+          "Remote endpoints that the client will connect.";
+          list remote-endpoint {
+            key "name";
+            min-elements 1;
+            description
+              "List of remote endpoints the client is to
+               initiate connections to in parallel.";
+            leaf name {
+              type string;
+              description
+                "An arbitrary name for the remote endpoint.";
+            }
+            leaf type {
+              type identityref {
+                base "bbf-nf-types:nf-type";
+              }
+              description
+                "The type of remote communication endpoint
+                 (e.g, vOMCI-proxy, vOMCI-function, vOLTMF, OLT)";
+            }
+            leaf local-endpoint-name {
+              type string;
+              description
+                "The name that this entity will use when reporting 
+                 the entity as an endpoint. For example, see 
+                 sections 5.6.2.1 Hello vOMCI service and 5.5.1.2.1.1
+                 Hello Message (service-endpoint-name) in TR-451 for 
+                 how this parameter is used for vOMCI communication.";
+            }
+            choice client-transport {
+              mandatory true;
+              description
+                "Selects between available client transports.";
+              case grpc {
+                if-feature "bbf-nfc:grpc-client-supported";
+                container grpc {
+                  description
+                    "The gRPC specific configuration for the 
+                     connection.";
+                  container grpc-client-parameters {
+                    description
+                      "A wrapper around the gRPC client parameters
+                       to avoid name collisions.";
+                    uses bbf-grpcc:grpc-client-grouping;
+                  }
+                }
+              }
+              case kafka-agent {
+                if-feature "bbf-nfc:kafka-agent-supported";
+                container kafka-agent {
+                  description
+                    "The Kafka agent specific configuration for the 
+                     connection.";
+                  container kafka-agent-parameters {
+                    description
+                      "A wrapper around the kafka-agent parameters
+                       to avoid name collisions.";
+                    uses bbf-kafkaa:kafka-agent-grouping;
+                  }
+                }
+              }
+            } // choice transport
+          list access-point {
+            key "name";
+            min-elements 1;
+            ordered-by user;
+            description
+              "A user-ordered list of access points  that the client
+               will attempt to connect to in the specified sequence.
+               Defining more than one enables high-availability.";
+            leaf name {
+              type string;
+              description
+                "An arbitrary name for the access point.";
+            }
+            choice message-transport {
+              mandatory true;
+              description
+                "Selects between available transports.";
+              case grpc {
+                if-feature "bbf-nfc:grpc-client-supported";
+                container grpc {
+                  description
+                    "The IP and gRPC specific configuration for the 
+                     connection.";
+                  container grpc-transport-parameters {
+                    description
+                      "A wrapper around the gRPC transport parameters
+                       to avoid name collisions.";
+                    uses tcpc:tcp-client-grouping {
+                      refine "remote-port" {
+                        default "8443";
+                        description
+                          "The client will attempt to connect
+                           to the well-known port value
+                           for 'grpc' (8443) if no value is
+                           specified.";
+                      }
+                    }
+                  }
+                }
+              }
+              case kafka-agent {
+                if-feature "bbf-nfc:kafka-agent-supported";
+                container kafka-agent {
+                  description
+                    "The Kafka agent connection.";
+                  container kafka-agent-transport-parameters {
+                    description
+                      "A wrapper around the kafka-agent transport 
+                       parameters to avoid name collisions.";
+                    uses tcpc:tcp-client-grouping {
+                      refine "remote-port" {
+                        default "9092";
+                        description
+                          "The client will attempt to connect
+                           to the well-known port value
+                           for 'kafka' (9092) if no value is
+                           specified.";
+                      }
+                    }
+                  }
+                }
+              }
+            } // choice transport
+          } // list access-point
+          notification remote-endpoint-status-change {
+            description
+              "A notification traceable to a client remote-endpoint 
+               and access-point. This notification is sent when
+               a remote-endpoint is connected or disconnected.";
+            leaf access-point {
+              type leafref {
+                 path "../../access-point/name";
+              }
+              mandatory true;
+              description
+                "Access-point that was connected/disconnected.";
+            }
+            leaf connected {
+              type boolean;
+              mandatory true;
+              description
+               "New remote-endpoint status.";
+            }
+           leaf remote-endpoint-state-last-change {
+              type yang:date-and-time;
+              mandatory true;
+              description
+                "The system date and time when the remote-endpoint was
+                 connected or disconnected.";
+            }
+          } // notification remote-endpoint-status-change
+        } // remote-endpoint
+      } // remote-endpoints
+    } // nf-initiate
+  } // nf-endpoint-grouping
+} // nf-client

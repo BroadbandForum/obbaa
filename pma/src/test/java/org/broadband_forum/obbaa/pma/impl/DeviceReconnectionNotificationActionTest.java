@@ -34,7 +34,6 @@ import org.broadband_forum.obbaa.netconf.api.client.NotificationListener;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
-import org.broadband_forum.obbaa.pma.DeviceNotificationClientListener;
 import org.broadband_forum.obbaa.pma.DeviceNotificationListenerService;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.junit.Before;

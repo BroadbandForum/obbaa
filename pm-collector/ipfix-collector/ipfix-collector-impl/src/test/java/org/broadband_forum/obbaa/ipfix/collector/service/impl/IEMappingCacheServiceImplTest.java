@@ -16,7 +16,11 @@
 
 package org.broadband_forum.obbaa.ipfix.collector.service.impl;
 
-import org.broadband_forum.obbaa.ipfix.collector.service.DeviceCacheService;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.broadband_forum.obbaa.ipfix.collector.service.InformationElementService;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
@@ -27,14 +31,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.io.IOException;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class IEMappingCacheServiceImplTest {
 

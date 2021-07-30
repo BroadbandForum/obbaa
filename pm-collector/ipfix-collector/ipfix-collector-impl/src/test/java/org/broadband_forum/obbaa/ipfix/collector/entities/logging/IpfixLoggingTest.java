@@ -28,7 +28,6 @@ import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixFieldSpecifier;
 import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixMessageHeader;
 import org.broadband_forum.obbaa.ipfix.collector.exception.NotEnoughBytesException;
 import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class IpfixLoggingTest {

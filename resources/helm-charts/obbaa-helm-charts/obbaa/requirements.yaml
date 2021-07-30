@@ -1,0 +1,51 @@
+dependencies:
+  - name: zookeeper
+    repository: http://127.0.0.1:8879/charts
+    version: 5.5.0
+    condition: zookeeper.enabled,global.zookeeper.enabled
+    tags:
+      - zookeeper
+      - tp
+  - name: kafka
+    repository: http://127.0.0.1:8879/charts
+    version: 5.5.0
+    condition: kafka.enabled,global.kafka.enabled
+    tags:
+      - kafka
+      - tp
+  - name: baa
+    repository: http://127.0.0.1:8879/charts
+    version: R4.0.0
+    condition: baa.enabled,global.baa.enabled
+    tags:
+      - bbf
+  - name: influxdb
+    repository: http://127.0.0.1:8879/charts
+    version: 2.0.0-beta.2-3
+    condition: influxdb.enabled,global.influxdb.enabled
+    tags:
+      - tp
+  - name: vproxy
+    repository: http://127.0.0.1:8879/charts
+    version: R4.0.0
+    condition: vproxy.enabled,global.vproxy.enabled
+    tags:
+      - bbf
+  - name: vomci
+    repository: http://127.0.0.1:8879/charts
+    version: R4.0.0
+    condition: vomci.enabled,global.vomci.enabled
+    tags:
+      - bbf
+  - name: ipfix-collector
+    repository: http://127.0.0.1:8879/charts
+    version: R4.0.0
+    condition: ipfix-collector.enabled,global.ipfix-collector.enabled
+    tags:
+      - bbf
+  - name: control-relay
+    repository: http://127.0.0.1:8879/charts
+    version: R4.0.0
+    condition: control-relay.enabled,global.control-relay.enabled
+    tags:
+      - bbf

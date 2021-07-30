@@ -1,0 +1,9 @@
+{
+  "olt-name": "OLT1",
+  "payload": "{\"identifier\":\"0\",\"operation\":\"get\",\"data\":{\"network-manager:device-management\":{\"device-state\":{\"bbf-obbaa-onu-management:onu-state-info\":{\"equipment-id\":\"test1\",\"software-images\":{\"software-image\":[{\"id\":\"1\",\"version\":\"1111\",\"is-committed\":\"false\",\"is-active\":\"false\",\"is-valid\":\"true\",\"product-code\":\"test1111\",\"hash\":\"11\"},{\"id\":\"0\",\"version\":\"0000\",\"is-committed\":\"true\",\"is-active\":\"true\",\"is-valid\":\"true\",\"product-code\":\"test\",\"hash\":\"00\"}]}}}}},\"status\":\"OK\"}",
+  "onu-name": "onu",
+  "channel-termination-ref": "CT_1",
+  "event": "response",
+  "onu-id": "1"
+}
+

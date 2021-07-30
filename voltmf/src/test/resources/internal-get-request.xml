@@ -1,0 +1,23 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <get>
+        <filter type="subtree">
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device>
+                        <name>onu1</name>
+                        <device-management>
+                            <device-state>
+                                <onu-state-info xmlns="urn:bbf:yang:obbaa:onu-management">
+                                    <equipment-id/>
+                                    <software-images>
+                                        <software-image/>
+                                    </software-images>
+                                </onu-state-info>
+                            </device-state>
+                        </device-management>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </filter>
+    </get>
+</rpc>

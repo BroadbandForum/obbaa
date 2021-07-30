@@ -40,7 +40,6 @@ import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemValidationException;
 import org.broadband_forum.obbaa.pma.NonNCNotificationHandler;
-
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -23,10 +23,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.Crypt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixMessageHeader;
 import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixOptionTemplateRecordHeader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IPFIXUtilTestHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(IPFIXUtilTestHelper.class);

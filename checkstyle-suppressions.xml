@@ -30,6 +30,9 @@
     <suppress files="org.broadband_forum.obbaa.aggregator.*" checks="CustomImportOrder"/>
     <suppress files="CallHomeListenerCompositeImpl.java" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.dmyang.entities.*" checks="MemberName"/>
+    <suppress files="org.broadband_forum.obbaa.nf.entities.*" checks="MemberName"/>
+    <suppress files="NetworkWideTag.java" checks="MemberName"/>
+    <suppress files="ResponseData.java" checks="MemberName"/>
     <suppress files="DataStoreTransactionInterceptor.java" checks="IllegalCatch"/>
     <suppress files="DeviceManagementSubsystem.java" checks="IllegalCatch"/>
     <suppress files="DeviceDaoImpl.java" checks="IllegalCatch"/>
@@ -71,9 +74,14 @@
     <suppress files="org.broadband_forum.obbaa.onu.UnknownONUHandler" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.onu.MediatedDeviceNetconfSession" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.onu.impl.VOLTManagementImpl" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.onu.util.VOLTManagementUtil" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.onu.notification.ONUNotification" checks="MemberName"/>
     <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="ArrayTypeStyle"/>
     <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="LocalVariableName"/>
     <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="VariableDeclarationUsageDistance"/>
+    <suppress files="org.broadband_forum.obbaa.onu.message.gpb.message.*" checks=".*"/>
+    <suppress files="org.broadband_forum.obbaa.onu.message.gpb.service.*" checks=".*"/>
+    <suppress files="OnuKafkaConsumerJson.java" checks="IllegalCatch"/>
+    <suppress files="OnuKafkaConsumerGpb.java" checks="IllegalCatch"/>
 </suppressions>

@@ -43,7 +43,6 @@ import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.device.adapter.impl.NcCompliantAdapterDeviceInterface;
-import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.dmyang.tx.TxService;
@@ -55,6 +54,7 @@ import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

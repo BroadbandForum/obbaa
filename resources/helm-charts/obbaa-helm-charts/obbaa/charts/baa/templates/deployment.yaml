@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baa
+  namespace: obbaa
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: baa
+  template:
+    metadata:
+      labels:
+        app: baa
+    spec:
+      volumes:
+        - name: baa-store
+          persistentVolumeClaim:
+            claimName: baa-pvclaim
+      hostname: baa
+      containers:
+        - name: baa
+          image: broadbandforum/baa:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: debug
+              containerPort: 5005
+              protocol: TCP
+            - name: ncnbissh
+              containerPort: 9292
+              protocol: TCP
+            - name: callhometls
+              containerPort: 4335
+              protocol: TCP
+            - name: snmp
+              containerPort: 162
+              protocol: UDP
+          stdin: true
+          tty: true
+          env:
+            - name: BAA_USER
+              value: admin
+            - name: BAA_USER_PASSWORD
+              value: password
+            - name: PMA_SESSION_FACTORY_TYPE
+              value: REGULAR
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+          volumeMounts:
+            - name: baa-store
+              mountPath: /baa/stores

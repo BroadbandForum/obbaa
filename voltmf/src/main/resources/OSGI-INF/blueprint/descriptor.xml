@@ -28,13 +28,20 @@
     <reference id="alarmService" interface="org.broadband_forum.obbaa.netconf.alarm.api.AlarmService" availability="mandatory"/>
     <reference id="aggregatedDSM" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager"
                availability="mandatory"/>
-    <reference id="deviceManager" interface="org.broadband_forum.obbaa.dm.DeviceManager" availability="mandatory"/>
+    <reference id="deviceManager" interface="org.broadband_forum.obbaa.nm.devicemanager.DeviceManager" availability="mandatory"/>
     <reference id="ncConnectionMgr" interface="org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager" availability="mandatory"/>
     <reference id="notificationService" interface="org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService"
                availability="mandatory"/>
     <reference id="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry" availability="mandatory"/>
+    <reference id="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry" availability="mandatory"/>
+    <reference id="deviceDao" interface="org.broadband_forum.obbaa.dmyang.dao.DeviceDao" availability="mandatory"/>
+    <reference id="networkFunctionDao" interface="org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao" availability="mandatory"/>
+    <reference id="networkFunctionManager" interface="org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager" availability="mandatory"/>
 
-    <bean id="kafkaProducer" class="org.broadband_forum.obbaa.onu.kafka.OnuKafkaProducer" init-method="init" destroy-method="destroy">
+    <!--<bean id="kafkaProducerJson" class="org.broadband_forum.obbaa.onu.kafka.producer.OnuKafkaProducerJson" init-method="init" destroy-method="destroy">
+        <argument ref="blueprintBundle"/>
+    </bean>-->
+    <bean id="kafkaProducerGpb" class="org.broadband_forum.obbaa.onu.kafka.producer.OnuKafkaProducerGpb" init-method="init" destroy-method="destroy">
         <argument ref="blueprintBundle"/>
     </bean>
 
@@ -45,22 +52,30 @@
         <property name="entityDataStoreManager" ref="osgiEDSM" />
     </bean>
 
+    <!--<bean id="jsonFormatter" class="org.broadband_forum.obbaa.onu.message.JsonFormatter"/>-->
+    <bean id="gpbFormatter" class="org.broadband_forum.obbaa.onu.message.GpbFormatter"/>
+
     <bean id="vOLTManagement" class="org.broadband_forum.obbaa.onu.impl.VOLTManagementImpl" init-method="init" destroy-method="destroy">
         <argument ref="txService"/>
         <argument ref="deviceManager"/>
         <argument ref="alarmService"/>
-        <argument ref="kafkaProducer"/>
+        <argument ref="kafkaProducerGpb"/>
         <argument ref="unknownOnuHandler"/>
         <argument ref="ncConnectionMgr"/>
         <argument ref="aggregatedDSM"/>
         <argument ref="notificationService"/>
         <argument ref="adapterManager"/>
         <argument ref="pmaRegistry"/>
+        <argument ref="schemaRegistry"/>
+        <argument ref="gpbFormatter"/>
+        <argument ref="networkFunctionDao"/>
+        <argument ref="deviceDao"/>
     </bean>
 
     <bean id="mediatedDeviceEventListener" class="org.broadband_forum.obbaa.onu.MediatedDeviceEventListener" init-method="init" destroy-method="destroy">
         <argument ref="deviceManager"/>
         <argument ref="vOLTManagement"/>
+        <argument ref="networkFunctionManager"/>
     </bean>
 
     <bean id="unknownOnuHandler" class="org.broadband_forum.obbaa.onu.UnknownONUHandler" >
@@ -70,11 +85,20 @@
     <bean id="onuNotificationListener" class="org.broadband_forum.obbaa.onu.ONUNotificationListener" init-method="init" destroy-method="destroy">
         <argument ref="deviceNotificationClientListenerRegistry"/>
         <argument ref="vOLTManagement"/>
+        <argument ref="gpbFormatter"/>
     </bean>
 
-    <bean id="onuKafkaConsumer" class="org.broadband_forum.obbaa.onu.kafka.OnuKafkaConsumer" init-method="init" destroy-method="destroy">
+    <!--<bean id="onuKafkaConsumerJson" class="org.broadband_forum.obbaa.onu.kafka.consumer.OnuKafkaConsumerJson" init-method="init" destroy-method="destroy">
         <argument ref="vOLTManagement"/>
         <argument ref="blueprintBundle"/>
+        <argument ref="deviceManager"/>
+        <argument ref="networkFunctionDao"/>
+    </bean>-->
+    <bean id="onuKafkaConsumerGpb" class="org.broadband_forum.obbaa.onu.kafka.consumer.OnuKafkaConsumerGpb" init-method="init" destroy-method="destroy">
+        <argument ref="vOLTManagement"/>
+        <argument ref="blueprintBundle"/>
+        <argument ref="deviceManager"/>
+        <argument ref="networkFunctionDao"/>
     </bean>
 
 </blueprint>

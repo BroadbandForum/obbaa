@@ -33,7 +33,6 @@ import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
-import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.tx.TXTemplate;
 import org.broadband_forum.obbaa.dmyang.tx.TxService;
@@ -42,6 +41,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 
 public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignmentService {
@@ -257,7 +257,8 @@ public class NetconfDeviceAlignmentServiceImpl implements NetconfDeviceAlignment
                         LOGGER.error(String.format("Error while aligning configuration with the device %s", deviceName), e);
                     }
                 }
-                if (queueForDevice.isEmpty() && !m_dm.getDevice(deviceName).isInError()) {
+                if (queueForDevice.isEmpty() && !m_dm.getDevice(deviceName).isInError()
+                        && !m_dm.getDevice(deviceName).isAlignmentUnknown()) {
                     markDeviceAligned(deviceName);
                 }
 

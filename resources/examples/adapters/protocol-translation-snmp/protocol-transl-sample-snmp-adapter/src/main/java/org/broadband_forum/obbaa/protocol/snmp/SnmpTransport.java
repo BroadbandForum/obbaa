@@ -27,10 +27,8 @@ import org.broadband_forum.obbaa.device.listener.RegisterTrapCallback;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.SnmpAuthentication;
 import org.broadband_forum.obbaa.pma.NonNCNotificationHandler;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
 import org.snmp4j.ScopedPDU;

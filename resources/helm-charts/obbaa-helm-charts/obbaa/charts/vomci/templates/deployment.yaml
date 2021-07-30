@@ -1,0 +1,36 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: vomci
+  namespace: obbaa
+spec:
+  selector:
+    matchLabels:
+      app: vomci
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: vomci
+    spec:
+      containers:
+        - name: vomci
+          image: broadbandforum/obbaa-vomci:latest
+          env:
+            - name: GRPC_SERVER_NAME
+              value: "vOMCi-grpc-1"
+            - name: LOCAL_GRPC_SERVER_PORT
+              value: "58433"
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: "kafka:9092"
+            # List of Consumer topics, seperated by spaces
+            - name: KAFKA_REQUEST_TOPICS
+              value: "vomci1-request" # if message formatter is JSON "OBBAA_ONU_REQUEST"
+            - name: KAFKA_RESPONSE_TOPICS
+              value: "vomci1-response" # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
+            - name: KAFKA_NOTIFICATION_TOPICS
+              value: "vomci1-notification" # if message formatter is JSON "OBBAA_ONU_NOTIFICATION"
+          ports:
+            - containerPort: 8081
+              name: port8081
+      restartPolicy: Always

@@ -17,11 +17,17 @@
 package org.broadband_forum.obbaa.onu.entity;
 
 import java.sql.Timestamp;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.broadband_forum.obbaa.dmyang.entities.SoftwareImages;
 
 /**
  * <p>
@@ -59,6 +65,13 @@ public class UnknownONU {
 
     @Column
     private Timestamp onuStateLastChange;
+
+    @Column
+    private String equipmentId;
+
+
+    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    private SoftwareImages softwareImages;
 
     public String getRegistrationId() {
         return registrationId;
@@ -124,12 +137,28 @@ public class UnknownONU {
         this.onuID = onuID;
     }
 
+    public String getEquipmentId() {
+        return equipmentId;
+    }
+
+    public void setEquipmentId(String equipmentId) {
+        this.equipmentId = equipmentId;
+    }
+
+    public SoftwareImages getSoftwareImages() {
+        return softwareImages;
+    }
+
+    public void setSoftwareImages(SoftwareImages softwareImages) {
+        this.softwareImages = softwareImages;
+    }
+
     @Override
     public String toString() {
         return "UnknownONU [serialNumber = " + serialNumber + ", registrationId = " + registrationId + ", vAniRef = "
                 + vAniRef + ", channel Termination Ref = " + channelTermRef + ", ONU state last change = "
                 + onuStateLastChange + ", ONU ID = "
-                + onuID + ", ONU state = " + onuState + "]";
+                + onuID + ", ONU state = " + onuState + ", EquipmentId = " + equipmentId + "]";
     }
 
 }

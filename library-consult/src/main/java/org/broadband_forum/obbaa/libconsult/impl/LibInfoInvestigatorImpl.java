@@ -18,9 +18,9 @@
 package org.broadband_forum.obbaa.libconsult.impl;
 
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
-import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.libconsult.BaseLibConsult;
 import org.broadband_forum.obbaa.libconsult.LibInfoInvestigator;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 
 public class LibInfoInvestigatorImpl extends BaseLibConsult implements LibInfoInvestigator {
 

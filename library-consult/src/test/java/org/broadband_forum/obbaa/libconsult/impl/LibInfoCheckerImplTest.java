@@ -1,23 +1,28 @@
 package org.broadband_forum.obbaa.libconsult.impl;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+
 import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.device.adapter.impl.AdapterManagerImpl;
-import org.broadband_forum.obbaa.dm.DeviceManager;
-import org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl;
 import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
+import org.broadband_forum.obbaa.nm.devicemanager.impl.DeviceManagerImpl;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.broadband_forum.obbaa.pma.impl.PmaRegistryImpl;
 import org.junit.BeforeClass;
@@ -26,10 +31,6 @@ import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class LibInfoCheckerImplTest {
 

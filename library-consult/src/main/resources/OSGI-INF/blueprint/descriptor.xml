@@ -22,7 +22,7 @@
     <tx:enable-annotations/>
 
     <reference id="adapterManager" interface="org.broadband_forum.obbaa.device.adapter.AdapterManager" availability="mandatory"/>
-    <reference id="deviceManager" interface="org.broadband_forum.obbaa.dm.DeviceManager" availability="mandatory"/>
+    <reference id="deviceManager" interface="org.broadband_forum.obbaa.nm.devicemanager.DeviceManager" availability="mandatory"/>
     <reference id="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry" availability="mandatory"/>
 
     <bean id="LibInfoChecker" class="org.broadband_forum.obbaa.libconsult.impl.LibInfoCheckerImpl">

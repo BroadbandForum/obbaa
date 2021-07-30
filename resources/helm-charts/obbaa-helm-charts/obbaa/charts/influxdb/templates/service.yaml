@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb
+  namespace: obbaa
+spec:
+  selector:
+    app: influxdb
+  ports:
+    - protocol: TCP
+      port: 9999
+      targetPort: 9999
+      nodePort: 31999  #external port
+  type: NodePort

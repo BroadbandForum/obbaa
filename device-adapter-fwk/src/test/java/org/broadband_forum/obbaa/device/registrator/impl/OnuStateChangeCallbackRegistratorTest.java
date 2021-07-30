@@ -1,6 +1,5 @@
 package org.broadband_forum.obbaa.device.registrator.impl;
 
-import static org.broadband_forum.obbaa.device.registrator.impl.OnuStateChangeCallbackRegistrator.ONU_STATE_CHANGE_NOTIFICATION;
 import static org.broadband_forum.obbaa.device.registrator.impl.OnuStateChangeCallbackRegistrator.ONU_STATE_CHANGE_NS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.reset;
@@ -32,7 +31,7 @@ import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 public class OnuStateChangeCallbackRegistratorTest {
-
+    private static final String IETF_INTERFACES_NS = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
     @Mock
     private NotificationService m_notificationService;
     private OnuStateChangeCallbackRegistrator m_onuCallbackRegistrator;
@@ -55,7 +54,7 @@ public class OnuStateChangeCallbackRegistratorTest {
         when(m_module.getName()).thenReturn("bbf-xpon-onu-states");
         QNameModule qNameModule = QNameModule.create(new URI(ONU_STATE_CHANGE_NS), Revision.of("2019-02-25"));
         when(m_module.getQNameModule()).thenReturn(qNameModule);
-        m_notificationQName = QName.create(ONU_STATE_CHANGE_NS, ONU_STATE_CHANGE_NOTIFICATION);
+        m_notificationQName = QName.create(IETF_INTERFACES_NS, "interfaces-state");
         when(m_schemaRegistry.getModuleByNamespace(ONU_STATE_CHANGE_NS)).thenReturn(m_module);
         AdapterBuilder adapterBuilder = new AdapterBuilder();
         adapterBuilder.setDeviceAdapterId(m_deviceAdapterId);

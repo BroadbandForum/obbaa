@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.snmp4j.smi.Counter32;
 import org.snmp4j.smi.Gauge32;
 import org.snmp4j.smi.Integer32;

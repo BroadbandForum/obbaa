@@ -16,6 +16,15 @@
 
 package org.broadband_forum.obbaa.ipfix.collector.service.impl;
 
+import static org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer.getRpcRequest;
+import static org.broadband_forum.obbaa.netconf.api.util.DocumentUtils.stringToDocument;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import org.broadband_forum.obbaa.ipfix.ncclient.api.NcClientService;
 import org.broadband_forum.obbaa.ipfix.ncclient.api.NetConfClientException;
 import org.broadband_forum.obbaa.ipfix.ncclient.app.NcClientServiceImpl;
@@ -26,23 +35,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcRequest;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import static org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer.getRpcRequest;
-import static org.broadband_forum.obbaa.netconf.api.util.DocumentUtils.stringToDocument;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class DeviceCacheServiceImplTest {
 

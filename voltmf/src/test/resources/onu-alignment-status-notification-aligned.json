@@ -1,0 +1,7 @@
+{
+  "bbf-vomci-function:onu-alignment-status": {
+    "event-time": "2021-06-01T15:53:36+00:00",
+    "onu-name": "onu1",
+    "alignment-status": "aligned"
+  }
+}

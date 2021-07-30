@@ -16,8 +16,8 @@
 
 package org.broadband_forum.obbaa.onu;
 
+import org.broadband_forum.obbaa.onu.kafka.consumer.OnuKafkaConsumer;
 import org.broadband_forum.obbaa.onu.notification.ONUNotification;
-import org.json.JSONObject;
 
 /**
  * <p>
@@ -33,5 +33,15 @@ public interface VOLTManagement {
 
     void onuNotificationProcess(ONUNotification onuNotification, String oltDeviceName);
 
-    void processResponse(JSONObject jsonResponse);
+    void processResponse(Object responseObject);
+
+    void setKafkaConsumer(OnuKafkaConsumer onuKafkaConsumer);
+
+    void unsetKafkaConsumer(OnuKafkaConsumer onuKafkaConsumer);
+
+    void networkFunctionAdded(String networkFunctionName);
+
+    void networkFunctionRemoved(String networkFunctionName);
+
+    void processNotification(Object notificationObject);
 }

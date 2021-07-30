@@ -114,6 +114,9 @@ services:
         container_name: kafka
         depends_on:
             - zookeeper
+        ports:
+            - "29092:29092"
+            - "9092:9092"
         environment:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
@@ -130,8 +133,14 @@ services:
         ports:
             - 8801:8801
         environment:
-            GRPC_SERVER_NAME: vOMCIProxy
+            GRPC_SERVER_NAME: vOMCi-grpc-1
             LOCAL_GRPC_SERVER_PORT: 58433
+            # Kafka bootstrap server, please provide only one address
+            KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
+            # List of Consumer topics, seperated by spaces
+            KAFKA_REQUEST_TOPICS: "vomci1-request" # if message formatter is JSON "OBBAA_ONU_REQUEST"
+            KAFKA_RESPONSE_TOPICS: 'vomci1-response' # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
+            KAFKA_NOTIFICATION_TOPICS: "vomci1-notification" # if message formatter is Json "OBBAA_ONU_NOTIFICATION"
         networks:
             - baadist_default
         depends_on:
@@ -144,9 +153,16 @@ services:
         ports:
             - 8433:8433
         environment:
+            GRPC_CLIENT_NAME: proxy-grpc-1
+            GRPC_SERVER_NAME: proxy-grpc-2
             LOCAL_GRPC_SERVER_PORT: 8433
             REMOTE_GRPC_SERVER_PORT: 58433
             REMOTE_GRPC_SERVER_ADDR: obbaa-vomci
+            KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
+            # List of Consumer topics, seperated by spaces
+            KAFKA_REQUEST_TOPICS: "vomci-proxy-request"
+            KAFKA_RESPONSE_TOPICS: 'vomci-proxy-response'
+            KAFKA_NOTIFICATION_TOPICS: "vomci-proxy-notification"
         networks:
             - baadist_default
         depends_on:

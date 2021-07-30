@@ -1,0 +1,48 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: influxdb
+  namespace: obbaa
+spec:
+  selector:
+    matchLabels:
+      app: influxdb
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      volumes:
+        - name: influxdb-volume
+          persistentVolumeClaim:
+            claimName: influxdb-pvclaim
+      hostname: influxdb
+      containers:
+        - name: influxdb
+          image: broadbandforum/influxdb:2.0.0-beta.2-3
+          env:
+            - name: DEBUG
+              value: "true"
+            - name: INFLUX_USER
+              value: "influxdb"
+            - name: INFLUX_PW
+              value: "influxdb"
+            - name: INFLUX_ORG
+              value: "broadband_forum"
+            - name: INFLUX_BUCKET
+              value: "pm-collection"
+            - name: INFLUX_RETENTION
+              value: "720"
+            - name: INFLUX_PORT
+              value: "9999"
+            - name: INFLUX_ROOT
+              value: "/var/opt/influxdb"
+          command: ["/entrypoint.sh", "--bolt-path", "/var/opt/influxdb/influxd.bolt", "--engine-path", "/var/opt/influxdb/engine", "--reporting-disabled"]
+          ports:
+            - containerPort: 9999
+              name: port9999
+          volumeMounts:
+            - mountPath: /var/opt/influxdb
+              name: influxdb-volume
+      restartPolicy: Always

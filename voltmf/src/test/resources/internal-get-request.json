@@ -1,0 +1,8 @@
+{
+    "olt-name": "OLT1",
+    "channel-termination-ref": "CT_1",
+    "event": "request",
+    "payload": "{\"operation\":\"get\",\"identifier\":\"0\",\"filters\":{\"network-manager:device-management\":{\"device-state\":{\"bbf-obbaa-onu-management:onu-state-info\":{\"equipment-id\":\"\",\"software-images\":{\"software-image\":{}}}}}}",
+    "onu-id": "1",
+    "labels": "{\"name\":\"vendor\",\"value\":\"ABCD\"}"
+}

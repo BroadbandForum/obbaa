@@ -16,14 +16,14 @@
 
 package org.broadband_forum.obbaa.aggregator.processor;
 
-import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
-import org.junit.Test;
-import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
-import org.w3c.dom.Document;
-
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
+
+import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
+import org.junit.Test;
+import org.w3c.dom.Document;
 
 public class NetconfMessageUtilTest {
     private static String TEST_REQUEST_AFTER_UNMOUNT =

@@ -1,0 +1,12 @@
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+   <eventTime>2019-07-25T05:53:36+00:00</eventTime>
+   <bbf-xpon-onu-states:onu-state-change xmlns:bbf-xpon-onu-states="urn:bbf:yang:bbf-xpon-onu-states">
+       <bbf-xpon-onu-states:detected-serial-number>%s</bbf-xpon-onu-states:detected-serial-number>
+       <bbf-xpon-onu-states:onu-id>%s</bbf-xpon-onu-states:onu-id>
+       <bbf-xpon-onu-states:channel-termination-ref>%s</bbf-xpon-onu-states:channel-termination-ref>
+       <bbf-xpon-onu-states:onu-state>%s</bbf-xpon-onu-states:onu-state>
+       <bbf-xpon-onu-states:detected-registration-id>%s</bbf-xpon-onu-states:detected-registration-id>
+       <bbf-xpon-onu-states:onu-state-last-change>2019-07-25T05:53:36+00:00</bbf-xpon-onu-states:onu-state-last-change>
+       <bbf-xpon-onu-states:v-ani-ref>%s</bbf-xpon-onu-states:v-ani-ref>
+   </bbf-xpon-onu-states:onu-state-change>
+</notification>

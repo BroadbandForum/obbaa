@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ipfix-collector
+  namespace: obbaa
+spec:
+  selector:
+    app: ipfix-collector
+  ports:
+    - name: port8005
+      protocol: TCP
+      port: 8005
+      targetPort: 8005
+      nodePort: 31085  #external port
+    - name: port4494
+      protocol: TCP
+      port: 4494
+      targetPort: 4494
+      nodePort: 31494  #external port
+    - name: port5051
+      protocol: TCP
+      port: 5051
+      targetPort: 5051
+      nodePort: 31051  #external port
+  type: NodePort

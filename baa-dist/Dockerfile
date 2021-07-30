@@ -28,7 +28,7 @@ ENV https_proxy $https_proxy
 RUN apk add --no-cache bash
 
 RUN mkdir /baa
-ARG version=4.0.0
+ARG version=4.1.0
 ADD target/baa-dist*.tar.gz /baa
 
 RUN ln -s /baa/baa-dist-${version} /baa/baa-dist

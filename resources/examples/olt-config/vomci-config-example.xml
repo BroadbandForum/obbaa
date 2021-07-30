@@ -25,60 +25,45 @@
                <device>
                   <name>deviceB</name>
                   <root>
-                      <remote-nf-settings xmlns="urn:bbf:yang:bbf-polt-vomci">
-                        <nf-client>
-                            <enabled>true</enabled>
-                            <client-parameters>
-                                <nf-initiate>
-                                    <remote-endpoints>
-                                        <name>vOMCI-proxy</name>
-                                        <type>vOMCI-nf</type>
-                                        <remote-endpoint>
-                                            <access-points>
-                                                <name>vOMCIProxy</name>
-                                                <grpc>
-                                                    <grpc-client-parameters>
+                    <bbf-olt-vomci:remote-network-function xmlns:bbf-olt-vomci="urn:bbf:yang:bbf-olt-vomci">
+                <bbf-olt-vomci:nf-client>
+                  <bbf-olt-vomci:enabled>true</bbf-olt-vomci:enabled>
+                    <bbf-olt-vomci:nf-initiate>
+                      <bbf-olt-vomci:remote-endpoints>
+                        <bbf-olt-vomci:remote-endpoint>
+                            <bbf-olt-vomci:name>vOMCIProxy</bbf-olt-vomci:name>
+                            <bbf-olt-vomci:local-endpoint-name>deviceB</bbf-olt-vomci:local-endpoint-name>
+                            <bbf-olt-vomci:type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:vomci-proxy-type</bbf-olt-vomci:type>
+                            <bbf-olt-vomci:grpc>
 
-                                                            <remote-address>www.example.com</remote-address>
-                                                            <remote-port>443</remote-port>
-                                                            <local-address>0.0.0.0</local-address>
-                                                            <local-port>0</local-port>
-                                                            <keepalives>
-                                                                <idle-time>15</idle-time>
-                                                                <max-probes>3</max-probes>
-                                                                <probe-interval>30</probe-interval>
-                                                            </keepalives>
-
-                                                    </grpc-client-parameters>
-                                                </grpc>
-                                            </access-points>
-                                        </remote-endpoint>
-                                    </remote-endpoints>
-                                </nf-initiate>
-                            </client-parameters>
-                            <nf-endpoint-filter>
-                                <rule>
-                                    <name>rule1</name>
-                                    <priority>1</priority>
-                                    <flexible-match>
-                                        <onu-vendor>PTIN</onu-vendor>
-                                    </flexible-match>
-                                </rule>
-                            </nf-endpoint-filter>
-                        </nf-client>
-                        <nf-server>
-                            <!--  if at least one rule does not exist an error will be thrown -->
-                            <nf-endpoint-filter>
-                              <rule>
-                                  <name>rule1</name>
-                                  <priority>1</priority>
-                                  <flexible-match>
-                                      <onu-vendor>none</onu-vendor>
-                                  </flexible-match>
-                              </rule>
-                            </nf-endpoint-filter>
-                        </nf-server>
-                    </remote-nf-settings>
+                            </bbf-olt-vomci:grpc>
+                            <bbf-olt-vomci:access-point>
+                              <bbf-olt-vomci:name>vOMCIProxy></bbf-olt-vomci:name>
+                              <bbf-olt-vomci:grpc>
+                                <bbf-olt-vomci:grpc-transport-parameters>
+                                  <bbf-olt-vomci:remote-address>10.1.1.1</bbf-olt-vomci:remote-address>
+                                  <bbf-olt-vomci:remote-port>4556</bbf-olt-vomci:remote-port>
+                                </bbf-olt-vomci:grpc-transport-parameters>
+                              </bbf-olt-vomci:grpc>
+                            </bbf-olt-vomci:access-point>
+                        </bbf-olt-vomci:remote-endpoint>
+                      </bbf-olt-vomci:remote-endpoints>
+                    </bbf-olt-vomci:nf-initiate>
+                </bbf-olt-vomci:nf-client>
+                <bbf-olt-vomci:nf-endpoint-filter>
+                    <bbf-olt-vomci:rule>
+                      <bbf-olt-vomci:name>client_rule1</bbf-olt-vomci:name>
+                      <bbf-olt-vomci:priority>1</bbf-olt-vomci:priority>
+                      <bbf-olt-vomci:flexible-match>
+                        <bbf-olt-vomci:onu-vendor>PTIN</bbf-olt-vomci:onu-vendor>
+                      </bbf-olt-vomci:flexible-match>
+                      <bbf-olt-vomci:resulting-endpoint>vOMCIProxy</bbf-olt-vomci:resulting-endpoint>
+                    </bbf-olt-vomci:rule>
+                 </bbf-olt-vomci:nf-endpoint-filter>
+                <bbf-olt-vomci:nf-server>
+                  <bbf-olt-vomci:enabled>true</bbf-olt-vomci:enabled>
+                </bbf-olt-vomci:nf-server>
+              </bbf-olt-vomci:remote-network-function>
                   </root>
                </device>
             </managed-devices>

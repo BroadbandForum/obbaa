@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
-import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 
 public class BaseLibConsult {
 

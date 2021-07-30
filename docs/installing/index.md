@@ -9,7 +9,7 @@ up and running. It includes:
 
 - [Setting up an OB-BAA Environment](env/index.md#env)
 
-    -   Platform requirements and running the baa image
+    -   Platform requirements
 
     -   Using OB-BAA micro-services from the Broadband Forum\'s 
         public docker artifactory

@@ -14,32 +14,32 @@ vOMCI Proxy provide the capabilities needed to:
 -   Transmit and receive request/responses and notification to/from the
     OLT
 
-## vOMCI Function
+### vOMCI Function
 
 The vOMCI function, is deployed as a microservice, is responsible for:
 
 -   Receiving service configurations from the vOLT Management function
 
--   Translating the received configurations into ITU G.988 OMCI management 
+-   Translating the received configurations into ITU G.988 OMCI management
     entities (ME) and formatting them into OMCI messages
 
--   Encapsulating and sending (receiving and de-encapsulating) formatted OMCI 
-    messages (ultimately targeting the ONU attached to the OLT) to (from) the 
+-   Encapsulating and sending (receiving and de-encapsulating) formatted OMCI
+    messages (ultimately targeting the ONU attached to the OLT) to (from) the
     vOMCI Proxy
 
--   Translating the OMCI messages (representing ONU's operational data) received 
+-   Translating the OMCI messages (representing ONU's operational data) received
     from the vOMCI Proxy into data (e.g. notifications, acknowledges, alarms, PM
     registers) understandable by the vOLT Management function
 
 -   Sending the above ONU operational data to the vOLT Management function
 
-The vOMCI function communicates with the vOLT Management function using Kafka bus that exchange YANG messages that have been encapsulated in JSON format as defined in WT-451.
+The vOMCI function communicates with the vOLT Management function using Kafka bus that exchange GPB formatted messages as defined in WT-451.
 
 **Note:** In this release there is a limitation of a single vOMCI Proxy instance for each OLT.
 
 In this release, the communication between the vOMCI Proxy and the vOMCI function uses a gRPC connection where the remote endpoint is the vOMCI Proxy that serves as an application gateway/proxy function between the OLT and vOMCI function.
 
-## vOMCI Proxy
+### vOMCI Proxy
 
 The vOMCI Proxy works as an aggregation and interception point that
 avoids the need for an OLT to directly connect to individual vOMCI
@@ -60,54 +60,165 @@ vOMCI Proxy microservices:
  <img width="600px" height="400px" src="{{site.url}}/architecture/voltmf/voltmf_design.png">
 </p>
 
-## vOLTMF to vOMCI function Notification and Request Handling
 
+## Deployment
 
-The vOLTMF sends JSON encapsulated requests and notification events as
-defined in section 5.4.1 of WT-451. The messages are transmitted to the
-vOMCI function using the Kafka bus.
+The vOMCI function and vOMCI Proxy are deployed using a shared yaml file and the same docker network. An important part of deploying them correctly and ensuring the connectivity between network functions is assigning the correct GRPC endpoint names and Kafka topics.
 
-The OB-BAA implementation adds an \"identifier\" field to the payload of
-YANG messages that is used to correlate the message request and
-response.
+Both the vOMCI function and the vOMCI Proxy have the following environmental variables in the yaml file:
+- GRPC_SERVER_NAME: is used for setting the GRPC server local endpoint name
+- GRPC_CLIENT_NAME: is used for setting the GRPC client local endpoint name
+- KAFKA_CONSUMER_TOPICS: is used for setting the kafka consumer topics
+- KAFKA_RESPONSE_TOPICS: for setting the response (kafka producer) topics
+- KAFKA_NOTIFICATION_TOPICS: for setting the notification (kafka producer) topics
 
-### Detect/Undetect Notifications
+Note: Before any communication between the vOMCI function and vOMCI Proxy, for example when set_onu_communication request is received, it is important the remote endpoint name of the other entity to match the local endpoint name of that entity.
 
-The notification (event) messages sent between the vOLTMF and vOMCI
-function are defined in section 5.4.1 of WT-451. The OB-BAA
-implementation adds a \"labels\" field to the message in provide the
-vOMCI Proxy the information needed to forward the message to the correct
-vOMC PF.
-
-The following code block describes a DETECT notification that is sent
-from the vOLTMF toward a vOMCI function with the additional \"labels\"
-field inserted in the message:
+The following is an example yaml file that would define the deployment of a vOMCI Function:
 
 ```
-{
-	"onu-name":"exampleDevice",
-	"olt-name":"olt1",
-	"onu-id":"25",
-	"channel-termination-ref":"CT-2",
-	"event":"DETECT",
-	"labels":"{\"name\" : \"vendor\", \"value\": \"BBF\"}",
-	"payload":"{\"operation\":\"DETECT\", \"identifier\":\"0\"}"
+omci:
+  image: obbaa-vomci
+  hostname: obbaa-vomci
+  container_name: obbaa-vomci
+  ports:
+    - 8801:8801
+    - 58433:58433
+  environment:
+    GRPC_SERVER_NAME: obbaa-grpc-1
+    LOCAL_GRPC_SERVER_PORT: 58433
+    KAFKA_BOOTSTRAP_SERVER: "kafka:9092 localhost:9092"
+    KAFKA_CONSUMER_TOPICS: "OBBAA_ONU_REQUEST"
+    KAFKA_RESPONSE_TOPICS: 'OBBAA_ONU_RESPONSE'
+    KAFKA_NOTIFICATION_TOPICS: "OBBAA_PROXY_ONU_NOTIFICATION" networks:
+    - baadist_default
+  depends_on:
+    - zookeeper
+    - kafka
+```
+
+The following is an example yaml file that would define the deployment of a vOMCI Proxy:
+
+```
+vproxy:
+      image: obbaa-vproxy
+      hostname: obbaa-vproxy
+      container_name: obbaa-vproxy
+      ports:
+        - 8433:8433
+      environment:
+        GRPC_CLIENT_NAME: obbaa-vproxy-grpc-client-1
+        GRPC_SERVER_NAME: obbaa-vproxy-grpc-server-1
+        LOCAL_GRPC_SERVER_PORT: 8433
+        REMOTE_GRPC_SERVER_PORT: 58433
+        REMOTE_GRPC_SERVER_ADDR: obbaa-vomci
+        KAFKA_BOOTSTRAP_SERVER: "kafka:9092 localhost:9092"
+        # List of Consumer topics, seperated by spaces
+        KAFKA_CONSUMER_TOPICS: "OBBAA_PROXY_ONU_REQUEST"
+        KAFKA_RESPONSE_TOPICS: "OBBAA_PROXY_ONU_RESPONSE"
+        KAFKA_NOTIFICATION_TOPICS: "OBBAA_PROXY_ONU_NOTIFICATION"
+      networks:
+        - baadist_default
+```
+
+## vOLTMF to vOMCI/vOMCI Proxy Request Handling
+The vOLTMF sends GPB formatted requests as defined in WT-451 for the vOLTMF-vOMCI interface. The messages are transmitted to the vOMCI function and the vOMCI Proxy function using the Kafka bus.
+
+### Creating an ONU in the vOMCI function
+The following is an example of a create-onu RPC that is directed toward a vOMCI function:
+
+```
+Msg {
+	header {                      
+	  msg_id: "1"                                                                                                                                                       
+	  sender_name: "vOLTMF"                                                                                                                                             
+	  recipient_name: "vomci-vendor-1"                                                                                                                                  
+	  object_type: VOMCI_FUNCTION                                                                                                                                       
+	  object_name: "vomci-vendor-1"                                                                                                                                     
+	}                                                                                                                                                                   
+	body {                                                                                                                                                              
+	  request {                                                                                                                                                         
+	    rpc {                                                                                                                                                           
+	      input_data: "{\"bbf-vomci-function:create-onu\":{\"name\":\"ont1\"}}"                                                                                         
+	    }                                                                                                                                                               
+	  }                                                                                                                                                                 
+	}
 }
 ```
 
-### Requests
+Upon receipt the receiving function ensures that the ONU is created within the function:
+- ONU is added to the list of managed ONUs and internal structures are initialized
+- Response is sent on the kafka bus
 
-The request messages sent between the vOLTMF and vOMCI function are
-defined in section 5.4.1 of WT-451.
+### Setting an ONU Management Chain
+The following is an example of a set-onu-communication that is directed toward a vOMCI Proxy:
 
-The OB-BAA implementation adds a \"delta\" field to the edit-config
-message to provide the information needed by the
-vOMCI function to assist in the translation of the YANG message into the
-correct OMCI message.
+```
+header.msg_id=2
+header.sender_name="VOLTMF"
+header.recipient_name="vproxy-vendor-1"
+header.object_type = VOMCI_PROXY
+header.object_name = "vproxy-vendor-1"
 
-The following code block describes an edit-config request that is sent
-from the vOLTMF toward a vOMCI function with the additional \"delta\"
-and identifier fields inserted in the message:
+body.action.input_data =
+
+"bbf-vomci-function:managed-onus":{
+     "managed-onu":{
+         "name":"onu1"
+         "set-onu-communication":{
+            "onu-communication-available": "true",
+            "vomci-remote-endpoint-name":    "obbaa-grpc-1",
+            "olt-remote-endpoint-name": "OLT1",
+            "onu-attachment-point":{
+               "olt-name":"OLT1",
+               "channel-termination-name":"CT1",
+               "onu-id": 1         
+      }
+   }
+}
+```
+
+Upon receipt the receiving function ensures that the ONU communication is established and activation has started within the function:
+- if set onu configuration has not been received before for this ONU:
+	- save the new information regarding the ONU\'s management chain
+	- lookup the communication channels with the given endpoint names and add to them the managed ONU
+    - if the endpoint corresponds to a remote grpc server that is not known, the set-onu-communication request will be rejected by sending a unsuccessful kafka response otherwise send a successful kafka response
+    - initiate ONU activation sequence (vOMCI function only)
+    - send responses through kafka notifications (vOMCI function only)
+
+- if ONU already exists and is configured (set ONU configuration has been received before):
+	- if only communication available changed, only the "communication available" field is handled
+
+### Deleting a Managed ONU
+The following is an example of a delete-onu action that is directed toward a vOMCI Proxy:
+
+```
+Msg {
+header {
+  msg_id: "6"
+  sender_name: "vOLTMF"
+  recipient_name: "proxy-1"
+  object_type: VOMCI_PROXY
+  object_name: "proxy-1"
+}
+body {
+  request {
+    action {
+      input_data: "{\"bbf-vomci-proxy:managed-onus\":{\"managed-onu\":[{\"name\":\"ont1\",\"delete-onu\":{}}]}}"
+    }
+  }
+}
+}
+```
+Upon receipt the receiving function ensures that the ONU is deleted within the function:
+  - ONU is deleted from the list of managed ONUs and any internal structures
+  - Response is sent on the kafka bus
+
+### ONU requests
+ONU is added to the list of managed ONUs and internal structures are initialized.
+The OB-BAA implementation adds a "delta" field to the  edit-config message to provide the information needed by the vOMCI function to assist in the translation of the YANG message into the correct OMCI message.
+
+The following example describes an edit-config request that is sent from the vOLTMF toward a vOMCI function with the additional "delta" and identifier fields inserted in the message:
 
 ```
 {
@@ -220,27 +331,21 @@ and identifier fields inserted in the message:
   }
 }
 ```
-
-### Responses
-
-The response messages sent from the vOMCI function to the vOLTMF are
-defined in section 5.4.1 of WT-451 with the addition of the
-\"identifier\" field within the payload of the response and the
-\"labels\" field that are previously discussed in the request section.
-
-The following code block provides a sample response to the a DETECT
-event:
+### Notifications
+Notifications can be sent from the vOMCI function or vOMCI Proxy for various purposes, For example, once the alignment of an ONU has been completed (after getting the MIB Data Sync from the ONU) the vOMCI function sends a notification to the vOLTMF.
+The following is an example of a onu-alignment-status notification that sent from a vOMCI function:
 
 ```
-
-{
-	"onu-name":"exampleDevice",
-	"olt-name":"olt1",
-	"onu-id":"25",
-	"channel-termination-ref":"CT-2",
-	"event":"DETECT",
-	"labels":"{\"name\":\"vendor\", \"value\":\"BBF\"}",
-	"payload":"{\"operation\":\"DETECT\", \"identifier\":\"0\", \"status\":\"OK\"}"
+header {
+    msg_id: "1"
+    sender_name: "vomci1"
+    recipient_name: "vOLTMF"
+    object_name: "onu1"
+}
+body {
+    notification {
+        data: "{\"bbf-vomci-function:onu-alignment-status\":{\"event-time\": \"2021-06-01T15:53:36+00:00\",\"onu-name\": \"ont1\",\"alignment-status\": \"aligned\"}}"
+    }
 }
 ```
 
@@ -249,7 +354,6 @@ event:
 The vOMCI function (vOMC PF) receives requests to translate YANG
 messages to corresponding OMCI messages. These OMCI messages are
 directed toward an OLT where the targeted ONU is attached. The vOMC PF
-interacts with the OLT via the vOMCI Proxy where the vOMCI Proxy is the
-gRPC remote endpoint for the ONU.
+interacts with the OLT via the vOMCI Proxy where the vOMCI Proxy is the gRPC remote endpoint for the ONU.
 
 [<--Architecture](../index.md#architecture)

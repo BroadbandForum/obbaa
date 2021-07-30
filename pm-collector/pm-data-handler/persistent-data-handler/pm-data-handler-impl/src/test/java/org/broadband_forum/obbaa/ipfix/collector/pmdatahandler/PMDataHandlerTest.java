@@ -16,24 +16,18 @@
 
 package org.broadband_forum.obbaa.ipfix.collector.pmdatahandler;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.SwingUtilities;
-import org.broadband_forum.obbaa.pmcollection.nbi.NBIClient;
-import org.broadband_forum.obbaa.pmcollection.nbi.NBIServer;
+import static org.junit.Assert.assertEquals;
+
+import javax.swing.*;
+
 import org.broadband_forum.obbaa.pmcollection.pmdatahandler.PMDataHandler;
 import org.broadband_forum.obbaa.pmcollection.pmdatahandler.influxdb.InfluxDBImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.FixMethodOrder;
+import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

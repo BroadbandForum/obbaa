@@ -585,12 +585,11 @@ the device\'s data model represented as \"root\" mount-point for that
 managed device in the list.
 
 ```
-
 module bbf-obbaa-network-manager {
     yang-version 1.1;
     namespace "urn:bbf:yang:obbaa:network-manager";
     prefix baa-network-manager;
- 
+
     import ietf-inet-types {
         prefix inet;
     }
@@ -604,24 +603,34 @@ module bbf-obbaa-network-manager {
         prefix yanglib;
         revision-date 2016-06-21;
     }
- 
+    import bbf-network-function-client {
+       prefix bbf-nfc;
+    }     
+    import bbf-network-function-server {
+       prefix bbf-nfs;
+    }
+    import bbf-network-function-types {
+       prefix bbf-nf-types;
+    }
+     
+    
     organization
       "Broadband Forum <https://www.broadband-forum.org>";
- 
+
     contact
       "Comments or questions about this Broadband Forum YANG module
        should be directed to <mailto:obbaa-leaders@broadband-forum.org>.
       ";
- 
+
     description
       "This module contains a collection of YANG definitions for supporting network management.
-               
+              
        Copyright 2018-2019 Broadband Forum
-        
+       
        Licensed under the Apache License, Version 2.0 (the \"License\");
        you may not use this file except in compliance with the License.
        You may obtain a copy of the License at
-        
+       
        http://www.apache.org/licenses/LICENSE-2.0
        Unless required by applicable law or agreed to in writing, software
        distributed under the License is distributed on an \"AS IS\" BASIS,
@@ -629,14 +638,42 @@ module bbf-obbaa-network-manager {
        See the License for the specific language governing permissions and
        limitations under the License.
       ";
- 
+
+    revision 2021-02-01 {
+       description
+         "Added support for vOMCI function management.";
+    }
+     
+    revision 2020-07-23 {
+        description
+          "Added support for vOMCI managed ONUs.";
+    }
+    
+    revision 2020-02-19 {
+        description
+          "Added support for SNMP connection model Authentication.";
+    }
+
     revision 2018-05-07 {
         description
           "Initial revision.";
         reference
           "broadband_forum";
     }
- 
+
+    //  Features
+    feature nf-client-supported {
+      description
+        "Indicates that client connectivity to network function's
+         endpoints are supported.";
+    }
+
+    feature nf-server-supported {
+      description
+        "Indicates that server connectivity for network function's
+         endpoints are supported.";
+    }
+    
     grouping connection-grouping {
         description
           "Information about the connection for the device managed by BAA.";
@@ -644,9 +681,12 @@ module bbf-obbaa-network-manager {
             type enumeration {
                 enum call-home;
                 enum direct;
+                enum snmp;
+                enum mediated-session;
             }
             description
-              "whether the connection is call-home or direct.";
+              "whether the connection is call-home/direct/snmp 
+               or a session mediated through another device.";
         }
         choice protocol {
             mandatory true;
@@ -683,6 +723,112 @@ module bbf-obbaa-network-manager {
                     }
                 }
             }
+            container snmp-auth {
+                when "../connection-model = 'snmp'";
+                description
+                    "Information when a device managed by BAA on SNMP. When user
+                    creates a device by BAA, the information below would be mandatory.";
+                container snmp-authentication {
+                    description
+                        "Mandatory information when BAA tries to create an SNMP device.";
+                    leaf address {
+                        type inet:ip-address;
+                        mandatory true;
+                        description
+                          "Device IP address.";
+                    }
+                    leaf agent-port {
+                        type inet:port-number;
+                        description
+                          "The snmp port of the device.";
+                    }
+                    leaf trap-port {
+                        type inet:port-number;
+                        description
+                          "The snmp trap listening port of manager.";
+                    }
+                    leaf snmp-version {
+                        type enumeration {
+                          enum v1;
+                          enum v2c;
+                          enum v3;
+                        }
+                        description
+                          "SNMP version";
+                    }
+                    choice auth-info {
+                      leaf community-string {
+                          when "(../snmp-version = 'v1') or
+                               (../snmp-version = 'v2c')";
+                          type string;
+                          description
+                            "SNMP community string";
+                      }
+                      container snmpv3-auth {
+                        when "../snmp-version = 'v3'";
+                        leaf user-name {
+                          type string;
+                          description
+                            "SNMP V3 username";
+                        }
+
+                        leaf security-level {
+                          type enumeration {
+                            enum noAuthNoPriv;
+                            enum authNoPriv;
+                            enum authPriv;
+                          }
+                          description
+                            "Security level";
+                        }
+
+                        leaf auth-protocol {
+                          when "../security-level != 'noAuthNoPriv'";
+                          type enumeration {
+                            enum AuthMD5;
+                            enum AuthSHA;
+                            enum AuthHMAC192SHA256;
+                            enum AuthHMAC384SHA512;
+                          }
+                          description
+                            "Authentication protocol";
+                        }
+
+                        leaf auth-password {
+                          when "../security-level != 'noAuthNoPriv'";
+                          type string {
+                            length "1..max";
+                          }
+                          description
+                            "Passphrase for authentication protocol";
+                        }
+
+                        leaf priv-protocol {
+                          when "../security-level = 'authPriv'";
+                          type enumeration {
+                            enum PrivDES;
+                            enum PrivAES;
+                            enum PrivAES128;
+                            enum PrivAES192;
+                            enum PrivAES256;
+                            enum Priv3DES;
+                          }
+                          description
+                            "Privacy protocol";
+                        }
+
+                        leaf priv-password {
+                          when "../security-level = 'authPriv'";
+                          type string {
+                            length "1..max";
+                          }
+                          description
+                            "Passphrase for privacy protocol";
+                        }
+                      }
+                    }
+                }
+            }
             leaf duid {
                 when "../connection-model = 'call-home'";
                 type string {
@@ -692,9 +838,22 @@ module bbf-obbaa-network-manager {
                   "A globally unique value for a DUID (DHCP Unique Identifier)
                    as defined in RFC 3315.";
             }
+            
+            leaf mediated-protocol {
+                when "../connection-model = 'mediated-session'";
+                type enumeration {
+                     enum vomci {
+                      description
+                        "This value applies to vOMCI managed ONUs";
+                    }
+                }
+                description
+                  "The protocol being mediated.";
+            }
+            
         }
     }
- 
+
     grouping device-details {
         description
           "These four leafs collectively determine one module-set/one adapter.";
@@ -734,7 +893,7 @@ module bbf-obbaa-network-manager {
               "Specifies if the device is a netconf device or non-netconf device.";
         }
     }
- 
+
     grouping management-grouping {
         description
             "This grouping contains the information to manage a device.";
@@ -774,7 +933,7 @@ module bbf-obbaa-network-manager {
             }
         }
     }
- 
+
     grouping notification-grouping {
         description
           "This grouping contains a notification triggered when the state of
@@ -824,7 +983,79 @@ module bbf-obbaa-network-manager {
                 }
             }
         }
- 
+       
+        container network-functions-settings
+        {
+           description
+             "Container for network function settings.";
+           container nf-client {
+              if-feature "nf-client-supported";
+              description
+                "Client network function configuration.";
+              leaf enabled {
+                type boolean;
+                default "true";
+                description
+                  "Administratively enable the use of the 
+                   client connectivity capability to the 
+                   network function.";
+              }
+              uses bbf-nfc:nf-endpoint-grouping;
+           } //nf-client
+
+           container nf-server {
+              if-feature "nf-server-supported";
+              description
+                "Server network function configuration.";
+              leaf enabled {
+                type boolean;
+                default "true";
+                description
+                  "Administratively enable the use of the 
+                   server connectivity capability for connecting 
+                   network function.";
+              }
+              uses bbf-nfs:nf-server-grouping;
+            } //nf-server
+        }
+           
+        container network-functions {
+           description
+             "The network function list.";
+           list network-function {
+               key "name";
+               description
+                   "A list of network functions.";
+               leaf name {
+                   type string;
+                   description
+                     "The name of the network function.";
+               }
+               
+               leaf type {
+                  type identityref {
+                     base "bbf-nf-types:vnf-type";
+                  }
+                  description
+                     "The type of the network function (e.g, vomci-function-type, 
+                     vomci-proxy-type).";
+               }
+               
+               leaf remote-endpoint-name {
+                  type string;
+                  description
+                    "The remote endpoint name to use for transmitting and
+                     receiving messages towards the network function.";
+                }
+               
+               container root{
+                   yangmnt:mount-point "root";
+                   description
+                     "Root for models supported per network function.";
+               }
+           }
+        }
+        
         container new-devices {
             config false;
             description
@@ -848,7 +1079,7 @@ module bbf-obbaa-network-manager {
                 }
             }
         }
- 
+
         container device-adapters {
             config false;
             description
@@ -864,43 +1095,45 @@ module bbf-obbaa-network-manager {
                 description
                   "List of device-adapters containing yang modules along with supported deviations and features.
                    An device-adapter is uniquely identified by its type, version, model and vendor.";
- 
+
                 uses device-details;
- 
+
                 leaf description {
                     type string;
                     config false;
                     description
                       "Brief description for this adapter.";
                 }
- 
+
                 leaf developer {
                     type string;
                     config false;
                     description
                       "Name of the developer for this adapter.";
                 }
- 
+
                 leaf revision {
-                    type yang:date-and-time;
+                   type string {
+                     pattern '\d{4}-\d{2}-\d{2}';
+                   }
                     config false;
                     description
                       "the latest time when the adapter create or modify";
                 }
- 
+
                 leaf upload-date {
                   type yang:date-and-time;
                   description
                     "The time when the adapter upload to BAA.";
                 }
- 
+
                 leaf in-use {
                     type boolean;
                     description
                       "This node indicates there is whether or not a device was created based on
                        this adapter.";
                 }
- 
+
                 container devices-related {
                     when "../in-use = 'true'";
                     description
@@ -923,7 +1156,7 @@ module bbf-obbaa-network-manager {
                         }
                     }
                 }
- 
+
                 container yang-modules {
                     description
                       "The list yang modules supported by the device-adapter";
@@ -950,122 +1183,503 @@ module bbf-obbaa-network-manager {
                         }
                     }
                 }
+                container factory-garment-tag {
+                    when "../model != 'standard'";
+                    description
+                        "This container contains a list of items which was specific to the VDA";
+                    leaf total-number-of-modules-present {
+                        config false;
+                        type string;
+                        description
+                            "Total number of modules present in corresponding standard adapter";
+                    }
+                    leaf number-of-modules-present-in-standard-adapter {
+                        config false;
+                        type string;
+                        description
+                            "Total number of modules present in corresponding standard adapter";
+                    }
+                    leaf percentage-adherence-to-standard-module {
+                        config false;
+                        type string;
+                        description
+                            "VDA's adherence percentage to standard modules";
+                    }
+                    leaf-list deviated-standard-module {
+                        config false;
+                        type string;
+                        description
+                            "list of standard modules that are having deviations";
+                    }
+                    leaf percentage-of-standard-modules-having-deviation {
+                        config false;
+                        type string;
+                        description
+                            "percentage of standard modules that are having deviations added in vda";
+                    }
+                    leaf-list augmented-standard-module {
+                        config false;
+                        type string;
+                        description
+                            "list of standard modules that are having augmentations";
+                    }
+                    leaf percentage-of-standard-modules-having-augments {
+                        config false;
+                        type string;
+                        description
+                            "percentage of standard modules that are having deviations added in vda";
+                    }
+                }
             }
         }
     }
-}
-  grouping management-grouping {
-    uses device-details;
-    container device-connection {
-      uses connection-grouping;
-    }
-    container device-state {
-      config false;
-      leaf configuration-alignment-state {
-        type string;
-      }
-      container connection-state {
-        leaf connected {
-          type boolean;
-          description
-            "The connection state of device.";
-        }
-        leaf connection-creation-time {
-          type yang:date-and-time;
-        }
-        leaf-list device-capability {
-          type string;
-        }
-      }
-    }
-  }
- 
-  grouping notification-grouping {
-    notification device-state-change {
-      description
-        "Device state changed";
-      leaf event {
-        type enumeration {
-          enum online;
-          enum offline;
-        }
-      }
-    }
-  }
-  container network-manager {
- 
-      container managed-devices {
-        description
-          "The managed devices and device communication settings.";
-        list device {
-          key "name";
-          leaf name {
-            type string;
-            description
-              "The name of device.";
-          }
-          container device-management {
-            uses management-grouping;
-          }
-          container device-notification {
-            uses notification-grouping;
-          }
-          container root {
-            yangmnt:mount-point "root";
-            description
-              "Root for models supported per device.";
-          }
-        }
-      }
- 
-      container new-devices {
-        config false;
-        list new-device {
-          key "duid";
-          leaf duid {
-            description
-              "A globally unique value for a DUID (DHCP Unique Identifier)
-               as defined in RFC 3315.";
-            type string {
-              length "1..128";
-            }
-          }
-          leaf-list device-capability {
-              type string;
-          }
-        }
-      }
- 
-      container device-adapters {
-        config false;
-        leaf device-adapter-count {
-          description
-           "Total number of device-adapters deployed";
-          type string;
-          config false;
-        }
-        list device-adapter {
-          key "type interface-version model vendor";
-          description
-           "List of device-adapters containing yang modules along with supported deviations and features.
-            An device-adapter is uniquely identified by its type, version, model and vendor.";
- 
-          uses device-details;
- 
-          container yang-modules {
-            description
-            "The list yang modules supported by the device-adapter";
-            uses yanglib:module-list;
-          }
-        }
-      }
-}
 }
 ```
 
 Note:
 1.  The current version does not support device management and service
     configuration in the same message at the same time.
+    
+bbf-obbaa-onu-management
+----------------------
+
+The bbf-obbaa-onu-management.yang augments the bbf-obbaa-network-manager with additional metadata that allows the aggregator to manage ONUs which rely on vOMCI. These ONUs are treated as top-level devices.
+
+```
+module bbf-obbaa-onu-management {
+    yang-version 1.1;
+    namespace "urn:bbf:yang:obbaa:onu-management";
+    prefix baa-onu-management;
+
+    import bbf-obbaa-network-manager {
+      prefix baa-network-manager;
+    }
+    
+    import bbf-xpon-types {
+      prefix bbf-xpon-types;
+    }
+    
+    import bbf-xpon-onu-types {
+      prefix bbf-xpon-onu-types;
+    }
+    
+    import bbf-voltmf-entity{
+      prefix bbf-voltmf-entity;
+    }
+    import bbf-voltmf-message-monitor {
+      prefix bbf-voltmf-msg-mon;
+    }
+    
+    organization
+      "Broadband Forum <https://www.broadband-forum.org>";
+
+    contact
+      "Comments or questions about this Broadband Forum YANG module
+       should be directed to <mailto:obbaa-leaders@broadband-forum.org>.
+      ";
+
+    description
+      "This module contains a collection of YANG definitions for 
+       the management of ONUs.
+       
+       Copyright 2020 Broadband Forum
+       
+       Licensed under the Apache License, Version 2.0 (the \"License\");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+       
+       http://www.apache.org/licenses/LICENSE-2.0
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an \"AS IS\" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License. 
+      ";
+    
+    revision 2021-04-21 {
+       description
+         "Changes to support vOMCI function enhancements in OB-BAA Rel 4.1.0.";
+    }
+    
+    revision 2020-07-15 {
+      description
+        "Initial revision.";
+      reference
+        "broadband_forum";
+    }
+
+    augment '/baa-network-manager:network-manager/baa-network-manager:managed-devices/'
+          + 'baa-network-manager:device/baa-network-manager:device-management' {
+       when
+           "/baa-network-manager:network-manager/baa-network-manager:managed-devices/"
+         + "baa-network-manager:device/baa-network-manager:device-management/"
+         + "baa-network-manager:type = 'ONU'" {
+         description
+           "Additional information for a ONU";
+         }
+         
+         container onu-config-info {
+           description 
+             "ONU management info";
+           
+           leaf vendor-name {
+              type string;
+              description "The ONU vendor";
+           }
+           
+           leaf expected-serial-number {
+             type bbf-xpon-types:onu-serial-number;
+             description
+               "The expected serial number for this ONU.
+                The serial number is unique for each ONU.
+                It contains the vendor ID and vendor specific serial
+                number. The first four bytes are an ASCII-encoded
+                vendor ID four letter mnemonic. The second four bytes
+                are a binary encoded serial number, under the control
+                of the ONU vendor.";
+             reference
+               "ITU-T G.984.3, clause 9.2.4.1
+               ITU-T G.987.3, clause 11.3.3.2
+               ITU-T G.9807.1, clauses C11.2.6.1, C11.2.6.2 and C11.3.4.1
+               ITU-T G.989.3, clauses 11.2.6.1, 11.2.6.2 and 11.3.4.1.";
+           }
+           
+           leaf expected-registration-id {
+              type bbf-xpon-types:onu-registration-id;
+              default "";
+              description
+                "A string that has been assigned to the subscriber
+                 on the management level, entered into and stored
+                 in non-volatile storage at the ONU. Registration ID may be
+                 useful in identifying a particular ONU installed at a
+                 particular location. Each octet is represented as 2
+                 hexadecimal characters, therefore the leaf must contain an
+                 even number of characters.
+                 For ITU-T G.984.3, the leaf can only be up to 20 characters
+                 long (refer to 'password' 10 bytes long).
+                 For ITU-T G.987.3, ITU-T G.9807.3 and ITU-T G.989.3 the
+                 leaf can be up to 72 characters long (refer to
+                 'registration id' 36 bytes long).";
+              reference
+                "ITU-T G.984.3 clause 9.2.4.2
+                 ITU-T G.987.3 clause 11.3.4.2
+                 ITU-T G.9807.3 clause C.11.3.4.2
+                 ITU-T G.989.3 clause 11.3.4.2";
+           }
+           
+           leaf xpon-technology {
+              type identityref {
+                 base bbf-xpon-types:channel-pair-type-base;
+               }
+               description
+                 "Represents the type of channel termination (e.g.
+                  TWDM NG-PON2, PtP NG-PON2, XGS-PON, XG-PON, G-PON).";
+           }
+           
+           container expected-attachment-point {
+              description
+                "The ONU expected attachment point";
+              
+              leaf olt-name {
+                type leafref {
+                    path '/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device/baa-network-manager:name';
+                }
+                description
+                  "A reference to the OLT where the ONU is expected";
+              }
+              
+              leaf channel-partition-name {
+                type string;                
+                description
+                  "The local name of the channel-partition in the OLT where the ONU is expected.";
+              }
+           }
+           container vomci-onu-management {
+              description
+                "Configuration and state date needed to manage 
+                 ONU's via vOMCI";
+              uses bbf-voltmf-entity:vomci-onu-config;
+            }
+            
+         }
+    }
+    
+    augment '/baa-network-manager:network-manager/baa-network-manager:managed-devices/'
+       + 'baa-network-manager:device/baa-network-manager:device-management/'
+       + 'baa-network-manager:device-state' {
+    when
+        "/baa-network-manager:network-manager/baa-network-manager:managed-devices/"
+      + "baa-network-manager:device/baa-network-manager:device-management/"
+      + "baa-network-manager:type = 'ONU'" {
+      description
+        "Additional information for a ONU";
+      }
+      
+      container onu-state-info {
+        description 
+          "Information about an ONU.";
+        
+        leaf onu-state {
+          type identityref {
+            base bbf-xpon-onu-types:onu-presence-state-base;
+          }
+          mandatory true;
+          description
+            "This leaf presents the state of the ONU. The most
+             specific applicable identity should be provided as
+             value.";
+        }
+        
+        leaf detected-serial-number {
+           type bbf-xpon-types:onu-serial-number;
+           description
+             "The serial number of the Optical Network Unit (ONU).";
+           reference
+             "ITU-T G.984.3, clause 9.2.4.1
+              ITU-T G.987.3, clause 11.3.3.2
+              ITU-T G.9807.1, clauses C11.2.6.1, C11.2.6.2 and
+              C11.3.4.1
+              ITU-T G.989.3, clauses 11.2.6.1, 11.2.6.2 and 11.3.4.1.";
+        }
+        
+        leaf detected-registration-id {
+           type bbf-xpon-types:onu-registration-id;
+           description
+             "The registration ID value which the Optical Line
+              Termination (OLT) has received from the Optical Network
+              Unit (ONU). This leaf is not present if the ONU has not
+              provided any registration ID to the OLT. Registration ID
+              may be useful in identifying a particular ONU installed
+              at a particular location. Each octet is represented as 2
+              hexadecimal characters, therefore the leaf must contain an
+              even number of characters. For ITU-T G.984.3, the leaf
+              can only be up to 20 octets long (refer to 'password'),
+              for ITU-T G.987.3, ITU-T G.9807.3 and ITU-T G.989.3
+              the leaf can be up to 72 octets long.";
+           reference
+             "ITU-T G.984.3 clause 9.2.4.2
+              ITU-T G.987.3 clause 11.3.4.2
+              ITU-T G.9807.3 clause C.11.3.4.2
+              ITU-T G.989.3 clause 11.3.4.2";
+         }
+        
+        leaf vendor-id {
+          type string {
+              pattern '[a-zA-Z]{4}';
+            }
+            description "This attribute identifies the vendor of the ONU.";
+            
+            reference
+              "ITU-T G.988, clause 9.1.1";
+        }
+        
+        leaf equipment-id {
+          type string {
+            pattern '[a-zA-Z]{4}[0-9a-fA-F]{20}';
+          }
+          description "This attribute may be used to identify the specific type of ONU.";
+          
+          reference
+            "ITU-T G.988, clause 9.1.2";
+        }
+        
+        container attachment-point {
+           description
+             "The current ONU attachment point";
+           
+           leaf olt-name {
+             type leafref {
+                 path '/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device/baa-network-manager:name';
+             }
+             mandatory true;
+             description
+               "A reference to the OLT where the ONU is attached";
+           }
+           
+           leaf channel-termination-name {
+              type string;
+              mandatory true;
+              description
+                "The local name of the channel termination in the OLT where the ONU is attached";
+           }
+           
+           leaf onu-id {
+              type bbf-xpon-types:onu-id;
+              description
+                "This is the ITU-T Transmission Convergence (TC) layer ONU-ID
+                 identifier which the Optical Line Termination (OLT) has
+                 assigned to the Optical Network Unit (ONU) during the ONU's
+                 activation using the Assign_ONU-ID PLOAM message. It
+                 identifies an ONU on a channel group and is unique on a
+                 channel group.";
+              reference
+                "ITU-T G.984.3 clause 5.5.2
+                 ITU-T G.987.3 clause 6.4.2
+                 ITU-T G.9807.1 clause C.6.1.5.6
+                 ITU-T G.989.3 clause 6.1.5.6";
+            }
+        }
+        
+        container software-images {
+          description
+             "Software image information.";
+          list software-image{ 
+            key "id";
+            description
+               "Software image list";
+            
+            leaf id {
+               type uint8 {
+                  range "0..1";
+               }
+               description
+                 "The software image instance Id.";
+               reference
+                 "ITU-T G.988, clause 9.1.4";
+            }
+               
+            leaf version {
+              type string;
+              description 
+                "The software version";
+              reference
+                 "ITU-T G.988, clause 9.1.4";
+              
+            }
+            
+            leaf is-committed {
+              type boolean;
+              mandatory true;
+              description
+                "Reports whether the associated software revision is
+                 committed ('true') or uncommitted ('false').";
+              reference
+                "ITU-T G.988, clause 9.1.4";
+            }
+            
+            leaf is-active {
+              type boolean;
+              mandatory true;
+              description
+                "Reports whether the associated software revision is
+                 active ('true') or inactive ('false').";
+              reference
+                "ITU-T G.988, clause 9.1.4";
+            }
+            
+            leaf is-valid {
+              type boolean;
+              mandatory true;
+              description
+                "Reports whether the stored software revision is
+                 valid ('true') or invalid ('false').";
+              reference
+                "ITU-T G.988, clause 9.1.4";
+            }
+            
+            leaf product-code {
+              type string;
+              description
+                "Reports the product code information of the software
+                 revision.";
+              reference
+                "ITU-T G.988, clause 9.1.4";
+            }
+            leaf hash {
+              type string;
+              description
+                "Reports the hash value calculated by the corresponding
+                 hash function at completion of the end download of the
+                 software revision.";
+              reference
+                "ITU-T G.988, clause 9.1.4";
+            }
+            
+           }
+          }
+          container voltmf-msg-data {
+             description
+                "This container contains the counters for the vOLTMF messages
+                 sent between the vOLTMF and vOMCI funciton.";
+   
+             uses bbf-voltmf-msg-mon:voltmf-msg-data-grouping;
+          }
+        
+        
+        }
+        
+    }
+    
+
+    augment '/baa-network-manager:network-manager/baa-network-manager:managed-devices/'
+      + 'baa-network-manager:device/baa-network-manager:device-management/' 
+      + 'baa-onu-management:onu-config-info/baa-onu-management:vomci-onu-management'
+      {
+        description 
+           "Additions specific to vOMCI ONU management.";
+       
+        container network-function-links {
+          
+          description
+            "Holds a list of links and endpoint names associated to the management 
+            chain of the ONU when discovery is not possible or not wanted. The 
+            endpoint names are needed by the vOLTMF when sending the 
+            'set-onu-communication' action to the vOMCI function and vOMCI
+            proxy.";
+          
+          list network-function-link {
+            key name;
+            description 
+              "List of network functions links between two network functions.";
+            
+            leaf name {
+               type string;
+               description
+                  "Link name.";
+            }
+            container termination-point-a {
+               description 
+                  "Source network function.";
+               
+               leaf function-name {
+                  //workaround, should be a leafref to the onu-management-chain
+                  type string;
+                  mandatory true;
+                  description
+                    "Network function name.";
+               }
+               leaf local-endpoint-name {
+                  type string;
+                  mandatory true;
+                  description 
+                    "The local endpoint name.";
+               }  
+            }
+            container termination-point-b {
+               description 
+                  "Destination network function.";
+               
+               leaf function-name {
+                  //workaround, should be a leafref to the onu-management-chain
+                  type string;
+                  mandatory true;
+                  description
+                    "Network function name.";
+               }
+               leaf local-endpoint-name {
+                  type string;
+                  mandatory true;
+                  description 
+                    "The local endpoint name.";
+               }  
+            }
+            
+          }
+        }
+      
+    }  
+}
+```
 
 ietf-yang-schema-mount
 ----------------------

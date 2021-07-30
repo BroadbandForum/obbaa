@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.onu.message.MessageFormatter;
 import org.broadband_forum.obbaa.onu.notification.ONUNotification;
 import org.broadband_forum.obbaa.pma.DeviceNotificationClientListener;
 import org.broadband_forum.obbaa.pma.DeviceNotificationListenerService;
@@ -35,11 +36,13 @@ public class ONUNotificationListener implements DeviceNotificationClientListener
     private static final Logger LOGGER = Logger.getLogger(ONUNotificationListener.class);
     private final VOLTManagement m_voltMgmt;
     private final DeviceNotificationListenerService m_deviceNotificationService;
+    private final MessageFormatter m_messageFormatter;
 
     public ONUNotificationListener(DeviceNotificationListenerService deviceNotificationService,
-                                    VOLTManagement voltMgmt) {
+                                    VOLTManagement voltMgmt, MessageFormatter messageFormatter) {
         m_deviceNotificationService = deviceNotificationService;
         m_voltMgmt = voltMgmt;
+        m_messageFormatter = messageFormatter;
 
     }
 
@@ -56,7 +59,7 @@ public class ONUNotificationListener implements DeviceNotificationClientListener
         QName notificationType = notification.getType();
         if (ONUNotification.isONUStateChangeNotif(notificationType)) {
             try {
-                ONUNotification onuNotification = new ONUNotification(notification, device.getDeviceName());
+                ONUNotification onuNotification = new ONUNotification(notification, device.getDeviceName(),m_messageFormatter);
                 m_voltMgmt.onuNotificationProcess(onuNotification, device.getDeviceName());
             } catch (NetconfMessageBuilderException exception) {
                 LOGGER.error(String.format("Could not process ONU notification for device %s", device.getDeviceName()), exception);

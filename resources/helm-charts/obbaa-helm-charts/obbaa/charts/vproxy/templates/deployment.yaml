@@ -1,0 +1,42 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: vproxy
+  namespace: obbaa
+spec:
+  selector:
+    matchLabels:
+      app: vproxy
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: vproxy
+    spec:
+      containers:
+        - name: vproxy
+          image: broadbandforum/obbaa-vproxy:latest
+          env:
+            - name: LOCAL_GRPC_SERVER_PORT
+              value: "8433"
+            - name: REMOTE_GRPC_SERVER_PORT
+              value: "58433"
+            - name: REMOTE_GRPC_SERVER_ADDR
+              value: "vomci-grpc"
+            - name: GRPC_SERVER_NAME
+              value: "proxy-grpc-2"
+            - name: GRPC_CLIENT_NAME
+              value: "proxy-grpc-1"
+            - name: KAFKA_BOOTSTRAP_SERVER #Kafka bootstrap server, please provide only one address
+              value: "kafka:9092"
+              # List of Consumer topics, seperated by spaces
+            - name: KAFKA_REQUEST_TOPICS
+              value: "vomci-proxy-request"
+            - name: KAFKA_RESPONSE_TOPICS
+              value: "vomci-proxy-response"
+            - name: KAFKA_NOTIFICATION_TOPICS
+              value: "vomci-proxy-notification"
+          ports:
+            - containerPort: 8433
+              name: port8433
+      restartPolicy: Always

@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -99,7 +99,6 @@
                         <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
                         <Dynamic-Import-Package>*, org.hibernate.proxy, javassist.util.proxy</Dynamic-Import-Package>
                         <Import-Package>*, org.hibernate.proxy, javassist.util.proxy, org.hibernate.jpa</Import-Package>
-                        <Meta-Persistence>META-INF/persistence.xml</Meta-Persistence>
                     </instructions>
                 </configuration>
             </plugin>

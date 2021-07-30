@@ -15,6 +15,6 @@
  */
 
 /**
- * Exposes a REST interface around {@link org.broadband_forum.obbaa.dm.DeviceManager}
+ * Exposes a REST interface around {@link org.broadband_forum.obbaa.nm.devicemanager.DeviceManager}
  */
-package org.broadband_forum.obbaa.dm.rest;
+package org.broadband_forum.obbaa.nm.devicemanager.rest;

@@ -1,4 +1,49 @@
-# OB-BAA R4 Release Notes (30 September 2020)
+# OB-BAA R4.1.0 Release Notes (31 July 2021)
+
+<a name="rel_4_1_0"></a>
+
+Release 4.1.0 Highlights:
+=========================
+
+This release enhances the existing OB-BAA software by added now functionality that:
+
+-	adds the new vOMCI Proxy according to the Broadband Forum's WT-451 specification.
+-	aligns the interfaces between the vOMCI function and vOMCI Proxy and the OLT with Broadband Forum's WT-451 specification.
+-	aligns the interfaces between the vOMCI function and vOLTMF (BAA layer) with Broadband Forum's WT-451 specification.
+
+In addition, this release includes:
+
+-	the ability to deploy OB-BAA software using either Kubernetes or Docker.
+-	an updated simulator for OLTs and ONUs that can be used for virtualized ONU management when developing OMCI message translation services.
+
+Release documentation:
+
+[OBBAA](https://obbaa.broadband-forum.org/) for product documentation on System Description, Installation, Commissioning and Usage
+
+## Other related repos of OB-BAA includes:
+
+[NETCONF stack](https://github.com/BroadbandForum/obbaa-netconf-stack) A NETCONF stack for use in OB-BAA implementations
+
+[vOMCI](https://github.com/BroadbandForum/obbaa-vomci) repository which contains the vOMCI Function and Proxy used in the OB-BAA Implementations
+
+[Control Relay](https://github.com/BroadbandForum/obbaa-fc-relay) repository contains the control relay feature of the OB-BAA project
+
+[pOLT Simulator](https://github.com/BroadbandForum/obbaa-polt-simulator) pOLT Simulator for Broadband Forum WT-451 vOMCI project
+
+[ONU Simulator](https://github.com/BroadbandForum/obbaa-onu-simulator) ONU simulator and test client(Extracted from pOLT Simulator)
+
+
+## FAQ
+Question : What should I do if ONU DETECT nofitication is not raised in OB-BAA for a vOMCI based ONU?
+
+Answer : Sometimes kafka will not have the required topics being available when it started, hence vomci functionality might not work properly in that case. as a workaround after starting OB-BAA microservices using docker compose file, we should restart vomci container (wait for a minute to have the vomci container up and running) and restart vproxy container. This would solve the problem.
+
+<a name="rel_2_1_0"></a>
+
+
+## Restrictions:
+1. Sporadically OB-BAA may not auto-detect link loss with devices (e.g., after device start). When a new provisioning/force alignment is attempted the connection will be restored. 
+
 
 <a name="rel_4_0_0"></a>
 
@@ -18,29 +63,9 @@ In addition, this release includes:
 
 -	a simulator for OLTs and ONUs that can be used for virtualized ONU management when developing OMCI message translation services.
 
-Release documentation:
 
-   [OBBAA](https://obbaa.broadband-forum.org/) for product documentation on System Description, Installation, Commissioning and Usage
-
-## Other related repos of OB-BAA includes:
-
-   [NETCONF stack](https://github.com/BroadbandForum/obbaa-netconf-stack) A NETCONF stack for use in OB-BAA implementations
-
-   [vOMCI](https://github.com/BroadbandForum/obbaa-vomci) repository which contains the vOMCI Function and Proxy used in the OB-BAA Implementations
-
-   [Control Relay](https://github.com/BroadbandForum/obbaa-fc-relay) repository contains the control relay feature of the OB-BAA project
-   
-   [pOLT Simulator](https://github.com/BroadbandForum/obbaa-polt-simulator) pOLT Simulator for Broadband Forum WT-451 vOMCI project
-   
-   [ONU Simulator](https://github.com/BroadbandForum/obbaa-onu-simulator) ONU simulator and test client(Extracted from pOLT Simulator)
-   
-
-## FAQ
-Question : What should I do if ONU DETECT nofitication is not raised in OB-BAA for a vOMCI based ONU?
-
-Answer : Sometimes kafka will not have the required topics being available when it started, hence vomci functionality might not work properly in that case. as a workaround after starting OB-BAA microservices using docker compose file, we should restart vomci container (wait for a minute to have the vomci container up and running) and restart vproxy container. This would solve the problem.
-
-<a name="rel_2_1_0"></a>
+## Restrictions:
+Same as release 3.0.0.
 
 <a name="rel_3_0_0"></a>
 
@@ -67,6 +92,8 @@ In addition, this release includes:
 ## Restrictions:
 Same as release 2.1.0.
 
+<a name="rel_2_1_0"></a>
+
 Release 2.1.0 Highlights:
 =========================
 
@@ -79,7 +106,7 @@ This release provides additional enhancements for:
 -   Examples related to the usage of the [NETCONF stack](https://github.com/BroadbandForum/obbaa-netconf-stack) used in OB-BAA
 
 ## Restrictions:
-Same as release 2.1.1.
+Same as release 2.0.0.
 
 <a name="rel_2_0_0"></a>
 

@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -35,6 +35,7 @@
         <module>examples</module>
         <module>simulators</module>
         <module>package</module>
+        <module>helm-charts</module>
     </modules>
     <properties>
         <revision>${obbaa-release.version}</revision>

@@ -22,7 +22,7 @@
            default-activation="eager">
     <jpa:enable/>
     <tx:enable-annotations/>
-    <reference id="deviceManager" interface="org.broadband_forum.obbaa.dm.DeviceManager" availability="mandatory"/>
+    <reference id="deviceManager" interface="org.broadband_forum.obbaa.nm.devicemanager.DeviceManager" availability="mandatory"/>
     <reference id="ncConnectionMgr"
                interface="org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager"
                availability="mandatory"/>

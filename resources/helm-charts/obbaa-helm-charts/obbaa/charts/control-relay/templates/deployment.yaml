@@ -1,0 +1,55 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: control-relay
+  namespace: obbaa
+spec:
+  selector:
+    matchLabels:
+      app: control-relay
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: control-relay
+    spec:
+      volumes:
+        - name: control-relay-volume
+          persistentVolumeClaim:
+            claimName: control-relay-pvclaim
+      hostname: control-relay
+      containers:
+        - name: control-relay
+          image: broadbandforum/obbaa-control-relay:latest
+          env:
+            - name: CONTROL_RELAY_HELLO_NAME
+              value: "control_relay_service"
+            - name: PLUGIN_PORT
+              value: "50052"
+            - name: SDN_MC_SERVER_PORT
+              value:
+            - name: SDN_MC_SERVER_LIST
+              value:
+            - name: CONTROL_RELAY_PORT
+              value: "50055"
+            - name: OBBAA_ADDRESS
+              value: "baa"
+            - name: OBBAA_PORT
+              value: "9292"
+            - name: SSH_USER
+              value: "admin"
+            - name: SSH_PASSWORD
+              value: "password"
+            - name: SHARED_FOLDER
+              value: "./plugin-repo"
+            - name: PRIVATE_FOLDER
+              value: "./plugin-enabled"
+          ports:
+            - containerPort: 50052
+              name: port50052
+            - containerPort: 50055
+              name: port50055
+          volumeMounts:
+            - mountPath: /control_relay/plugin-repo
+              name: control-relay-volume
+      restartPolicy: Always

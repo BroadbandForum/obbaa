@@ -33,6 +33,8 @@ public class OnuStateChangeCallbackRegistrator implements StandardAdapterModelRe
     private NotificationService m_notificationService;
     private static final String BBF_ONU_STATE_CAP_FORMAT = "%s?module=%s&revision=%s";
     private static final String BBF_ONU_STATE_CAP_FORMAT_NO_REV = "%s?module=%s";
+    private static final String IETF_INTERFACES_NS = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
+    private static final QName INTERFACES_STATE_QNAME = QName.create(IETF_INTERFACES_NS, "interfaces-state");
     private Map<DeviceAdapterId, List<NotificationCallBackInfo>> m_callbackMapPerAdapter = new ConcurrentHashMap<>();
 
     public OnuStateChangeCallbackRegistrator(NotificationService notificationService) {
@@ -120,9 +122,10 @@ public class OnuStateChangeCallbackRegistrator implements StandardAdapterModelRe
         cbInfo.setCapabilities(capabilitiesString);
         Set<QName> notificationTypes = new HashSet<>();
         NotificationCallBack callback = new OnuStateChangeCallback(m_notificationService, ONU_STATE_CHANGE_NS);
-        notificationTypes.add(getOnuStateChangeNotificationQName(moduleNs));
-        cbInfo.setNotificationTypes(notificationTypes);
         cbInfo.setCallBack(callback);
+        notificationTypes.add(getOnuStateChangeNotificationQName(moduleNs));
+        notificationTypes.add(INTERFACES_STATE_QNAME);
+        cbInfo.setNotificationTypes(notificationTypes);
         List<NotificationCallBackInfo> notificationCBInfoList = new ArrayList<>();
         notificationCBInfoList.add(cbInfo);
         m_callbackMapPerAdapter.put(adapter.getDeviceAdapterId(), notificationCBInfoList);

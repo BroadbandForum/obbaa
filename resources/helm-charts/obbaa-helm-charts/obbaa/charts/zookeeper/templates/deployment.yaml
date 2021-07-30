@@ -1,0 +1,31 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: zookeeper
+  namespace: obbaa
+spec:
+  selector:
+    matchLabels:
+      app: zookeeper
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      hostname: zookeeper
+      containers:
+        - name: zookeeper
+          image: confluentinc/cp-zookeeper:5.5.0
+          ports:
+            - containerPort: 2181
+              name: port2181
+            - containerPort: 2888
+              name: port2888
+            - containerPort: 3888
+              name: port3888
+          env:
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+            - name: ZOOKEEPER_TICK_TIME
+              value: "2000"

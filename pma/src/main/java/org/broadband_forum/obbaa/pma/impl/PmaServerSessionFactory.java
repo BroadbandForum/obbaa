@@ -27,7 +27,6 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
-import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
@@ -40,6 +39,7 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityR
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.SingleXmlObjectDSM;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.pma.DeviceXmlStore;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;

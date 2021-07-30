@@ -1,0 +1,19 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <action xmlns="urn:ietf:params:xml:ns:yang:1">
+        <managed-onus xmlns="urn:bbf:yang:bbf-vomci-proxy">
+            <managed-onu>
+                <name>onu1</name>
+                <set-onu-communication>
+                    <onu-communication-available>true</onu-communication-available>
+                    <olt-remote-endpoint-name>OLT1</olt-remote-endpoint-name>
+                    <vomci-func-remote-endpoint-name>vOMCi-grpc-1</vomci-func-remote-endpoint-name>
+                    <onu-attachment-point>
+                        <olt-name>OLT1</olt-name>
+                        <channel-termination-name>CT_1</channel-termination-name>
+                        <onu-id>1</onu-id>
+                    </onu-attachment-point>
+                </set-onu-communication>
+            </managed-onu>
+        </managed-onus>
+    </action>
+</rpc>

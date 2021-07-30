@@ -16,7 +16,14 @@
 
 package org.broadband_forum.obbaa.ipfix.collector.service.impl;
 
-import net.sf.ehcache.CacheManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
 import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixSetHeader;
 import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixTemplateRecordHeader;
 import org.broadband_forum.obbaa.ipfix.collector.entities.record.AbstractTemplateRecord;
@@ -27,13 +34,6 @@ import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.*;
 
 public class IpfixCachingServiceImplTest {
 

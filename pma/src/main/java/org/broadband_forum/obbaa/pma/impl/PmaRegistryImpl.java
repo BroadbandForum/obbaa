@@ -24,10 +24,10 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.apache.log4j.Logger;
-import org.broadband_forum.obbaa.dm.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;

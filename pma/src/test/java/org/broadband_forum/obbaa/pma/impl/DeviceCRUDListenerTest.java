@@ -19,7 +19,7 @@ package org.broadband_forum.obbaa.pma.impl;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

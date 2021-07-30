@@ -16,8 +16,10 @@
 
 package org.broadband_forum.obbaa.onu;
 
-import org.broadband_forum.obbaa.dm.DeviceManager;
-import org.broadband_forum.obbaa.dm.DeviceStateProvider;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceStateProvider;
+import org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager;
+import org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionStateProvider;
 
 /**
  * <p>
@@ -25,22 +27,28 @@ import org.broadband_forum.obbaa.dm.DeviceStateProvider;
  * </p>
  * Created by Ranjitha.B.R (Nokia) on 22/07/2020.
  */
-public class MediatedDeviceEventListener implements DeviceStateProvider {
+public class MediatedDeviceEventListener implements DeviceStateProvider, NetworkFunctionStateProvider {
 
     private final DeviceManager m_deviceManager;
     private final VOLTManagement m_voltManagement;
+    private final NetworkFunctionManager m_networkFunctionManager;
 
-    public MediatedDeviceEventListener(DeviceManager deviceManager, VOLTManagement voltManagement) {
+    public MediatedDeviceEventListener(DeviceManager deviceManager, VOLTManagement voltManagement,
+                                       NetworkFunctionManager networkFunctionManager) {
         m_deviceManager = deviceManager;
         m_voltManagement = voltManagement;
+        m_networkFunctionManager = networkFunctionManager;
+
     }
 
     public void init() {
         m_deviceManager.addDeviceStateProvider(this);
+        m_networkFunctionManager.addNetworkFunctionStateProvider(this);
     }
 
     public void destroy() {
         m_deviceManager.removeDeviceStateProvider(this);
+        m_networkFunctionManager.removeNetworkFunctionStateProvider(this);
     }
 
     @Override
@@ -51,5 +59,15 @@ public class MediatedDeviceEventListener implements DeviceStateProvider {
     @Override
     public void deviceRemoved(String deviceName) {
         m_voltManagement.deviceRemoved(deviceName);
+    }
+
+    @Override
+    public void networkFunctionAdded(String networkFunctionName) {
+        m_voltManagement.networkFunctionAdded(networkFunctionName);
+    }
+
+    @Override
+    public void networkFunctionRemoved(String networkFunctionName) {
+        m_voltManagement.networkFunctionRemoved(networkFunctionName);
     }
 }

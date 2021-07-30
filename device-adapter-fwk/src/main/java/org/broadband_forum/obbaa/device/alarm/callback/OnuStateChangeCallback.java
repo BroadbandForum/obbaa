@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class OnuStateChangeCallback implements NotificationCallBack {
     private static final Logger LOGGER = LoggerFactory.getLogger(OnuStateChangeCallback.class);
+    private static final String IETF_INTERFACES_NS = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
     private final QName m_onuStateChangeNotificationType;
     private NotificationService m_notificationService;
 
@@ -22,7 +23,8 @@ public class OnuStateChangeCallback implements NotificationCallBack {
 
     @Override
     public void onNotificationReceived(Notification notification, NotificationContext context, DateTime receivedTime) {
-        if (m_onuStateChangeNotificationType.equals(notification.getType())) {
+        if (m_onuStateChangeNotificationType.equals(notification.getType())
+                || notification.getType().getNamespace().toString().equals(IETF_INTERFACES_NS)) {
             LOGGER.debug(String.format("This notification is going to be forwarded to the NBI %s",
                     notification.notificationToPrettyString()));
             m_notificationService.sendNotification(NetconfResources.STATE_CHANGE, notification);

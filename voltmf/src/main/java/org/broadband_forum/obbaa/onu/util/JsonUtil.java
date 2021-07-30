@@ -57,6 +57,7 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.OperationDefinition;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
@@ -97,7 +98,7 @@ public final class JsonUtil {
     private static final String HEX_INT_TYPE = "^(0x) {1}([0-9]*([a-f]*[A-F]*))+$";
 
     private static ThreadLocal<Boolean> c_ignoreEmptyLeaves = ThreadLocal.withInitial(() -> Boolean.FALSE);
-    private static ThreadLocal<Boolean> c_appendActionInput = ThreadLocal.withInitial((Supplier<Boolean>) () -> Boolean.FALSE);
+    private static ThreadLocal<Boolean> c_appendActionInput = ThreadLocal.withInitial((Supplier<Boolean>) () -> Boolean.TRUE);
 
     private JsonUtil() {
         //Not called
@@ -263,13 +264,11 @@ public final class JsonUtil {
                             .findDataChildByName(currentElementQName).orElse(null),
                             schemaRegistry, null, modelNodeDSM);
                 }
-            }
-            else if (schemaNode instanceof ContainerSchemaNode) {
+            } else if (schemaNode instanceof ContainerSchemaNode) {
                 JSONObject containerJSON = new JSONObject();
                 parentJsonObject.put(jsonName, containerJSON);
                 handleChildNodes(containerJSON, xml, schemaNode, schemaRegistry, currentModuleName, isMountPointNode, modelNodeDSM);
-            }
-            else if (schemaNode instanceof ActionDefinition) {
+            } else if (schemaNode instanceof ActionDefinition) {
                 if (c_appendActionInput.get()) {
                     ActionDefinition actionDef = (ActionDefinition) schemaNode;
                     ContainerSchemaNode actionInput = actionDef.getInput();
@@ -280,37 +279,38 @@ public final class JsonUtil {
                         parentJsonObject.put(jsonName, containerJSON);
                     }
                 }
-            }
-            else if (schemaNode instanceof ListSchemaNode) {
+            } else if (schemaNode instanceof ListSchemaNode) {
                 // at top level we should not have []
                 JSONObject listEltJSON = new JSONObject();
                 boolean hasChildren = hasElementChildren(xml);
                 if ((isTopLevel && !((ListSchemaNode) schemaNode).getKeyDefinition().isEmpty()) || !(hasChildren)) {
                     parentJsonObject.put(jsonName, listEltJSON);
-                }
-                else {
+                } else {
                     JSONArray listJSON = getOrCreateJSONArray(parentJsonObject, jsonName);
                     listJSON.put(listEltJSON);
                 }
                 handleChildNodes(listEltJSON, xml, schemaNode, schemaRegistry, currentModuleName, isMountPointNode, modelNodeDSM);
-            }
-            else if (schemaNode instanceof LeafSchemaNode) {
+            } else if (schemaNode instanceof LeafSchemaNode) {
                 parentJsonObject.put(jsonName, getValueForJson(xml, ((LeafSchemaNode)schemaNode).getType(), schemaRegistry,
                         currentModuleName, modelNodeDSM));
-            }
-            else if (schemaNode instanceof LeafListSchemaNode) {
+            } else if (schemaNode instanceof LeafListSchemaNode) {
                 JSONArray leafListJSON = getOrCreateJSONArray(parentJsonObject, jsonName);
                 leafListJSON.put(getValueForJson(xml, ((LeafListSchemaNode)schemaNode).getType(), schemaRegistry, currentModuleName,
                         modelNodeDSM));
-            }
-            else if (schemaNode instanceof ChoiceSchemaNode) {
+            } else if (schemaNode instanceof ChoiceSchemaNode) {
                 handleChoiceChildNodes(parentJsonObject, xml, (ChoiceSchemaNode)schemaNode, schemaRegistry, currentModuleName,
                         modelNodeDSM);
-            }
-            else if (schemaNode instanceof AnyXmlSchemaNode) {
+            } else if (schemaNode instanceof AnyXmlSchemaNode) {
                 handleAnyXmlSchemaNode(parentJsonObject, xml, jsonName);
-            }
-            else {
+            } else if (schemaNode instanceof RpcDefinition) {
+                ContainerSchemaNode rpcInput = ((RpcDefinition)schemaNode).getInput();
+                if (rpcInput != null) {
+                    JSONObject containerJSON = new JSONObject();
+                    handleChildNodes(containerJSON, xml, rpcInput, schemaRegistry, currentModuleName,
+                            isMountPointNode, modelNodeDSM);
+                    parentJsonObject.put(jsonName, containerJSON);
+                }
+            } else {
                 LOGGER.warn(String.format("Missing handler for schemaNode %s, while converting xml to json", schemaNode));
             }
         }
@@ -390,6 +390,14 @@ public final class JsonUtil {
             for (ActionDefinition action : ((ContainerSchemaNode) dataSchemaNode).getActions()) {
                 QName childQname = action.getQName();
 
+                if (childElement.getLocalName().equals(childQname.getLocalName()) && childElement.getNamespaceURI()
+                        .equals(childQname.getNamespace().toString())) {
+                    return action;
+                }
+            }
+        } else if (dataSchemaNode instanceof ListSchemaNode) {
+            for (ActionDefinition action : ((ListSchemaNode) dataSchemaNode).getActions()) {
+                QName childQname = action.getQName();
                 if (childElement.getLocalName().equals(childQname.getLocalName()) && childElement.getNamespaceURI()
                         .equals(childQname.getNamespace().toString())) {
                     return action;

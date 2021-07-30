@@ -16,11 +16,14 @@
 
 package org.broadband_forum.obbaa.ipfix.collector.service.ie;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElement;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class InformationElementCacheTest {
 

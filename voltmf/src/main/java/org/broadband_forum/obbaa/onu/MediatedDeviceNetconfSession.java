@@ -20,25 +20,23 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
-import org.broadband_forum.obbaa.device.adapter.DeviceConfigBackup;
-import org.broadband_forum.obbaa.device.adapter.VomciAdapterDeviceInterface;
+import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.client.AbstractNetconfClientSession;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
-import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
-import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
@@ -53,12 +51,21 @@ import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
-import org.broadband_forum.obbaa.onu.kafka.OnuKafkaProducer;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxTemplate;
+import org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao;
+import org.broadband_forum.obbaa.nf.dao.impl.KafkaTopicPurpose;
+import org.broadband_forum.obbaa.onu.exception.MessageFormatterException;
+import org.broadband_forum.obbaa.onu.exception.MessageFormatterSyncException;
+import org.broadband_forum.obbaa.onu.kafka.producer.OnuKafkaProducer;
+import org.broadband_forum.obbaa.onu.message.GpbFormatter;
+import org.broadband_forum.obbaa.onu.message.JsonFormatter;
+import org.broadband_forum.obbaa.onu.message.MessageFormatter;
+import org.broadband_forum.obbaa.onu.message.NetworkWideTag;
+import org.broadband_forum.obbaa.onu.message.ObjectType;
 import org.broadband_forum.obbaa.onu.util.DeviceJsonUtils;
-import org.broadband_forum.obbaa.onu.util.JsonUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -78,26 +85,32 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
     private final ModelNodeDataStoreManager m_modelNodeDSM;
     private final AdapterManager m_adapterManager;
     private final Device m_onuDevice;
+    private final Object m_lock = new Object();
+    private final long m_creationTime;
+    private final MessageFormatter m_messageFormatter;
+    private final TxService m_txService;
     private Map<String, TimestampFutureResponse> m_requestMap;
     private boolean m_open = true;
-    private final Object m_lock = new Object();
     private String m_onuDeviceName;
     private HashMap<String, String> m_labels;
     private OnuKafkaProducer m_kafkaProducer;
-    private final long m_creationTime;
-    private long m_transactionId;
     private ThreadPoolExecutor m_kafkaCommunicationPool;
+    private SchemaRegistry m_schemaRegistry;
+    private NetworkFunctionDao m_networkFunctionDao;
+    private DeviceDao m_deviceDao;
+    private Map<String, AtomicReference<HashSet<String>>> m_kafkatopicMap = new HashMap<>();
 
     public MediatedDeviceNetconfSession(Device device, String oltDeviceName, String onuId, String channelTermRef,
-                                        HashMap<String, String> labels, long transactionId, OnuKafkaProducer kafkaProducer,
+                                        HashMap<String, String> labels, OnuKafkaProducer kafkaProducer,
                                         ModelNodeDataStoreManager modelNodeDSM, AdapterManager adapterManager,
-                                        ThreadPoolExecutor kafkaCommunicationPool) {
+                                        ThreadPoolExecutor kafkaCommunicationPool, SchemaRegistry schemaRegistry,
+                                        MessageFormatter messageFormatter, TxService txService,
+                                        NetworkFunctionDao networkFunctionDao, DeviceDao deviceDao) {
         m_creationTime = System.currentTimeMillis();
         m_onuDevice = device;
         m_onuDeviceName = device.getDeviceName();
         m_kafkaProducer = kafkaProducer;
         m_labels = labels;
-        m_transactionId = transactionId;
         m_oltDeviceName = oltDeviceName;
         m_onuId = onuId;
         m_channelTermRef = channelTermRef;
@@ -105,6 +118,11 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         m_adapterManager = adapterManager;
         m_requestMap = new LinkedHashMap<>();
         m_kafkaCommunicationPool = kafkaCommunicationPool;
+        m_schemaRegistry = schemaRegistry;
+        m_messageFormatter = messageFormatter;
+        m_txService = txService;
+        m_networkFunctionDao = networkFunctionDao;
+        m_deviceDao = deviceDao;
     }
 
     @Override
@@ -121,7 +139,7 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
                     break;
                 case NetconfResources.EDIT_CONFIG:
                     netconfRequest = DocumentToPojoTransformer.getEditConfig(requestDocument);
-                    future = onEditConfig((EditConfigRequest)netconfRequest);
+                    future = onEditConfig((EditConfigRequest) netconfRequest);
                     break;
                 case NetconfResources.GET:
                     netconfRequest = DocumentToPojoTransformer.getGet(requestDocument);
@@ -175,42 +193,83 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
 
     @Override
     public void closeAsync() {
-        NotificationRequest request = new NotificationRequest(m_onuDeviceName, m_oltDeviceName, m_channelTermRef,
-                m_onuId, ONUConstants.ONU_UNDETECTED, m_labels);
-        String jsonUndetectNotification = getJsonNotification(request);
-        if (m_open) {
-            sendRequest(ONUConstants.ONU_UNDETECTED, jsonUndetectNotification, request, null);
-        }
-        m_kafkaCommunicationPool.shutdown();
-        try {
-            close();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while closing session for " + m_onuDeviceName, e);
-        } catch (IOException e) {
-            LOGGER.error("Error while closing session for " + m_onuDeviceName, e);
+        if (m_messageFormatter instanceof JsonFormatter) {
+            String notificationEvent = ONUConstants.UNDETECT_EVENT;
+            NotificationRequest request = new NotificationRequest(m_onuDeviceName, m_oltDeviceName, m_channelTermRef,
+                    m_onuId, notificationEvent, m_labels);
+            setMessageId(request);
+            NetworkWideTag networkWideTag = new NetworkWideTag(m_onuDeviceName, m_oltDeviceName, m_onuId, m_channelTermRef, m_labels);
+            try {
+                Object message = m_messageFormatter.getFormattedRequest(request, notificationEvent, m_onuDevice,
+                        null, null, null, networkWideTag);
+                if (m_open) {
+                    sendRequest(notificationEvent, message, request, null);
+                }
+                close();
+            } catch (InterruptedException e) {
+                LOGGER.error("Error while closing session for " + m_onuDeviceName, e);
+            } catch (IOException e) {
+                LOGGER.error("Error while closing session for " + m_onuDeviceName, e);
+            } catch (NetconfMessageBuilderException | MessageFormatterException e) {
+                LOGGER.error("Error while closing session for " + m_onuDeviceName, e);
+            }
         }
     }
 
-    private void sendRequest(String operation, String requestStringInJSON, AbstractNetconfRequest request,
+    private void sendRequest(String operation, Object message, AbstractNetconfRequest request,
                              TimestampFutureResponse future) {
-        String topicName = null;
+        AtomicReference<HashSet<String>> kafkaTopicNameSet = new AtomicReference<>(new HashSet<String>());
+        String kafkaTopicName = null;
         try {
             switch (operation) {
                 case ONUConstants.ONU_DETECTED:
                 case ONUConstants.ONU_UNDETECTED:
-                    topicName = ONUConstants.ONU_NOTIFICATION_KAFKA_TOPIC;
+                    if (m_messageFormatter instanceof JsonFormatter) {
+                        kafkaTopicName = ONUConstants.ONU_NOTIFICATION_KAFKA_TOPIC;
+                    }
+                    break;
+                case ONUConstants.CREATE_ONU:
+                case ONUConstants.DELETE_ONU:
+                    if (m_messageFormatter instanceof GpbFormatter) {
+                        if (m_kafkatopicMap.containsKey(m_onuDeviceName)) {
+                            kafkaTopicNameSet = m_kafkatopicMap.get(m_onuDeviceName);
+                            m_kafkatopicMap.remove(m_onuDeviceName);
+                        }
+                    }
                     break;
                 case ONUConstants.ONU_GET_OPERATION:
                 case ONUConstants.ONU_COPY_OPERATION:
                 case ONUConstants.ONU_EDIT_OPERATION:
-                    topicName = ONUConstants.ONU_REQUEST_KAFKA_TOPIC;
+                    if (m_messageFormatter instanceof JsonFormatter) {
+                        kafkaTopicName = ONUConstants.ONU_REQUEST_KAFKA_TOPIC;
+                    } else {
+                        String networkFunctionName = getNwFunctionName(m_onuDeviceName);
+                        kafkaTopicNameSet = getTopicName(networkFunctionName);
+                        m_kafkatopicMap.put(m_onuDeviceName, kafkaTopicNameSet);
+                    }
                     break;
                 default:
-                    topicName = ONUConstants.ONU_REQUEST_KAFKA_TOPIC;
+                    if (m_messageFormatter instanceof JsonFormatter) {
+                        kafkaTopicName = ONUConstants.ONU_REQUEST_KAFKA_TOPIC;
+                    } else {
+                        String networkFunctionName = getNwFunctionName(m_onuDeviceName);
+                        kafkaTopicNameSet = getTopicName(networkFunctionName);
+                        m_kafkatopicMap.put(m_onuDeviceName, kafkaTopicNameSet);
+                    }
             }
             synchronized (m_lock) {
                 if (m_open) {
-                    m_kafkaProducer.sendNotification(topicName, requestStringInJSON);
+                    if (m_messageFormatter instanceof JsonFormatter) {
+                        m_kafkaProducer.sendNotification(kafkaTopicName, message);
+                    } else {
+                        if (!kafkaTopicNameSet.get().isEmpty()) {
+                            for (String topicName : kafkaTopicNameSet.get()) {
+                                m_kafkaProducer.sendNotification(topicName, message);
+                            }
+                        } else {
+                            LOGGER.error(String.format("Topic name set is NULL"));
+                        }
+                    }
                     if (future != null) {
                         registerRequestInMap(request, future);
                     }
@@ -226,19 +285,29 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         }
     }
 
+    private AtomicReference<HashSet<String>> getTopicName(String networkFunctionName) {
+        AtomicReference<HashSet<String>> kafkaTopicNames = new AtomicReference<>(new HashSet<String>());
+        if (networkFunctionName != null) {
+            m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                final HashSet<String> kafkaTopicNameFinal = m_networkFunctionDao.getKafkaTopicNames(networkFunctionName,
+                        KafkaTopicPurpose.VOMCI_REQUEST);
+                if (kafkaTopicNameFinal != null && !kafkaTopicNameFinal.isEmpty()) {
+                    kafkaTopicNames.set(kafkaTopicNameFinal);
+                } else {
+                    LOGGER.error(String.format("Kafka topic names for the Network Function: %s is Null or Empty", networkFunctionName));
+                }
+                return null;
+            });
+        } else {
+            LOGGER.error("Network Function Name is NULL");
+        }
+        return kafkaTopicNames;
+    }
+
     private void registerRequestInMap(AbstractNetconfRequest request, TimestampFutureResponse future) {
         synchronized (m_lock) {
             m_requestMap.put(request.getMessageId(), future);
         }
-    }
-
-    public String getJsonNotification(NotificationRequest request) {
-        LOGGER.debug(String.format("Processing %s request", request.getEvent()));
-        setMessageId(request);
-        if (request.getMessageId().isEmpty() || request.getMessageId() == null) {
-            LOGGER.error("MessegeId is not set for the DETECT/UNDETECT request notification");
-        }
-        return request.getJsonNotification();
     }
 
     private void internalOkResponse(AbstractNetconfRequest request, TimestampFutureResponse future) {
@@ -300,23 +369,28 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
 
     public CompletableFuture<NetConfResponse> onCopyConfig(AbstractNetconfRequest request) {
         LOGGER.info(String.format("Sending copy config request for device %s: %s", m_onuDeviceName, request.requestToString()));
+        synchronized (m_lock) {
+            if (!m_open) {
+                LOGGER.debug("Mediated Device Netconf Session is closed. Unable to process copy-config request for " + m_onuDeviceName);
+                return CompletableFuture.completedFuture(null);
+            }
+        }
         TimestampFutureResponse future = new TimestampFutureResponse();
         m_kafkaCommunicationPool.execute(() -> {
             try {
                 setMessageId(request);
-                String targetConfig = DocumentUtils.documentToPrettyString(request.getRequestDocument());
-                if (request instanceof CopyConfigRequest) {
-                    CopyConfigRequest copyConfig = (CopyConfigRequest)request;
-                    targetConfig = convertXmlToJson(DocumentUtils.documentToPrettyString(copyConfig.getSourceConfigElement()));
+                NetworkWideTag networkWideTag ;
+                if (m_messageFormatter instanceof JsonFormatter) {
+                    networkWideTag = new NetworkWideTag(m_onuDeviceName, m_oltDeviceName, m_onuId, m_channelTermRef, m_labels);
+                } else {
+                    String vomciFunctionName = getNwFunctionName(m_onuDeviceName);
+                    networkWideTag = new NetworkWideTag(m_onuDeviceName, vomciFunctionName, m_onuDeviceName, ObjectType.ONU);
                 }
-                String payloadString = getPayloadPrefix(ONUConstants.ONU_COPY_OPERATION, request.getMessageId())
-                        + ONUConstants.ONU_TARGET_CONFIG + "\"" + ONUConstants.COLON + targetConfig + "}";
-                String requestJsonString = getJsonRequest(ONUConstants.PAYLOAD_JSON_KEY, payloadString);
-
-                sendRequest(ONUConstants.ONU_COPY_OPERATION, requestJsonString, request, future);
-                internalOkResponse(request, future);
+                Object formattedMessage = m_messageFormatter.getFormattedRequest(request, ONUConstants.ONU_COPY_OPERATION, m_onuDevice,
+                        m_adapterManager, m_modelNodeDSM, m_schemaRegistry, networkWideTag);
+                sendRequest(ONUConstants.ONU_COPY_OPERATION, formattedMessage, request, future);
                 return;
-            } catch (NetconfMessageBuilderException e) {
+            } catch (NetconfMessageBuilderException | MessageFormatterException e) {
                 LOGGER.error("Error while processing copy-config request for device " + m_onuDeviceName, e);
             }
             internalNokResponse(request, future, "Error processing copy-config");
@@ -324,20 +398,7 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         return future;
     }
 
-    private String getJsonRequest(String key, String value) {
-        Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(ONUConstants.ONU_NAME_JSON_KEY, m_onuDeviceName);
-        requestMap.put(ONUConstants.OLT_NAME_JSON_KEY, m_oltDeviceName);
-        requestMap.put(ONUConstants.ONU_ID_JSON_KEY, m_onuId);
-        requestMap.put(ONUConstants.CHANNEL_TERMINATION_REF_JSON_KEY, m_channelTermRef);
-        requestMap.put(ONUConstants.EVENT, ONUConstants.REQUEST_EVENT);
-        requestMap.put(ONUConstants.LABELS_JSON_KEY, m_labels);
-        requestMap.put(key, value);
-        JSONObject requestJSON = new JSONObject(requestMap);
-        return requestJSON.toString(ONUConstants.JSON_INDENT_FACTOR);
-    }
-
-    private CompletableFuture<NetConfResponse> onGet(GetRequest request) {
+    public CompletableFuture<NetConfResponse> onGet(GetRequest request) {
         LOGGER.info(String.format("Sending get request for device %s: %s", m_onuDeviceName, request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
@@ -347,41 +408,37 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         }
         TimestampFutureResponse future = new TimestampFutureResponse();
         m_kafkaCommunicationPool.execute(() -> {
-            setMessageId(request);
-            if (request.getMessageId() == null || request.getMessageId().isEmpty()) {
-                LOGGER.debug("Unable to set GET request messageId. Terminate processing GET request");
-                internalNokResponse(request, future, "Unable to set GET request messageId");
-                return;
-            }
-            NetconfFilter filter = request.getFilter();
-            if (filter != null) {
-                SchemaRegistry deviceSchemaRegistry = AdapterUtils.getAdapterContext(m_onuDevice, m_adapterManager).getSchemaRegistry();
-                DeviceJsonUtils deviceJsonUtils = new DeviceJsonUtils(deviceSchemaRegistry, m_modelNodeDSM);
-                List<String> filterElementsJsonList = new ArrayList<>();
-                for (Element element : filter.getXmlFilterElements()) {
-                    DataSchemaNode deviceRootSchemaNode = deviceJsonUtils.getDeviceRootSchemaNode(element.getLocalName(),
-                            element.getNamespaceURI());
-                    String filterElementJsonString = JsonUtil.convertFromXmlToJsonIgnoreEmptyLeaves(Arrays.asList(element),
-                            deviceRootSchemaNode, deviceSchemaRegistry, m_modelNodeDSM);
-                    filterElementsJsonList.add(filterElementJsonString.substring(1, filterElementJsonString.length() - 1));
-                    LOGGER.debug("JSON converted string for the GET request of the filter element is " + filterElementJsonString);
+            try {
+                if (request.getMessageId() == null || request.getMessageId().isEmpty()) {
+                    LOGGER.debug("Unable to set GET request messageId. Terminate processing GET request");
+                    internalNokResponse(request, future, "Unable to set GET request messageId");
+                    return;
                 }
-                String payloadJsonString = getPayloadPrefix(ONUConstants.ONU_GET_OPERATION, request.getMessageId())
-                        + ONUConstants.FILTERS_JSON_KEY + "\"" + ONUConstants.COLON + "{\"" + ONUConstants.NETWORK_MANAGER
-                        + ONUConstants.COLON + ONUConstants.ROOT + "\"" + ONUConstants.COLON
-                        + "{" + String.join(",", filterElementsJsonList) + "}}}";
-                String requestJsonString = getJsonRequest("payload", payloadJsonString);
-                sendRequest(ONUConstants.ONU_GET_OPERATION, requestJsonString, request, future);
-            } else {
-                LOGGER.error("No filter for GET request");
-                internalNokResponse(request, future, "Unable to get filters of the GET request");
+                NetconfFilter filter = request.getFilter();
+                if (filter != null) {
+                    NetworkWideTag networkWideTag;
+                    if (m_messageFormatter instanceof JsonFormatter) {
+                        networkWideTag = new NetworkWideTag(m_onuDeviceName, m_oltDeviceName, m_onuId, m_channelTermRef, m_labels);
+                    } else {
+                        String vomciFunctionName = getNwFunctionName(m_onuDeviceName);
+                        networkWideTag = new NetworkWideTag(m_onuDeviceName, vomciFunctionName, m_onuDeviceName, ObjectType.ONU);
+                    }
+                    Object formattedMessage = m_messageFormatter.getFormattedRequest(request, ONUConstants.ONU_GET_OPERATION, m_onuDevice,
+                            m_adapterManager, m_modelNodeDSM, m_schemaRegistry, networkWideTag);
+                    sendRequest(ONUConstants.ONU_GET_OPERATION, formattedMessage, request, future);
+                } else {
+                    LOGGER.error("No filter for GET request");
+                    internalNokResponse(request, future, "Unable to get filters of the GET request");
+                }
+            } catch (Exception e) {
+                LOGGER.error("Error while processing onGet request for device " + m_onuDeviceName, e);
             }
         });
         return future;
     }
 
     private CompletableFuture<NetConfResponse> onEditConfig(EditConfigRequest request) {
-        LOGGER.info(String.format("DZS: Sending edit config request for device %s: >%s<", m_onuDeviceName,
+        LOGGER.info(String.format("Sending edit config request for device %s: >%s<", m_onuDeviceName,
                 request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
@@ -399,106 +456,26 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
                 internalNokResponse(request, future, "Unable to set edit-config request messageId");
             }
             try {
-                DeviceConfigBackup backupDatastore = ((VomciAdapterDeviceInterface)AdapterUtils.getAdapterContext(m_onuDevice,
-                    m_adapterManager).getDeviceInterface()).getDatastoreBackup();
-                if (backupDatastore != null) {
-                    String preConfig = convertXmlToJson(backupDatastore.getOldDataStore());
-                    String postConfig = convertXmlToJson(backupDatastore.getUpdatedDatastore());
-
-                    if (isInvalidConfig(request, future, ONUConstants.ONU_EDIT_OPERATION, preConfig)
-                            || isInvalidConfig(request, future, ONUConstants.ONU_EDIT_OPERATION, postConfig)
-                            || preConfigEqualsPostConfig(request, future, ONUConstants.ONU_EDIT_OPERATION, preConfig, postConfig)) {
-                        //Do nothing
-                    } else {
-                        EditConfigElement configElement = request.getConfigElement();
-                        List<String> configElementsJsonList = new ArrayList<>();
-                        if (configElement != null) {
-                            SchemaRegistry deviceSchemaRegistry = AdapterUtils.getAdapterContext(m_onuDevice, m_adapterManager)
-                                    .getSchemaRegistry();
-                            DeviceJsonUtils deviceJsonUtils = new DeviceJsonUtils(deviceSchemaRegistry, m_modelNodeDSM);
-                            for (Element element : configElement.getConfigElementContents()) {
-                                DataSchemaNode deviceRootSchemaNode = deviceJsonUtils.getDeviceRootSchemaNode(element.getLocalName(),
-                                        element.getNamespaceURI());
-                                String configElementJsonString = JsonUtil.convertFromXmlToJsonIgnoreEmptyLeaves(Arrays.asList(element),
-                                        deviceRootSchemaNode, deviceSchemaRegistry, m_modelNodeDSM);
-                                configElementsJsonList.add(configElementJsonString.substring(1, configElementJsonString.length() - 1));
-                                LOGGER.debug("JSON converted string for the edit-config request of the filter element is "
-                                        + configElementJsonString);
-                            }
-                        }
-                        String payloadJsonString = getPayloadPrefix(ONUConstants.ONU_EDIT_OPERATION, request.getMessageId())
-                                + ONUConstants.ONU_CURRENT_CONFIG + "\"" + ONUConstants.COLON + preConfig + ", \""
-                                + ONUConstants.ONU_TARGET_CONFIG + "\"" + ONUConstants.COLON + postConfig + ", \""
-                                + ONUConstants.ONU_DELTA_CONFIG + "\"" + ONUConstants.COLON
-                                + "{" + String.join(",", configElementsJsonList)  + "}}";
-                        String requestJsonString = getJsonRequest(ONUConstants.PAYLOAD_JSON_KEY, payloadJsonString);
-                        sendRequest(ONUConstants.ONU_EDIT_OPERATION, requestJsonString, request, future);
-                    }
+                NetworkWideTag networkWideTag;
+                if (m_messageFormatter instanceof JsonFormatter) {
+                    networkWideTag = new NetworkWideTag(m_onuDeviceName, m_oltDeviceName, m_onuId, m_channelTermRef, m_labels);
                 } else {
-                    LOGGER.error(String.format("No backup datastore found for edit-config with message-id %s found for device %s",
-                            request.getMessageId(), m_onuDeviceName));
-                    internalNokResponse(request, future, "Error while processing edit-config. No backup datastore found for message-id "
-                            + request.getMessageId());
+                    String vomciFunctionName = getNwFunctionName(m_onuDeviceName);
+                    networkWideTag = new NetworkWideTag(m_onuDeviceName, vomciFunctionName, m_onuDeviceName, ObjectType.ONU);
                 }
+                Object formattedMessage = m_messageFormatter.getFormattedRequest(request, ONUConstants.ONU_EDIT_OPERATION, m_onuDevice,
+                        m_adapterManager, m_modelNodeDSM, m_schemaRegistry, networkWideTag);
+                sendRequest(ONUConstants.ONU_EDIT_OPERATION, formattedMessage, request, future);
+            } catch (MessageFormatterSyncException e) {
+                internalOkResponse(request, future);
+            } catch (MessageFormatterException e) {
+                internalNokResponse(request, future, e.getMessage());
             } catch (Exception e) {
                 LOGGER.error("Error while processing edit-config request for device" + m_onuDeviceName, e);
                 internalNokResponse(request, future, e.toString());
             }
         });
         return future;
-    }
-
-    private boolean isInvalidConfig(AbstractNetconfRequest request, TimestampFutureResponse future, String operation,
-                                    String config) {
-        if (config == null || config.isEmpty()) {
-            LOGGER.error(String.format("Unable to fetch pre/post backup configuration for %s request for device %s",
-                    operation, m_onuDeviceName));
-            internalNokResponse(request, future,
-                    "Unable to fetch pre/post backup configuration for " + operation + " request for device " + m_onuDeviceName);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean preConfigEqualsPostConfig(AbstractNetconfRequest request, TimestampFutureResponse future, String operation,
-                                              String preConfig, String postConfig) {
-        if (preConfig.equals(postConfig)) {
-            LOGGER.debug(String.format("Config already is in sync (same config in cache) - skipping %s request for device %s",
-                    operation, m_onuDeviceName));
-            internalOkResponse(request, future);
-            return true;
-        }
-        return false;
-    }
-
-    private String getPayloadPrefix(String operation, String messageId) {
-        return "{\"operation\"" + ONUConstants.COLON + "\"" + operation
-                + "\", \"identifier\"" + ONUConstants.COLON + "\"" + messageId + "\", \"";
-    }
-
-    private String convertXmlToJson(String xml) {
-        try {
-            Element element = DocumentUtils.stringToDocument(xml).getDocumentElement();
-            List<Element> deviceRootNodes = DocumentUtils.getChildElements(element);
-            return convertElementsToJson(deviceRootNodes);
-        } catch (Exception exception) {
-            LOGGER.error("Error in convertXmlToJson ", exception);
-            return "";
-        }
-    }
-
-    private String convertElementsToJson(List<Element> deviceRootNodes) {
-        SchemaRegistry deviceSchemaRegistry = AdapterUtils.getAdapterContext(m_onuDevice, m_adapterManager).getSchemaRegistry();
-        DeviceJsonUtils deviceJsonUtils = new DeviceJsonUtils(deviceSchemaRegistry, m_modelNodeDSM);
-        List<String> jsonNodes = new ArrayList<>();
-        for (Element deviceRootNode : deviceRootNodes) {
-            DataSchemaNode schemaNode = deviceJsonUtils.getDeviceRootSchemaNode(deviceRootNode.getLocalName(),
-                    deviceRootNode.getNamespaceURI());
-            String jsonNode = JsonUtil.convertFromXmlToJson(Arrays.asList(deviceRootNode), schemaNode,
-                    deviceSchemaRegistry, m_modelNodeDSM);
-            jsonNodes.add(jsonNode.substring(1, jsonNode.length() - 1));
-        }
-        return "{" + String.join(",", jsonNodes) + "}";
     }
 
     public NetConfResponse processGetResponse(String identifier, String responseStatus, String jsonResponse, String failureReason) {
@@ -633,5 +610,19 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
             m_requestMap.get(identifier).complete(response);
             m_requestMap.remove(identifier);
         }
+    }
+
+    protected String getNwFunctionName(String onuDeviceName) {
+        AtomicReference<String> networkFunctionName = new AtomicReference<String>();
+        m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+            String nwFunctionName = m_deviceDao.getVomciFunctionName(onuDeviceName);
+            if (nwFunctionName != null) {
+                networkFunctionName.set(nwFunctionName);
+            } else {
+                LOGGER.error(String.format("No Network Function found for the given device %s:", onuDeviceName));
+            }
+            return null;
+        });
+        return networkFunctionName.get();
     }
 }

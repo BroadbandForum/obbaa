@@ -1,0 +1,67 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: ipfix-collector
+  namespace: obbaa
+spec:
+  selector:
+    matchLabels:
+      app: ipfix-collector
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: ipfix-collector
+    spec:
+      volumes:
+        - name: ipfix-volume
+          persistentVolumeClaim:
+            claimName: ipfix-pvclaim
+      hostname: ipfix-collector
+      containers:
+        - name: ipfix-collector
+          image: broadbandforum/ipfix-collector:latest
+          env:
+            - name: IPFIX_COLLECTOR_PORT
+              value: "4494"
+            - name: IPFIX_IE_MAPPING_DIR
+              value: "/ipfix/ie-mapping/"
+            - name: IPFIX_COLLECTOR_MAX_CONNECTION
+              value: "10000"
+            - name: BAA_HOST
+              value: "baa"
+            - name: BAA_SSH_PORT
+              value: "9292"
+            - name: BAA_USERNAME
+              value: "admin"
+            - name: BAA_PASSWORD
+              value: "password"
+            - name: DEBUG
+              value: "true"
+            - name: INFLUXDB_ORGANISATION
+              value: "broadband_forum"
+            - name: INFLUXDB_BUCKETID
+              value: "pm-collection"
+            - name: INFLUXDB_API_URL
+              value: "http://influxdb:9999"
+            - name: INFLUXDB_TOKEN
+              value: "_6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g=="
+            - name: PMD_MAX_BUFFERED_POINTS
+              value: "5000"
+            - name: PMD_MAX_BUFFERED_MEASUREMENTS
+              value: "100"
+            - name: PMD_TIMEOUT_BUFFERED_POINTS
+              value: "60"
+            - name: PMD_NBI_PORT
+              value: "5051"
+          ports:
+            - containerPort: 8005
+              name: port8005
+            - containerPort: 4494
+              name: port4494
+            - containerPort: 5051
+              name: port5051
+          volumeMounts:
+            - name: ipfix-volume
+              mountPath: /ipfix/ie-mapping/
+      restartPolicy: Always

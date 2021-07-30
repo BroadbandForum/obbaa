@@ -16,11 +16,19 @@
 
 package org.broadband_forum.obbaa.onu;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
+import org.broadband_forum.obbaa.onu.message.MessageFormatter;
 import org.broadband_forum.obbaa.onu.notification.ONUNotification;
 import org.broadband_forum.obbaa.pma.DeviceNotificationListenerService;
 import org.junit.Before;
@@ -29,13 +37,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.yangtools.yang.common.QName;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * <p>
@@ -52,6 +53,8 @@ public class OnuNotificationListenerTest {
     private VOLTManagement voltManagement;
     @Mock
     private Device device;
+    @Mock
+    private MessageFormatter messageFormatter;
 
     private ONUNotificationListener m_listener;
     String deviceName = "onu";
@@ -84,7 +87,7 @@ public class OnuNotificationListenerTest {
                         "        <bbf-xpon-onu-states:onu-state-last-change>2019-07-25T05:53:36+00:00</bbf-xpon-onu-states:onu-state-last-change>\n" +
                         "        <bbf-xpon-onu-states:v-ani-ref>onu_25</bbf-xpon-onu-states:v-ani-ref>\n" +
                         "    </bbf-xpon-onu-states:onu-state-change>").getDocumentElement());
-        m_listener = new ONUNotificationListener(m_deviceNotifService, voltManagement);
+        m_listener = new ONUNotificationListener(m_deviceNotifService, voltManagement,messageFormatter);
     }
 
     @Test

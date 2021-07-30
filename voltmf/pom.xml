@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
     </parent>
 
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>org.broadband-forum.obbaa</groupId>
-            <artifactId>device-manager</artifactId>
+            <artifactId>network-manager</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -50,7 +50,7 @@
         </dependency>
         <dependency>
             <groupId>org.broadband-forum.obbaa</groupId>
-            <artifactId>device-manager-entities</artifactId>
+            <artifactId>network-manager-entities</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -75,7 +75,13 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-         <dependency>
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <version>${xmlunit.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>${mockito-all.version}</version>
@@ -101,13 +107,47 @@
         <dependency>
             <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>pma</artifactId>
-            <version>4.0.0</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
             <version>${kafka.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-core</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.18.2-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
+            <artifactId>netconf-server-modelnode-fwk</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -167,7 +207,10 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
                         <Import-Package>*, org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support,
-                            org.broadband_forum.obbaa.netconf.api.server, org.hibernate.proxy, javassist.util.proxy, org.hibernate.jpa</Import-Package>
+                            org.broadband_forum.obbaa.netconf.api.server, org.hibernate.proxy, javassist.util.proxy,
+                            org.hibernate.jpa,
+                            org.broadband_forum.obbaa.nf.*,
+                            org.broadband_forum.obbaa.nm.nwfunctionmgr.*</Import-Package>
                         <_removeheaders>Import-Service,Export-Service,Provide-Capability,Require-Capability</_removeheaders>
                         <Dynamic-Import-Package>*, org.hibernate.proxy, javassist.util.proxy</Dynamic-Import-Package>
                         <Meta-Persistence>META-INF/persistence.xml</Meta-Persistence>

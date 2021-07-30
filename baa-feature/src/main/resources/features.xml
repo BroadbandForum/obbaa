@@ -36,9 +36,9 @@
 
         <bundle>mvn:org.broadband-forum.obbaa/netconf-alarm-app/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/device-adapter-fwk/${project.version}</bundle>
-        <bundle>mvn:org.broadband-forum.obbaa/device-manager-entities/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/network-manager-entities/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/sbi-connectors/${project.version}</bundle>
-        <bundle>mvn:org.broadband-forum.obbaa/device-manager/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/network-manager/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/pma/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/aggregator/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/nbi-adapter/${project.version}</bundle>
@@ -64,6 +64,7 @@
         <bundle><![CDATA[wrap:mvn:net.sf.ehcache/ehcache-core/${ehcache-core.version}$Bundle-SymbolicName=ehcache-core&Bundle-Version=${ehcache-core.version}&Import-Package=javax.management;resolution:=optional,javax.management.openmbean;resolution:=optional,javax.naming;resolution:=optional,javax.servlet;resolution:=optional,javax.transaction;resolution:=optional,javax.transaction.xa;resolution:=optional,javax.xml.parsers;resolution:=optional,org.hibernate,org.hibernate.cache,org.hibernate.cache.spi,org.hibernate.cache.access;resolution:=optional,org.hibernate.cfg;resolution:=optional,org.hibernate.impl;resolution:=optional,org.hibernate.stat;resolution:=optional,org.hibernate.transaction;resolution:=optional,org.slf4j;resolution:=optional,org.xml.sax;resolution:=optional,org.xml.sax.helpers;resolution:=optional]]></bundle>
         <bundle start-level="70">mvn:org.hibernate/hibernate-ehcache/${hibernate.version}</bundle>
 
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle>mvn:org.apache.commons/commons-pool2/${commons-pool2.version}</bundle>
         <bundle>mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle><![CDATA[wrap:mvn:com.google.errorprone/error_prone_annotations/${errorprone.version}$Bundle-SymbolicName=errorprone-annotations&Bundle-Version=${errorprone.version}]]></bundle>

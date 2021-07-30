@@ -25,6 +25,7 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
 import org.broadband_forum.obbaa.onu.ONUConstants;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.w3c.dom.Element;
 
 /**
@@ -49,6 +50,15 @@ public class DeviceJsonUtils {
                 .withRevision(sr.getModuleByNamespace(namespace).getQNameModule().getRevision().orElse(null))
                 .appendLocalName(localName);
         return sr.getDataSchemaNode(builder.build());
+    }
+
+    public RpcDefinition getRpcSchemaNode(String localName, String namespace) {
+        SchemaPathBuilder builder = new SchemaPathBuilder();
+        SchemaRegistry sr = m_schemaRegistry;
+        builder.withNamespace(namespace)
+                .withRevision(sr.getModuleByNamespace(namespace).getQNameModule().getRevision().orElse(null))
+                .appendLocalName(localName);
+        return sr.getRpcDefinition(builder.build());
     }
 
     public Element convertFromJsonToXmlSBI(String jsonData) throws NetconfMessageBuilderException {

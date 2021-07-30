@@ -18,12 +18,12 @@ package org.broadband_forum.obbaa.sa.pac;
 
 import org.broadband_forum.obbaa.aggregator.processor.DeviceManagerAdapter;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.impl.NetconfConnectionManagerImpl;
-import org.broadband_forum.obbaa.dm.DeviceManagementSubsystem;
-import org.broadband_forum.obbaa.dm.impl.DeviceManagerImpl;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.interceptor.DataStoreTransactionInterceptor;
 import org.broadband_forum.obbaa.dmyang.tx.TxService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManagementSubsystem;
+import org.broadband_forum.obbaa.nm.devicemanager.impl.DeviceManagerImpl;
 import org.broadband_forum.obbaa.pma.impl.AlignmentTimer;
 import org.broadband_forum.obbaa.pma.impl.NetconfDeviceAlignmentServiceImpl;
 import org.springframework.boot.SpringApplication;

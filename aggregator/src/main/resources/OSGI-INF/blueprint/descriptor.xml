@@ -23,7 +23,7 @@
     <jpa:enable/>
     <tx:enable-annotations/>
 
-    <reference id="deviceManager" interface="org.broadband_forum.obbaa.dm.DeviceManager" availability="mandatory"/>
+    <reference id="deviceManager" interface="org.broadband_forum.obbaa.nm.devicemanager.DeviceManager" availability="mandatory"/>
     <reference id="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry" availability="mandatory"/>
     <reference id="dmNetconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer"
                availability="mandatory"/>

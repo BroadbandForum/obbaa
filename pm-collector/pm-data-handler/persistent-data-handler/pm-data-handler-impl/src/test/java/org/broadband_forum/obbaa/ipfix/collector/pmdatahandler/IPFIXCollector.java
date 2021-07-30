@@ -18,7 +18,6 @@ package org.broadband_forum.obbaa.ipfix.collector.pmdatahandler;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.broadband_forum.obbaa.pm.service.DataHandlerService;
 import org.broadband_forum.obbaa.pm.service.IpfixDataHandler;

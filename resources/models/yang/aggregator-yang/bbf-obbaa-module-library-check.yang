@@ -10,7 +10,6 @@ module bbf-obbaa-module-library-check {
 
     import bbf-obbaa-network-manager {
         prefix network-manager;
-        revision-date 2020-07-23;
     }
 
     organization

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: control-relay
+  namespace: obbaa
+spec:
+  selector:
+    app: control-relay
+  ports:
+    - name: port50052
+      protocol: TCP
+      port: 50052
+      targetPort: 50052
+      nodePort: 32052  #external port
+    - name: port50055
+      protocol: TCP
+      port: 50055
+      targetPort: 50055
+      nodePort: 32055  #external port
+  type: NodePort

@@ -1,0 +1,3 @@
+<device-state xmlns="urn:bbf:yang:obbaa:network-manager">
+<onu-state-info xmlns="urn:bbf:yang:obbaa:onu-management"/>
+</device-state>

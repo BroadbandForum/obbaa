@@ -17,8 +17,13 @@
 package org.broadband_forum.obbaa.onu;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.LockModeType;
 
 import org.apache.log4j.Logger;
+import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
 import org.broadband_forum.obbaa.onu.entity.UnknownONU;
 
@@ -31,27 +36,24 @@ import org.broadband_forum.obbaa.onu.entity.UnknownONU;
 public class UnknownONUHandler {
     private static final Logger LOGGER = Logger.getLogger(UnknownONUHandler.class);
     private final PersistenceManagerUtil m_persistenceMgrUtil;
-    private HashMap<String, UnknownONU> m_unknownOnuMap;
 
     public UnknownONUHandler(PersistenceManagerUtil persistenceMgrUtil) {
         m_persistenceMgrUtil = persistenceMgrUtil;
-        m_unknownOnuMap = new HashMap<>();
     }
 
     public void createUnknownONUEntity(UnknownONU unknownONU) {
-        /*EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
+        EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
         try {
             manager.create(unknownONU);
         } catch (Exception e) {
             LOGGER.error("Problem in creating unknown ONU entity " + unknownONU);
             throw new RuntimeException("Unable to create unknown ONU entity", e);
-        }*/
-        m_unknownOnuMap.put(unknownONU.getSerialNumber(), unknownONU);
+        }
     }
 
     public UnknownONU findUnknownOnuEntity(String serialNumber, String registrationId) {
         final UnknownONU[] unknownONU = new UnknownONU[1];
-        /*EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
+        EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
         Map<String, Object> matchValue = new HashMap<String, Object>();
         if (serialNumber != null) {
             matchValue.put(ONUConstants.SERIAL_NUMBER, serialNumber);
@@ -70,18 +72,44 @@ public class UnknownONUHandler {
                         serialNumber, registrationId), e);
             }
         }
-        return unknownONU[0];*/
-        return m_unknownOnuMap.get(serialNumber);
+        return unknownONU[0];
+    }
+
+    public UnknownONU findMatchingUnknownOnu(String oltName, String channelTermRef, String onuId) {
+        UnknownONU unknownONU = new UnknownONU();
+        EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
+        Map<String, Object> matchValue = new HashMap<>();
+        if (oltName != null) {
+            matchValue.put(ONUConstants.OLT_DEVICE_NAME, oltName);
+        }
+        if (onuId != null) {
+            matchValue.put(ONUConstants.ONU_ID, onuId);
+        }
+
+        if (channelTermRef != null) {
+            matchValue.put(ONUConstants.CHANNEL_TERMINATION_REFERENCE, channelTermRef);
+        }
+        if (!matchValue.isEmpty()) {
+            try {
+                List<UnknownONU> unknownOnuList = manager.findByMatchValue(UnknownONU.class, matchValue, LockModeType.PESSIMISTIC_WRITE);
+                if (!unknownOnuList.isEmpty()) {
+                    unknownONU = unknownOnuList.get(0);
+                }
+            } catch (Exception e) {
+                LOGGER.error(String.format("Problem in finding unknown ONU entity with oltName:%s, onuId:%s and channelTermRef:%s",
+                        oltName, onuId, channelTermRef), e);
+            }
+        }
+        return unknownONU;
     }
 
     public void deleteUnknownOnuEntity(UnknownONU unknownONU) {
-        /*EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
+        EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
         try {
             manager.delete(unknownONU);
         } catch (Exception e) {
             LOGGER.error("Problem in deleting unknown ONU entity " + unknownONU, e);
-        }*/
-        m_unknownOnuMap.remove(unknownONU.getSerialNumber());
+        }
     }
 
 }

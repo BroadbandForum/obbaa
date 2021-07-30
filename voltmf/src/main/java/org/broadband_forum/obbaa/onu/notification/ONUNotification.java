@@ -28,6 +28,8 @@ import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.onu.ONUConstants;
+import org.broadband_forum.obbaa.onu.message.GpbFormatter;
+import org.broadband_forum.obbaa.onu.message.MessageFormatter;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.w3c.dom.Document;
 
@@ -40,6 +42,12 @@ import org.w3c.dom.Document;
 public class ONUNotification extends NetconfNotification {
 
     private static final Logger LOGGER = Logger.getLogger(ONUNotification.class);
+    private static final String IETF_INTERFACES_NS = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
+    private static final String BBF_XPON_ONU_STATE_NS = "urn:bbf:yang:bbf-xpon-onu-state";
+    private static final String BBF_XPON_ONU_STATES_NS = "urn:bbf:yang:bbf-xpon-onu-states";
+    private static final String BBF_XPON_NS = "urn:bbf:yang:bbf-xpon";
+    private static final String ONU_PRESENCE_STATE_CHANGE_XPATH = "/nc:notification/ietf-interfaces:interfaces-state/"
+            + "ietf-interfaces:interface/bbf-xpon:channel-termination/bbf-xpon-onu-state:onu-presence-state-change/";
     private String m_serialNumber;
     private String m_oltDeviceName;
     private Document m_document;
@@ -54,9 +62,11 @@ public class ONUNotification extends NetconfNotification {
     private volatile XPathExpression c_xPathCtermRef;
     private volatile XPathExpression c_xPathOnuStateLastChange;
     private volatile XPathExpression c_xPathVAniRef;
+    private MessageFormatter m_messageFormatter;
 
 
-    public ONUNotification(final Notification notification, String oltDeviceName) throws NetconfMessageBuilderException {
+    public ONUNotification(final Notification notification, String oltDeviceName, MessageFormatter messageFormatter)
+            throws NetconfMessageBuilderException {
         super(notification.getNotificationDocument());
         m_notification = notification;
         m_oltDeviceName = oltDeviceName;
@@ -64,6 +74,7 @@ public class ONUNotification extends NetconfNotification {
         m_notificationType = notification.getType();
         m_ONUStateChangeNameSpace = m_notificationType.getNamespace().toString();
         m_event = m_notificationType.getLocalName();
+        m_messageFormatter = messageFormatter;
         initXPath();
     }
 
@@ -75,8 +86,17 @@ public class ONUNotification extends NetconfNotification {
                         if (prefix.equals("nc")) {
                             return "urn:ietf:params:xml:ns:netconf:notification:1.0";
                         }
+                        if (prefix.equals("bbf-xpon-onu-state")) {
+                            return BBF_XPON_ONU_STATE_NS;
+                        }
                         if (prefix.equals("bbf-xpon-onu-states")) {
-                            return m_ONUStateChangeNameSpace;
+                            return BBF_XPON_ONU_STATES_NS;
+                        }
+                        if (prefix.equals("ietf-interfaces")) {
+                            return IETF_INTERFACES_NS;
+                        }
+                        if (prefix.equals("bbf-xpon")) {
+                            return BBF_XPON_NS;
                         }
                         return null;
                     }
@@ -91,20 +111,37 @@ public class ONUNotification extends NetconfNotification {
                 };
                 XPath xpath = XPathFactory.newInstance().newXPath();
                 xpath.setNamespaceContext(ctx);
-                c_xPathSn = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
-                        + "bbf-xpon-onu-states:detected-serial-number/text()");
-                c_xPathRegId = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
-                        + "bbf-xpon-onu-states:detected-registration-id/text()");
-                c_xPathOnuid = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
-                        + "bbf-xpon-onu-states:onu-id/text()");
-                c_xPathOnuState = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
-                        + "bbf-xpon-onu-states:onu-state/text()");
-                c_xPathCtermRef = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
-                        + "bbf-xpon-onu-states:channel-termination-ref/text()");
-                c_xPathOnuStateLastChange = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
-                        + "bbf-xpon-onu-states:onu-state-last-change/text()");
-                c_xPathVAniRef = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
-                        + "bbf-xpon-onu-states:v-ani-ref/text()");
+                if (m_ONUStateChangeNameSpace.equals(BBF_XPON_ONU_STATES_NS)) {
+                    c_xPathSn = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
+                            + "bbf-xpon-onu-states:detected-serial-number/text()");
+                    c_xPathRegId = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
+                            + "bbf-xpon-onu-states:detected-registration-id/text()");
+                    c_xPathOnuid = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
+                            + "bbf-xpon-onu-states:onu-id/text()");
+                    c_xPathOnuState = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
+                            + "bbf-xpon-onu-states:onu-state/text()");
+                    c_xPathCtermRef = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
+                            + "bbf-xpon-onu-states:channel-termination-ref/text()");
+                    c_xPathOnuStateLastChange = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
+                            + "bbf-xpon-onu-states:onu-state-last-change/text()");
+                    c_xPathVAniRef = xpath.compile("/nc:notification/bbf-xpon-onu-states:onu-state-change/"
+                            + "bbf-xpon-onu-states:v-ani-ref/text()");
+                } else {
+                    c_xPathSn = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
+                            + "bbf-xpon-onu-state:detected-serial-number/text()");
+                    c_xPathRegId = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
+                            + "bbf-xpon-onu-state:detected-registration-id/text()");
+                    c_xPathOnuid = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
+                            + "bbf-xpon-onu-state:onu-id/text()");
+                    c_xPathOnuState = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
+                            + "bbf-xpon-onu-state:onu-presence-state/text()");
+                    c_xPathCtermRef = xpath.compile("/nc:notification/ietf-interfaces:interfaces-state/ietf-interfaces:interface/"
+                            + "ietf-interfaces:name/text()");
+                    c_xPathOnuStateLastChange = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
+                            + "bbf-xpon-onu-state:last-change/text()");
+                    c_xPathVAniRef = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
+                            + "bbf-xpon-onu-state:v-ani-ref/text()");
+                }
             } catch (XPathExpressionException e) {
                 throw new RuntimeException(e);
             }
@@ -228,7 +265,9 @@ public class ONUNotification extends NetconfNotification {
 
     public static boolean isONUStateChangeNotif(QName notificationType) {
         boolean onuNotif = false;
-        if (ONUConstants.ONU_STATE_CHANGE_NS.equals(notificationType.getNamespace().toString())) {
+        if (IETF_INTERFACES_NS.equals(notificationType.getNamespace().toString())) {
+            onuNotif = true;
+        } else if (ONUConstants.ONU_STATE_CHANGE_NS.equals(notificationType.getNamespace().toString())) {
             onuNotif = true;
         }
         return onuNotif;
@@ -238,27 +277,38 @@ public class ONUNotification extends NetconfNotification {
         String mappedEvent = null;
         String onuState = getOnuState();
         switch (onuState) {
+            case "onu-present":
             case "onu-present-and-unexpected":
             case "onu-present-and-on-intended-channel-termination":
             case "onu-present-and-in-wavelength-discovery":
             case "onu-present-and-discovery-tune-failed":
             case "onu-present-and-no-v-ani-known-and-o5-failed":
-            case "onu-present-and-no-v-ani-known-and-o5-failed-no-id":
+            case "onu-present-and-no-v-ani-known-and-o5-failed-no-onu-id":
             case "onu-present-and-no-v-ani-known-and-o5-failed-undefined":
             case "onu-present-and-v-ani-known-and-o5-failed":
             case "onu-present-and-v-ani-known-and-o5-failed-no-id":
+            case "onu-present-and-v-ani-known-and-o5-failed-no-onu-id":
             case "onu-present-and-v-ani-known-and-o5-failed-undefined":
+            case "onu-present-and-no-v-ani-known-and-in-o5":
             case "onu-present-and-no-v-ani-known-and-o5-passed":
             case "onu-present-and-no-v-ani-known-and-unclaimed":
             case "onu-present-and-v-ani-known-but-intended-ct-unknown":
             case "onu-present-and-in-discovery":
-                mappedEvent = ONUConstants.ONU_DETECTED;
+                if (m_messageFormatter instanceof GpbFormatter) {
+                    mappedEvent = ONUConstants.CREATE_ONU;
+                } else {
+                    mappedEvent = ONUConstants.ONU_DETECTED;
+                }
                 break;
             case "onu-present-and-emergency-stopped":
             case "onu-not-present":
             case "onu-not-present-with-v-ani":
             case "onu-not-present-without-v-ani":
-                mappedEvent = ONUConstants.ONU_UNDETECTED;
+                if (m_messageFormatter instanceof GpbFormatter) {
+                    mappedEvent = ONUConstants.DELETE_ONU;
+                } else {
+                    mappedEvent = ONUConstants.ONU_UNDETECTED;
+                }
                 break;
             default:
                 mappedEvent = ONUConstants.NOT_APPLICABLE;

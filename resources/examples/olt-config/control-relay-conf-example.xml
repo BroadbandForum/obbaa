@@ -1,0 +1,107 @@
+<!--
+   ~ Copyright 2021 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="34566756">
+   <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <target>
+         <running/>
+      </target>
+      <config>
+         <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+               <device>
+                  <name>deviceB</name>
+                  <root>
+                    <baa-mfc-conf:remote-network-function xmlns:baa-mfc-conf="urn:bbf:yang:obbaa:mfc-conf">
+                     <baa-mfc-conf:nf-client>
+                       <baa-mfc-conf:enabled>true</baa-mfc-conf:enabled>
+                       <baa-mfc-conf:client-parameters>
+                         <baa-mfc-conf:nf-initiate>
+                           <baa-mfc-conf:remote-endpoints>
+                             <baa-mfc-conf:remote-endpoint>
+                               <baa-mfc-conf:name>control-relay</baa-mfc-conf:name>
+                               <baa-mfc-conf:type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:vnf-type</baa-mfc-conf:type>
+                               <baa-mfc-conf:local-endpoint-name>olt-crelay-1</baa-mfc-conf:local-endpoint-name>
+                               <baa-mfc-conf:grpc>
+                               </baa-mfc-conf:grpc>
+                               <baa-mfc-conf:access-point>
+                                 <baa-mfc-conf:name>control-relay</baa-mfc-conf:name>
+                                 <baa-mfc-conf:grpc>
+                                   <baa-mfc-conf:grpc-transport-parameters>
+                                     <baa-mfc-conf:remote-address>1.2.3.4</baa-mfc-conf:remote-address>
+                                     <baa-mfc-conf:remote-port>50052</baa-mfc-conf:remote-port>
+                                   </baa-mfc-conf:grpc-transport-parameters>
+                                 </baa-mfc-conf:grpc>
+                               </baa-mfc-conf:access-point>
+                             </baa-mfc-conf:remote-endpoint>
+                           </baa-mfc-conf:remote-endpoints>
+                         </baa-mfc-conf:nf-initiate>
+                       </baa-mfc-conf:client-parameters>
+                     </baa-mfc-conf:nf-client>
+
+                   </baa-mfc-conf:remote-network-function>
+
+                    <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                      <interface>
+                        <name>if.1</name>
+                        <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+                      </interface>
+
+                     <!-- Relay DHCP and IGMP packets (rule with highest priority) -->
+                     <interface>
+                       <name>capture_example1</name>
+                       <type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</type>
+                       <subif-lower-layer xmlns="urn:bbf:yang:bbf-sub-interfaces">
+                         <interface>if.1</interface>
+                       </subif-lower-layer>
+                       <enabled>true</enabled>
+                       <inline-frame-processing xmlns="urn:bbf:yang:bbf-sub-interfaces">
+                         <ingress-rule>
+                          <rule>
+                            <name>rule_1</name>
+                            <!--
+                                This field indicates the priority for applying the
+                                match criteria of this rule against the priority of
+                                match criteria of other rules of this and other
+                                sub-interfaces on the same parent-interface. -->
+                            <priority>1</priority>
+                            <flexible-match>
+                             <match-criteria xmlns="urn:bbf:yang:bbf-sub-interface-tagging">
+                              <match-all/>
+                              <protocol>dhcpv4</protocol>
+                              <protocol>dhcpv6</protocol>
+                              <protocol>igmp</protocol>
+                             </match-criteria>
+                            </flexible-match>
+                            <control-relay xmlns="urn:bbf:yang:obbaa:mfc-conf">
+                             <action>redirect</action>
+                             <resulting-endpoint>control</resulting-endpoint>
+                            </control-relay>
+                          </rule>
+                         </ingress-rule>
+                       </inline-frame-processing>
+                      </interface>
+
+
+                  </interfaces>
+
+                  </root>
+               </device>
+            </managed-devices>
+         </network-manager>
+      </config>
+   </edit-config>
+</rpc>

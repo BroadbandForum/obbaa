@@ -65,5 +65,13 @@
                 <include>ob-baa_setup.yml</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>../${project.basedir}/helm-charts/obbaa-helm-charts</directory>
+            <outputDirectory>helm_charts</outputDirectory>
+            <includes>
+                <include>obbaa/**/*</include>
+                <include>obbaa-pv-pvc.yaml</include>
+            </includes>
+        </fileSet>
     </fileSets>
  </assembly>

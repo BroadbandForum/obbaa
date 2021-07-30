@@ -16,12 +16,14 @@
 
 package org.broadband_forum.obbaa.nbiadapter.netconf;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.broadband_forum.obbaa.netconf.api.server.auth.ClientAuthenticationInfo;
 import org.junit.Before;
 import org.junit.Test;
-import sun.security.provider.DSAPublicKey;
 
-import static org.junit.Assert.*;
+import sun.security.provider.DSAPublicKey;
 
 public class NbiSshNetconfAuthTest {
 

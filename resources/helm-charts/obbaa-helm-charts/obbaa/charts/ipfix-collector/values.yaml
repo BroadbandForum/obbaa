@@ -1,0 +1,73 @@
+# Default values for baa-zookeeper.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: broadbandforum/ipfix-collector
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: NodePort
+  ports:
+    port8005: 8005
+    port4494: 4494
+    port5051: 5051
+env:
+  open:
+    IPFIX_COLLECTOR_PORT: 4494
+    IPFIX_IE_MAPPING_DIR: /ipfix/ie-mapping/
+    IPFIX_COLLECTOR_MAX_CONNECTION: 10000
+    BAA_HOST: baa
+    BAA_SSH_PORT: 9292
+    BAA_USERNAME: admin
+    BAA_PASSWORD: password
+    DEBUG: true
+    INFLUXDB_ORGANISATION: broadband_forum
+    INFLUXDB_BUCKETID: pm-collection
+    INFLUXDB_API_URL: http://influxdb:9999
+    INFLUXDB_TOKEN: _6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
+    PMD_MAX_BUFFERED_POINTS: 5000
+    PMD_MAX_BUFFERED_MEASUREMENTS: 100
+    PMD_TIMEOUT_BUFFERED_POINTS: 60
+    PMD_NBI_PORT: 5051
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+persistence:
+  enabled: false
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

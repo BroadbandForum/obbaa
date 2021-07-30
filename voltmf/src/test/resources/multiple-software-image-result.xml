@@ -1,0 +1,27 @@
+<onu-discovery-result xmlns="urn:bbf:yang:bbf-voltmf-entity">
+<onu-serial-number>BRCM00000001</onu-serial-number>
+<discovery-result>successful</discovery-result>
+<device-info>eqpt-1</device-info>
+<software-info>
+<software-images xmlns="urn:bbf:yang:obbaa:onu-management">
+<software-image>
+<id>0</id>
+<version>1.0</version>
+<is-committed>true</is-committed>
+<is-active>true</is-active>
+<is-valid>true</is-valid>
+<product-code>product-1.0</product-code>
+<hash>1234</hash>
+</software-image>
+<software-image>
+<id>1</id>
+<version>2.0</version>
+<is-committed>false</is-committed>
+<is-active>false</is-active>
+<is-valid>false</is-valid>
+<product-code>product2</product-code>
+<hash>4321</hash>
+</software-image>
+</software-images>
+</software-info>
+</onu-discovery-result>

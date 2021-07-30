@@ -7,7 +7,7 @@ Depending on what the user will want to do with the OB-BAA project this section 
 
 Developers should be able to understand:
 
--   The pre-requisites needed for a development environment
+-   The pre-requisites needed for a deployment environment
 
 -   How to obtain and synchronize the code base
 
@@ -19,9 +19,9 @@ Users should be able to understand:
 
 -   How to deploy and bring-up the OB-BAA executables
 
-Before deploying OB-BAA the environment has to be prepared, you can find out how to install and run OB-BAA in a bare metal environment or a virtualized machine (VM) [here](./#platform).
+Before deploying OB-BAA the environment has to be prepared, you can find out how to setup an environment on a bare metal environment or a virtualized machine (VM) [here](./#platform).
 
-For developers and users the easiest way to get started with OB-BAA is to download the OB-BAA micro-services from the [Broadband Forum's baa docker hub artifactory](https://hub.docker.com/r/broadbandforum/baa). Instructions for using OB-BAA micro-services can be found [here](./#artifactory)
+For developers and users the easiest way to get started with OB-BAA is to download the OB-BAA micro-services from the [Broadband Forum's baa docker hub artifactory](https://hub.docker.com/r/broadbandforum/baa). Instructions for using OB-BAA micro-services can be found [here](./#artifactory).
 
 If developers require additional access to the source code, the source code can be downloaded and OB-BAA can be built using the instructions found [here](./#source).
 
@@ -60,7 +60,7 @@ HDD
 
 While there isn\'t a strict requirement on the OS needed for the
 project, Ubuntu is the OS in which the core development team uses.
-For the Guest OS in a VM: 64bit Ubuntu 16.04.04 is the recommended
+For the Guest OS in a VM: 64bit Ubuntu 18.04 is the recommended
 and either server or desktop versions are supported.
 
 #### Network Requirements
@@ -78,7 +78,7 @@ which is covered between in the Simulator setup section.
 
 #### Docker
 
-OB-BAA services are realized as a micro-services under a docker engine and requires docker and docker-compose applications to be installed.
+OB-BAA is realized as micro-services under the docker engine and requires docker to be installed.
 
 ```
 Install docker:
@@ -93,32 +93,72 @@ Install Docker Compose:
   sudo apt-get install docker-compose
 ```
 
-### Running OB-BAA
+### Kubernetes
 
-Once the baa image has been downloaded or built using the source code and the docker daemon is running
-(ps -ef|grep dockerd should return a valid process), you can run the baa image using the following:
+Kubernetes is a portable, extensible, open-source platform for managing containerized workloads and services that facilitates both declarative configuration and automation.
+Kubernetes services, support, and tools are widely available and more details about K8s can be found [here](https://kubernetes.io/).
+
+Install kubernetes:
+<https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/>
 
 ```
-  cd obbaa/baa-dist
-  docker-compose -f docker-compose.yml up -d
+kubectl version
 
-Note: As the docker-compose.yml file now have ipfix-collector, influxDB, zookeeper and kafka containers added, it will also bring up the mentioned ipfix-collector, influxDB, zookeeper and kafka microservices along with BAA.
-
-The following commands displays the BAA application logs:
-   docker exec -it baa bash
-   cd /baa/baa-dist/data/log
-   tail -f karaf.log (the file is moved to ".1" extension after reaching certain size and a new file is created)
+Client Version: version.Info{Major:"1", Minor:"18", GitVersion:"v1.18.13", GitCommit:"4c00c3c459261e8ff3381c1070ddf798f0131956", GitTreeState:"clean", BuildDate:"2020-12-09T11:18:24Z", GoVersion:"go1.13.15", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"18", GitVersion:"v1.18.13", GitCommit:"4c00c3c459261e8ff3381c1070ddf798f0131956", GitTreeState:"clean", BuildDate:"2020-12-09T11:09:27Z", GoVersion:"go1.13.15", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
+#### Minikube
+
+**Minikube** is a tool that lets you run Kubernetes locally.
+**Minikube** runs a single-node Kubernetes cluster on your personal
+computer (including Windows, macOS and Linux PCs) so that you can try
+out Kubernetes, or use for daily development work. More details about
+minikube can be found [here](https://kubernetes.io/docs/tutorials/hello-minikube/)
+
+Install minikube: <https://minikube.sigs.k8s.io/docs/start/>
+
+```
+minikube version
+minikube version: v1.14.2
+commit: 2c82918e2347188e21c4e44c8056fc80408bce10
+```
+
+Start Minikube:
+
+```
+sudo minikube start --vm-driver=none
+sudo chown -R $USER:$USER ~/.kube ~/.minikube
+helm init
+```
+
+#### Helm
+
+Helm helps you manage Kubernetes applications and help define, install, and upgrade even the most complex Kubernetes application. Charts are easy to create, version, share, and publish.
+
+Install helm: <https://helm.sh/docs/intro/install/>
+
+```
+helm version
+version.BuildInfo{Version:"v3.2.4", GitCommit:"0ad800ef43d3b826f31a5ad8dfbb4fe05d143688", GitTreeState:"clean", GoVersion:"go1.13.12"}
+
+```
+
+Note: The OB-BAA installation is verified with above said K8s, Minikube and Helm versions.
 
 <a id="artifactory" />
-## Deploying OB-BAA micro-services from the Broadband Forum\'s public docker artifactory
+## Using OB-BAA micro-services from the Broadband Forum\'s public docker artifactory
 This section of the document provides information of how to deploy (pull and run) an OB-BAA distribution from the Broadband Forum\'s public docker registry.
 
 Obtain the OB-BAA source code:
 Instructions for obtaining the OB-BAA source code can be found [here](./#source).
 
 Running OB-BAA micro-services from the public docker registry:
+In this release, OB-BAA can be deployed in two ways:
+  - Using a Docker Compose file
+  - Using Helm Charts (K8s installation)
+
+### Using Docker Compose
 
 ```
 cd obbaa/resources
@@ -126,10 +166,24 @@ Pull images from public docker registry using command "docker-compose -f ob-baa_
 Start the docker containers using command "docker-compose -f ob-baa_setup.yml up -d"
 
 Note: As the ob-baa_setup.yml file now have ipfix-collector, influxDB, zookeeper,
-      kafka, and vomci and vproxy containers added, the ob-baa_setup.yml file will 
-      also bring up the mentioned ipfix collector, influxDB, zookeeper, kafka, 
+      kafka, and vomci and vproxy containers added, the ob-baa_setup.yml file will
+      also bring up the mentioned ipfix collector, influxDB, zookeeper, kafka,
       vomci and vproxy microservices along with baa.
 
+```
+
+### Using Helm Charts
+OB-BAA Helm Chart Hierarchy
+<p align="left">
+ <img width="400px" height="400px" src="{{site.url}}/installing/env/helm_hierarchy.png">
+</p>
+
+```
+cd obbaa/resources/helm-charts/obbaa-helm-charts
+create persistent-volume & volume claims using command : "kubectl create -f obbaa-pv-pvc.yaml"
+Start the helm charts using command: "helm install obbaa ./obbaa" (helm install <name-of-the-installation> ./parentChartDirectory)
+
+Note: As the we have run the helm install command from the parent chart, it will also bring up the mentioned control-relay, ipfix-collector, influxDB, zookeeper, kafka, vomci and vproxy microservices along with baa
 ```
 
 <a id="source" />
@@ -228,11 +282,11 @@ Build NETCONF stack
 Build OBBAA
   Change directory to obbaa
   mvn clean install -DskipTests
-  
+
 Build OBBAA with Unit Test (UT)
   Pre-requisite: Start InfluxDB docker container using the command:
      docker-compose -f ~obbaa/pm-collector/pm-data-handler/persistent-data-handler/influxdb-impl/bamboo-docker/obbaa-influxdb.yml up -d
-  If InfluxDB is not running there will be UT failures in pm-collector modules. 
+  If InfluxDB is not running there will be UT failures in pm-collector modules.
   This step is required only if you are going to run UT in your local environment.
     Change directory obbaa
     mvn clean install
@@ -267,28 +321,28 @@ Build Control Relay Service Docker Image
 
    Contents of the file single-command-build.dockerfile:
 		FROM golang:1.14.4 AS builder
-		
+
 		RUN apt update && apt-get install protobuf-compiler unzip -y
 		RUN go get -u github.com/golang/protobuf/protoc-gen-go
 		WORKDIR /opt/control-relay
 		COPY . .
-		
+
 		RUN protoc --proto_path=proto --go_out=plugins=grpc:pb --go_opt=paths=source_relative ./proto/control_relay_packet_filter_service.v1.proto ./proto/control_relay_service.proto
 		RUN go build -buildmode=plugin -o bin/plugin-standard/BBF-OLT-standard-1.0.so plugins/standard/BBF-OLT-standard-1.0.go
 		RUN go build -o bin/control-relay
 		RUN chmod +x create-bundle.sh && ./create-bundle.sh
-		
+
 		FROM ubuntu:18.04
-		
+
 		RUN apt-get update && \
 		    apt-get upgrade -y
-		
+
 		WORKDIR /control_relay
-		
+
 		COPY --from=builder /opt/control-relay/dist/control-relay.tgz /control_relay
 		RUN tar xvfz control-relay.tgz
 		RUN rm control-relay.tgz
-		
+
 		CMD ["./control-relay"]    
 
 ```

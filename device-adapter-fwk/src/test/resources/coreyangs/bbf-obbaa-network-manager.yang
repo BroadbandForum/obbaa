@@ -16,7 +16,17 @@ module bbf-obbaa-network-manager {
         prefix yanglib;
         revision-date 2016-06-21;
     }
-
+    import bbf-network-function-client {
+       prefix bbf-nfc;
+    }     
+    import bbf-network-function-server {
+       prefix bbf-nfs;
+    }
+    import bbf-network-function-types {
+       prefix bbf-nf-types;
+    }
+     
+    
     organization
       "Broadband Forum <https://www.broadband-forum.org>";
 
@@ -42,6 +52,11 @@ module bbf-obbaa-network-manager {
        limitations under the License.
       ";
 
+    revision 2021-02-01 {
+       description
+         "Added support for vOMCI function management.";
+    }
+     
     revision 2020-07-23 {
         description
           "Added support for vOMCI managed ONUs.";
@@ -59,6 +74,19 @@ module bbf-obbaa-network-manager {
           "broadband_forum";
     }
 
+    //  Features
+    feature nf-client-supported {
+      description
+        "Indicates that client connectivity to network function's
+         endpoints are supported.";
+    }
+
+    feature nf-server-supported {
+      description
+        "Indicates that server connectivity for network function's
+         endpoints are supported.";
+    }
+    
     grouping connection-grouping {
         description
           "Information about the connection for the device managed by BAA.";
@@ -368,7 +396,79 @@ module bbf-obbaa-network-manager {
                 }
             }
         }
+       
+        container network-functions-settings
+        {
+           description
+             "Container for network function settings.";
+           container nf-client {
+              if-feature "nf-client-supported";
+              description
+                "Client network function configuration.";
+              leaf enabled {
+                type boolean;
+                default "true";
+                description
+                  "Administratively enable the use of the 
+                   client connectivity capability to the 
+                   network function.";
+              }
+              uses bbf-nfc:nf-endpoint-grouping;
+           } //nf-client
 
+           container nf-server {
+              if-feature "nf-server-supported";
+              description
+                "Server network function configuration.";
+              leaf enabled {
+                type boolean;
+                default "true";
+                description
+                  "Administratively enable the use of the 
+                   server connectivity capability for connecting 
+                   network function.";
+              }
+              uses bbf-nfs:nf-server-grouping;
+            } //nf-server
+        }
+           
+        container network-functions {
+           description
+             "The network function list.";
+           list network-function {
+               key "name";
+               description
+                   "A list of network functions.";
+               leaf name {
+                   type string;
+                   description
+                     "The name of the network function.";
+               }
+               
+               leaf type {
+                  type identityref {
+                     base "bbf-nf-types:vnf-type";
+                  }
+                  description
+                     "The type of the network function (e.g, vomci-function-type, 
+                     vomci-proxy-type).";
+               }
+               
+               leaf remote-endpoint-name {
+                  type string;
+                  description
+                    "The remote endpoint name to use for transmitting and
+                     receiving messages towards the network function.";
+                }
+               
+               container root{
+                   yangmnt:mount-point "root";
+                   description
+                     "Root for models supported per network function.";
+               }
+           }
+        }
+        
         container new-devices {
             config false;
             description

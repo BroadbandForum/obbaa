@@ -23,7 +23,7 @@
     <jpa:enable/>
     <tx:enable-annotations/>
     <reference id="netconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer"
-               availability="mandatory" filter="component=dm">
+               availability="mandatory" filter="component=nm">
     </reference>
     <reference id="aggregator" interface="org.broadband_forum.obbaa.aggregator.api.Aggregator" availability="mandatory"/>
     <reference id="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry" availability="mandatory"/>

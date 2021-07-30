@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.broadband_forum.obbaa.dm.rest;
+package org.broadband_forum.obbaa.nm.devicemanager.rest;
 
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

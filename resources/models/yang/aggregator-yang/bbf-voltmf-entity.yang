@@ -1,0 +1,156 @@
+module bbf-voltmf-entity {
+  yang-version 1.1;
+  namespace "urn:bbf:yang:bbf-voltmf-entity";
+  prefix bbf-voltmf-entity;
+
+
+  import bbf-vomci-types {
+    prefix bbf-vomcit;
+  }
+  
+  import bbf-voltmf-message-monitor {
+    prefix bbf-voltmf-msg-mon;
+  }
+
+  import bbf-xpon-types {
+    prefix bbf-xpon-types;
+  }
+
+  organization
+    "Broadband Forum <https://www.broadband-forum.org>
+     SDN/NFV Work Area";
+  contact
+    "Comments or questions about this Broadband Forum YANG module
+     should be directed to <mailto:help@broadband-forum.org>.
+
+     Editor:      Tim Carey, Nokia
+
+     Editor:      Dechao Zhang, China Mobile
+
+     PS Leader:   Yves Hertoghs, VMWare
+
+     WA Director: George Dobrowski, Morris Creek Consulting
+
+     WA Director: Bruno Cornaglia, Vodafone";
+  description
+    "This module contains a collection of YANG definitions needed
+     for vOLTMF entity configuration and state attributes as well 
+     as notifications needed to support management of ONUs using 
+     vOMCI as defined in TR-451.
+
+     Copyright (c) 2019-2021, Broadband Forum
+
+     Redistribution and use in source and binary forms, with or
+     without modification, are permitted provided that the following
+     conditions are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials
+        provided with the distribution.
+
+     3. Neither the name of the copyright holder nor the names of its
+        contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+     CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+     NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+     ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     The above license is used as a license under copyright only.
+     Please reference the Forum IPR Policy for patent licensing terms
+     <https://www.broadband-forum.org/ipr-policy>.
+
+     Any moral rights which are necessary to exercise under the above
+     license grant are also deemed granted under this license.
+
+     This version of this YANG module is part of TR-451; see
+     the TR itself for full legal notices.";
+
+  revision 2021-02-07 {
+    description
+      "Initial revision.";
+    reference
+      "TR-451: Section 5.4 vOLT Management Function Description
+               Section 5.5 vOLTMF to vOMCI Function Interface";
+  }
+
+  // Groupings
+  // vOMCI ONU Management information
+  grouping vomci-onu-config {
+    description
+      "The configuration data needed to manage ONUs via vOMCI.";
+
+    leaf use-vomci-management {
+      type boolean;
+      description
+        "When true, use vOMCI to manage the ONU.";
+    }
+    leaf vomci-function {
+      type string;
+      description
+        "The vOMCI function to use for this ONU's management.";
+    }
+    leaf-list onu-management-chain {
+      type string;
+      ordered-by user;
+      description
+        "The ordered list of vOMCI function, vOMCI Proxy and OLT 
+         to use for this ONU's management. The list is ordered from 
+         the vOMCI function to the OLT inclusive.";
+    }
+  }
+  
+  grouping vomci-onu-state {
+    description
+      "State data needed to manage ONUs via vOMCI.";
+
+    container voltmf-msg-data {
+      description
+        "Counters for the vOLTMF messages sent between the v
+         OLTMF and vOMCI function.";
+
+      uses bbf-voltmf-msg-mon:voltmf-msg-data-grouping;
+    }
+  }
+
+  // Notifications
+  notification onu-discovery-result {
+    description
+      "The notification that reports an ONU discovery by the vOLTMF.";
+    leaf onu-serial-number {
+      type bbf-xpon-types:onu-serial-number;
+      description
+        "The TC layer ONU serial number of the discovered ONU.";
+    }
+    leaf discovery-result {
+      type bbf-vomcit:onu-discovery-result;
+      description
+        "The result of the discovery process for this ONU.";
+    }
+    anydata device-info {
+      description
+        "The device information obtained as the result of the
+         discovery process.";
+    }
+    anydata software-info {
+      description
+        "The sofware information obtained as the result of the
+         discovery process.";
+    }
+  }
+}

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.broadband_forum.obbaa.dm.rest;
+package org.broadband_forum.obbaa.nm.devicemanager.rest;
 
 import java.util.List;
 
 import javax.ws.rs.GET;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NewDeviceInfo;
-import org.broadband_forum.obbaa.dm.DeviceManager;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

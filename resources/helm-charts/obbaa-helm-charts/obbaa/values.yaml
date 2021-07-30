@@ -1,0 +1,211 @@
+# Default values for obbaa.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+tags:
+  tp: true
+  bbf: true
+#NOTE
+# EITHER keep the line uncommented
+# OR keep it commented
+# NEVER set it to enabled: false
+global:
+  zookeeper:
+    #enabled: true
+  kafka:
+    #enabled: true
+  baa:
+    #enabled: true
+  vomci:
+  #enabled: true
+  vproxy:
+  #enabled: true
+  influxdb:
+  #enabled: true
+  ipfix-collector:
+  #enabled: true
+  control-relay:
+  #enabled: true
+
+zookeeper:
+  #enabled: true
+  image:
+    registry: #confluentinc
+    #repository: #cp-zookeeper
+    tag: 5.5.0
+  service:
+    type: ClusterIP
+  env:
+    open:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.2Gi
+baa:
+  image:
+    registry: #broadbandforum
+    #repository: #baa
+    tag: latest
+  service:
+    type: ClusterIP
+  env:
+    open:
+      BAA_USER: admin
+      BAA_USER_PASSWORD: password
+      PMA_SESSION_FACTORY_TYPE: REGULAR
+      MAXIMUM_ALLOWED_ADAPTER_VERSIONS: 3
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.2Gi
+
+kafka:
+  #enabled: true
+  image:
+    registry: #confluentinc
+    #repository: #cp-kafka
+    tag: 5.5.0
+  service:
+    type: LoadBalancer
+  env:
+    open:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.5Gi
+
+vomci:
+  #enabled: true
+  image:
+    registry: #broadbandforum
+    #repository: #obbaa-vomci
+    tag: latest
+  service:
+    type: ClusterIP
+  env:
+    open:
+      GRPC_SERVER_NAME: vOMCi-grpc-1
+      LOCAL_GRPC_SERVER_PORT: 58433
+      KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
+      # List of Consumer topics, seperated by spaces
+      KAFKA_REQUEST_TOPICS: "vomci1-request" # if message formatter is JSON "OBBAA_ONU_REQUEST"
+      KAFKA_RESPONSE_TOPICS: 'vomci1-response' # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
+      KAFKA_NOTIFICATION_TOPICS: "vomci1-notification" # if message formatter is Json "OBBAA_ONU_NOTIFICATION"
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.5Gi
+
+vproxy:
+  #enabled: true
+  image:
+    registry: #broadbandforum
+    #repository: #obbaa-vproxy
+    tag: latest
+  service:
+    type: ClusterIP
+  env:
+    open:
+      GRPC_SERVER_NAME: proxy-grpc-2
+      GRPC_CLIENT_NAME: proxy-grpc-1
+      LOCAL_GRPC_SERVER_PORT: 8433
+      REMOTE_GRPC_SERVER_PORT: 58433
+      REMOTE_GRPC_SERVER_ADDR: vomci-grpc
+      KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
+      # List of Consumer topics, seperated by spaces
+      KAFKA_REQUEST_TOPICS: "vomci-proxy-request"
+      KAFKA_RESPONSE_TOPICS: "vomci-proxy-response"
+      KAFKA_NOTIFICATION_TOPICS: "vomci-proxy-notification"
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.5Gi
+
+influxdb:
+  #enabled: true
+  image:
+    registry: #broadbandforum
+    #repository: #influxdb
+    tag: 2.0.0-beta.2-3
+  service:
+    type: ClusterIP
+  env:
+    open:
+      DEBUG: true
+      INFLUX_USER: influxdb
+      INFLUX_PW: influxdb
+      INFLUX_ORG: broadband_forum
+      INFLUX_BUCKET: pm-collection
+      INFLUX_RETENTION: 720
+      INFLUX_PORT: 9999
+      INFLUX_ROOT: /var/opt/influxdb
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.5Gi
+
+ipfix-collector:
+  #enabled: true
+  image:
+    registry: #broadbandforum
+    #repository: #ipfix-collector
+    tag: latest
+  service:
+    type: NodePort
+  env:
+    open:
+      IPFIX_COLLECTOR_PORT: 4494
+      IPFIX_IE_MAPPING_DIR: /ipfix/ie-mapping/
+      IPFIX_COLLECTOR_MAX_CONNECTION: 10000
+      BAA_HOST: baa
+      BAA_SSH_PORT: 9292
+      BAA_USERNAME: admin
+      BAA_PASSWORD: password
+      DEBUG: true
+      INFLUXDB_ORGANISATION: broadband_forum
+      INFLUXDB_BUCKETID: pm-collection
+      INFLUXDB_API_URL: http://influxdb:9999
+      INFLUXDB_TOKEN: _6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
+      PMD_MAX_BUFFERED_POINTS: 5000
+      PMD_MAX_BUFFERED_MEASUREMENTS: 100
+      PMD_TIMEOUT_BUFFERED_POINTS: 60
+      PMD_NBI_PORT: 5051
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.5Gi
+
+control-relay:
+  #enabled: true
+  image:
+    registry: #broadbandforum
+    #repository: #obbaa-control-relay
+    tag: latest
+  service:
+    type: ClusterIP
+  env:
+    open:
+      GRPC_SERVER_NAME: vOMCIProxy
+      LOCAL_GRPC_SERVER_PORT: 58433
+      CONTROL_RELAY_HELLO_NAME: control_relay_service
+      PLUGIN_PORT: 50052
+      SDN_MC_SERVER_PORT:
+      SDN_MC_SERVER_LIST:
+      CONTROL_RELAY_PORT: 50055
+      OBBAA_ADDRESS: baa
+      OBBAA_PORT: 9292
+      SSH_USER: admin
+      SSH_PASSWORD: password
+      SHARED_FOLDER: ./plugin-repo
+      PRIVATE_FOLDER: ./plugin-enabled
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.5Gi

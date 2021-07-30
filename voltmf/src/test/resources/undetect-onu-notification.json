@@ -1,0 +1,9 @@
+{
+    "olt-name": "OLT1",
+    "payload": "{\"operation\":\"undetect\",\"identifier\":\"null\"}",
+    "onu-name": "onu1",
+    "channel-termination-ref": "CT_1",
+    "event": "undetect",
+    "onu-id": "1",
+    "labels": "{\"name\":\"vendor\",\"value\":\"bbf\"}"
+}
