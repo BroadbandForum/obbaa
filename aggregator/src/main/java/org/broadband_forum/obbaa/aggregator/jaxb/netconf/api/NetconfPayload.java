@@ -56,8 +56,14 @@ public abstract class NetconfPayload {
      * @throws DispatchException Exception
      */
     public String getOnlyOneTopXmlns() throws DispatchException {
+        List<Document> payloadDocuments = getPayloadDocuments();
         try {
-            return getPayloadDocuments().get(0).getFirstChild().getNamespaceURI();
+            if (payloadDocuments.isEmpty()) {
+                LOGGER.debug("payloadDocuments is empty");
+                return "";
+            } else {
+                return payloadDocuments.get(0).getFirstChild().getNamespaceURI();
+            }
         }
         catch (NoSuchElementException | IndexOutOfBoundsException ex) {
             LOGGER.info("getOnlyOneTopXmlns : {}", ex);

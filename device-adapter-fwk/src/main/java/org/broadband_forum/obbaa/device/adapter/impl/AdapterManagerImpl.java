@@ -48,6 +48,9 @@ import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.device.adapter.FactoryGarmentTag;
 import org.broadband_forum.obbaa.device.registrator.impl.StandardModelRegistrator;
+import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigErrorOptions;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
@@ -73,6 +76,7 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeIn
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.RootModelNodeAggregatorImpl;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityModelNodeHelperDeployer;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.yang.ModelNodeHelperDeployer;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.LockServiceException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService;
@@ -106,14 +110,19 @@ public class AdapterManagerImpl implements AdapterManager {
     private int m_maxAllowedAdapterVersions = Integer.parseInt(SystemPropertyUtils.getInstance().getFromEnvOrSysProperty(
             "MAXIMUM_ALLOWED_ADAPTER_VERSIONS", "3"));
     private StandardModelRegistrator m_standardModelRegistrator;
+    private DeviceDao m_deviceDao;
+    private TxService m_txService;
 
     public AdapterManagerImpl(ModelNodeDataStoreManager dataStoreManager, ReadWriteLockService readWriteLockService,
-                              EntityRegistry entityRegistry, EventAdmin eventAdmin, StandardModelRegistrator standardModelRegistrator) {
+                              EntityRegistry entityRegistry, EventAdmin eventAdmin, StandardModelRegistrator standardModelRegistrator,
+                              DeviceDao deviceDao, TxService txService) {
         m_dataStoreManager = dataStoreManager;
         m_readWriteLockService = readWriteLockService;
         m_entityRegistry = entityRegistry;
         m_eventAdmin = eventAdmin;
         m_standardModelRegistrator = standardModelRegistrator;
+        m_deviceDao = deviceDao;
+        m_txService = txService;
     }
 
     @Override
@@ -208,9 +217,9 @@ public class AdapterManagerImpl implements AdapterManager {
     }
 
     private void unDeployAdapter(DeviceAdapter adapter) throws Exception {
-        LOGGER.info("undeploying device adapter: " + adapter.getDeviceAdapterId().toString());
-        if (adapter.getModel().equalsIgnoreCase(STANDARD) && isStandardAdapterInUse()) {
-            throw new Exception("Given standard adapter is in use, undeploy operation is not allowed");
+        LOGGER.info("Undeploying device adapter: " + adapter.getDeviceAdapterId().toString());
+        if (adapter.getModel().equalsIgnoreCase(STANDARD) && isStandardAdapterReferencedByCodedAdapters()) {
+            throw new Exception("Given standard adapter is referenced by other coded adapter(s), undeploy operation is not allowed");
         }
         String componentId = getComponentId(adapter);
         AdapterContext context = getAdapterContext(new DeviceAdapterId(adapter.getType(),
@@ -375,6 +384,24 @@ public class AdapterManagerImpl implements AdapterManager {
         return m_defaultConfigReqMap.get(adapterId);
     }
 
+    public boolean isAdapterInUse(DeviceAdapterId adapterId) {
+        List<Device> devices = m_txService.executeWithTxRequired(() -> m_deviceDao.findAllDevices());
+        boolean adapterInUse = false;
+        if (devices != null && !devices.isEmpty()) {
+            for (Device device : devices) {
+                DeviceMgmt deviceMgmt = device.getDeviceManagement();
+                if (adapterId.getVendor().equalsIgnoreCase(deviceMgmt.getDeviceVendor())
+                        && adapterId.getModel().equalsIgnoreCase(deviceMgmt.getDeviceModel())
+                        && adapterId.getType().equalsIgnoreCase(deviceMgmt.getDeviceType())
+                        && adapterId.getInterfaceVersion().equalsIgnoreCase(deviceMgmt.getDeviceInterfaceVersion())) {
+                    adapterInUse = true;
+                    break;
+                }
+            }
+        }
+        return adapterInUse;
+    }
+
     public FactoryGarmentTag getFactoryGarmentTag(DeviceAdapter adapter) {
         return m_garmentTagMap.get(adapter);
     }
@@ -457,7 +484,7 @@ public class AdapterManagerImpl implements AdapterManager {
                 && deployedAdapterId.getVendor().equals(adapterId.getVendor());
     }
 
-    private boolean isStandardAdapterInUse() {
+    private boolean isStandardAdapterReferencedByCodedAdapters() {
         Collection<DeviceAdapter> adapters = getAllDeviceAdapters();
         String intVersion = null;
         boolean stdAdapterInUse = false;

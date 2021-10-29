@@ -278,7 +278,6 @@ public class ONUNotification extends NetconfNotification {
         String onuState = getOnuState();
         switch (onuState) {
             case "onu-present":
-            case "onu-present-and-unexpected":
             case "onu-present-and-on-intended-channel-termination":
             case "onu-present-and-in-wavelength-discovery":
             case "onu-present-and-discovery-tune-failed":

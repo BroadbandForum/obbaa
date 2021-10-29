@@ -1,4 +1,16 @@
-# OB-BAA R4.1.0 Release Notes (31 July 2021)
+# OB-BAA R4.1.1 Release Notes (29 October 2021)
+
+<a name="rel_4_1_1"></a>
+
+Release 4.1.1 Highlights:
+=========================
+
+This release provides enhancements and fixes to the existing OB-BAA software related that:
+
+-   adds the update configuration actions needed in vOMCI implementations.
+-   permits multiple ONUs to be managed.
+-   provides additional support for HSIA service activation scenarios.
+-   provides fixes to defects for the vOMCI implementation.
 
 <a name="rel_4_1_0"></a>
 
@@ -15,30 +27,6 @@ In addition, this release includes:
 
 -	the ability to deploy OB-BAA software using either Kubernetes or Docker.
 -	an updated simulator for OLTs and ONUs that can be used for virtualized ONU management when developing OMCI message translation services.
-
-Release documentation:
-
-[OBBAA](https://obbaa.broadband-forum.org/) for product documentation on System Description, Installation, Commissioning and Usage
-
-## Other related repos of OB-BAA includes:
-
-[NETCONF stack](https://github.com/BroadbandForum/obbaa-netconf-stack) A NETCONF stack for use in OB-BAA implementations
-
-[vOMCI](https://github.com/BroadbandForum/obbaa-vomci) repository which contains the vOMCI Function and Proxy used in the OB-BAA Implementations
-
-[Control Relay](https://github.com/BroadbandForum/obbaa-fc-relay) repository contains the control relay feature of the OB-BAA project
-
-[pOLT Simulator](https://github.com/BroadbandForum/obbaa-polt-simulator) pOLT Simulator for Broadband Forum WT-451 vOMCI project
-
-[ONU Simulator](https://github.com/BroadbandForum/obbaa-onu-simulator) ONU simulator and test client(Extracted from pOLT Simulator)
-
-
-## FAQ
-Question : What should I do if ONU DETECT nofitication is not raised in OB-BAA for a vOMCI based ONU?
-
-Answer : Sometimes kafka will not have the required topics being available when it started, hence vomci functionality might not work properly in that case. as a workaround after starting OB-BAA microservices using docker compose file, we should restart vomci container (wait for a minute to have the vomci container up and running) and restart vproxy container. This would solve the problem.
-
-<a name="rel_2_1_0"></a>
 
 
 ## Restrictions:

@@ -221,12 +221,12 @@ dependent 3rd party bundle.
     <parent>
         <groupId>org.bbf.obbaa</groupId>
         <artifactId>protocol-translation-example</artifactId>
-        <version>4.1.0</version>
+        <version>2.0.0</version>
     </parent>
 
     <groupId>org.bbf.obbaa</groupId>
     <artifactId>protocol-transl-feature</artifactId>
-    <version>4.1.0</version>
+    <version>2.0.0</version>
     <dependencies>
         <dependency>
             <groupId>org.bbf.obbaa</groupId>
@@ -399,7 +399,7 @@ Sample response: See that the SDAs are deployed:
 	karaf@root()> kar:list
 	KAR Name
 	--------------------------------------
-	protocol-transl-feature-4.1.0
+	protocol-transl-feature-4.1.1
 	karaf@root()> list
 	START LEVEL 100 , List Threshold: 50
 	 ID | State  | Lvl | Version             | Name
@@ -425,13 +425,13 @@ Sample response: See that the SDAs are deployed:
 	 72 | Active |  80 | 1.1.0               | OPS4J Pax JDBC Config
 	 73 | Active |  80 | 1.1.0               | OPS4J Pax JDBC Pooling Support Base
 	 78 | Active |  80 | 1.0.0.201505202023  | org.osgi:org.osgi.service.jdbc
-	 79 | Active |  80 | 4.1.0               | Broadband Access Abstraction/Aggregator
+	 79 | Active |  80 | 4.1.1               | Broadband Access Abstraction/Aggregator
 	 80 | Active |  80 | 1.14                | animalsniffer-annotations
 	 81 | Active |  80 | 1.46                | bcprov
 	 82 | Active |  80 | 23.6.1.jre          | Guava: Google Core Libraries for Java
-	 83 | Active |  80 | 4.1.0               | Broadband Access Abstraction/Device Adapter framework
-	 84 | Active |  80 | 4.1.0               | Broadband Access Abstraction/Network Manager
-	 85 | Active |  80 | 4.1.0               | Broadband Access Abstraction/Network Manager Entities
+	 83 | Active |  80 | 4.1.1               | Broadband Access Abstraction/Device Adapter framework
+	 84 | Active |  80 | 4.1.1               | Broadband Access Abstraction/Device Manager
+	 85 | Active |  80 | 4.1.1               | Broadband Access Abstraction/Device Manager Entities
 	 86 | Active |  80 | 2.4.3               | ehcache-core
 	 87 | Active |  80 | 2.0.18              | errorprone-annotations
 	 88 | Active |  80 | 4.1.16.Final        | Netty/Buffer
@@ -448,8 +448,8 @@ Sample response: See that the SDAs are deployed:
 	100 | Active |  80 | 2.0                 | javax.ws.rs-api
 	101 | Active |  80 | 1.1.3               | jdom
 	103 | Active |  80 | 2.8                 | Joda-Time
-	104 | Active |  80 | 4.1.0               | Broadband Access Abstraction/Library Consult
-	105 | Active |  80 | 4.1.0               | Broadband Access Abstraction/NBI Adapter
+	104 | Active |  80 | 4.1.1               | Broadband Access Abstraction/Library Consult
+	105 | Active |  80 | 4.1.1               | Broadband Access Abstraction/NBI Adapter
 	106 | Active |  80 | 4.7.1               | ANTLR 4 Runtime
 	117 | Active |  80 | 2.3.0               | Apache Aries JPA Container API
 	118 | Active |  80 | 2.3.0               | Apache Aries JPA blueprint
@@ -472,15 +472,15 @@ Sample response: See that the SDAs are deployed:
 	160 | Active |  80 | 3.2.4.1             | Apache ServiceMix :: Bundles :: cglib
 	161 | Active |  80 | 1.0.0.2             | Apache ServiceMix :: Bundles :: javax.inject
 	164 | Active |  80 | 1.3.0               | Apache Mina SSHD :: Core
-	166 | Active |  80 | 4.1.0               | netconf-lib/netconf-api
-	167 | Active |  80 | 4.1.0               | netconf-fwk/auth-spi
-	168 | Active |  80 | 4.1.0               | netconf-lib/netconf-client
-	169 | Active |  80 | 4.1.0               | netconf-lib/netconf-notification-app
-	170 | Active |  80 | 4.1.0               | netconf-fwk/netconf-persistence-app
-	171 | Active |  80 | 4.1.0               | netconf-lib/netconf-server
-	172 | Active |  80 | 4.1.0               | netconf-fwk/netconf-server-modelnode-fwk
-	173 | Active |  80 | 4.1.0               | netconf-fwk/stack-api
-	174 | Active |  80 | 4.1.0               | netconf-fwk/stack-logging-api
+	166 | Active |  80 | 4.1.1               | netconf-lib/netconf-api
+	167 | Active |  80 | 4.1.1               | netconf-fwk/auth-spi
+	168 | Active |  80 | 4.1.1               | netconf-lib/netconf-client
+	169 | Active |  80 | 4.1.1               | netconf-lib/netconf-notification-app
+	170 | Active |  80 | 4.1.1               | netconf-fwk/netconf-persistence-app
+	171 | Active |  80 | 4.1.1               | netconf-lib/netconf-server
+	172 | Active |  80 | 4.1.1               | netconf-fwk/netconf-server-modelnode-fwk
+	173 | Active |  80 | 4.1.1               | netconf-fwk/stack-api
+	174 | Active |  80 | 4.1.1               | netconf-fwk/stack-logging-api
 	176 | Active |  80 | 1.3.172             | H2 Database Engine
 	177 | Active |  70 | 4.3.6.Final         | hibernate-ehcache
 	178 | Active |  80 | 2.3.4               | HSQLDB
@@ -509,12 +509,12 @@ Sample response: See that the SDAs are deployed:
 	202 | Active |  80 | 1.1.0               | OPS4J Pax JDBC HSQLDB Driver Adapter
 	203 | Active |  80 | 1.1.0               | OPS4J Pax JDBC MariaDB Driver Adapter
 	204 | Active |  80 | 1.1.0               | OPS4J Pax JDBC Pooling DBCP2
-	207 | Active |  80 | 4.1.0               | Broadband Access Abstraction/Persistence Management Agent
-	208 | Active |  80 | 4.1.0               | Broadband Access Abstraction/SBI Connectors
-	209 | Active |  80 | 0                   | wrap_file__baa_baa-dist-4.1.0_system_com_google_errorprone_error_prone_annotations_2.1.3_error_prone_annotations-2.1.3.jar
-	210 | Active |  80 | 0                   | wrap_file__baa_baa-dist-4.1.0_system_org_checkerframework_checker-compat-qual_2.0.0_checker-compat-qual-2.0.0.jar
+	207 | Active |  80 | 4.1.1               | Broadband Access Abstraction/Persistence Management Agent
+	208 | Active |  80 | 4.1.1               | Broadband Access Abstraction/SBI Connectors
+	209 | Active |  80 | 0                   | wrap_file__baa_baa-dist-4.1.1_system_com_google_errorprone_error_prone_annotations_2.1.3_error_prone_annotations-2.1.3.jar
+	210 | Active |  80 | 0                   | wrap_file__baa_baa-dist-4.1.1_system_org_checkerframework_checker-compat-qual_2.0.0_checker-compat-qual-2.0.0.jar
 	214 | Active |  80 | 0.1.54              | jsch
-	215 | Active |  80 | 4.1.0               | Sample adapter for protocol translation
+	215 | Active |  80 | 4.1.1      | Sample adapter for protocol translation
 ```
 
 -   If the VDA deployment fails when we try to deploy the Karaf kar
@@ -532,12 +532,12 @@ Sample response: See that the SDAs are deployed:
 	karaf@root()> kar:list
 	KAR Name
 	--------------------------------------
-	protocol-transl-feature-4.1.0
+	protocol-transl-feature-4.1.1
 	karaf@root()> list | grep -v Active
 	START LEVEL 100 , List Threshold: 50
 	 ID | State   | Lvl | Version             | Name
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	217 | Failure |  80 | 4.1.0               | Sample adapter for protocol translation
+	217 | Failure |  80 | 4.1.1      | Sample adapter for protocol translation
 	karaf@root()> diag
 	Sample adapter for protocol translation (217)
 	---------------------------------------------
@@ -590,12 +590,12 @@ Sample response: See that the SDAs are deployed:
     **Error due to dependency issues**
 
 ```
-	2019-02-11 12:24:40,940 | INFO  | f]-nio2-thread-6 | DeviceAdapterActionHandlerImpl   | 207 - pma - 4.1.0 | Received request for deploying coded adapter protocol-transl-feature-4.1.0.kar
-	2019-02-11 12:24:40,940 | INFO  | f]-nio2-thread-6 | DeviceAdapterActionHandlerImpl   | 207 - pma - 4.1.0 | Installing kar
-	2019-02-11 12:24:40,949 | INFO  | f]-nio2-thread-6 | KarServiceImpl                   | 149 - org.apache.karaf.kar.core - 4.0.4 | Added feature repository 'mvn:org.bbf.obbaa/protocol-transl-feature/4.1.0/xml/features'
-	2019-02-11 12:24:40,950 | INFO  | f]-nio2-thread-6 | FeaturesServiceImpl              | 8 - org.apache.karaf.features.core - 4.0.4 | Adding features: protocol-transl-feature/[4.1.0,4.1.0]
-	2019-02-11 12:24:41,442 | WARN  | f]-nio2-thread-6 | KarServiceImpl                   | 149 - org.apache.karaf.kar.core - 4.0.4 | Unable to install Kar feature protocol-transl-feature/4.1.0
-	org.osgi.service.resolver.ResolutionException: Unable to resolve root: missing requirement [root] osgi.identity; osgi.identity=protocol-transl-feature; type=karaf.feature; version="[4.1.0,4.1.0]"; filter:="(&(osgi.identity=protocol-transl-feature)(type=karaf.feature)(version>=4.1.0)(version<=4.1.0))" [caused by: Unable to resolve protocol-transl-feature/4.1.0: missing requirement [protocol-transl-feature/4.1.0] osgi.identity; osgi.identity=protocol-transl-sample-adapter; type=osgi.bundle; version="[4.1.0,4.1.0]"; resolution:=mandatory [caused by: Unable to resolve protocol-transl-sample-adapter/4.1.0: missing requirement [protocol-transl-sample-adapter/4.1.0] osgi.wiring.package; filter:="(osgi.wiring.package=com.jcraft.jsch)"]]
+	2019-02-11 12:24:40,940 | INFO  | f]-nio2-thread-6 | DeviceAdapterActionHandlerImpl   | 207 - pma - 4.1.1 | Received request for deploying coded adapter protocol-transl-feature-4.1.1.kar
+	2019-02-11 12:24:40,940 | INFO  | f]-nio2-thread-6 | DeviceAdapterActionHandlerImpl   | 207 - pma - 4.1.1 | Installing kar
+	2019-02-11 12:24:40,949 | INFO  | f]-nio2-thread-6 | KarServiceImpl                   | 149 - org.apache.karaf.kar.core - 4.0.4 | Added feature repository 'mvn:org.bbf.obbaa/protocol-transl-feature/4.1.1/xml/features'
+	2019-02-11 12:24:40,950 | INFO  | f]-nio2-thread-6 | FeaturesServiceImpl              | 8 - org.apache.karaf.features.core - 4.0.4 | Adding features: protocol-transl-feature/[4.1.1,4.1.1]
+	2019-02-11 12:24:41,442 | WARN  | f]-nio2-thread-6 | KarServiceImpl                   | 149 - org.apache.karaf.kar.core - 4.0.4 | Unable to install Kar feature protocol-transl-feature/4.1.1
+	org.osgi.service.resolver.ResolutionException: Unable to resolve root: missing requirement [root] osgi.identity; osgi.identity=protocol-transl-feature; type=karaf.feature; version="[4.1.1,4.1.1]"; filter:="(&(osgi.identity=protocol-transl-feature)(type=karaf.feature)(version>=4.1.1)(version<=4.1.1))" [caused by: Unable to resolve protocol-transl-feature/4.1.1: missing requirement [protocol-transl-feature/4.1.1] osgi.identity; osgi.identity=protocol-transl-sample-adapter; type=osgi.bundle; version="[4.1.1,4.1.1]"; resolution:=mandatory [caused by: Unable to resolve protocol-transl-sample-adapter/4.1.1: missing requirement [protocol-transl-sample-adapter/4.1.1] osgi.wiring.package; filter:="(osgi.wiring.package=com.jcraft.jsch)"]]
 		at org.apache.felix.resolver.ResolutionError.toException(ResolutionError.java:42)[org.apache.felix.framework-5.4.0.jar:]
 		at org.apache.felix.resolver.ResolverImpl.resolve(ResolverImpl.java:235)[org.apache.felix.framework-5.4.0.jar:]
 		at org.apache.felix.resolver.ResolverImpl.resolve(ResolverImpl.java:158)[org.apache.felix.framework-5.4.0.jar:]

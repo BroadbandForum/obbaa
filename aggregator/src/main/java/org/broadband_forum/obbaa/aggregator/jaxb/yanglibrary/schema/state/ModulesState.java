@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class ModulesState extends Modules {
     private String ModuleSetId;
 
-    @XmlElement(name = "module-set-id")
+    @XmlElement(name = "module-set-id", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public String getModuleSetId() {
         return ModuleSetId;
     }

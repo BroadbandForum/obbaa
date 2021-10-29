@@ -20,14 +20,14 @@ networks:
         name: baadist_default
 services:
     baa:
-        image: broadbandforum/baa:latest
+        image: obbaa-master.registry.broadband-forum.org/baa:latest
         container_name: baa
         restart: always
         ports:
             - "8080:8080"
-            - "5005:5005"
+            - "5006:5005"
             - "9292:9292"
-            - "4335:4335"
+            - "4336:4335"
             - "162:162/udp"
         environment:
             - BAA_USER=admin
@@ -44,7 +44,7 @@ services:
             - zookeeper
 
     ipfix-collector:
-        image: broadbandforum/ipfix-collector:latest
+        image: obbaa-master.registry.broadband-forum.org/ipfix-collector:4.1.1-master_42
         container_name: ipfix-collector
         restart: always
         ports:
@@ -127,7 +127,7 @@ services:
         networks:
             - baadist_default
     vomci:
-        image: broadbandforum/obbaa-vomci:latest
+        image: obbaa-master.registry.broadband-forum.org/obbaa-vomci:4.1.1-master_42
         hostname: obbaa-vomci
         container_name: obbaa-vomci
         ports:
@@ -147,7 +147,7 @@ services:
             - zookeeper
             - kafka
     vproxy:
-        image: broadbandforum/obbaa-vproxy:latest
+        image: obbaa-master.registry.broadband-forum.org/obbaa-vproxy:4.1.1-master_42
         hostname: obbaa-vproxy
         container_name: obbaa-vproxy
         ports:
@@ -169,7 +169,7 @@ services:
             - vomci
 
     control_relay:
-        image: broadbandforum/obbaa-control-relay:latest
+        image: obbaa-master.registry.broadband-forum.org/obbaa-control-relay:4.1.1-master_42
         container_name: obbaa-control-relay
         restart: always
         ports:
@@ -189,5 +189,7 @@ services:
             - PRIVATE_FOLDER=./plugin-enabled
         volumes:
             - /baa/control-relay/plugins:/control_relay/plugin-repo
+        networks:
+            - baadist_default
         depends_on:
             - baa

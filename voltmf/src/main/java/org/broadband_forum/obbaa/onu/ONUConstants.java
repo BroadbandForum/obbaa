@@ -104,6 +104,8 @@ public interface ONUConstants {
     String RESPONSE_EVENT = "response";
     String DETECT_EVENT = "detect";
     String UNDETECT_EVENT = "undetect";
+    String SET_ONU_COMMUNICATION_TRUE = "set-onu-communication-true";
+    String SET_ONU_COMMUNICATION_FALSE = "set-onu-communication-false";
 
     // Operation type constants
     String ONU_GET_OPERATION = "get";

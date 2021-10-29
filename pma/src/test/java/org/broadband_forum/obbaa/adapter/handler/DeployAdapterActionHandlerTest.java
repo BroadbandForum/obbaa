@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.net.URI;
@@ -28,6 +29,8 @@ import java.net.URISyntaxException;
 
 import org.apache.karaf.kar.KarService;
 import org.broadband_forum.obbaa.adapter.AdapterDeployer;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -41,13 +44,18 @@ public class DeployAdapterActionHandlerTest {
     @Mock
     private KarService m_karService;
     private URI m_url;
+    @Mock
+    private AdapterManager m_adapterManager;
+    @Mock
+    private DeviceAdapterId m_deviceAdapterId;
 
     @Before
     public void setUp() throws BundleException, URISyntaxException {
         initMocks(this);
         m_stagingArea = "/home";
         m_url = new URI("file:///home/test/adapter.kar");
-        m_adapterActionHandler = new DeviceAdapterActionHandlerImpl(m_stagingArea, m_karService);
+        m_adapterActionHandler = new DeviceAdapterActionHandlerImpl(m_stagingArea, m_karService, m_adapterManager);
+
     }
 
 
@@ -163,6 +171,24 @@ public class DeployAdapterActionHandlerTest {
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains("uninstall error"));
         }
+    }
+
+    @Test
+    public void testUndeployKarWhenAdapterInUse() throws Exception {
+        when(m_adapterManager.isAdapterInUse(any())).thenReturn(true);
+        try {
+            m_adapterActionHandler.undeployAdapter("bbf-olt-8lt-1.0.kar");
+            fail("Should have failed while uninstalling kar");
+        } catch (RuntimeException e) {
+            assertTrue(e.getMessage().contains("Adapter in Use, Undeploy operation not allowed"));
+        }
+    }
+
+    @Test
+    public void testUndeployKarWhenNotInUse() throws Exception {
+        when(m_adapterManager.isAdapterInUse(any())).thenReturn(false);
+        m_adapterActionHandler.undeployAdapter("bbf-olt-8lt-1.0.kar");
+        verify(m_karService).uninstall("bbf-olt-8lt-1.0");
     }
 
 }

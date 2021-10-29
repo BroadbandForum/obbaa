@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
  * </p>
  * Created by Ranjitha.B.R (Nokia) on 22/07/2020.
  */
+@Ignore
 public class UnknownONUHandlerTest {
 
     @Mock

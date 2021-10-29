@@ -171,7 +171,7 @@ public class VOLTManagementImpl implements VOLTManagement {
         String onuSerialNum = onuNotification.getSerialNo();
         Device onuDevice = null;
         try {
-            onuDevice = m_deviceManager.getDeviceWithSerialNumber(onuSerialNum);
+            onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDeviceWithSerialNumber(onuSerialNum));
         } catch (Exception e) {
             LOGGER.info("ONU device not found with serial number: " + onuSerialNum);
         }
@@ -251,7 +251,7 @@ public class VOLTManagementImpl implements VOLTManagement {
     @Override
     public void deviceAdded(String deviceName) {
         m_processNotificationRequestPool.execute(() -> {
-            Device device = m_deviceManager.getDevice(deviceName);
+            Device device = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(deviceName));
             if (device != null && device.getDeviceManagement().getDeviceType().equals(ONUConstants.ONU_DEVICE_TYPE)
                     && device.isMediatedSession()) {
                 // TO DO :: ONU Authentication
@@ -336,27 +336,33 @@ public class VOLTManagementImpl implements VOLTManagement {
                     voltmfRemoteEpName = m_txService.executeWithTxRequired(() -> m_networkFunctionDao.getLocalEndpointName(
                             managementChain.get(0).getSecond()));
                     if (managementChain.size() == 1) {
-                        oltRemoteEpName = m_deviceManager.getEndpointName(onuDeviceName, ONUConstants.TERMINATION_POINT_B,
-                                oltName);
+                        oltRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
+                                ONUConstants.TERMINATION_POINT_B, oltName));
                     } else {
-                        oltRemoteEpName = m_deviceManager.getEndpointName(onuDeviceName, ONUConstants.TERMINATION_POINT_B,
-                                managementChain.get(i + 1).getSecond());
+                        int index = i + 1;
+                        oltRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
+                                ONUConstants.TERMINATION_POINT_B, managementChain.get(index).getSecond()));
                     }
                 } else if (i == (managementChain.size() - 1)) {
-                    voltmfRemoteEpName = m_deviceManager.getEndpointName(onuDeviceName, ONUConstants.TERMINATION_POINT_A,
-                            managementChain.get(i - 1).getSecond());
-                    oltRemoteEpName = m_deviceManager.getEndpointName(onuDeviceName, ONUConstants.TERMINATION_POINT_B, oltName);
+                    int index = i - 1;
+                    voltmfRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
+                            ONUConstants.TERMINATION_POINT_A, managementChain.get(index).getSecond()));
+                    oltRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
+                            ONUConstants.TERMINATION_POINT_B, oltName));
                 } else {
-                    voltmfRemoteEpName = m_deviceManager.getEndpointName(onuDeviceName, ONUConstants.TERMINATION_POINT_A,
-                            managementChain.get(i - 1).getSecond());
-                    oltRemoteEpName = m_deviceManager.getEndpointName(onuDeviceName, ONUConstants.TERMINATION_POINT_B,
-                            managementChain.get(i + 1).getSecond());
+                    int prevIndex = i - 1;
+                    voltmfRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
+                            ONUConstants.TERMINATION_POINT_A, managementChain.get(prevIndex).getSecond()));
+                    int nextIndex = i + 1;
+                    oltRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
+                            ONUConstants.TERMINATION_POINT_B, managementChain.get(nextIndex).getSecond()));
                 }
                 ActionRequest request = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(onuDeviceName,
                         isCommAvailable, oltName, channelTermName, onuId, voltmfRemoteEpName, oltRemoteEpName, (i != 0) ? true : false);
                 LOGGER.debug("Prepared Set ONU Communincation Action request " + request.requestToString());
                 Object kafkaMessage = getFormattedKafkaMessage(request, onuDeviceName, managementChain.get(i).getSecond(),
-                        managementChain.get(i).getSecond(), managementChain.get(i).getFirst(), ONUConstants.SET_ONU_COMMUNICATION);
+                        managementChain.get(i).getSecond(), managementChain.get(i).getFirst(),
+                        isCommAvailable ? ONUConstants.SET_ONU_COMMUNICATION_TRUE : ONUConstants.SET_ONU_COMMUNICATION_FALSE);
                 if (kafkaMessage != null) {
                     VOLTManagementUtil.sendKafkaMessage(kafkaMessage, managementChain.get(i).getSecond(),
                             m_txService, m_networkFunctionDao, m_kafkaProducer);
@@ -375,13 +381,15 @@ public class VOLTManagementImpl implements VOLTManagement {
         VOLTManagementUtil.setMessageId(request, m_messageId);
         try {
             if (!operationType.equals(ONUConstants.DELETE_ONU)) {
-                onuDevice = m_deviceManager.getDevice(onuDeviceName);
+                LOGGER.info(String.format("Trying to fetch device-details from DB for %s before sending %s request",
+                        onuDeviceName, operationType));
+                onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuDeviceName));
             }
             kafkaMessage = m_messageFormatter.getFormattedRequest(request, operationType, onuDevice,
                     m_adapterManager, m_modelNodeDSM, m_schemaRegistry, networkWideTag);
             VOLTManagementUtil.registerInRequestMap(request, onuDeviceName, operationType);
         } catch (IllegalArgumentException e) {
-            LOGGER.warn("Trying to send Kafka message to onu device that is already deleted from OBBAA: " + onuDeviceName);
+            LOGGER.warn("Trying to send Kafka message to onu device that is already deleted from OBBAA: " + onuDeviceName, e);
         } catch (NetconfMessageBuilderException e) {
             LOGGER.error(String.format("Failed to convert netconf request to json: %s", request.requestToString(), e));
         } catch (MessageFormatterException e) {
@@ -403,7 +411,7 @@ public class VOLTManagementImpl implements VOLTManagement {
     public void deviceRemoved(String deviceName) {
         m_processNotificationRequestPool.execute(() -> {
             try {
-                Device device = m_deviceManager.getDevice(deviceName);
+                Device device = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(deviceName));
                 if (device != null) {
                     if (device.getDeviceManagement().getDeviceType().equals(ONUConstants.ONU_DEVICE_TYPE)) {
                         onuDeviceRemoved(device);
@@ -419,6 +427,9 @@ public class VOLTManagementImpl implements VOLTManagement {
                     }
                 }
                 m_onuDevicesCreated.remove(deviceName);
+                if (m_networkFunctionResponse.containsKey(deviceName)) {
+                    m_networkFunctionResponse.remove(deviceName);
+                }
             }
         });
     }
@@ -528,7 +539,10 @@ public class VOLTManagementImpl implements VOLTManagement {
                         LOGGER.error("Error while closing Mediated device netconf session for device " + onuDeviceName);
                     }
                 }
-                m_deviceManager.updateConfigAlignmentState(onuDeviceName, DeviceManagerNSConstants.NEVER_ALIGNED);
+                m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                    m_deviceManager.updateConfigAlignmentState(onuDeviceName, DeviceManagerNSConstants.NEVER_ALIGNED);
+                    return null;
+                });
             } else {
                 // This is DETECT response
                 if (responseStatus.equals(ONUConstants.NOK_RESPONSE)) {
@@ -652,7 +666,10 @@ public class VOLTManagementImpl implements VOLTManagement {
                             LOGGER.debug(String.format("ONU device %s not found", onuDeviceName));
                         }
                         if (m_connectionManager.getConnectionState(onuDevice).isConnected()) {
-                            m_deviceManager.updateConfigAlignmentState(onuDeviceName, DeviceManagerNSConstants.ALIGNED);
+                            m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                                m_deviceManager.updateConfigAlignmentState(onuDeviceName, DeviceManagerNSConstants.ALIGNED);
+                                return null;
+                            });
                             VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
                                     m_notificationService);
                         }
@@ -678,10 +695,14 @@ public class VOLTManagementImpl implements VOLTManagement {
                     } else {
                         LOGGER.info(String.format("Invalid response code %s received from %s ", responseStatus, senderName));
                     }
-                    m_deviceManager.updateConfigAlignmentState(onuDeviceName, DeviceManagerNSConstants.ALIGNMENT_UNKNOWN);
+                    m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                        m_deviceManager.updateConfigAlignmentState(onuDeviceName, DeviceManagerNSConstants.ALIGNMENT_UNKNOWN);
+                        return null;
+                    });
                     VOLTManagementUtil.removeRequestFromMap(identifier);
                     break;
-                case ONUConstants.SET_ONU_COMMUNICATION:
+                case ONUConstants.SET_ONU_COMMUNICATION_FALSE:
+                case ONUConstants.SET_ONU_COMMUNICATION_TRUE:
                     boolean isSuccessful = false;
                     if (responseStatus.equals(ONUConstants.OK_RESPONSE)) {
                         isSuccessful = true;
@@ -698,51 +719,68 @@ public class VOLTManagementImpl implements VOLTManagement {
                         m_networkFunctionResponse.put(onuDeviceName, responseArray);
                     }
                     int mgmtChainSize = VOLTManagementUtil.getManagementChain(onuDeviceName, m_txService, m_deviceDao).size();
-                    if (mgmtChainSize == m_networkFunctionResponse.get(onuDeviceName).size()) {
+                    if (mgmtChainSize <= m_networkFunctionResponse.get(onuDeviceName).size()) {
                         MediatedDeviceNetconfSession devSession = VOLTManagementUtil.getMediatedDeviceNetconfSession(onuDevice,
                                 m_connectionManager);
                         ArrayList<Boolean> respArray = m_networkFunctionResponse.get(onuDeviceName);
                         m_networkFunctionResponse.remove(onuDeviceName);
                         if (VOLTManagementUtil.isResponseOK(respArray)) {
-                            if (devSession == null) {
-                                ActualAttachmentPoint actualAttachmentPoint = onuDevice.getDeviceManagement().getDeviceState()
-                                        .getOnuStateInfo().getActualAttachmentPoint();
-                                String oltDeviceName = actualAttachmentPoint.getOltName();
-                                String onuId1 = actualAttachmentPoint.getOnuId();
-                                String channelTermRef1 = actualAttachmentPoint.getChannelTerminationRef();
-                                MediatedDeviceNetconfSession newDeviceMediatedSession = new MediatedDeviceNetconfSession(onuDevice,
-                                        oltDeviceName, onuId1, channelTermRef1, null, m_kafkaProducer,
-                                        m_modelNodeDSM, m_adapterManager, m_kafkaCommunicationPool, m_schemaRegistry, m_messageFormatter,
-                                        m_txService, m_networkFunctionDao, m_deviceDao);
-                                m_connectionManager.addMediatedDeviceNetconfSession(onuDevice, newDeviceMediatedSession);
-                                m_connectionManager.getConnectionState(onuDevice).setConnected(true);
-                                if (onuDevice.isAligned()) {
-                                    VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
-                                            m_notificationService);
+                            if (ONUConstants.SET_ONU_COMMUNICATION_TRUE.equals(operationType)) {
+                                if (devSession == null) {
+                                    LOGGER.info("Received all responses from network functions. " + onuDeviceName
+                                            + " is connected so creating new MediatedDeviceSession");
+                                    ActualAttachmentPoint actualAttachmentPoint = onuDevice.getDeviceManagement().getDeviceState()
+                                            .getOnuStateInfo().getActualAttachmentPoint();
+                                    String oltDeviceName = actualAttachmentPoint.getOltName();
+                                    String onuId1 = actualAttachmentPoint.getOnuId();
+                                    String channelTermRef1 = actualAttachmentPoint.getChannelTerminationRef();
+                                    MediatedDeviceNetconfSession newDeviceMediatedSession = new MediatedDeviceNetconfSession(onuDevice,
+                                            oltDeviceName, onuId1, channelTermRef1, null, m_kafkaProducer,
+                                            m_modelNodeDSM, m_adapterManager, m_kafkaCommunicationPool, m_schemaRegistry,
+                                            m_messageFormatter, m_txService, m_networkFunctionDao, m_deviceDao);
+                                    m_connectionManager.addMediatedDeviceNetconfSession(onuDevice, newDeviceMediatedSession);
+                                    m_connectionManager.getConnectionState(onuDevice).setConnected(true);
+                                    if (onuDevice.isAligned()) {
+                                        VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
+                                                m_notificationService);
+                                    }
+                                } else {
+                                    LOGGER.info("Received all responses from network functions. " + onuDeviceName
+                                            + "MediatedDeviceSession already created.");
                                 }
-                                LOGGER.debug("Processing " + operationType + " response from " + senderName + " with id "
-                                        + identifier + " is successful");
                             } else {
-                                try {
-                                    devSession.close();
-                                } catch (IOException e) {
-                                    LOGGER.error("Error while closing session for " + onuDeviceName, e);
-                                } catch (InterruptedException e) {
-                                    LOGGER.error("Error while closing session for " + onuDeviceName, e);
-                                }
+                                if (devSession != null) {
+                                    LOGGER.info("Received all responses from network functions. " + onuDeviceName
+                                            + " is disconnected so closing MediatedDeviceSession");
+                                    try {
+                                        devSession.close();
+                                    } catch (IOException e) {
+                                        LOGGER.error("Error while closing session for " + onuDeviceName, e);
+                                    } catch (InterruptedException e) {
+                                        LOGGER.error("Error while closing session for " + onuDeviceName, e);
+                                    }
 
-                                m_connectionManager.getConnectionState(onuDevice).setConnected(false);
-                                m_deviceManager.updateConfigAlignmentState(onuDeviceName, DeviceManagerNSConstants.ALIGNMENT_UNKNOWN);
-                                VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.OFFLINE,
-                                        m_notificationService);
-                                LOGGER.debug("Processing " + operationType + " response from " + senderName + " with id "
-                                        + identifier + " is successful");
+                                    m_connectionManager.getConnectionState(onuDevice).setConnected(false);
+                                    m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                                        m_deviceManager.updateConfigAlignmentState(onuDeviceName,
+                                                DeviceManagerNSConstants.ALIGNMENT_UNKNOWN);
+                                        return null;
+                                    });
+                                    VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.OFFLINE,
+                                            m_notificationService);
+                                } else {
+                                    LOGGER.info("Received all responses from network functions. " + onuDeviceName
+                                            + " is disconnected. MediatedDeviceSession was already closed.");
+                                }
                             }
                         } else {
-                            LOGGER.debug("Processing " + operationType + " response from " + senderName + " with id "
+                            LOGGER.info("Processing " + operationType + " response from " + senderName + " with id "
                                     + identifier + " failed with error " + failureReason);
                         }
                         respArray = null;
+                    } else {
+                        LOGGER.info("Responses from all network functions still not received. Waiting for "
+                                + (mgmtChainSize - m_networkFunctionResponse.get(onuDeviceName).size()) + " responses.");
                     }
                     VOLTManagementUtil.removeRequestFromMap(identifier);
                     break;
@@ -775,6 +813,9 @@ public class VOLTManagementImpl implements VOLTManagement {
                     LOGGER.info(String.format("Invalid response code %s received from %s ", responseStatus, senderName));
                 }
                 VOLTManagementUtil.removeRequestFromMap(identifier);
+                if (m_networkFunctionResponse.containsKey(onuDeviceName)) {
+                    m_networkFunctionResponse.remove(onuDeviceName);
+                }
             } else {
                 LOGGER.warn(String.format("Unknown operation type %s ", operationType));
             }
@@ -797,19 +838,25 @@ public class VOLTManagementImpl implements VOLTManagement {
                     if (onuAlignmentStatus != null) {
                         if (onuAlignmentStatus.equals(ONUConstants.ALIGNED)) {
                             try {
-                                onuDevice = m_deviceManager.getDevice(onuName);
+                                onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
                             } catch (IllegalArgumentException e) {
                                 LOGGER.error(String.format("Device with name %s does not exist: %s", onuName, e));
                             }
                             if (onuDevice != null) {
-                                m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.ALIGNED);
+                                m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                                    m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.ALIGNED);
+                                    return null;
+                                });
                                 if (m_connectionManager.getConnectionState(onuDevice).isConnected()) {
                                     VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
                                             m_notificationService);
                                 }
                             }
                         } else {
-                            m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.NEVER_ALIGNED);
+                            m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                                m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.NEVER_ALIGNED);
+                                return null;
+                            });
                         }
                     } else {
                         LOGGER.error("ONU Alignment Status received from notification is NULL");

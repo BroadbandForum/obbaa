@@ -24,7 +24,7 @@ import java.util.List;
 public class Modules {
     protected List<Module> modules;
 
-    @XmlElement(name = "module")
+    @XmlElement(name = "module", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public List<Module> getModules() {
         return modules;
     }

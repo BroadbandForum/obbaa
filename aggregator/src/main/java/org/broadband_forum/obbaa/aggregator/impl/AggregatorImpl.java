@@ -66,13 +66,13 @@ public class AggregatorImpl implements Aggregator {
 
     @Override
     public String dispatchRequest(NetconfClientInfo clientInfo, String netconfRequest) throws DispatchException {
-        LOGGER.info("Aggregator dispatch request:\n {}", netconfRequest);
+        LOGGER.debug("Aggregator dispatch request:\n {}", netconfRequest);
         AggregatorRpcMessage aggregatorRpcMessage = buildAggregatorRpcMessage(netconfRequest);
 
         String response;
         if (aggregatorRpcMessage.isNetworkManagerMessage()) {
             response = dispatchNetworkManageRequest(clientInfo, aggregatorRpcMessage);
-            LOGGER.info("Network manager request response:\n {}", response);
+            LOGGER.debug("Network manager request response:\n {}", response);
         } else {
             response = dispatchGlobalRequest(clientInfo, aggregatorRpcMessage);
             LOGGER.info("Global request response:\n {}", response);
@@ -83,7 +83,7 @@ public class AggregatorImpl implements Aggregator {
 
     @Override
     public void publishNotification(Notification notification) throws DispatchException {
-        LOGGER.info("Publish global notification:\n {}", notification.notificationToString());
+        LOGGER.debug("Publish global notification:\n {}", notification.notificationToString());
         Set<NotificationProcessor> notificationProcessors = getNotificationProcessorManager().getProcessors();
 
         for (NotificationProcessor notificationProcessor : notificationProcessors) {
@@ -94,12 +94,12 @@ public class AggregatorImpl implements Aggregator {
 
     @Override
     public void publishNotification(String deviceName, Notification notification) throws DispatchException {
-        LOGGER.info("Publish device notification:\n {} \n {}", deviceName, notification.notificationToString());
+        LOGGER.debug("Publish device notification:\n {} \n {}", deviceName, notification.notificationToString());
 
         Notification packagedNotification = null;
         try {
             packagedNotification = AggregatorUtils.packageNotification(deviceName, notification);
-            LOGGER.info("Packaged message:\n {}", packagedNotification.notificationToString());
+            LOGGER.debug("Packaged message:\n {}", packagedNotification.notificationToString());
             publishNotification(packagedNotification);
         } catch (NetconfMessageBuilderException e) {
             LOGGER.error("Failed to build Notifcation", e);
@@ -269,7 +269,7 @@ public class AggregatorImpl implements Aggregator {
 
         String deviceName = singleDeviceRequest.getDeviceName();
         String request = singleDeviceRequest.getMessage();
-        LOGGER.info("Dispatch device config request:\n {} {} {}", deviceConfigProcessor, deviceName, request);
+        LOGGER.debug("Dispatch device config request:\n {} {} {}", deviceConfigProcessor, deviceName, request);
 
         //Dispatch (can thrown exception)
         String singleDeviceResponse = deviceConfigProcessor.processRequest(deviceName, request);

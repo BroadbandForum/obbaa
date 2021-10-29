@@ -3,9 +3,11 @@ package org.broadband_forum.obbaa.device.adapter;
 import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.device.adapter.impl.AdapterManagerImpl;
 import org.broadband_forum.obbaa.device.registrator.impl.StandardModelRegistrator;
+import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl;
 import org.junit.Before;
@@ -55,6 +57,8 @@ public class FactoryGarmentTagTest {
     private DeviceInterface m_deviceInterface;
     private InputStream m_inputStreamStdAdapterv2;
     private InputStream m_inputStreamStdAdapterv1;
+    private DeviceDao m_deviceDao;
+    private TxService m_txService;
 
     @Mock
     private StandardModelRegistrator m_standardModelRegistrator;
@@ -63,7 +67,7 @@ public class FactoryGarmentTagTest {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         m_readWriteLockService = spy(new ReadWriteLockServiceImpl());
-        m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator));
+        m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator, m_deviceDao, m_txService));
         m_inputStream = getClass().getResourceAsStream("/model/device-adapter1.xml");
         m_inputStream2 = getClass().getResourceAsStream("/model/device-adapter2.xml");
         m_inputStream3 = getClass().getResourceAsStream("/model/device-adapter10.xml");

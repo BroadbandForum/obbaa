@@ -194,5 +194,7 @@ services:
         - PRIVATE_FOLDER=./plugin-enabled
       volumes:
         - /baa/control-relay/plugins:/control_relay/plugin-repo
+      networks:
+        - baadist_default
       depends_on:
         - baa

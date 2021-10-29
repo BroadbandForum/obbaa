@@ -28,7 +28,7 @@ ENV https_proxy $https_proxy
 RUN apk add --no-cache bash
 
 RUN mkdir /ipfix
-ARG version=4.0.0
+ARG version=4.1.1
 ADD target/ipfix-collector-dist*.tar.gz /ipfix
 
 RUN ln -s /ipfix/ipfix-collector-dist-${version} /ipfix/ipfix-collector-dist

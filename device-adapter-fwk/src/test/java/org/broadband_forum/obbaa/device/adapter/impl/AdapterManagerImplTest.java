@@ -16,6 +16,27 @@
 
 package org.broadband_forum.obbaa.device.adapter.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
@@ -26,11 +47,15 @@ import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.device.adapter.util.SystemProperty;
 import org.broadband_forum.obbaa.device.registrator.impl.StandardModelRegistrator;
+import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl;
 import org.junit.Before;
@@ -38,25 +63,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.EventAdmin;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class AdapterManagerImplTest {
 
@@ -90,9 +96,21 @@ public class AdapterManagerImplTest {
     private InputStream m_inputStreamStdAdapterv2;
     private InputStream m_inputStreamStdAdapterv1;
     private InputStream m_inputStreamCodedStdAdapterv1;
-
+    @Mock
+    private DeviceDao m_deviceDao;
+    @Mock
+    private DeviceAdapterId m_deviceAdapterId;
+    private TxService m_txService;
     @Mock
     private StandardModelRegistrator m_standardModelRegistrator;
+
+    private final String TYPE_OLT = "OLT";
+    private final String TYPE_DPU = "DPU";
+    private final String VENDOR_BBF = "BBF";
+    private final String MODEL = "model";
+    private final String VERSION_1 = "1.0";
+    private final String VERSION_2 = "2.0";
+
 
     public AdapterManagerImplTest() {
     }
@@ -102,7 +120,8 @@ public class AdapterManagerImplTest {
         MockitoAnnotations.initMocks(this);
         System.setProperty("MAXIMUM_ALLOWED_ADAPTER_VERSIONS", "1");
         m_readWriteLockService = spy(new ReadWriteLockServiceImpl());
-        m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator));
+        m_txService = new TxService();
+        m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator, m_deviceDao, m_txService));
         m_inputStream = getClass().getResourceAsStream("/model/device-adapter1.xml");
         m_inputStream2 = getClass().getResourceAsStream("/model/device-adapter2.xml");
         m_inputStream3 = getClass().getResourceAsStream("/model/device-adapter10.xml");
@@ -251,7 +270,7 @@ public class AdapterManagerImplTest {
             m_adapterManager.undeploy(m_codedStdAdapterv1);
             fail("Expected an Exception");
         } catch (Exception e) {
-            String expectedMessage = "Given standard adapter is in use, undeploy operation is not allowed";
+            String expectedMessage = "Given standard adapter is referenced by other coded adapter(s), undeploy operation is not allowed";
             assertEquals(expectedMessage, e.getCause().getMessage());
         }
     }
@@ -302,6 +321,64 @@ public class AdapterManagerImplTest {
         assertNull(m_adapterManager.getEditRequestForAdapter(m_deviceAdapter2.getDeviceAdapterId()));
         m_adapterManager.undeploy(m_stdAdapterv1);
         assertNull(m_adapterManager.getEditRequestForAdapter(m_stdAdapterv2.getDeviceAdapterId()));
+    }
+
+    @Test
+    public void testIsAdapterInUseTrue() {
+        when(m_deviceDao.findAllDevices()).thenReturn(prepareDeviceList());
+        when(m_deviceAdapterId.getInterfaceVersion()).thenReturn(VERSION_1);
+        when(m_deviceAdapterId.getType()).thenReturn(TYPE_OLT);
+        when(m_deviceAdapterId.getModel()).thenReturn(MODEL);
+        when(m_deviceAdapterId.getVendor()).thenReturn(VENDOR_BBF);
+        Boolean isAdapterInUse = m_adapterManager.isAdapterInUse(m_deviceAdapterId);
+        verify(m_deviceAdapterId, times(1)).getInterfaceVersion();
+        verify(m_deviceAdapterId, times(1)).getModel();
+        verify(m_deviceAdapterId, times(1)).getVendor();
+        verify(m_deviceAdapterId, times(1)).getType();
+        assertTrue(isAdapterInUse);
+    }
+
+    @Test
+    public void testIsAdapterInUseWhenNoDevicesAdded() {
+        List<Device> devices = Collections.<Device>emptyList();
+        when(m_deviceDao.findAllDevices()).thenReturn(devices);
+        when(m_deviceAdapterId.getInterfaceVersion()).thenReturn(VERSION_1);
+        when(m_deviceAdapterId.getType()).thenReturn(TYPE_OLT);
+        when(m_deviceAdapterId.getModel()).thenReturn(MODEL);
+        when(m_deviceAdapterId.getVendor()).thenReturn(VENDOR_BBF);
+        Boolean isAdapterInUse = m_adapterManager.isAdapterInUse(m_deviceAdapterId);
+        verify(m_deviceAdapterId, never()).getInterfaceVersion();
+        verify(m_deviceAdapterId, never()).getModel();
+        verify(m_deviceAdapterId, never()).getVendor();
+        verify(m_deviceAdapterId, never()).getType();
+        assertFalse(isAdapterInUse);
+    }
+
+    @Test
+    public void testIsAdapterInUseFalse() {
+        when(m_deviceDao.findAllDevices()).thenReturn(prepareDeviceList());
+        when(m_deviceAdapterId.getInterfaceVersion()).thenReturn(VERSION_2);
+        when(m_deviceAdapterId.getType()).thenReturn(TYPE_DPU);
+        when(m_deviceAdapterId.getModel()).thenReturn(MODEL);
+        when(m_deviceAdapterId.getVendor()).thenReturn(VENDOR_BBF);
+        Boolean isAdapterInUse = m_adapterManager.isAdapterInUse(m_deviceAdapterId);
+        verify(m_deviceAdapterId, times(1)).getModel();
+        verify(m_deviceAdapterId, times(1)).getVendor();
+        verify(m_deviceAdapterId, times(1)).getType();
+        assertFalse(isAdapterInUse);
+    }
+
+    private List<Device> prepareDeviceList() {
+        List<Device> devices = new ArrayList<>();
+        Device device = new Device();
+        DeviceMgmt deviceMgmt = new DeviceMgmt();
+        device.setDeviceManagement(deviceMgmt);
+        device.getDeviceManagement().setDeviceModel(MODEL);
+        device.getDeviceManagement().setDeviceType(TYPE_OLT);
+        device.getDeviceManagement().setDeviceInterfaceVersion(VERSION_1);
+        device.getDeviceManagement().setDeviceVendor(VENDOR_BBF);
+        devices.add(device);
+        return devices;
     }
 
     @Test

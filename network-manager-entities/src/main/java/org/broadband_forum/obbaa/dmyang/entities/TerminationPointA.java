@@ -31,7 +31,7 @@ import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangSchemaPath;
 public class TerminationPointA {
     @Id
     @YangParentId
-    @Column(name = YangParentId.PARENT_ID_FIELD_NAME)
+    @Column(name = YangParentId.PARENT_ID_FIELD_NAME, length = 1000)
     private String parentId;
 
     @YangSchemaPath

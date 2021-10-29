@@ -37,11 +37,13 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.broadband_forum.obbaa.device.adapter.impl.AdapterManagerImpl;
 import org.broadband_forum.obbaa.device.registrator.impl.StandardModelRegistrator;
+import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl;
 import org.junit.After;
@@ -72,6 +74,9 @@ public class AdapterUtilsTest {
     private DeviceInterface m_deviceInterface;
     @Mock
     private StandardModelRegistrator m_standardModelRegistrator;
+    @Mock
+    private DeviceDao m_deviceDao;
+    private TxService m_txService;
 
     public AdapterUtilsTest() {
 
@@ -86,7 +91,7 @@ public class AdapterUtilsTest {
         deviatedStdModules.add(0, "ietf-interfaces");
         ArrayList<String> augmentedStdModules = new ArrayList<>();
         augmentedStdModules.add(0, "iana-interfaces");
-        m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator) {
+        m_adapterManager = spy(new AdapterManagerImpl(m_modelNodeDataStoreManager, m_readWriteLockService, m_entityRegistry, m_eventAdmin, m_standardModelRegistrator, m_deviceDao, m_txService) {
             @Override
             protected void computeFactoryGarmentTag(DeviceAdapter adapter, AdapterContext vendorAdapterContext) {
                 garmentTagMap.put(adapter, new FactoryGarmentTag(10, 3, 2, deviatedStdModules, augmentedStdModules));

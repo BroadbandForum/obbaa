@@ -27,6 +27,8 @@ import java.util.Collections;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.karaf.kar.KarService;
 import org.broadband_forum.obbaa.adapter.AdapterDeployer;
+import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -43,11 +45,13 @@ public class DeviceAdapterActionHandlerImpl implements AdapterDeployer, EventHan
     //Archive should be in the format "vendor-type-model-interfaceVersion.kar"
     private static final String FILENAME_PATTERN = "([a-zA-Z]*)" + DELIMITER + "([a-zA-Z]*)" + DELIMITER + "([a-zA-Z0-9]*)"
             + DELIMITER + "([0-9]\\.[0-9])";
+    private AdapterManager m_adapterManager;
 
-    public DeviceAdapterActionHandlerImpl(String stagingArea, KarService karService) {
+    public DeviceAdapterActionHandlerImpl(String stagingArea, KarService karService, AdapterManager adapterManager) {
         m_stagingAreaDir = new File(stagingArea);
         m_stagingArea = stagingArea;
         m_karService = karService;
+        m_adapterManager = adapterManager;
     }
 
     public void init() throws Exception {
@@ -117,7 +121,11 @@ public class DeviceAdapterActionHandlerImpl implements AdapterDeployer, EventHan
                 if (!verifyFileNameMatchesExpectedPattern(fileName)) {
                     throw new RuntimeException("File name is not in the expected pattern(vendor-type-model-interfaceVersion.kar)");
                 }
-                undeployKar(fileNameWOExt);
+                if (!m_adapterManager.isAdapterInUse(prepareAdapterIdFromArchive(fileNameWOExt))) {
+                    undeployKar(fileNameWOExt);
+                } else {
+                    throw new RuntimeException("Adapter in Use, Undeploy operation not allowed");
+                }
             }
         } catch (Exception e) {
             LOGGER.error("Error when un-deploying coded adapter : ", e);
@@ -157,5 +165,16 @@ public class DeviceAdapterActionHandlerImpl implements AdapterDeployer, EventHan
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private DeviceAdapterId prepareAdapterIdFromArchive(String fileNameWOExt) {
+        String[] adapterId = fileNameWOExt.split("-", 4);
+        String vendor = adapterId[0];
+        String type = adapterId[1];
+        String model = adapterId[2];
+        String version = adapterId[3];
+        DeviceAdapterId deviceAdapterId = new DeviceAdapterId(type, version, model, vendor);
+        LOGGER.info(String.format("Adapter ID prepared from archive name: %s", deviceAdapterId));
+        return deviceAdapterId;
     }
 }

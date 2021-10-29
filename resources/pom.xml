@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>

@@ -89,7 +89,8 @@ public class GpbFormatter implements MessageFormatter<Msg> {
                 msg = getFormattedMessageForOnuAction((ActionRequest) request, schemaRegistry,
                         modelNodeDsm, networkWideTag);
                 break;
-            case ONUConstants.SET_ONU_COMMUNICATION:
+            case ONUConstants.SET_ONU_COMMUNICATION_TRUE:
+            case ONUConstants.SET_ONU_COMMUNICATION_FALSE:
                 msg = getFormattedMessageForOnuAction((ActionRequest) request, schemaRegistry,
                         modelNodeDsm, networkWideTag);
                 break;

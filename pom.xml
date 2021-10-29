@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>baa-root-pom</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.1</version>
     <packaging>pom</packaging>
     <name>Broadband Access Abstraction</name>
 
@@ -44,7 +44,7 @@
     </modules>
 
     <properties>
-        <obbaa-release.version>4.1.0</obbaa-release.version>
+        <obbaa-release.version>4.1.1</obbaa-release.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <java.source.version>1.8</java.source.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>

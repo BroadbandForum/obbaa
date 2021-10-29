@@ -168,6 +168,7 @@
     <bean id="adapterActionHandler" class="org.broadband_forum.obbaa.adapter.handler.DeviceAdapterActionHandlerImpl" init-method="init">
         <argument value="/baa/stores/deviceAdapter"/>
         <argument ref="karService"/>
+        <argument ref="adapterManager"/>
     </bean>
 
     <service ref="adapterActionHandler" interface="org.osgi.service.event.EventHandler">

@@ -23,6 +23,7 @@
     <reference id="ncConnectionMgr" interface="org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager" availability="mandatory"/>
     <reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin" availability="mandatory"/>
     <reference id="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry" availability="mandatory"/>
+    <reference id="deviceDao" interface="org.broadband_forum.obbaa.dmyang.dao.DeviceDao" availability="mandatory"/>
 
     <bean id="osgiEDSM" class="org.broadband_forum.obbaa.netconf.alarm.persistence.jpa.AlarmOsgiEntityDataStoreManager"/>
 
@@ -120,6 +121,8 @@
         <argument ref="entityRegistry"/>
         <argument ref="eventAdmin"/>
         <argument ref="standardModelRegistrator" />
+        <argument ref="deviceDao"/>
+        <argument ref="transactionService"/>
     </bean>
 
     <bean id="dsmRegistry"

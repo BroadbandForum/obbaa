@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
-@XmlRootElement
+@XmlRootElement(name = "module", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
 public class Module {
     private String id;
     private String name;
@@ -41,7 +41,7 @@ public class Module {
         this.id = id;
     }
 
-    @XmlElement(name = "name")
+    @XmlElement(name = "name", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public String getName() {
         return name;
     }
@@ -50,7 +50,7 @@ public class Module {
         this.name = name;
     }
 
-    @XmlElement(name = "revision")
+    @XmlElement(name = "revision", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public String getRevision() {
         return revision;
     }
@@ -59,7 +59,7 @@ public class Module {
         this.revision = revision;
     }
 
-    @XmlElement(name = "schema")
+    @XmlElement(name = "schema", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public String getSchema() {
         return schema;
     }
@@ -68,7 +68,7 @@ public class Module {
         this.schema = schema;
     }
 
-    @XmlElement(name = "namespace")
+    @XmlElement(name = "namespace", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public String getNamespace() {
         return namespace;
     }
@@ -77,7 +77,7 @@ public class Module {
         this.namespace = namespace;
     }
 
-    @XmlElement(name = "feature")
+    @XmlElement(name = "feature", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public List<String> getFeature() {
         return feature;
     }
@@ -86,7 +86,7 @@ public class Module {
         this.feature = feature;
     }
 
-    @XmlElement(name = "deviation")
+    @XmlElement(name = "deviation", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public Deviation getDeviation() {
         return deviation;
     }
@@ -95,7 +95,7 @@ public class Module {
         this.deviation = deviation;
     }
 
-    @XmlElement(name = "conformance-type")
+    @XmlElement(name = "conformance-type", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public String getConformanceType() {
         return conformanceType;
     }
@@ -104,7 +104,7 @@ public class Module {
         this.conformanceType = conformanceType;
     }
 
-    @XmlElement(name = "submodule")
+    @XmlElement(name = "submodule", namespace = "urn:ietf:params:xml:ns:yang:ietf-yang-library")
     public SubModule getSubModule() {
         return subModule;
     }

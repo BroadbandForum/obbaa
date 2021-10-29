@@ -36,23 +36,26 @@ import org.broadband_forum.obbaa.onu.entity.UnknownONU;
 public class UnknownONUHandler {
     private static final Logger LOGGER = Logger.getLogger(UnknownONUHandler.class);
     private final PersistenceManagerUtil m_persistenceMgrUtil;
+    private HashMap<String, UnknownONU> m_unknownOnuMap;
 
     public UnknownONUHandler(PersistenceManagerUtil persistenceMgrUtil) {
         m_persistenceMgrUtil = persistenceMgrUtil;
+        m_unknownOnuMap = new HashMap<>();
     }
 
     public void createUnknownONUEntity(UnknownONU unknownONU) {
-        EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
+        /*EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
         try {
             manager.create(unknownONU);
         } catch (Exception e) {
             LOGGER.error("Problem in creating unknown ONU entity " + unknownONU);
             throw new RuntimeException("Unable to create unknown ONU entity", e);
-        }
+        }*/
+        m_unknownOnuMap.put(unknownONU.getSerialNumber(), unknownONU);
     }
 
     public UnknownONU findUnknownOnuEntity(String serialNumber, String registrationId) {
-        final UnknownONU[] unknownONU = new UnknownONU[1];
+        /*final UnknownONU[] unknownONU = new UnknownONU[1];
         EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
         Map<String, Object> matchValue = new HashMap<String, Object>();
         if (serialNumber != null) {
@@ -72,7 +75,8 @@ public class UnknownONUHandler {
                         serialNumber, registrationId), e);
             }
         }
-        return unknownONU[0];
+        return unknownONU[0];*/
+        return m_unknownOnuMap.get(serialNumber);
     }
 
     public UnknownONU findMatchingUnknownOnu(String oltName, String channelTermRef, String onuId) {
@@ -104,12 +108,13 @@ public class UnknownONUHandler {
     }
 
     public void deleteUnknownOnuEntity(UnknownONU unknownONU) {
-        EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
+        /*EntityDataStoreManager manager = m_persistenceMgrUtil.getEntityDataStoreManager();
         try {
             manager.delete(unknownONU);
         } catch (Exception e) {
             LOGGER.error("Problem in deleting unknown ONU entity " + unknownONU, e);
-        }
+        }*/
+        m_unknownOnuMap.remove(unknownONU.getSerialNumber());
     }
 
 }

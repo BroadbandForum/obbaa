@@ -70,7 +70,7 @@ public class ONUNotificationTest {
         assertEquals(onuNotification.getChannelTermRef(), chanTermRef);
         assertEquals(onuNotification.getOnuId(), onuId);
         assertEquals(onuNotification.getOnuState(), onuPresentAndUnexpectedState);
-        assertEquals(onuNotification.getMappedEvent(), ONUConstants.DETECT_EVENT);
+        assertEquals(onuNotification.getMappedEvent(), ONUConstants.NOT_APPLICABLE);
     }
 
     @Test

@@ -43,4 +43,6 @@ public interface AdapterManager {
     Map<String, AdapterContext> getStdAdapterContextRegistry();
 
     String EVENT_TOPIC = "com/bbf/obbaa/AdapterManager/Event";
+
+    boolean isAdapterInUse(DeviceAdapterId adapterId);
 }
