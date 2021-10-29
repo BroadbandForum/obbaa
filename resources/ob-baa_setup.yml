@@ -20,7 +20,7 @@ networks:
         name: baadist_default
 services:
     baa:
-        image: obbaa-master.registry.broadband-forum.org/baa:latest
+        image: broadbandforum/baa:latest
         container_name: baa
         restart: always
         ports:
@@ -44,7 +44,7 @@ services:
             - zookeeper
 
     ipfix-collector:
-        image: obbaa-master.registry.broadband-forum.org/ipfix-collector:4.1.1-master_42
+        image: broadbandforum/ipfix-collector:latest
         container_name: ipfix-collector
         restart: always
         ports:
@@ -127,7 +127,7 @@ services:
         networks:
             - baadist_default
     vomci:
-        image: obbaa-master.registry.broadband-forum.org/obbaa-vomci:4.1.1-master_42
+        image: broadbandforum/obbaa-vomci:latest
         hostname: obbaa-vomci
         container_name: obbaa-vomci
         ports:
@@ -147,7 +147,7 @@ services:
             - zookeeper
             - kafka
     vproxy:
-        image: obbaa-master.registry.broadband-forum.org/obbaa-vproxy:4.1.1-master_42
+        image: broadbandforum/obbaa-vproxy:latest
         hostname: obbaa-vproxy
         container_name: obbaa-vproxy
         ports:
@@ -169,7 +169,7 @@ services:
             - vomci
 
     control_relay:
-        image: obbaa-master.registry.broadband-forum.org/obbaa-control-relay:4.1.1-master_42
+        image: broadbandforum/obbaa-control-relay:latest
         container_name: obbaa-control-relay
         restart: always
         ports:
