@@ -63,7 +63,7 @@
         <springfox-swagger-ui.version>2.7.0</springfox-swagger-ui.version>
         <commons-io.version>2.5</commons-io.version>
         <commons.lang.version>2.6</commons.lang.version>
-        <spring-boot.version>1.2.5.RELEASE</spring-boot.version>
+        <spring-boot.version>2.5.12</spring-boot.version>
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
         <jackson-jaxrs.version>1.9.13</jackson-jaxrs.version>
         <commons-pool2.version>2.4.2</commons-pool2.version>
