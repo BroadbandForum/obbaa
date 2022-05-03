@@ -23,10 +23,12 @@
     <jpa:enable/>
     <tx:enable-annotations/>
     <reference id="deviceManager" interface="org.broadband_forum.obbaa.nm.devicemanager.DeviceManager" availability="mandatory"/>
+    <reference id="networkFunctionManager" interface="org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager" availability="mandatory"/>
     <reference id="ncConnectionMgr"
                interface="org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager"
                availability="mandatory"/>
     <reference id="deviceDao" interface="org.broadband_forum.obbaa.dmyang.dao.DeviceDao" availability="mandatory"/>
+    <reference id="networkFunctionDao" interface="org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao" availability="mandatory"/>
     <reference id="nonCodedConfigAlign" interface="org.broadband_forum.obbaa.device.adapter.DeviceInterface" availability="mandatory"/>
 
     <reference id="nonCodedAdapterService" interface="org.broadband_forum.obbaa.device.adapter.NonCodedAdapterService"
@@ -42,6 +44,9 @@
                availability="mandatory"/>
     <reference id="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry" availability="mandatory"/>
     <reference id="karService" interface="org.apache.karaf.kar.KarService" availability="mandatory"/>
+
+
+
 
     <bean id="threadLocalSchemaRegistry" class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalSchemaRegistry">
     </bean>
@@ -65,12 +70,26 @@
         <argument ref="adapterManager"/>
     </bean>
 
-    <bean id="aligmentTimer" class="org.broadband_forum.obbaa.pma.impl.AlignmentTimer" init-method="init"
+    <bean id="networkFunctionAlignmentService" class="org.broadband_forum.obbaa.pma.impl.NetconfNetworkFunctionAlignmentServiceImpl"
+          init-method="init"
+          destroy-method="destroy">
+        <property name="txService" ref="txService"/>
+        <argument ref="networkFunctionManager"/>
+        <argument ref="ncConnectionMgr"/>
+    </bean>
+
+    <bean id="alignmentTimer" class="org.broadband_forum.obbaa.pma.impl.AlignmentTimer" init-method="init"
           destroy-method="destroy">
         <argument ref="pmaRegistry"/>
         <argument ref="adapterManager"/>
         <argument ref="deviceDao"/>
         <argument ref="txService"/>
+    </bean>
+
+    <bean id="alignmentTimerNF" class="org.broadband_forum.obbaa.pma.impl.AlignmentTimerNF" init-method="init"
+          destroy-method="destroy">
+        <argument ref="pmaRegistry"/>
+        <argument ref="networkFunctionDao"/>
     </bean>
 
     <bean id="deviceSubsystem" class="org.broadband_forum.obbaa.pma.impl.DeviceSubsystem">
@@ -79,8 +98,13 @@
         <argument ref="adapterManager"/>
     </bean>
 
+    <bean id="networkFunctionSubsystem" class="org.broadband_forum.obbaa.pma.impl.NetworkFunctionSubsystem">
+        <argument ref="networkFunctionAlignmentService"/>
+    </bean>
+
     <bean id="pmaRegistry" class="org.broadband_forum.obbaa.pma.impl.PmaRegistryImpl">
         <argument ref="deviceManager"/>
+        <argument ref="networkFunctionManager"/>
         <argument ref="switchableFactory"/>
     </bean>
 
@@ -115,11 +139,19 @@
         <argument ref="schemaRegistry"/>
         <argument ref="dsmRegistry"/>
         <argument ref="adapterManager"/>
+        <argument ref="networkFunctionManager"/>
+        <argument ref="networkFunctionAlignmentService"/>
     </bean>
 
     <bean id="deviceCRUDListener" class="org.broadband_forum.obbaa.pma.impl.DeviceCRUDListener" init-method="init"
           destroy-method="destroy">
         <argument ref="deviceManager"/>
+        <argument ref="pmaRegistry"/>
+    </bean>
+
+    <bean id="networkFunctionCRUDListener" class="org.broadband_forum.obbaa.pma.impl.NetworkFunctionCRUDListener" init-method="init"
+          destroy-method="destroy">
+        <argument ref="networkFunctionManager"/>
         <argument ref="pmaRegistry"/>
     </bean>
 
@@ -181,6 +213,14 @@
         <argument ref="nonCodedAdapterService"/>
         <argument ref="deviceSubsystem"/>
         <argument value="/baa/baa-dist/standardAdapters"/>
+        <argument value="/baa/stores/ipfix"/>
+        <argument ref="nonCodedConfigAlign"/>
+    </bean>
+
+    <bean id="nfStandardAdapterDeployer" class="org.broadband_forum.obbaa.adapter.StandardAdaptersDeployer" init-method="init">
+        <argument ref="nonCodedAdapterService"/>
+        <argument ref="networkFunctionSubsystem"/>
+        <argument value="/baa/baa-dist/nfStandardAdapters"/>
         <argument value="/baa/stores/ipfix"/>
         <argument ref="nonCodedConfigAlign"/>
     </bean>

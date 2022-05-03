@@ -19,6 +19,7 @@ package org.broadband_forum.obbaa.aggregator.registrant.api;
 import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
+import org.broadband_forum.obbaa.aggregator.api.NetworkFunctionConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.ProcessorCapability;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 
@@ -46,6 +47,9 @@ public interface RequestProcessorManager {
      */
     void addProcessor(String deviceType, Set<ModuleIdentifier> moduleIdentifiers,
                       DeviceConfigProcessor deviceConfigProcessor) throws DispatchException;
+
+    void addNFCProcessor(Set<ModuleIdentifier> moduleIdentifiers, NetworkFunctionConfigProcessor networkFunctionConfigProcessor)
+        throws DispatchException;
 
     /**
      * Provide a unified API to message processor(YANG library...) unregister themselves.
@@ -91,12 +95,16 @@ public interface RequestProcessorManager {
      */
     DeviceConfigProcessor getProcessor(String deviceType, String xmlns);
 
+    NetworkFunctionConfigProcessor getNFCProcessor(String xmlns);
+
     /**
      * Get all of the request processor.
      *
      * @return All request processor
      */
     Set<DeviceConfigProcessor> getAllDeviceConfigProcessors();
+
+    Set<NetworkFunctionConfigProcessor> getAllNFConfigProcessors();
 
     /**
      * Get all capabilities of the modules.

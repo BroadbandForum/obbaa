@@ -22,11 +22,20 @@ import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.SOFTWARE_IMAGE_IS_VALID;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.SOFTWARE_IMAGE_PRODUCT_CODE;
 import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.SOFWARE_IMAGE_VERSION;
+import static org.broadband_forum.obbaa.onu.ONUConstants.DEVICE_INFO;
+import static org.broadband_forum.obbaa.onu.ONUConstants.DISCOVERY_RESULT;
+import static org.broadband_forum.obbaa.onu.ONUConstants.FAILED_CONNECTIVITY;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_DESCOVERY_RESULT;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_DESCOVERY_RESULT_NS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_SERIAL_NUMBER;
+import static org.broadband_forum.obbaa.onu.ONUConstants.SOFTWARE_INFO;
+import static org.broadband_forum.obbaa.onu.ONUConstants.SUCCESSFUL;
 
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.dmyang.entities.OnuStateInfo;
 import org.broadband_forum.obbaa.dmyang.entities.SoftwareImage;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfNotification;
@@ -45,22 +54,8 @@ import org.w3c.dom.Element;
  */
 public class OnuDiscoveryResultNotification extends NetconfNotification {
 
-    private static final Logger LOGGER = Logger.getLogger(OnuDiscoveryResultNotification.class);
-    public static final String ONU_DESCOVERY_RESULT_NS = "urn:bbf:yang:bbf-voltmf-entity";
-    public static final String ONU_DESCOVERY_RESULT = "onu-discovery-result";
-    public static final String SERIAL_NUMBER = "onu-serial-number";
-    public static final String DISCOVERY_RESULT = "discovery-result";
-    public static final String SUCCESSFUL = "successful";
-    public static final String FAILED_CONNECTIVITY = "failed-connectivity";
-    public static final String DEVICE_INFO = "device-info";
-    public static final String SOFTWARE_INFO = "software-info";
-    public static final String ONU_MANAGEMENT_NS = "urn:bbf:yang:obbaa:onu-management";
-    public static final String SOFTWARE_IMAGES = "software-images";
-    public static final String SOFTWARE_IMAGE = "software-image";
-    public static final String SOFTWARE_IMAGE_ID = "id";
-
     public static final QName TYPE = QName.create(ONU_DESCOVERY_RESULT_NS, ONU_DESCOVERY_RESULT);
-
+    private static final Logger LOGGER = Logger.getLogger(OnuDiscoveryResultNotification.class);
     private final Device m_device;
     private final String m_onuState;
 
@@ -82,7 +77,7 @@ public class OnuDiscoveryResultNotification extends NetconfNotification {
 
             onuDiscoveryResultElement = document.createElementNS(ONU_DESCOVERY_RESULT_NS, ONU_DESCOVERY_RESULT);
 
-            Element serialNumber = document.createElementNS(ONU_DESCOVERY_RESULT_NS, SERIAL_NUMBER);
+            Element serialNumber = document.createElementNS(ONU_DESCOVERY_RESULT_NS, ONU_SERIAL_NUMBER);
             String serialNum = device.getDeviceManagement().getOnuConfigInfo().getExpectedSerialNumber();
             serialNumber.setTextContent(serialNum);
             onuDiscoveryResultElement.appendChild(serialNumber);
@@ -115,11 +110,13 @@ public class OnuDiscoveryResultNotification extends NetconfNotification {
         OnuStateInfo onuStateInfo = device.getDeviceManagement().getDeviceState().getOnuStateInfo();
         Set<SoftwareImage> softwareImageSet = onuStateInfo.getSoftwareImages().getSoftwareImage();
         if (softwareImageSet != null) {
-            Element softwareImagesElement = document.createElementNS(ONU_MANAGEMENT_NS, SOFTWARE_IMAGES);
+            Element softwareImagesElement = document.createElementNS(DeviceManagerNSConstants.ONU_MANAGEMENT_NS,
+                    DeviceManagerNSConstants.SOFTWARE_IMAGES);
             softwareImageSet.forEach(softwareImage -> {
-                Element softwareImageElement = document.createElementNS(ONU_MANAGEMENT_NS, SOFTWARE_IMAGE);
+                Element softwareImageElement = document.createElementNS(DeviceManagerNSConstants.ONU_MANAGEMENT_NS,
+                        DeviceManagerNSConstants.SOFTWARE_IMAGE);
                 softwareImagesElement.appendChild(softwareImageElement);
-                appendElementWithoutNS(document, softwareImageElement, SOFTWARE_IMAGE_ID, String.valueOf(softwareImage.getId()));
+                appendElementWithoutNS(document, softwareImageElement, DeviceManagerNSConstants.ID, String.valueOf(softwareImage.getId()));
                 appendElementWithoutNS(document, softwareImageElement, SOFWARE_IMAGE_VERSION,
                         String.valueOf(softwareImage.getVersion()));
                 appendElementWithoutNS(document, softwareImageElement, SOFTWARE_IMAGE_IS_COMMITTED,

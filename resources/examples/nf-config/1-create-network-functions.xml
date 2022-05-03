@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   ~ Copyright 2022 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="18">
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <baa-network-manager:network-manager xmlns:baa-network-manager="urn:bbf:yang:obbaa:network-manager">
+                <baa-network-manager:network-functions-settings>
+                    <baa-network-manager:nf-client>
+                        <baa-network-manager:enabled>true</baa-network-manager:enabled>
+                        <baa-network-manager:nf-initiate>
+                            <baa-network-manager:remote-endpoints>
+                                <!-- vomci -->
+                                <baa-network-manager:remote-endpoint >
+                                    <baa-network-manager:name>vOMCi-kfk-1</baa-network-manager:name>
+                                    <baa-network-manager:nf-type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:vomci-function-type</baa-network-manager:nf-type>
+                                    <baa-network-manager:local-endpoint-name>vOLTMF_Kafka_1</baa-network-manager:local-endpoint-name>
+                                    <baa-network-manager:kafka-agent>
+                                        <baa-network-manager:kafka-agent-parameters>
+                                            <baa-network-manager:client-id>client-id1</baa-network-manager:client-id>
+                                            <baa-network-manager:publication-parameters>
+                                                <baa-network-manager:topic>
+                                                    <baa-network-manager:name>vomci1-request</baa-network-manager:name>
+                                                    <baa-network-manager:purpose>VOMCI_REQUEST</baa-network-manager:purpose>
+                                                </baa-network-manager:topic>
+                                            </baa-network-manager:publication-parameters>
+                                            <baa-network-manager:consumption-parameters>
+                                                <baa-network-manager:group-id>group-id</baa-network-manager:group-id>
+                                                <baa-network-manager:topic>
+                                                    <baa-network-manager:name>vomci1-response</baa-network-manager:name>
+                                                    <baa-network-manager:purpose>VOMCI_RESPONSE</baa-network-manager:purpose>
+                                                </baa-network-manager:topic>
+                                                <baa-network-manager:topic>
+                                                    <baa-network-manager:name>vomci1-notification</baa-network-manager:name>
+                                                    <baa-network-manager:purpose>VOMCI_NOTIFICATION</baa-network-manager:purpose>
+                                                </baa-network-manager:topic>
+                                            </baa-network-manager:consumption-parameters>
+                                        </baa-network-manager:kafka-agent-parameters>
+                                    </baa-network-manager:kafka-agent>
+                                    <baa-network-manager:access-point>
+                                        <baa-network-manager:name>vomci1</baa-network-manager:name>
+                                        <baa-network-manager:kafka-agent>
+                                            <baa-network-manager:kafka-agent-transport-parameters>
+                                                <baa-network-manager:remote-address>kafka-host</baa-network-manager:remote-address>
+                                            </baa-network-manager:kafka-agent-transport-parameters>
+                                        </baa-network-manager:kafka-agent>
+                                    </baa-network-manager:access-point>
+                                </baa-network-manager:remote-endpoint>
+
+                                <!-- proxy -->
+                                <baa-network-manager:remote-endpoint>
+                                    <baa-network-manager:name>proxy-kfk-1</baa-network-manager:name>
+                                    <baa-network-manager:nf-type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:vomci-proxy-type</baa-network-manager:nf-type>
+                                    <baa-network-manager:local-endpoint-name>vOLTMF_Kafka_2</baa-network-manager:local-endpoint-name>
+                                    <baa-network-manager:kafka-agent>
+                                        <baa-network-manager:kafka-agent-parameters>
+                                            <baa-network-manager:client-id>client-id2</baa-network-manager:client-id>
+                                            <baa-network-manager:publication-parameters>
+                                                <baa-network-manager:topic>
+                                                    <baa-network-manager:name>vomci-proxy-request</baa-network-manager:name>
+                                                    <baa-network-manager:purpose>VOMCI_REQUEST</baa-network-manager:purpose>
+                                                </baa-network-manager:topic>
+                                            </baa-network-manager:publication-parameters>
+                                            <baa-network-manager:consumption-parameters>
+                                                <baa-network-manager:group-id>group-id</baa-network-manager:group-id>
+                                                <baa-network-manager:topic>
+                                                    <baa-network-manager:name>vomci-proxy-response</baa-network-manager:name>
+                                                    <baa-network-manager:purpose>VOMCI_RESPONSE</baa-network-manager:purpose>
+                                                </baa-network-manager:topic>
+                                                <baa-network-manager:topic>
+                                                    <baa-network-manager:name>vomci-proxy-notification</baa-network-manager:name>
+                                                    <baa-network-manager:purpose>VOMCI_NOTIFICATION</baa-network-manager:purpose>
+                                                </baa-network-manager:topic>
+                                            </baa-network-manager:consumption-parameters>
+                                        </baa-network-manager:kafka-agent-parameters>
+                                    </baa-network-manager:kafka-agent>
+                                    <baa-network-manager:access-point>
+                                        <baa-network-manager:name>vomci-proxy</baa-network-manager:name>
+                                        <baa-network-manager:kafka-agent>
+                                            <baa-network-manager:kafka-agent-transport-parameters>
+                                                <baa-network-manager:remote-address>kafka-host</baa-network-manager:remote-address>
+                                            </baa-network-manager:kafka-agent-transport-parameters>
+                                        </baa-network-manager:kafka-agent>
+                                    </baa-network-manager:access-point>
+                                </baa-network-manager:remote-endpoint>
+                            </baa-network-manager:remote-endpoints>
+                        </baa-network-manager:nf-initiate>
+                    </baa-network-manager:nf-client>
+                </baa-network-manager:network-functions-settings>
+
+                <!-- network functions -->
+                <baa-network-manager:network-functions>
+                    <baa-network-manager:network-function>
+                        <baa-network-manager:name>bbf-vomci</baa-network-manager:name>
+                        <baa-network-manager:type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:vomci-function-type</baa-network-manager:type>
+                        <!-- must match the local endpoint name configured locally in the vOMCI function -->
+                        <baa-network-manager:remote-endpoint-name>vOMCi-kfk-1</baa-network-manager:remote-endpoint-name>
+                    </baa-network-manager:network-function>
+                    <baa-network-manager:network-function>
+                        <baa-network-manager:name>bbf-vproxy</baa-network-manager:name>
+                        <baa-network-manager:type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:vomci-proxy-type</baa-network-manager:type>
+                        <!-- must match the local endpoint name configured locally in the Proxy -->
+                        <baa-network-manager:remote-endpoint-name>proxy-kfk-1</baa-network-manager:remote-endpoint-name>
+                    </baa-network-manager:network-function>
+                </baa-network-manager:network-functions>
+
+            </baa-network-manager:network-manager>
+        </config>
+    </edit-config>
+</rpc>

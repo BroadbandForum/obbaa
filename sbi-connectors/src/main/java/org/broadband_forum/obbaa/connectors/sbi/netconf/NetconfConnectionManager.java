@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
-import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResource;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
@@ -37,13 +37,13 @@ public interface NetconfConnectionManager {
     /**
      * Executes the given Netconf request on the specified device and returns a Future object to get the response.
      *
-     * @param device - Target device.
+     * @param resource - Target device.
      * @param request    - Request to be executed.
      * @return - Future object to retrieve the result of execution.
      * @throws IllegalStateException - If the device is not already connected.
      * @throws ExecutionException    - If there are exceptions during execution.
      */
-    Future<NetConfResponse> executeNetconf(Device device, AbstractNetconfRequest request)
+    Future<NetConfResponse> executeNetconf(PmaResource resource, AbstractNetconfRequest request)
             throws IllegalStateException, ExecutionException;
 
     /**
@@ -61,31 +61,31 @@ public interface NetconfConnectionManager {
     /**
      * Executes the given Netconf template on the specified device.
      *
-     * @param device      - MetaData of the device.
+     * @param resource      - MetaData of the device.
      * @param netconfTemplate - Template to be executed with session on the device,
      * @param <RT>            - Type of the result.
      * @return - Result of execution.
      * @throws IllegalStateException - If the device is not already connected.
      * @throws ExecutionException    - If there are exceptions during execution.
      */
-    <RT> RT executeWithSession(Device device, NetconfTemplate<RT> netconfTemplate)
+    <RT> RT executeWithSession(PmaResource resource, NetconfTemplate<RT> netconfTemplate)
             throws IllegalStateException, ExecutionException;
 
     /**
      * Gives the current connection state of the device.
      *
-     * @param device - MetaData of the device.
+     * @param resource - MetaData of the device.
      * @return - true if the device is connected, false otherwise.
      */
-    boolean isConnected(Device device);
+    boolean isConnected(PmaResource resource);
 
     /**
      * Returns the details of the existing connection to the device.
      *
-     * @param device - Key of the device.
+     * @param resource - Key of the device.
      * @return - Connection state details.
      */
-    ConnectionState getConnectionState(Device device);
+    ConnectionState getConnectionState(PmaResource resource);
 
     /**
      * Get list of "new devices" that have called home, but have not been managed in the data store.
@@ -105,8 +105,13 @@ public interface NetconfConnectionManager {
 
     void unregisterDeviceConnectionListener(ConnectionListener connectionListener);
 
-    void addMediatedDeviceNetconfSession(Device device, NetconfClientSession deviceSession);
+    void addMediatedDeviceNetconfSession(String deviceName, NetconfClientSession deviceSession);
 
-    NetconfClientSession getMediatedDeviceSession(Device device);
+    void addMediatedNetworkFunctionNetconfSession(String networkFunctionName,
+                                                  NetconfClientSession networkFunctionSession);
+
+    NetconfClientSession getMediatedDeviceSession(String deviceName);
+
+    NetconfClientSession getMediatedNetworkFunctionSession(String networkFunctionName);
 
 }

@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.pool2.PooledObject;
 import org.apache.log4j.Logger;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;
 
@@ -47,8 +48,8 @@ public class SwitchableFactory extends PmaSessionFactory {
     }
 
     @Override
-    public PmaSession create(String key) throws Exception {
-        return m_currentFactory.create(key);
+    public PmaSession create(PmaResourceId resourceId) throws Exception {
+        return m_currentFactory.create(resourceId);
     }
 
     @Override
@@ -57,12 +58,17 @@ public class SwitchableFactory extends PmaSessionFactory {
     }
 
     @Override
-    public boolean validateObject(String key, PooledObject<PmaSession> session) {
-        return m_currentFactory.validateObject(key, session);
+    public boolean validateObject(PmaResourceId resourceId, PooledObject<PmaSession> session) {
+        return m_currentFactory.validateObject(resourceId, session);
     }
 
     @Override
     public void deviceDeleted(String deviceName) {
         m_currentFactory.deviceDeleted(deviceName);
+    }
+
+    @Override
+    public void networkFunctionDeleted(String networkFunctionName) {
+        m_currentFactory.networkFunctionDeleted(networkFunctionName);
     }
 }

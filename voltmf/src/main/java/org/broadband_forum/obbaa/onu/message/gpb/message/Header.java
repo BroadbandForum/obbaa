@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.Header}
  */
-public final class Header extends
+public  final class Header extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.Header)
     HeaderOrBuilder {
@@ -136,6 +136,14 @@ private static final long serialVersionUID = 0L;
      * <code>VOLTMF = 3;</code>
      */
     VOLTMF(3),
+    /**
+     * <pre>
+     *Category of vOMCI function instances
+     * </pre>
+     *
+     * <code>VOMCI_FUNCTION_TYPE = 4;</code>
+     */
+    VOMCI_FUNCTION_TYPE(4),
     UNRECOGNIZED(-1),
     ;
 
@@ -155,6 +163,14 @@ private static final long serialVersionUID = 0L;
      * <code>VOLTMF = 3;</code>
      */
     public static final int VOLTMF_VALUE = 3;
+    /**
+     * <pre>
+     *Category of vOMCI function instances
+     * </pre>
+     *
+     * <code>VOMCI_FUNCTION_TYPE = 4;</code>
+     */
+    public static final int VOMCI_FUNCTION_TYPE_VALUE = 4;
 
 
     public final int getNumber() {
@@ -185,6 +201,7 @@ private static final long serialVersionUID = 0L;
         case 1: return VOMCI_FUNCTION;
         case 2: return VOMCI_PROXY;
         case 3: return VOLTMF;
+        case 4: return VOMCI_FUNCTION_TYPE;
         default: return null;
       }
     }
@@ -203,10 +220,6 @@ private static final long serialVersionUID = 0L;
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalStateException(
-            "Can't get the descriptor of an unrecognized enum value.");
-      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -251,7 +264,6 @@ private static final long serialVersionUID = 0L;
    * <code>string msg_id = 1;</code>
    * @return The msgId.
    */
-  @java.lang.Override
   public java.lang.String getMsgId() {
     java.lang.Object ref = msgId_;
     if (ref instanceof java.lang.String) {
@@ -272,7 +284,6 @@ private static final long serialVersionUID = 0L;
    * <code>string msg_id = 1;</code>
    * @return The bytes for msgId.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getMsgIdBytes() {
     java.lang.Object ref = msgId_;
@@ -298,7 +309,6 @@ private static final long serialVersionUID = 0L;
    * <code>string sender_name = 2;</code>
    * @return The senderName.
    */
-  @java.lang.Override
   public java.lang.String getSenderName() {
     java.lang.Object ref = senderName_;
     if (ref instanceof java.lang.String) {
@@ -320,7 +330,6 @@ private static final long serialVersionUID = 0L;
    * <code>string sender_name = 2;</code>
    * @return The bytes for senderName.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getSenderNameBytes() {
     java.lang.Object ref = senderName_;
@@ -345,7 +354,6 @@ private static final long serialVersionUID = 0L;
    * <code>string recipient_name = 3;</code>
    * @return The recipientName.
    */
-  @java.lang.Override
   public java.lang.String getRecipientName() {
     java.lang.Object ref = recipientName_;
     if (ref instanceof java.lang.String) {
@@ -366,7 +374,6 @@ private static final long serialVersionUID = 0L;
    * <code>string recipient_name = 3;</code>
    * @return The bytes for recipientName.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getRecipientNameBytes() {
     java.lang.Object ref = recipientName_;
@@ -391,7 +398,7 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Header.OBJECT_TYPE object_type = 4;</code>
    * @return The enum numeric value on the wire for objectType.
    */
-  @java.lang.Override public int getObjectTypeValue() {
+  public int getObjectTypeValue() {
     return objectType_;
   }
   /**
@@ -402,7 +409,7 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Header.OBJECT_TYPE object_type = 4;</code>
    * @return The objectType.
    */
-  @java.lang.Override public org.broadband_forum.obbaa.onu.message.gpb.message.Header.OBJECT_TYPE getObjectType() {
+  public org.broadband_forum.obbaa.onu.message.gpb.message.Header.OBJECT_TYPE getObjectType() {
     @SuppressWarnings("deprecation")
     org.broadband_forum.obbaa.onu.message.gpb.message.Header.OBJECT_TYPE result = org.broadband_forum.obbaa.onu.message.gpb.message.Header.OBJECT_TYPE.valueOf(objectType_);
     return result == null ? org.broadband_forum.obbaa.onu.message.gpb.message.Header.OBJECT_TYPE.UNRECOGNIZED : result;
@@ -418,7 +425,6 @@ private static final long serialVersionUID = 0L;
    * <code>string object_name = 5;</code>
    * @return The objectName.
    */
-  @java.lang.Override
   public java.lang.String getObjectName() {
     java.lang.Object ref = objectName_;
     if (ref instanceof java.lang.String) {
@@ -439,7 +445,6 @@ private static final long serialVersionUID = 0L;
    * <code>string object_name = 5;</code>
    * @return The bytes for objectName.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getObjectNameBytes() {
     java.lang.Object ref = objectName_;
@@ -1125,7 +1130,7 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Header.OBJECT_TYPE object_type = 4;</code>
      * @return The enum numeric value on the wire for objectType.
      */
-    @java.lang.Override public int getObjectTypeValue() {
+    public int getObjectTypeValue() {
       return objectType_;
     }
     /**
@@ -1138,7 +1143,6 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setObjectTypeValue(int value) {
-      
       objectType_ = value;
       onChanged();
       return this;
@@ -1151,7 +1155,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Header.OBJECT_TYPE object_type = 4;</code>
      * @return The objectType.
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.Header.OBJECT_TYPE getObjectType() {
       @SuppressWarnings("deprecation")
       org.broadband_forum.obbaa.onu.message.gpb.message.Header.OBJECT_TYPE result = org.broadband_forum.obbaa.onu.message.gpb.message.Header.OBJECT_TYPE.valueOf(objectType_);

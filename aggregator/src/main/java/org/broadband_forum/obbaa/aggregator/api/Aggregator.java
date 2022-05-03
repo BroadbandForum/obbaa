@@ -84,6 +84,9 @@ public interface Aggregator {
      */
     void addProcessor(NotificationProcessor notificationProcessor) throws DispatchException;
 
+    void addNFCProcessor(Set<ModuleIdentifier> moduleIdentifiers, NetworkFunctionConfigProcessor networkFunctionConfigProcessor)
+            throws DispatchException;
+
     /**
      * Provide a unified API to message processor(YANG library...) unregister themselves.
      *

@@ -22,6 +22,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 import org.broadband_forum.obbaa.onu.exception.MessageFormatterException;
 
 /**
@@ -36,6 +37,20 @@ public interface MessageFormatter<T> {
                                AdapterManager adapterManager, ModelNodeDataStoreManager modelNodeDsm,
                                SchemaRegistry schemaRegistry, NetworkWideTag networkWideTag)
             throws NetconfMessageBuilderException, MessageFormatterException;
+
+    T getFormattedRequestForNF(AbstractNetconfRequest request,
+                                        String operationType,
+                                        NetworkFunction networkFunction,
+                                        ModelNodeDataStoreManager modelNodeDsm,
+                                        AdapterManager adapterManager)
+            throws NetconfMessageBuilderException, MessageFormatterException;
+
+    T getFormattedHelloRequest(String msgId, String networkFunctionName,
+                               ObjectType type, String localEndpointName) throws MessageFormatterException;
+
+    boolean isHelloResponse(Object responseObject) throws MessageFormatterException;
+
+    HelloResponseData getHelloResponseData(Object responseObject) throws MessageFormatterException;
 
     ResponseData getResponseData(Object responseObject) throws MessageFormatterException;
 }

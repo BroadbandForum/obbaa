@@ -6,7 +6,7 @@
                 <set-onu-communication>
                     <onu-communication-available>true</onu-communication-available>
                     <olt-remote-endpoint-name>OLT1</olt-remote-endpoint-name>
-                    <vomci-func-remote-endpoint-name>vOMCi-grpc-1</vomci-func-remote-endpoint-name>
+                    <vomci-function-remote-endpoint-name>vOMCi-grpc-1</vomci-function-remote-endpoint-name>
                     <onu-attachment-point>
                         <olt-name>OLT1</olt-name>
                         <channel-termination-name>CT_1</channel-termination-name>

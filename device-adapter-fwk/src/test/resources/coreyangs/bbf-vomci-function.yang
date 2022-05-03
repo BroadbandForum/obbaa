@@ -3,8 +3,8 @@ module bbf-vomci-function {
   namespace "urn:bbf:yang:bbf-vomci-function";
   prefix bbf-vomci-func;
 
-  import ietf-yang-types {
-    prefix yang;
+  import bbf-yang-types {
+    prefix bbf-yang;
   }
   
   import bbf-vomci-types {
@@ -13,10 +13,6 @@ module bbf-vomci-function {
 
   import bbf-network-function-client {
     prefix bbf-nfc;
-  }
-  
-  import bbf-network-function-server {
-    prefix bbf-nfs;
   }
   
   import bbf-omci-message-retransmission {
@@ -41,8 +37,6 @@ module bbf-vomci-function {
      Editor:      Tim Carey, Nokia
 
      Editor:      Dechao Zhang, China Mobile
-
-     PS Leader:   Yves Hertoghs, VMWare
 
      WA Director: George Dobrowski, Morris Creek Consulting
 
@@ -94,13 +88,13 @@ module bbf-vomci-function {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2021-02-07 {
+  revision 2021-08-19 {
     description
       "Initial revision.";
     reference
       "TR-451: Section 5.2 vOMCI Function Description
-               Section 5.5 vOLTMF to vOMCI function Interface
-               Section 5.6 vOMCI function to OLT Interface";
+               Section 5.7 vOLTMF to vOMCI function Interface
+               Section 5.8 vOMCI function to OLT Interface";
   }
 
   // Features
@@ -112,7 +106,7 @@ module bbf-vomci-function {
 
   feature nf-server-supported {
     description
-      "Indicates that server connectivity for network function's
+      "Indicates that server connectivity for network function's 
        endpoints are supported.";
   }
 
@@ -121,16 +115,17 @@ module bbf-vomci-function {
     description
       "The notification that the vOMCI function has completed an
        alignment on an ONU.";
-    leaf event-time {
-      type yang:date-and-time;
-      description
-        "The date and time of the notification event";
-    }
     leaf onu-name {
       type bbf-vomcit:onu-name;
       description
-        "The name of the ONU that is the target of the
-         alignment result.";
+        "The name of the ONU that is the target of the alignment 
+         result.";
+    }
+    leaf datastore-tag {
+      type string;
+      description
+        "The datastore tag associated with the ONU's configuration
+         data kept by the vOMCI function.";
     }
     leaf alignment-status {
       type bbf-vomcit:onu-alignment-status;
@@ -141,18 +136,13 @@ module bbf-vomci-function {
   
   notification onu-alarm-misalignment {
     description
-      "The vOMCI function a gap in the OMCI alarm 
-        message’s sequence number.";
-    leaf event-time {
-      type yang:date-and-time;
-      description
-        "The date and time of the notification event";
-    }
+      "The vOMCI function dectected a gap in the OMCI alarm 
+        message's sequence number.";
     leaf onu-name {
       type bbf-vomcit:onu-name;
       description
-        "The name of the ONU that is the target of the
-         alignment result.";
+        "The name of the ONU that is the target of the alignment 
+         result.";
     }
     leaf detected-sequence-number {
       type bbf-vomcit:omci-sequence-number; 
@@ -166,33 +156,22 @@ module bbf-vomci-function {
       "The vOMC Message function cannot translate an 
        OMCI Alarm or AVC message into a specific YANG 
        notification.";
-    leaf event-time {
-      type yang:date-and-time;
-      description
-        "The date and time of the notification event";
-    }
     leaf onu-name {
       type bbf-vomcit:onu-name;
       description
-        "The name of the ONU that is the target of the
-         alignment result.";
+        "The name of the ONU.";
     }
     anydata untranslated-data {
       description
-        "The data received by the vOMCI function that 
-         could not be translated.";
+        "The data received by the vOMCI function that could not be 
+         translated.";
     }
   }
   
   notification unsupported-version-vomci-function-message {
     description
-      "The vOMCI function does not support the version of 
-       the message sent by the vOLTMF.";
-    leaf event-time {
-      type yang:date-and-time;
-      description
-        "The date and time of the notification event";
-    }
+      "The vOMCI function does not support the version of the message 
+       sent by the vOLTMF.";
     leaf request-payload-id {
       type string;
       description
@@ -206,28 +185,25 @@ module bbf-vomci-function {
     leaf-list supported-message-versions {
       type string;
       description
-        "The version(s) that are supported by the 
-         vOMCI function.";
-    }
-  }
-
-  // RPCs
-  rpc create-onu {
-    description
-      "Provides the ability to create an ONU within the 
-       vOMCI function.";
-    input {
-      leaf name {
-        type bbf-vomcit:onu-name;
-        description
-          "The unique name of the ONU.";
-      }
+        "The version(s) that are supported by the vOMCI function.";
     }
   }
 
   container managed-onus {
     description
       "The ONUs that are being managed by this entity.";
+    action create-onu {
+      description
+        "Provides the ability to create an ONU within the vOMCI 
+         function.";
+      input {
+        leaf name {
+          type bbf-vomcit:onu-name;
+          description
+            "The unique name of the ONU.";
+        }
+      }
+    }
     list managed-onu {
       key "name";
       config false;
@@ -240,8 +216,8 @@ module bbf-vomci-function {
       }
       action delete-onu {
         description
-          "Provides the ability to delete an ONU within the 
-           vOMCI function.";
+          "Provides the ability to delete an ONU within the vOMCI 
+           function.";
       }
       action set-onu-communication {
         description
@@ -252,49 +228,48 @@ module bbf-vomci-function {
           leaf onu-communication-available {
             type boolean;
             description
-              "When true, the ONU is able to be communicated
-               with across the ONU management chain of entities.";
+              "When true, the ONU is able to be communicated with 
+               across the ONU management chain of entities.";
           }
           leaf olt-remote-endpoint-name {
-            type string;
+            type bbf-yang:string-ascii64;
             description
-              "The remote endpoint name to use for transmitting
-               vOMCI messages toward the OLT.";
+              "The remote endpoint name to use for transmitting vOMCI 
+               messages toward the OLT.";
           }
           leaf voltmf-remote-endpoint-name {
-            type string;
+            type bbf-yang:string-ascii64;
             description
-              "The remote endpoint name to use for transmitting
-               YANG messages toward the vOLTMF.";
+              "The remote endpoint name to use for transmitting YANG 
+               messages toward the vOLTMF.";
           }
           uses bbf-vomci-ent:vomci-onu-header;
         }
       }
-  
       uses bbf-vomci-ent:vomci-onu-header;
       leaf onu-communication-available {
         type boolean;
         description
-          "When true, the ONU is able to be communicated
-           with across the ONU management chain of entities.";
+          "When true, the ONU is able to be communicated with across 
+           the ONU management chain of entities.";
       }
       leaf olt-remote-endpoint-name {
-        type string;
+        type bbf-yang:string-ascii64;
         description
-          "The name remote endpoint to use for transmitting
-           vOMCI messages toward the OLT.";
+          "The name remote endpoint to use for transmitting vOMCI 
+           messages toward the OLT.";
       }
       
-      container vomci-message-data {
+      container statistics {
         description
-          "vOMCI message data statistics.";
-        uses bbf-vomci-ent:vomci-message-data;
-      }
-      container omci-message-retransmission-data {
-        description
-          "The statistics for the OMCI message retransmission 
-           capability.";
-        uses bbf-omci-mr:omci-msg-retrans-data;
+          "vOMCI message and retransmission statistics.";
+        action reset {
+          description
+            "Provides the capability to reset the counters of the 
+             statistics.";
+        }
+        uses bbf-vomci-ent:vomci-message-statistics;
+        uses bbf-omci-mr:omci-msg-retrans-statistics;
       }
     }
   }
@@ -309,25 +284,17 @@ module bbf-vomci-function {
       units "seconds";
       default "900";
       description
-        "The maximum number of seconds that a
-         vOMCI message is transmitted and has not been responded.
-         The timeout used to cleanup stale vOMCI messages
-         The timeout is only applicable when OMCI message
-         retransmission capability is not currently enabled
-         for this entity.";
+        "The maximum number of seconds that a vOMCI message is 
+         transmitted and has not been responded. The timeout used to 
+         cleanup stale vOMCI messages. The timeout is only applicable 
+         when OMCI message retransmission capability is not currently 
+         enabled for this entity.";
     }
   
     container omci-message-retransmission {
       if-feature "bbf-omci-mr:omci-msg-retrans-supported";
       description
         "OMCI message retransmission capability.";
-      leaf enabled {
-        type boolean;
-        default "true";
-        description
-          "Administratively enable the use of the OMCI message
-           retransmission capability for the network function.";
-      }
       uses bbf-omci-mr:omci-msg-retrans-grouping;
     } //OMCI message retransmission capability
 
@@ -344,9 +311,8 @@ module bbf-vomci-function {
           type boolean;
           default "true";
           description
-            "Administratively enable the use of the 
-             client connectivity capability to the 
-             network function.";
+            "Administratively enable the use of the client 
+             connectivity capability to the network function.";
         }
         uses bbf-nfc:nf-endpoint-grouping;
       } //nf-client
@@ -359,32 +325,29 @@ module bbf-vomci-function {
           type boolean;
           default "true";
           description
-            "Administratively enable the use of the 
-             server connectivity capability for connecting 
-             network function.";
+            "Administratively enable the use of the server 
+             connectivity capability for connecting network 
+             function.";
         }
-        uses bbf-nfs:nf-server-grouping;
       } //nf-server
     }
-  }
-  
-  container vomci-state {
-    config false;
-    description
-      "The state data associated with the vOMCI function.";
-       
-    container omci-message-retransmission-data {
+    container statistics {
+      config false;
       description
-        "The statistics for the OMCI message retransmission 
-         capability.";
-      uses bbf-omci-mr:omci-msg-retrans-data;
+        "The OMCI function statistics.";
+      action reset {
+        description
+          "Provides the capability to reset the counters of the 
+           statistics.";
+      }
+      uses bbf-omci-mr:omci-msg-retrans-statistics;
+      container voltmf-statistics {
+        config false;
+        description
+          "Counters for the vOLTMF messages sent between the vOLTMF 
+           and the vOMCI function.";
+        uses bbf-voltmf-msg-mon:voltmf-msg-statistics-grouping;
+      }
     }
-    
-    container voltmf-message-data {
-      description
-        "Counters for the vOLTMF messages
-         sent between the vOLTMF and vOMCI function.";
-      uses bbf-voltmf-msg-mon:voltmf-msg-data-grouping;
-    } //voltmf-message data
   }
 }

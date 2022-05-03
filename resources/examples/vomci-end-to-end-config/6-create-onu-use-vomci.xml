@@ -1,0 +1,102 @@
+<!--
+   ~ Copyright 2022 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="121">
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" xc:operation="create">
+                        <name>ont1</name>
+                        <device-management>
+                            <type>ONU</type>
+                            <interface-version>1.1</interface-version>
+                            <vendor>BBF</vendor>
+                            <model>standard</model>
+                            <device-connection>
+                                <connection-model>mediated-session</connection-model>
+                                <mediated-protocol>vomci</mediated-protocol>
+                            </device-connection>
+                            <onu-config-info xmlns="urn:bbf:yang:obbaa:onu-management" xmlns:onu="urn:bbf:yang:obbaa:onu-management">
+                                <expected-serial-number>ABCD12345678</expected-serial-number>
+                                <planned-onu-management-mode xmlns:baa-xpon-onu-types="urn:bbf:yang:obbaa:xpon-onu-types">baa-xpon-onu-types:use-vomci</planned-onu-management-mode>
+                                <expected-attachment-points>
+                                    <list-type>allow-any</list-type>
+                                    <expected-attachment-point>
+                                        <name>OLT1.CPart_1</name>
+                                        <olt-name>OLT1</olt-name>
+                                        <channel-partition-name>CG_1.CPart_1</channel-partition-name>
+                                        <!--planned-onu-management-mode-in-this-olt xmlns:baa-xpon-onu-types="urn:bbf:yang:obbaa:xpon-onu-types">baa-xpon-onu-types:use-vomci</planned-onu-management-mode-in-this-olt-->
+                                    </expected-attachment-point>
+                                    <expected-attachment-point>
+                                        <name>OLT1.CPart_2</name>
+                                        <olt-name>OLT1</olt-name>
+                                        <channel-partition-name>CG_1.CPart_2</channel-partition-name>
+                                        <!--planned-onu-management-mode-in-this-olt xmlns:baa-xpon-onu-types="urn:bbf:yang:obbaa:xpon-onu-types">baa-xpon-onu-types:use-vomci</planned-onu-management-mode-in-this-olt-->
+                                    </expected-attachment-point>
+                                </expected-attachment-points>
+                                <xpon-technology xmlns:bbf-xpon-types="urn:bbf:yang:bbf-xpon-types">bbf-xpon-types:gpon</xpon-technology>
+                                <vomci-onu-management>
+                                    <onu-management-chain-selection>configured</onu-management-chain-selection>
+                                    <vomci-function>bbf-vomci</vomci-function>
+                                    <onu-management-chain>
+                                        <nf-type>vomci-function</nf-type>
+                                        <nf-name>bbf-vomci</nf-name>
+                                    </onu-management-chain>
+                                    <onu-management-chain>
+                                        <nf-type>onu-management-proxy</nf-type>
+                                        <nf-name>bbf-vproxy</nf-name>
+                                    </onu-management-chain>
+                                    <onu-management-chain>
+                                        <nf-type>olt</nf-type>
+                                        <nf-name>OLT1</nf-name>
+                                    </onu-management-chain>
+                                    <network-function-links>
+                                        <network-function-link>
+                                            <name>vOMCI-proxy</name>
+                                            <termination-point-a>
+                                                <function-name>bbf-vomci</function-name>
+                                                <local-endpoint-name>vOMCi-grpc-1</local-endpoint-name>
+                                            </termination-point-a>
+                                            <termination-point-b>
+                                                <function-name>bbf-vproxy</function-name>
+                                                <local-endpoint-name>proxy-grpc-1</local-endpoint-name>
+                                            </termination-point-b>
+                                        </network-function-link>
+                                        <network-function-link>
+                                            <name>proxy-OLT</name>
+                                            <termination-point-a>
+                                                <function-name>bbf-vproxy</function-name>
+                                                <local-endpoint-name>proxy-grpc-2</local-endpoint-name>
+                                            </termination-point-a>
+                                            <termination-point-b>
+                                                <function-name>OLT1</function-name>
+                                                <local-endpoint-name>olt-grpc-2</local-endpoint-name>
+                                            </termination-point-b>
+                                        </network-function-link>
+                                    </network-function-links>
+                                </vomci-onu-management>
+                            </onu-config-info>
+                        </device-management>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </config>
+    </edit-config>
+</rpc>

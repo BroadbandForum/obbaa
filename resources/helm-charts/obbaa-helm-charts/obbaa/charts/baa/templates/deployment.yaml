@@ -49,6 +49,8 @@ spec:
               value: password
             - name: PMA_SESSION_FACTORY_TYPE
               value: REGULAR
+            - name: VOLTMF_NAME
+              value: vOLTMF
 #          livenessProbe:
 #            httpGet:
 #              path: /

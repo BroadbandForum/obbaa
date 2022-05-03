@@ -27,6 +27,7 @@ import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
+import org.broadband_forum.obbaa.aggregator.api.NetworkFunctionConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc.RpcOperationType;
 import org.broadband_forum.obbaa.aggregator.jaxb.pma.api.DeployAdapterRpc;
@@ -38,13 +39,14 @@ import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * PMA Adapter.
  */
-public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor {
+public class PmaAdapter implements DeviceConfigProcessor, NetworkFunctionConfigProcessor, GlobalRequestProcessor {
 
     private static final String DEVICE_DPU = "DPU";
     private static final Logger LOGGER = LoggerFactory.getLogger(PmaAdapter.class);
@@ -73,6 +75,7 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
     public void init() {
         registerGlobalProcessors();
         registerDeviceConfigProcessor();
+        registerNetworkFunctionConfigProcessor();
     }
 
     /**
@@ -135,6 +138,18 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
         return moduleIdentifiers;
     }
 
+    private Set<ModuleIdentifier> buildPmaNetworkFunctionConfigModules() {
+        Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
+
+        //TODO OBBAA-366 check namespace strings
+        ModuleIdentifier moduleIdentifier = NetconfMessageUtil.buildModuleIdentifier(
+                PmaDeviceConfigRpc.MODULE_NAME,PmaDeviceConfigRpc.NAMESPACE,
+                PmaDeviceConfigRpc.REVISION);
+        moduleIdentifiers.add(moduleIdentifier);
+
+        return moduleIdentifiers;
+    }
+
     /**
      * Register device config processor which functions supported by PMA.
      */
@@ -148,6 +163,16 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
         }
     }
 
+    private void registerNetworkFunctionConfigProcessor() {
+        try {
+            Set<ModuleIdentifier> moduleIdentifiers = new HashSet<>();
+            moduleIdentifiers.addAll(buildPmaNetworkFunctionConfigModules());
+            getAggregator().addNFCProcessor(moduleIdentifiers, this);
+        } catch (DispatchException ex) {
+            LOGGER.error(ex.getMessage());
+        }
+    }
+
     @Override
     public String processRequest(String deviceName, String netconfRequest) throws DispatchException {
         try {
@@ -155,7 +180,8 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
             if (netconfRpcMessage.getOnlyOneTopXmlns().equals(PmaDeviceConfigRpc.NAMESPACE)) {
                 return processPmaDeviceConfigRequest(deviceName, netconfRpcMessage);
             }
-            Map<NetConfResponse, List<Notification>> netConfResponseListMap = getPmaRegistry().executeNC(deviceName,
+            PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,deviceName);
+            Map<NetConfResponse, List<Notification>> netConfResponseListMap = getPmaRegistry().executeNC(resourceId,
                     netconfRequest);
             Map.Entry<NetConfResponse, List<Notification>> entry = netConfResponseListMap.entrySet().iterator().next();
             List<Notification> notificationList = entry.getValue();
@@ -178,6 +204,42 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
         }
 
         throw DispatchException.buildNotSupport();
+    }
+
+    @Override
+    public String processRequest(PmaResourceId networkFunctionResource, String netconfRequest) throws DispatchException {
+        try {
+            //assert that the resource is, in fact, a network function
+            if (networkFunctionResource.getResourceType() != PmaResourceId.Type.NETWORK_FUNCTION) {
+                throw new DispatchException("");
+            }
+            NetconfRpcMessage netconfRpcMessage = NetconfRpcMessage.getInstance(netconfRequest);
+            if (netconfRpcMessage.getOnlyOneTopXmlns().equals(PmaDeviceConfigRpc.NAMESPACE)) {
+                return processPmaNetworkFunctionConfigRequest(networkFunctionResource.getResourceName(), netconfRpcMessage);
+            }
+
+            Map.Entry<NetConfResponse, List<Notification>> entry = getPmaRegistry().executeNC(networkFunctionResource,
+                    netconfRequest).entrySet().iterator().next();
+            List<Notification> notificationList = entry.getValue();
+            if (notificationList != null && !notificationList.isEmpty()) {
+                for (Notification notification : notificationList) {
+                    m_aggregator.publishNotification(networkFunctionResource.getResourceName(),notification);
+                }
+            }
+            return entry.getKey().responseToString();
+        }
+        catch (Exception ex) {
+            throw new DispatchException(ex);
+        }
+    }
+
+    private String processPmaNetworkFunctionConfigRequest(String networkFunctionName, NetconfRpcMessage netconfRpcMessage)
+            throws DispatchException {
+        PmaDeviceConfigRpc pmaDeviceConfigRpc = PmaDeviceConfigRpc.getInstance(netconfRpcMessage.getOriginalMessage());
+        switch (netconfRpcMessage.getRpc().getRpcOperationType()) {
+            default:
+                throw DispatchException.buildNotSupport();
+        }
     }
 
     private String processDeployOrUndeployAdapterRequest(NetconfRpcMessage netconfRpcMessage) throws DispatchException {
@@ -260,18 +322,20 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
      */
     private String processPmaDeviceConfigAction(String deviceName, PmaDeviceConfigRpc pmaDeviceConfigRpc)
             throws DispatchException {
+        PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,deviceName);
         try {
             PmaDeviceConfigAlign align = pmaDeviceConfigRpc.getPmaDeviceConfig().getPmaDeviceConfigAlign();
             if ((align != null) && (align.getForce() != null)) {
-                getPmaRegistry().forceAlign(deviceName);
+                getPmaRegistry().forceAlign(resourceId);
             } else {
-                getPmaRegistry().align(deviceName);
+                getPmaRegistry().align(resourceId);
             }
             return pmaDeviceConfigRpc.buildRpcReplyOk();
         } catch (ExecutionException ex) {
             throw new DispatchException(ex);
         }
     }
+
 
     /**
      * Get namespace of the request.
@@ -301,5 +365,4 @@ public class PmaAdapter implements DeviceConfigProcessor, GlobalRequestProcessor
     public PmaRegistry getPmaRegistry() {
         return m_pmaRegistry;
     }
-
 }

@@ -14,8 +14,6 @@ module bbf-kafka-agent {
 
      Editor:      Dechao Zhang, China Mobile
 
-     PS Leader:   Yves Hertoghs, VMWare
-
      WA Director: George Dobrowski, Morris Creek Consulting
 
      WA Director: Bruno Cornaglia, Vodafone";
@@ -66,11 +64,11 @@ module bbf-kafka-agent {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2021-02-19 {
+  revision 2021-08-01 {
     description
       "Initial revision.";
     reference
-      "TR-451: Section 5.5.3.1 Message Transfer Using Kafka";
+      "TBD";
   }
 
   // Features
@@ -152,7 +150,7 @@ module bbf-kafka-agent {
              participate.";
       }
 
-      list topics {
+      list topic {
         key name;
         description
           "The topics the agent will consume.";

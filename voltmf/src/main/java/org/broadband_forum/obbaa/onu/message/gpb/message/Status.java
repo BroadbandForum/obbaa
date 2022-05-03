@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.Status}
  */
-public final class Status extends
+public  final class Status extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.Status)
     StatusOrBuilder {
@@ -171,10 +171,6 @@ private static final long serialVersionUID = 0L;
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalStateException(
-            "Can't get the descriptor of an unrecognized enum value.");
-      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -215,14 +211,14 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Status.StatusCode status_code = 1;</code>
    * @return The enum numeric value on the wire for statusCode.
    */
-  @java.lang.Override public int getStatusCodeValue() {
+  public int getStatusCodeValue() {
     return statusCode_;
   }
   /**
    * <code>.tr451_vomci_nbi_message.v1.Status.StatusCode status_code = 1;</code>
    * @return The statusCode.
    */
-  @java.lang.Override public org.broadband_forum.obbaa.onu.message.gpb.message.Status.StatusCode getStatusCode() {
+  public org.broadband_forum.obbaa.onu.message.gpb.message.Status.StatusCode getStatusCode() {
     @SuppressWarnings("deprecation")
     org.broadband_forum.obbaa.onu.message.gpb.message.Status.StatusCode result = org.broadband_forum.obbaa.onu.message.gpb.message.Status.StatusCode.valueOf(statusCode_);
     return result == null ? org.broadband_forum.obbaa.onu.message.gpb.message.Status.StatusCode.UNRECOGNIZED : result;
@@ -237,7 +233,6 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .tr451_vomci_nbi_message.v1.Error error = 2;</code>
    */
-  @java.lang.Override
   public java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.Error> getErrorList() {
     return error_;
   }
@@ -248,7 +243,6 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .tr451_vomci_nbi_message.v1.Error error = 2;</code>
    */
-  @java.lang.Override
   public java.util.List<? extends org.broadband_forum.obbaa.onu.message.gpb.message.ErrorOrBuilder> 
       getErrorOrBuilderList() {
     return error_;
@@ -260,7 +254,6 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .tr451_vomci_nbi_message.v1.Error error = 2;</code>
    */
-  @java.lang.Override
   public int getErrorCount() {
     return error_.size();
   }
@@ -271,7 +264,6 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .tr451_vomci_nbi_message.v1.Error error = 2;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.Error getError(int index) {
     return error_.get(index);
   }
@@ -282,7 +274,6 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .tr451_vomci_nbi_message.v1.Error error = 2;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.ErrorOrBuilder getErrorOrBuilder(
       int index) {
     return error_.get(index);
@@ -651,7 +642,7 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Status.StatusCode status_code = 1;</code>
      * @return The enum numeric value on the wire for statusCode.
      */
-    @java.lang.Override public int getStatusCodeValue() {
+    public int getStatusCodeValue() {
       return statusCode_;
     }
     /**
@@ -660,7 +651,6 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setStatusCodeValue(int value) {
-      
       statusCode_ = value;
       onChanged();
       return this;
@@ -669,7 +659,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Status.StatusCode status_code = 1;</code>
      * @return The statusCode.
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.Status.StatusCode getStatusCode() {
       @SuppressWarnings("deprecation")
       org.broadband_forum.obbaa.onu.message.gpb.message.Status.StatusCode result = org.broadband_forum.obbaa.onu.message.gpb.message.Status.StatusCode.valueOf(statusCode_);

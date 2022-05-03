@@ -38,6 +38,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.pma.impl.PmaRegistryImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -133,7 +134,7 @@ public class PmaAdapterTest {
         Map<NetConfResponse, List<Notification>> map = new HashMap<>();
         NetConfResponse netConfResponse = DocumentToPojoTransformer.getNetconfResponse(DocumentUtils.stringToDocument(RESPONSE_OK_XML));
         map.put(netConfResponse, Collections.emptyList());
-        when(m_pmaRegistry.executeNC(DEVICE_NAME_A, REQUEST_DEVICE_CONFIG_GET)).thenReturn(map);
+        when(m_pmaRegistry.executeNC(new PmaResourceId(PmaResourceId.Type.DEVICE,DEVICE_NAME_A), REQUEST_DEVICE_CONFIG_GET)).thenReturn(map);
         String response = m_pmaAdapter.processRequest(DEVICE_NAME_A, REQUEST_DEVICE_CONFIG_GET);
 //        assertEquals(RESPONSE_OK_XML, response);
 
@@ -144,14 +145,14 @@ public class PmaAdapterTest {
     @Test
     public void processRequestAlign() throws Exception {
         String response = m_pmaAdapter.processRequest(DEVICE_NAME_A, REQUEST_ALIGN);
-        verify(m_pmaRegistry).align(DEVICE_NAME_A);
+        verify(m_pmaRegistry).align(new PmaResourceId(PmaResourceId.Type.DEVICE,DEVICE_NAME_A));
         assertTrue(response.contains(RESPONSE_OK));
     }
 
     @Test
     public void processRequestAlignForce() throws Exception {
         String response = m_pmaAdapter.processRequest(DEVICE_NAME_A, REQUEST_ALIGN_FORCE);
-        verify(m_pmaRegistry).forceAlign(DEVICE_NAME_A);
+        verify(m_pmaRegistry).forceAlign(new PmaResourceId(PmaResourceId.Type.DEVICE,DEVICE_NAME_A));
         assertTrue(response.contains(RESPONSE_OK));
     }
 

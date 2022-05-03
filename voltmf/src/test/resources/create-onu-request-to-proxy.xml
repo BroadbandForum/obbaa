@@ -1,5 +1,9 @@
 <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-    <create-onu xmlns="urn:bbf:yang:bbf-vomci-proxy">
-        <name>onu1</name>
-    </create-onu>
+<action xmlns="urn:ietf:params:xml:ns:yang:1">
+    <managed-onus xmlns="urn:bbf:yang:bbf-vomci-proxy">
+        <create-onu>
+            <name>onu1</name>
+        </create-onu>
+    </managed-onus>
+</action>
 </rpc>

@@ -35,7 +35,7 @@ public class NetworkFunctionManagerImplTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        m_networkFunctionManagerImpl = new NetworkFunctionManagerImpl();
+        m_networkFunctionManagerImpl = new NetworkFunctionManagerImpl(null);
     }
 
     @Test

@@ -1,0 +1,10 @@
+{
+  "ietf-alarms:alarm-notification": {
+    "resource": "/ietf-interfaces:interfaces/interface[name='eth1']",
+    "alarm-type-id": "bbf-obbaa-ethernet-alarm-types:loss-of-signal",
+    "alarm-type-qualifier": "",
+    "time": "2022-01-09T13:53:36+00:00",
+    "perceived-severity": "major",
+    "alarm-text": "example alarm"
+  }
+}

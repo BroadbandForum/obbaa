@@ -49,9 +49,10 @@ syntax = "proto3";
 // BBF software release registry: http://www.broadband-forum.org/software
 //********************************************************************
 
+package tr451_vomci_nbi_message.v1;
+
 option java_multiple_files = true;
 option java_package = "org.broadband_forum.obbaa.onu.message.gpb.message";
-package tr451_vomci_nbi_message.v1;
 
 
 message Msg {
@@ -68,7 +69,7 @@ message Header {
                              // originated the message
   string recipient_name = 3; // The name of the entity that is to
                              // receive the request
-  OBJECT_TYPE object_type = 4; // The type of the object or 
+  OBJECT_TYPE object_type = 4; // The type of the object or
                                // resource that is subject of the message
   string object_name = 5;    // The  name of the object or resource
 
@@ -77,6 +78,7 @@ message Header {
     VOMCI_FUNCTION = 1;
     VOMCI_PROXY = 2;
     VOLTMF = 3;
+    VOMCI_FUNCTION_TYPE = 4; //Category of vOMCI function instances
   }
 }
 
@@ -116,17 +118,25 @@ message Hello {
                                     // used to establish the session
 }
 
-message HelloResp {
-  string service_endpoint_name = 1; //The service endpoint the server
-                                    //used to listen on the session
-  repeated ServerCapability capabilities = 2; // The capabilities
-                                              // supported by the
-                                              // server
-  enum ServerCapability  {
+message NFInformation {
+  map<string, string> nf_types = 1; //Valid Key types: 
+                                    // usage-category, vendor-name,
+                                    // software-version
+  repeated NFCapability capabilities = 2;
+  enum NFCapability  {
     NO_CAPABILITY_REPORTED = 0;
     ONU_STATE_ONLY_SUPPORT = 1;
     ONU_CONFIG_REPLICA_SUPPORT = 2;
   }
+}
+
+message HelloResp {
+  string service_endpoint_name = 1; //The service endpoint the server
+                                    //used to listen on the session
+  repeated NFInformation network_function_info = 2;
+                                      // The type information and
+                                      // capabilities supported by
+                                      // the network function
 }
 
 message GetData {
@@ -136,12 +146,16 @@ message GetData {
 message GetDataResp {
   Status status_resp = 1;
   bytes data = 2;
+  string datastore_tag = 3;       // Optional: Datastore tag used to
+                                  // synchronize the config datastore
 }
 
 message ReplaceConfig {
   bytes  config_inst = 1;          // Full configuration instance to
                                    // be used as a replacement of what
                                    // exists for the target
+  string datastore_tag = 2;        // Optional: Datastore tag used to
+                                   // synchronize the config datastore
 }
 
 message ReplaceConfigResp {
@@ -167,6 +181,8 @@ message UpdateConfig {
     UpdateConfigInstance update_config_inst = 1;
     UpdateConfigReplica update_config_replica = 2;
   }
+  string datastore_tag = 3;       // Optional: Datastore tag used to
+                                  // synchronize the config store
 }
 
 message UpdateConfigResp {
@@ -175,6 +191,8 @@ message UpdateConfigResp {
 
 message RPC {
   bytes input_data = 1;
+  string datastore_tag = 2;       // Optional: Datastore tag used to
+                                  // synchronize the config datastore
 }
 
 message RPCResp {
@@ -184,6 +202,8 @@ message RPCResp {
 
 message Action {
   bytes input_data = 1;
+  string datastore_tag = 2;       // Optional: Datastore tag used to
+                                  // synchronize the config datastore
 }
 
 message ActionResp {
@@ -193,7 +213,8 @@ message ActionResp {
 
 
 message Notification {
-  bytes data = 1;
+  string event_timestamp = 1;
+  bytes data = 2;
 }
 
 

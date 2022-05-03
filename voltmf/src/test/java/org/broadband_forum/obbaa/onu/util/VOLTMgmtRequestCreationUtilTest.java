@@ -27,7 +27,8 @@ import java.util.HashMap;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
-import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcRequest;
+import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
+import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
 import org.broadband_forum.obbaa.onu.NotificationRequest;
 import org.broadband_forum.obbaa.onu.entity.UnknownONU;
@@ -60,6 +61,7 @@ public class VOLTMgmtRequestCreationUtilTest {
     String internalGetRequest = "/internal-get-request.xml";
     String undetectOnuJsonNotification = "/undetect-onu-notification.json";
     String detectOnuJsonNotification = "/detect-onu-notification.json";
+    String onuAuthReportActionRequestFile = "/onu-authentication-report-action-request.xml";
 
     @Before
     public void setUp() {
@@ -68,10 +70,10 @@ public class VOLTMgmtRequestCreationUtilTest {
 
     @Test
     public void testPrepareCreateOnuRequest() throws IOException, SAXException {
-        NetconfRpcRequest vomciRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(ONU_NAME, false);
+        ActionRequest vomciRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(ONU_NAME, false);
         assertNotNull(vomciRequest);
         assertXMLEquals(TestUtil.loadAsXml(createOnuRequestToVomci), vomciRequest);
-        NetconfRpcRequest proxyRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(ONU_NAME, true);
+        ActionRequest proxyRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(ONU_NAME, true);
         assertNotNull(proxyRequest);
         assertXMLEquals(TestUtil.loadAsXml(createOnuRequestToProxy), proxyRequest);
     }
@@ -94,6 +96,20 @@ public class VOLTMgmtRequestCreationUtilTest {
         ActionRequest setOnuCommproxyAction = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(ONU_NAME, true, OLT_NAME, CHANNEL_TERM_REF, ONU_ID, "vOMCi-grpc-1", OLT_NAME, true);
         assertNotNull(setOnuCommproxyAction);
         assertXMLEquals(TestUtil.loadAsXml(setOnuCommProxy), setOnuCommproxyAction);
+    }
+
+    @Test
+    public void testOnuAuthReportActionRequest() throws NetconfMessageBuilderException {
+        String serialNumber = "ABCD12345678";
+        String onuManagementMode = "baa-xpon-onu-types:use-vomci";
+        String vaniName = "test";
+        String channelTermination = "CT_1";
+        Boolean authSuccess = true;
+        ActionRequest onuAuthenicationReportActionRequest = VOLTMgmtRequestCreationUtil.prepareOnuAuthenicationReportActionRequest(ONU_NAME,
+                authSuccess, vaniName, onuManagementMode, serialNumber, channelTermination);
+        String onuAuthenicationReportActionRequestString = DocumentUtils.documentToPrettyString(onuAuthenicationReportActionRequest.getRequestDocument());
+        assertNotNull(onuAuthenicationReportActionRequest);
+        assertEquals(TestUtil.loadAsString(onuAuthReportActionRequestFile), onuAuthenicationReportActionRequestString);
     }
 
     @Test

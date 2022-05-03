@@ -34,6 +34,7 @@ import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.nbiadapter.netconf.NbiNetconfServerMessageListener;
 import org.broadband_forum.obbaa.netconf.api.client.AbstractNetconfClientSession;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
@@ -99,13 +100,15 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
     private NetworkFunctionDao m_networkFunctionDao;
     private DeviceDao m_deviceDao;
     private Map<String, AtomicReference<HashSet<String>>> m_kafkatopicMap = new HashMap<>();
+    NbiNetconfServerMessageListener m_nbiNetconfServerMessageListener;
 
     public MediatedDeviceNetconfSession(Device device, String oltDeviceName, String onuId, String channelTermRef,
                                         HashMap<String, String> labels, OnuKafkaProducer kafkaProducer,
                                         ModelNodeDataStoreManager modelNodeDSM, AdapterManager adapterManager,
                                         ThreadPoolExecutor kafkaCommunicationPool, SchemaRegistry schemaRegistry,
                                         MessageFormatter messageFormatter, TxService txService,
-                                        NetworkFunctionDao networkFunctionDao, DeviceDao deviceDao) {
+                                        NetworkFunctionDao networkFunctionDao, DeviceDao deviceDao,
+                                        NbiNetconfServerMessageListener nbiNetconfServerMessageListener) {
         m_creationTime = System.currentTimeMillis();
         m_onuDevice = device;
         m_onuDeviceName = device.getDeviceName();
@@ -123,6 +126,7 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         m_txService = txService;
         m_networkFunctionDao = networkFunctionDao;
         m_deviceDao = deviceDao;
+        m_nbiNetconfServerMessageListener = nbiNetconfServerMessageListener;
     }
 
     @Override
@@ -142,6 +146,7 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
                     future = onEditConfig((EditConfigRequest) netconfRequest);
                     break;
                 case NetconfResources.GET:
+                    m_nbiNetconfServerMessageListener.setOnuCurrentMessageId(currentMessageId);
                     netconfRequest = DocumentToPojoTransformer.getGet(requestDocument);
                     future = onGet((GetRequest) netconfRequest);
                     break;

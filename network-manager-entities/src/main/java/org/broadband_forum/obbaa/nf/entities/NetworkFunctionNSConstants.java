@@ -35,7 +35,10 @@ public interface NetworkFunctionNSConstants {
     String NETWORK_FUNCTION_NAME = "name";
     String NETWORK_FUNCTION_TYPE = "type";
     String NETWORK_FUNCTIONS = "network-functions";
-
+    String ONU_FUNCTION = "onu-management-proxy-type";
+    String VOMCI_FUNCTION = "vomci-function-type";
+    String PROXY_FUNCTION = "vomci-proxy-type";
+    String VOLTMF_FUNCTION = "voltmf-type";
     String LISTEN = "listen";
     String IDLE_TIMEOUT = "idle-timeout";
     String LISTEN_ENDPOINT = "listen-endpoint";
@@ -80,6 +83,7 @@ public interface NetworkFunctionNSConstants {
     String NETWORK_FUNCTIONS_SETTINGS = "network-functions-settings";
     String NF_SERVER = "nf-server";
     String ENABLED = "enabled";
+    String ON_DEMAND = "on-demand";
     SchemaPath NETWORK_MANAGER_SP = SchemaPath.create(true, QName.create(NS, REVISION, NETWORK_MANAGER));
 
     //Database Constants

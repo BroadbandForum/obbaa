@@ -12,7 +12,7 @@ M<sub>inf\_eq-inv</sub>) and the device management interfaces (M<sub>inf\_Lxxx</
 representation of the AN is exposed through each of the interfaces using
 access control to restrict access to parts of the AN.
 
-While most northbound interfaces used by OB-BAA are standardized, several interfaces (e.g., Data Lake, M<sub>fc_relay</sub>) are used that haven't been standardized or are in the process of standardization.
+While most northbound interfaces used by OB-BAA are standardized, several interfaces (e.g., M<sub>fc_L2-3</sub>) are used that haven't been standardized or are in the process of standardization.
 
 <p align="center">
  <img width="800px" height="500px" src="{{site.url}}/architecture/system_interfaces.png">
@@ -111,6 +111,17 @@ The vOLT Management Function (vOLTMF) is responsible for:
     Access SDN M&C.
 
 [For more information about the vOLT Management Function](voltmf/index.md#voltmf)
+
+### ONU Authenticator - ONU Authentication Function
+
+The ability for the operator to identify an ONU and authenticate that the ONU belongs to a subscriber of one or more services from the operator has been traditionally performed as an function embedded within the physical OLT. In this regard the OLT acted as the policy enforcement point (PEP) and policy decision point (PDP). The ONU Authentication function allows the BAA layer to act as a PDP entity where the BAA layer itself is able to perform the identification and authentication of an ONU based on a set of policy rules or it can work in concert with the OLT and/or other SDN management entities to collectively identify and authenticate the ONU.
+
+Several scenarios are supported by the BAA layer:
+-	vOMCI (Separated model) and ONU authentication in the BAA layer
+-	vOMCI (Separated model) and ONU authentication in the OLT (for PLOAM credentials) and the BAA layer (for LOID & OMCI Mutual Authentication protocol)
+-	eOMCI (Combined model) and ONU authentication in the OLT (BAA layer not to be engaged ! )
+
+[For more information about the ONU Authentication Function](onu_auth/index.md#onu_auth)
 
 ### NAI & BAA Core
 

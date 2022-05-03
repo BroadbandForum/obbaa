@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.Msg}
  */
-public final class Msg extends
+public  final class Msg extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.Msg)
     MsgOrBuilder {
@@ -112,7 +112,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Header header = 1;</code>
    * @return Whether the header field is set.
    */
-  @java.lang.Override
   public boolean hasHeader() {
     return header_ != null;
   }
@@ -120,14 +119,12 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Header header = 1;</code>
    * @return The header.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.Header getHeader() {
     return header_ == null ? org.broadband_forum.obbaa.onu.message.gpb.message.Header.getDefaultInstance() : header_;
   }
   /**
    * <code>.tr451_vomci_nbi_message.v1.Header header = 1;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.HeaderOrBuilder getHeaderOrBuilder() {
     return getHeader();
   }
@@ -138,7 +135,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Body body = 2;</code>
    * @return Whether the body field is set.
    */
-  @java.lang.Override
   public boolean hasBody() {
     return body_ != null;
   }
@@ -146,14 +142,12 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Body body = 2;</code>
    * @return The body.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.Body getBody() {
     return body_ == null ? org.broadband_forum.obbaa.onu.message.gpb.message.Body.getDefaultInstance() : body_;
   }
   /**
    * <code>.tr451_vomci_nbi_message.v1.Body body = 2;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.BodyOrBuilder getBodyOrBuilder() {
     return getBody();
   }

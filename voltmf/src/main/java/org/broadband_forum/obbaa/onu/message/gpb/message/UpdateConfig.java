@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.UpdateConfig}
  */
-public final class UpdateConfig extends
+public  final class UpdateConfig extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.UpdateConfig)
     UpdateConfigOrBuilder {
@@ -16,6 +16,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private UpdateConfig() {
+    datastoreTag_ = "";
   }
 
   @java.lang.Override
@@ -74,6 +75,12 @@ private static final long serialVersionUID = 0L;
               reqType_ = subBuilder.buildPartial();
             }
             reqTypeCase_ = 2;
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            datastoreTag_ = s;
             break;
           }
           default: {
@@ -154,7 +161,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.UpdateConfigInstance update_config_inst = 1;</code>
    * @return Whether the updateConfigInst field is set.
    */
-  @java.lang.Override
   public boolean hasUpdateConfigInst() {
     return reqTypeCase_ == 1;
   }
@@ -162,7 +168,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.UpdateConfigInstance update_config_inst = 1;</code>
    * @return The updateConfigInst.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigInstance getUpdateConfigInst() {
     if (reqTypeCase_ == 1) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigInstance) reqType_;
@@ -172,7 +177,6 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.tr451_vomci_nbi_message.v1.UpdateConfigInstance update_config_inst = 1;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigInstanceOrBuilder getUpdateConfigInstOrBuilder() {
     if (reqTypeCase_ == 1) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigInstance) reqType_;
@@ -185,7 +189,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.UpdateConfigReplica update_config_replica = 2;</code>
    * @return Whether the updateConfigReplica field is set.
    */
-  @java.lang.Override
   public boolean hasUpdateConfigReplica() {
     return reqTypeCase_ == 2;
   }
@@ -193,7 +196,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.UpdateConfigReplica update_config_replica = 2;</code>
    * @return The updateConfigReplica.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplica getUpdateConfigReplica() {
     if (reqTypeCase_ == 2) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplica) reqType_;
@@ -203,12 +205,55 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.tr451_vomci_nbi_message.v1.UpdateConfigReplica update_config_replica = 2;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplicaOrBuilder getUpdateConfigReplicaOrBuilder() {
     if (reqTypeCase_ == 2) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplica) reqType_;
     }
     return org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplica.getDefaultInstance();
+  }
+
+  public static final int DATASTORE_TAG_FIELD_NUMBER = 3;
+  private volatile java.lang.Object datastoreTag_;
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 3;</code>
+   * @return The datastoreTag.
+   */
+  public java.lang.String getDatastoreTag() {
+    java.lang.Object ref = datastoreTag_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      datastoreTag_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 3;</code>
+   * @return The bytes for datastoreTag.
+   */
+  public com.google.protobuf.ByteString
+      getDatastoreTagBytes() {
+    java.lang.Object ref = datastoreTag_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      datastoreTag_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
   }
 
   private byte memoizedIsInitialized = -1;
@@ -231,6 +276,9 @@ private static final long serialVersionUID = 0L;
     if (reqTypeCase_ == 2) {
       output.writeMessage(2, (org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplica) reqType_);
     }
+    if (!getDatastoreTagBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, datastoreTag_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -248,6 +296,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, (org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplica) reqType_);
     }
+    if (!getDatastoreTagBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, datastoreTag_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -263,6 +314,8 @@ private static final long serialVersionUID = 0L;
     }
     org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfig other = (org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfig) obj;
 
+    if (!getDatastoreTag()
+        .equals(other.getDatastoreTag())) return false;
     if (!getReqTypeCase().equals(other.getReqTypeCase())) return false;
     switch (reqTypeCase_) {
       case 1:
@@ -287,6 +340,8 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + DATASTORE_TAG_FIELD_NUMBER;
+    hash = (53 * hash) + getDatastoreTag().hashCode();
     switch (reqTypeCase_) {
       case 1:
         hash = (37 * hash) + UPDATE_CONFIG_INST_FIELD_NUMBER;
@@ -432,6 +487,8 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      datastoreTag_ = "";
+
       reqTypeCase_ = 0;
       reqType_ = null;
       return this;
@@ -474,6 +531,7 @@ private static final long serialVersionUID = 0L;
           result.reqType_ = updateConfigReplicaBuilder_.build();
         }
       }
+      result.datastoreTag_ = datastoreTag_;
       result.reqTypeCase_ = reqTypeCase_;
       onBuilt();
       return result;
@@ -523,6 +581,10 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfig other) {
       if (other == org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfig.getDefaultInstance()) return this;
+      if (!other.getDatastoreTag().isEmpty()) {
+        datastoreTag_ = other.datastoreTag_;
+        onChanged();
+      }
       switch (other.getReqTypeCase()) {
         case UPDATE_CONFIG_INST: {
           mergeUpdateConfigInst(other.getUpdateConfigInst());
@@ -586,7 +648,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.UpdateConfigInstance update_config_inst = 1;</code>
      * @return Whether the updateConfigInst field is set.
      */
-    @java.lang.Override
     public boolean hasUpdateConfigInst() {
       return reqTypeCase_ == 1;
     }
@@ -594,7 +655,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.UpdateConfigInstance update_config_inst = 1;</code>
      * @return The updateConfigInst.
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigInstance getUpdateConfigInst() {
       if (updateConfigInstBuilder_ == null) {
         if (reqTypeCase_ == 1) {
@@ -688,7 +748,6 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.tr451_vomci_nbi_message.v1.UpdateConfigInstance update_config_inst = 1;</code>
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigInstanceOrBuilder getUpdateConfigInstOrBuilder() {
       if ((reqTypeCase_ == 1) && (updateConfigInstBuilder_ != null)) {
         return updateConfigInstBuilder_.getMessageOrBuilder();
@@ -727,7 +786,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.UpdateConfigReplica update_config_replica = 2;</code>
      * @return Whether the updateConfigReplica field is set.
      */
-    @java.lang.Override
     public boolean hasUpdateConfigReplica() {
       return reqTypeCase_ == 2;
     }
@@ -735,7 +793,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.UpdateConfigReplica update_config_replica = 2;</code>
      * @return The updateConfigReplica.
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplica getUpdateConfigReplica() {
       if (updateConfigReplicaBuilder_ == null) {
         if (reqTypeCase_ == 2) {
@@ -829,7 +886,6 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.tr451_vomci_nbi_message.v1.UpdateConfigReplica update_config_replica = 2;</code>
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplicaOrBuilder getUpdateConfigReplicaOrBuilder() {
       if ((reqTypeCase_ == 2) && (updateConfigReplicaBuilder_ != null)) {
         return updateConfigReplicaBuilder_.getMessageOrBuilder();
@@ -860,6 +916,102 @@ private static final long serialVersionUID = 0L;
       reqTypeCase_ = 2;
       onChanged();;
       return updateConfigReplicaBuilder_;
+    }
+
+    private java.lang.Object datastoreTag_ = "";
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @return The datastoreTag.
+     */
+    public java.lang.String getDatastoreTag() {
+      java.lang.Object ref = datastoreTag_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datastoreTag_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @return The bytes for datastoreTag.
+     */
+    public com.google.protobuf.ByteString
+        getDatastoreTagBytes() {
+      java.lang.Object ref = datastoreTag_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datastoreTag_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @param value The datastoreTag to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDatastoreTag(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      datastoreTag_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDatastoreTag() {
+      
+      datastoreTag_ = getDefaultInstance().getDatastoreTag();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @param value The bytes for datastoreTag to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDatastoreTagBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      datastoreTag_ = value;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

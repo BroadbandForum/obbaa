@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   ~ Copyright 2022 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="4">
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+          <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+              <network-functions>
+                  <network-function>
+                      <name>bbf-vproxy</name>
+                      <root>
+                        <bbf-vomci-proxy:vomci xmlns:bbf-vomci-proxy="urn:bbf:yang:bbf-vomci-proxy">
+                            <bbf-vomci-proxy:remote-network-function>
+                                <bbf-vomci-proxy:nf-client>
+                                    <bbf-vomci-proxy:enabled>true</bbf-vomci-proxy:enabled>
+                                    <bbf-vomci-proxy:nf-initiate>
+                                        <bbf-vomci-proxy:remote-endpoints>
+                                            <bbf-vomci-proxy:remote-endpoint>
+                                                <bbf-vomci-proxy:name>vOLTMF_Kafka_2</bbf-vomci-proxy:name>
+                                                <bbf-vomci-proxy:nf-type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:voltmf-type</bbf-vomci-proxy:nf-type>
+                                                <bbf-vomci-proxy:local-endpoint-name>proxy-kfk-1</bbf-vomci-proxy:local-endpoint-name>
+                                                <bbf-vomci-proxy:kafka-agent>
+                                                    <bbf-vomci-proxy:kafka-agent-parameters>
+                                                        <bbf-vomci-proxy:client-id>client-id3</bbf-vomci-proxy:client-id>
+                                                        <bbf-vomci-proxy:publication-parameters>
+                                                            <bbf-vomci-proxy:topic>
+                                                                <bbf-vomci-proxy:name>vomci-proxy-response</bbf-vomci-proxy:name>
+                                                                <bbf-vomci-proxy:purpose>VOMCI_RESPONSE</bbf-vomci-proxy:purpose>
+                                                            </bbf-vomci-proxy:topic>
+                                                            <bbf-vomci-proxy:topic>
+                                                                <bbf-vomci-proxy:name>vomci-proxy-notification</bbf-vomci-proxy:name>
+                                                                <bbf-vomci-proxy:purpose>VOMCI_NOTIFICATION</bbf-vomci-proxy:purpose>
+                                                            </bbf-vomci-proxy:topic>
+                                                        </bbf-vomci-proxy:publication-parameters>
+
+                                                        <bbf-vomci-proxy:consumption-parameters>
+                                                            <bbf-vomci-proxy:topic>
+                                                                <bbf-vomci-proxy:name>vomci-proxy-request</bbf-vomci-proxy:name>
+                                                                <bbf-vomci-proxy:purpose>VOMCI_REQUEST</bbf-vomci-proxy:purpose>
+                                                            </bbf-vomci-proxy:topic>
+                                                        </bbf-vomci-proxy:consumption-parameters>
+                                                    </bbf-vomci-proxy:kafka-agent-parameters>
+                                                </bbf-vomci-proxy:kafka-agent>
+                                                <bbf-vomci-proxy:access-point>
+                                                    <bbf-vomci-proxy:name>vOLTMF_Kafka_2</bbf-vomci-proxy:name>
+                                                    <bbf-vomci-proxy:kafka-agent>
+                                                        <bbf-vomci-proxy:kafka-agent-transport-parameters>
+                                                            <bbf-vomci-proxy:remote-address>kafka</bbf-vomci-proxy:remote-address>
+                                                            <bbf-vomci-proxy:remote-port>9092</bbf-vomci-proxy:remote-port>
+                                                        </bbf-vomci-proxy:kafka-agent-transport-parameters>
+                                                    </bbf-vomci-proxy:kafka-agent>
+                                                </bbf-vomci-proxy:access-point>
+                                            </bbf-vomci-proxy:remote-endpoint>
+
+                                            <bbf-vomci-proxy:remote-endpoint>
+                                                <bbf-vomci-proxy:name>vOMCI-grpc-1</bbf-vomci-proxy:name>
+                                                <bbf-vomci-proxy:nf-type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:vomci-function-type</bbf-vomci-proxy:nf-type>
+                                                <bbf-vomci-proxy:local-endpoint-name>proxy-grpc-2</bbf-vomci-proxy:local-endpoint-name>
+                                                <bbf-vomci-proxy:grpc>
+                                                    <bbf-vomci-proxy:grpc-client-parameters>
+                                                        <bbf-vomci-proxy:channel>
+                                                            <!-- without specifiying at least a leaf, yanglint throws: Mandatory choice "client-transport" data do not exist -->
+                                                            <bbf-vomci-proxy:ping-interval>300</bbf-vomci-proxy:ping-interval>
+                                                        </bbf-vomci-proxy:channel>
+                                                    </bbf-vomci-proxy:grpc-client-parameters>
+                                                </bbf-vomci-proxy:grpc>
+                                                <bbf-vomci-proxy:access-point>
+                                                    <bbf-vomci-proxy:name>vOMCI-grpc-1</bbf-vomci-proxy:name>
+                                                    <bbf-vomci-proxy:grpc>
+                                                        <bbf-vomci-proxy:grpc-transport-parameters>
+                                                            <bbf-vomci-proxy:remote-address>obbaa-vomci</bbf-vomci-proxy:remote-address>
+                                                            <bbf-vomci-proxy:remote-port>58433</bbf-vomci-proxy:remote-port>
+                                                        </bbf-vomci-proxy:grpc-transport-parameters>
+                                                    </bbf-vomci-proxy:grpc>
+                                                </bbf-vomci-proxy:access-point>
+                                            </bbf-vomci-proxy:remote-endpoint>
+                                        </bbf-vomci-proxy:remote-endpoints>
+                                    </bbf-vomci-proxy:nf-initiate>
+                                </bbf-vomci-proxy:nf-client>
+
+                                 <bbf-vomci-proxy:nf-server>
+                                    <bbf-vomci-proxy:enabled>true</bbf-vomci-proxy:enabled>
+                                    <bbf-vomci-proxy:listen>
+                                        <bbf-vomci-proxy:listen-endpoint>
+                                            <bbf-vomci-proxy:name>proxy-grpc-2</bbf-vomci-proxy:name>
+                                            <bbf-vomci-proxy:grpc>
+                                                <bbf-vomci-proxy:grpc-server-parameters>
+                                                    <bbf-vomci-proxy:local-endpoint-name>proxy-grpc-2</bbf-vomci-proxy:local-endpoint-name>
+                                                    <bbf-vomci-proxy:local-address>0.0.0.0</bbf-vomci-proxy:local-address>
+                                                    <bbf-vomci-proxy:local-port>8433</bbf-vomci-proxy:local-port>
+                                                </bbf-vomci-proxy:grpc-server-parameters>
+                                            </bbf-vomci-proxy:grpc>
+                                        </bbf-vomci-proxy:listen-endpoint>
+                                    </bbf-vomci-proxy:listen>
+                                </bbf-vomci-proxy:nf-server>
+                            </bbf-vomci-proxy:remote-network-function>
+                        </bbf-vomci-proxy:vomci>
+                      </root>
+                  </network-function>
+              </network-functions>
+          </network-manager>
+        </config>
+    </edit-config>
+</rpc>

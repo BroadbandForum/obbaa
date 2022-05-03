@@ -35,6 +35,12 @@ public class ActualAttachmentPoint {
     @Column(name = "onuId")
     private String onuId;
 
+    @Column(name = "vaniName")
+    private String vaniName;
+
+    @Column(name = "oltLocalOnuName")
+    private String oltLocalOnuName;
+
     public String getAttachmentPointId() {
         return attachmentPointId;
     }
@@ -57,6 +63,22 @@ public class ActualAttachmentPoint {
 
     public void setChannelTerminationRef(String channelTerminationRef) {
         this.channelTerminationRef = channelTerminationRef;
+    }
+
+    public String getvAniName() {
+        return vaniName;
+    }
+
+    public void setvAniName(String vaniName) {
+        this.vaniName = vaniName;
+    }
+
+    public String getOltLocalOnuName() {
+        return oltLocalOnuName;
+    }
+
+    public void setOltLocalOnuName(String oltLocalOnuName) {
+        this.oltLocalOnuName = oltLocalOnuName;
     }
 
     public String getOltName() {
@@ -86,6 +108,14 @@ public class ActualAttachmentPoint {
                 : that.channelTerminationRef != null) {
             return false;
         }
+        if (vaniName != null ? !vaniName.equals(that.vaniName)
+                : that.vaniName != null) {
+            return false;
+        }
+        if (oltLocalOnuName != null ? !oltLocalOnuName.equals(that.oltLocalOnuName)
+                : that.oltLocalOnuName != null) {
+            return false;
+        }
         return onuId != null ? onuId.equals(that.onuId) : that.onuId == null;
 
     }
@@ -96,6 +126,8 @@ public class ActualAttachmentPoint {
         result = 31 * result + (oltName != null ? oltName.hashCode() : 0);
         result = 31 * result + (channelTerminationRef != null ? channelTerminationRef.hashCode() : 0);
         result = 31 * result + (onuId != null ? onuId.hashCode() : 0);
+        result = 31 * result + (vaniName != null ? vaniName.hashCode() : 0);
+        result = 31 * result + (oltLocalOnuName != null ? oltLocalOnuName.hashCode() : 0);
         return result;
     }
 }

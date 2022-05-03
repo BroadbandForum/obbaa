@@ -1,0 +1,80 @@
+module bbf-obbaa-xpon-onu-alarm-types {
+  yang-version 1.1;
+  namespace "urn:bbf:yang:obbaa:xpon-onu-alarm-types";
+  prefix bbf-baa-xpononualt;
+
+  import bbf-alarm-types {
+    prefix bbf-alt;
+  }
+  
+ organization
+   "Broadband Forum <https://www.broadband-forum.org>";
+
+ contact
+   "Comments or questions about this Broadband Forum YANG module
+    should be directed to <mailto:obbaa-leaders@broadband-forum.org>.
+   ";
+
+ description
+   "This module contains a set of xPON alarm definitions that are 
+    applicable to OB-BAA.
+    
+    Copyright 2022 Broadband Forum
+    
+    Licensed under the Apache License, Version 2.0 (the \"License\");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an \"AS IS\" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.";
+
+
+  revision 2022-01-31 {
+    description
+      "Initial revision.";
+    reference
+       "https://obbaa.broadband-forum.org/";
+  }
+  
+  identity xpon-onu-alarms {
+    base bbf-alt:bbf-alarm-type-id;
+    description
+      "Base identity for autonomous alarms reported by the Optical 
+       Network Unit (ONU) and that are specific to the xPON 
+       technology.
+       
+       This identity is abstract and SHOULD NOT generally be used for
+       alarms. If used to define an alarm that was not known at
+       design time, it MUST be qualified with an alarm type qualifier
+       string. This practice, however, should be generally avoided to
+       ensure all possible alarms are known at design time.";
+    reference
+      "ITU-T G.988 (11/2017) 7.2";
+  }
+   
+  identity signal-fail {
+    base xpon-onu-alarms;
+    base bbf-alt:bbf-threshold-crossing-alarm-type-id;
+    description
+      "A 'signal-fail' alarm is declared when the downstream Bit 
+       Error Rate (BER) becomes >= a configurable value.";
+    reference
+      "ITU-T G.988 (11/2017) 9.2.1";
+  }
+
+  identity signal-degraded {
+    base xpon-onu-alarms;
+    base bbf-alt:bbf-threshold-crossing-alarm-type-id;
+    description
+      "A 'signal-degraded' alarm is declared when the downstream Bit 
+       Error Rate (BER) becomes >= a configurable value which must 
+       be lower than the 'signal-fail' threshold.";
+    reference
+      "ITU-T G.988 (11/2017) 9.2.1";
+  }
+  
+}

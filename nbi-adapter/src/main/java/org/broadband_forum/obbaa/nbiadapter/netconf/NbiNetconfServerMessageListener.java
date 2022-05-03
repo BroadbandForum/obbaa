@@ -16,12 +16,29 @@
 
 package org.broadband_forum.obbaa.nbiadapter.netconf;
 
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.APPLICATION;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.DEVICE;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.ERROR;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.ERROR_MESSAGE;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.ERROR_SEVERITY;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.ERROR_TAG;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.ERROR_TYPE;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.NAME;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.NAMESPACE;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.OPERATION_FAILED;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.ROOT;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.RPC_ERROR;
+import static org.broadband_forum.obbaa.nbiadapter.netconf.NbiConstants.TIMEOUT_MESSAGE;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.aggregator.api.Aggregator;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
+import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
@@ -47,8 +64,11 @@ import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.util.NetconfRpcErrorUtil;
+import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 /**
@@ -62,10 +82,17 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     private NetconfServer m_coreNetconfServer;
 
     private Aggregator m_aggregator;
+    private static final int MAX_ATTEMPTS_TO_GET_RESPONSE_FROM_MAP = 20;
+    private static HashMap<String, String> responseMap = new HashMap<>();
+    private static HashMap<String, String> externalInternalMessageIdMap = new HashMap<>();
+    private static boolean isNetconfSessionIsAlive = false;
+    private static List<String> receivedMessageIdList = new ArrayList<>();
+    private final DeviceManager m_deviceManager;
 
-    public NbiNetconfServerMessageListener(NetconfServer coreNetconfServer, Aggregator aggregator) {
+    public NbiNetconfServerMessageListener(NetconfServer coreNetconfServer, Aggregator aggregator, DeviceManager deviceManager) {
         m_coreNetconfServer = coreNetconfServer;
         m_aggregator = aggregator;
+        m_deviceManager = deviceManager;
     }
 
 
@@ -108,6 +135,171 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
 
     }
 
+    private void executeGetRequest(NetconfClientInfo clientInfo, AbstractNetconfRequest request, NetConfResponse response) {
+        try {
+            // Exec onu external get request
+            String responseFromMap = null;
+            int attemptsMadeToFetchResponseFromMap = 0;
+            setReceivedMessageId(request.getMessageId());
+            executeNC(clientInfo, request.requestToString());
+            String internalMessageId = getInternalMessageIdFromExternalMessageId(request.getMessageId());
+            LOGGER.info("Waiting for the response from vOLTMF");
+            String responseString = null;
+            while (responseString == null) {
+                LOGGER.debug("Fetching response from VOLT-MF, Attempts made: " + attemptsMadeToFetchResponseFromMap);
+                responseFromMap = getResponseMap(internalMessageId);
+                if (responseFromMap != null) {
+                    isNetconfSessionIsAlive = false;
+                    responseString = responseFromMap;
+                    removeResponseFromMap(internalMessageId);
+                } else if (attemptsMadeToFetchResponseFromMap >= MAX_ATTEMPTS_TO_GET_RESPONSE_FROM_MAP) {
+                    isNetconfSessionIsAlive = false;
+                    LOGGER.info("Timed out while getting response from VOLT-MF");
+                    responseString = getErrorResponse(request.getMessageId());
+                }
+                attemptsMadeToFetchResponseFromMap++;
+                Thread.sleep(1000);
+            }
+            // Convert response string message to NetconfResponse object
+            Document document = DocumentUtils.stringToDocument(responseString);
+            NetConfResponse netconfResponse = DocumentToPojoTransformer.getNetconfResponse(document);
+
+            // Copy reponse object
+            response.setMessageId(request.getMessageId());
+            response.addErrors(netconfResponse.getErrors());
+            response.setOk(netconfResponse.isOk());
+            if ((response instanceof NetconfRpcResponse) && (netconfResponse instanceof NetconfRpcResponse)) {
+                for (Element element : ((NetconfRpcResponse) netconfResponse).getRpcOutputElements()) {
+                    ((NetconfRpcResponse) response).addRpcOutputElement(element);
+                }
+            } else {
+                response.setData(netconfResponse.getData());
+            }
+        } catch (NetconfMessageBuilderException | DispatchException | InterruptedException e) {
+            LOGGER.info("Exec netconf request failed : %s", e);
+            response.addError(NetconfRpcErrorUtil.getApplicationError(NetconfRpcErrorTag.OPERATION_FAILED,
+                    "Error while executing netconf message - " + e.getMessage()));
+        }
+    }
+
+    private String getDeviceNameFromGetRequest(AbstractNetconfRequest request) throws NetconfMessageBuilderException {
+        String deviceName = null;
+        if (request != null) {
+            Document requestDocument = request.getRequestDocument();
+            if (requestDocument != null) {
+                NodeList deviceNodeList = requestDocument.getElementsByTagName(DEVICE);
+                if (deviceNodeList != null) {
+                    Node deviceNode = deviceNodeList.item(0);
+                    if (deviceNode != null) {
+                        Element deviceElement = (Element) deviceNode;
+                        NodeList deviceNameNodeList = deviceElement.getElementsByTagName(NAME);
+                        if (deviceNameNodeList != null) {
+                            Node deviceNameNode = deviceNameNodeList.item(0);
+                            if (deviceNameNode != null) {
+                                NodeList deviceChildNodeList = deviceNameNode.getChildNodes();
+                                if (deviceChildNodeList != null) {
+                                    Node deviceChildNode = deviceChildNodeList.item(0);
+                                    if (deviceChildNode != null) {
+                                        deviceName = deviceChildNode.getNodeValue();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return deviceName;
+    }
+
+    private boolean isExternalgetRequest(GetRequest request) throws NetconfMessageBuilderException {
+        boolean isRootTagPresent = false;
+        if (request != null) {
+            Document requestDocument = request.getRequestDocument();
+            if (requestDocument != null) {
+                NodeList deviceNodeList = requestDocument.getElementsByTagName(DEVICE);
+                if (deviceNodeList != null) {
+                    Node deviceNode = deviceNodeList.item(0);
+                    if (deviceNode != null) {
+                        Element deviceElement = (Element) deviceNode;
+                        NodeList deviceNameNodeList = deviceElement.getElementsByTagName(ROOT);
+                        if (deviceNameNodeList != null) {
+                            Node deviceNameNode = deviceNameNodeList.item(0);
+                            if (deviceNameNode != null) {
+                                isRootTagPresent = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return isRootTagPresent;
+    }
+
+    private String getdeviceType(AbstractNetconfRequest request) {
+        String deviceName = null;
+        String deviceType = null;
+        try {
+            deviceName = getDeviceNameFromGetRequest(request);
+        } catch (NetconfMessageBuilderException e) {
+            LOGGER.info("Error while fetching device-name from Get request");
+        }
+        if (deviceName != null) {
+            Device device = m_deviceManager.getDevice(deviceName);
+            deviceType = device.getDeviceManagement().getDeviceType();
+        }
+        return deviceType;
+    }
+
+    public void setOnuCurrentMessageId(String currentMessageId) {
+        if (isNetconfSessionIsAlive && currentMessageId != null && receivedMessageIdList.get(0) != null) {
+            externalInternalMessageIdMap.put(receivedMessageIdList.get(0), currentMessageId);
+            receivedMessageIdList.remove(0);
+        }
+    }
+
+    private void setReceivedMessageId(String messageId) {
+        if (messageId != null) {
+            receivedMessageIdList.add(messageId);
+        }
+    }
+
+    private String getErrorResponse(String messageId) {
+        Document document = DocumentUtils.createDocument();
+        Element rpcError = document.createElementNS(NAMESPACE, RPC_ERROR);
+        Element errorType = document.createElementNS(NAMESPACE, ERROR_TYPE);
+        rpcError.appendChild(errorType);
+        errorType.setTextContent(APPLICATION);
+
+        Element errorTag = document.createElementNS(NAMESPACE, ERROR_TAG);
+        rpcError.appendChild(errorTag);
+        errorTag.setTextContent(OPERATION_FAILED);
+
+        Element errorSeverity = document.createElementNS(NAMESPACE, ERROR_SEVERITY);
+        rpcError.appendChild(errorSeverity);
+        errorSeverity.setTextContent(ERROR);
+
+        Element errorMessage = document.createElementNS(NAMESPACE, ERROR_MESSAGE);
+        rpcError.appendChild(errorMessage);
+        errorMessage.setTextContent(TIMEOUT_MESSAGE);
+
+        document.appendChild(rpcError);
+
+        NetConfResponse netConfResponse = new NetConfResponse();
+        netConfResponse.setMessageId(messageId);
+        netConfResponse.setData(document.getDocumentElement());
+
+        return netConfResponse.responseToString();
+    }
+
+    private String getInternalMessageIdFromExternalMessageId(String externalMessageId) {
+        String internalMessageId = null;
+        if (externalMessageId != null) {
+            internalMessageId = externalInternalMessageIdMap.get(externalMessageId);
+            externalInternalMessageIdMap.remove(externalMessageId);
+        }
+        return internalMessageId;
+    }
 
     @Override
     public void onHello(NetconfClientInfo info, Set<String> clientCaps) {
@@ -120,12 +312,36 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
     @Override
     public void onGet(NetconfClientInfo info, GetRequest req, NetConfResponse resp) {
         logRpc(info, req);
-
-        executeRequest(info, req, resp);
-
+        boolean isexternalGetRequest = false;
+        String deviceType = null;
+        try {
+            isexternalGetRequest = isExternalgetRequest(req);
+        } catch (NetconfMessageBuilderException e) {
+            LOGGER.info("error while parsing get request");
+        }
+        deviceType = getdeviceType(req);
+        if (isexternalGetRequest && deviceType != null && deviceType.equals("ONU")) {
+            isNetconfSessionIsAlive = true;
+            executeGetRequest(info, req, resp);
+        } else {
+            executeRequest(info, req, resp);
+        }
         logRpcResp(info, resp);
     }
 
+    public void addResponseIntoMap(String messageId, String response) {
+        if (isNetconfSessionIsAlive) {
+            responseMap.put(messageId, response);
+        }
+    }
+
+    public String getResponseMap(String messageId) {
+        return responseMap.get(messageId);
+    }
+
+    public void removeResponseFromMap(String messageId) {
+        responseMap.remove(messageId);
+    }
 
     @Override
     public void onGetConfig(NetconfClientInfo info, GetConfigRequest req, NetConfResponse resp) {

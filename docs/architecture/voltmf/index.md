@@ -418,15 +418,12 @@ authenticate the ONU among other items. For example:
 
 -   The *onu-config* container contains the information for
     authenticating the ONU and that must be provided when creating the
-    pONU instance in OB-BAA:
+    pONU instance in OB-BAA> It includes:
 
-    -   Authentication method (see the ONU Authentication section
-        below). Defines a combination of serial-number and/or
-        registration id
-
+    -   planned-onu-management-mode (please refer to ONU Authentication Function for more details).
     -   serial-number
-
     -   registration-id
+    -	  expected-attachment-point
 
 The bbf-obbaa-onu-management.yang and bbf-network-manager.yang YANG
 modules can be found in the /resources/models/yang/aggregator-yang
@@ -439,12 +436,12 @@ module: bbf-obbaa-network-manager
      |  +--rw device* [name]
      |     +--rw name                   string
      |     +--rw device-management
-     |     |  +--rw type?                                 string
-     |     |  +--rw interface-version?                    string
-     |     |  +--rw model?                                string
-     |     |  +--rw vendor?                               string
-     |     |  +--rw push-pma-configuration-to-device?     boolean
-     |     |  +--ro is-netconf?                           boolean
+     |     |  +--rw type?                               string
+     |     |  +--rw interface-version?                  string
+     |     |  +--rw model?                              string
+     |     |  +--rw vendor?                             string
+     |     |  +--rw push-pma-configuration-to-device?   boolean
+     |     |  +--ro is-netconf?                         boolean
      |     |  +--rw device-connection
      |     |  |  +--rw connection-model?          enumeration
      |     |  |  +--rw (protocol)
@@ -478,56 +475,11 @@ module: bbf-obbaa-network-manager
      |     |  |     +--:(mediated-protocol)
      |     |  |        +--rw mediated-protocol?   enumeration
      |     |  +--ro device-state
-     |     |  |  +--ro configuration-alignment-state?       string
-     |     |  |  +--ro connection-state
-     |     |  |  |  +--ro connected?                  boolean
-     |     |  |  |  +--ro connection-creation-time?   yang:date-and-time
-     |     |  |  |  +--ro device-capability*          string
-     |     |  |  +--ro baa-onu-management:onu-state-info
-     |     |  |     +--ro baa-onu-management:onu-state                   identityref
-     |     |  |     +--ro baa-onu-management:detected-serial-number?     bbf-xpon-types:onu-serial-number
-     |     |  |     +--ro baa-onu-management:detected-registration-id?   bbf-xpon-types:onu-registration-id
-     |     |  |     +--ro baa-onu-management:vendor-id?                  string
-     |     |  |     +--ro baa-onu-management:equipment-id?               string
-     |     |  |     +--ro baa-onu-management:attachment-point
-     |     |  |     |  +--ro baa-onu-management:olt-name                    -> /baa-network-manager:network-manager/managed-devices/device/name
-     |     |  |     |  +--ro baa-onu-management:channel-termination-name    string
-     |     |  |     |  +--ro baa-onu-management:onu-id?                     bbf-xpon-types:onu-id
-     |     |  |     +--ro baa-onu-management:software-images
-     |     |  |     |  +--ro baa-onu-management:software-image* [id]
-     |     |  |     |     +--ro baa-onu-management:id              uint8
-     |     |  |     |     +--ro baa-onu-management:version?        string
-     |     |  |     |     +--ro baa-onu-management:is-committed    boolean
-     |     |  |     |     +--ro baa-onu-management:is-active       boolean
-     |     |  |     |     +--ro baa-onu-management:is-valid        boolean
-     |     |  |     |     +--ro baa-onu-management:product-code?   string
-     |     |  |     |     +--ro baa-onu-management:hash?           string
-     |     |  |     +--ro baa-onu-management:voltmf-msg-data
-     |     |  |        +---x baa-onu-management:reset-voltmf-msg-data
-     |     |  |        +--ro baa-onu-management:in-messages?             bbf-yang:performance-counter64
-     |     |  |        +--ro baa-onu-management:out-messages?            bbf-yang:performance-counter64
-     |     |  |        +--ro baa-onu-management:messages-errors?         bbf-yang:performance-counter64
-     |     |  +--rw baa-onu-management:onu-config-info
-     |     |     +--rw baa-onu-management:vendor-name?                 string
-     |     |     +--rw baa-onu-management:expected-serial-number?      bbf-xpon-types:onu-serial-number
-     |     |     +--rw baa-onu-management:expected-registration-id?    bbf-xpon-types:onu-registration-id
-     |     |     +--rw baa-onu-management:xpon-technology?             identityref
-     |     |     +--rw baa-onu-management:expected-attachment-point
-     |     |     |  +--rw baa-onu-management:olt-name?                 -> /baa-network-manager:network-manager/managed-devices/device/name
-     |     |     |  +--rw baa-onu-management:channel-partition-name?   string
-     |     |     +--rw baa-onu-management:vomci-onu-management
-     |     |        +--rw baa-onu-management:use-vomci-management?     boolean
-     |     |        +--rw baa-onu-management:vomci-function?           string
-     |     |        +--rw baa-onu-management:onu-management-chain*     string
-     |     |        +--rw baa-onu-management:network-function-links
-     |     |           +--rw baa-onu-management:network-function-link* [name]
-     |     |              +--rw baa-onu-management:name                   string
-     |     |              +--rw baa-onu-management:termination-point-a
-     |     |              |  +--rw baa-onu-management:function-name          string
-     |     |              |  +--rw baa-onu-management:local-endpoint-name    string
-     |     |              +--rw baa-onu-management:termination-point-b
-     |     |                 +--rw baa-onu-management:function-name          string
-     |     |                 +--rw baa-onu-management:local-endpoint-name    string
+     |     |     +--ro configuration-alignment-state?   string
+     |     |     +--ro connection-state
+     |     |        +--ro connected?                  boolean
+     |     |        +--ro connection-creation-time?   yang:date-and-time
+     |     |        +--ro device-capability*          string
      |     +--rw device-notification
      |     |  +---n device-state-change
      |     |     +-- event?   enumeration
@@ -538,12 +490,13 @@ module: bbf-obbaa-network-manager
      |  |  +--rw nf-initiate!
      |  |     +--rw remote-endpoints
      |  |        +--rw remote-endpoint* [name]
-     |  |           +--rw name                             string
-     |  |           +--rw type?                            identityref
+     |  |           +--rw name                             bbf-yang:string-ascii64
+     |  |           +--rw nf-type?                         identityref
+     |  |           +--rw on-demand?                       boolean
+     |  |           +--rw local-endpoint-name?             bbf-yang:string-ascii64
      |  |           +--rw (client-transport)
      |  |           |  +--:(grpc) {bbf-nfc:grpc-client-supported}?
      |  |           |  |  +--rw grpc
-     |  |           |  |     +--rw local-endpoint-name?      string
      |  |           |  |     +--rw grpc-client-parameters
      |  |           |  |        +--rw channel
      |  |           |  |        |  +--rw ping-interval?   uint32
@@ -569,7 +522,7 @@ module: bbf-obbaa-network-manager
      |  |           |                 +--rw purpose?     string
      |  |           |                 +--rw partition?   string
      |  |           +--rw access-point* [name]
-     |  |           |  +--rw name                 string
+     |  |           |  +--rw name                 bbf-yang:string-ascii64
      |  |           |  +--rw (message-transport)
      |  |           |     +--:(grpc) {bbf-nfc:grpc-client-supported}?
      |  |           |     |  +--rw grpc
@@ -658,12 +611,12 @@ module: bbf-obbaa-network-manager
      |     +--rw listen!
      |        +--rw idle-timeout?      uint16
      |        +--rw listen-endpoint* [name]
-     |           +--rw name                string
+     |           +--rw name                bbf-yang:string-ascii64
      |           +--rw (transport)
      |           |  +--:(grpc)
      |           |     +--rw grpc
      |           |        +--rw grpc-server-parameters
-     |           |           +--rw local-endpoint-name?   string
+     |           |           +--rw local-endpoint-name?   bbf-yang:string-ascii64
      |           |           +--rw local-address          inet:ip-address
      |           |           +--rw local-port?            inet:port-number
      |           |           +--rw keepalives! {keepalives-supported}?
@@ -672,7 +625,7 @@ module: bbf-obbaa-network-manager
      |           |              +--rw probe-interval    uint16
      |           +--rw remote-endpoints
      |              +--ro remote-endpoint* [name]
-     |              |  +--ro name    string
+     |              |  +--ro name    bbf-yang:string-ascii64
      |              +---n remote-endpoint-status-change
      |                 +-- remote-endpoint                      -> ../../../remote-endpoints/remote-endpoint/name
      |                 +-- connected                            boolean
@@ -719,6 +672,80 @@ module: bbf-obbaa-network-manager
               +--ro percentage-of-standard-modules-having-augments?    string
 ```
 
+```
+module: bbf-obbaa-onu-management
+
+  augment /baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device/baa-network-manager:device-management:
+    +--rw onu-config-info
+       +--rw vendor-name?                   string
+       +--rw expected-serial-number?        bbf-xpon-types:onu-serial-number
+       +--rw expected-registration-id?      bbf-xpon-types:onu-registration-id
+       +--rw xpon-technology?               identityref
+       +--rw planned-onu-management-mode?   identityref
+       +--rw expected-attachment-points
+       |  +--rw list-type?                   enumeration
+       |  +--rw expected-attachment-point* [name]
+       |     +--rw name                                       string
+       |     +--rw olt-name                                   -> /baa-network-manager:network-manager/managed-devices/device/name
+       |     +--rw channel-partition-name?                    string
+       |     +--rw planned-onu-management-mode-in-this-olt?   identityref
+       +--rw vomci-onu-management
+          +--rw use-vomci-management?             boolean
+          +--rw onu-management-chain-selection?   bbf-vomcit:onu-management-chain-selection
+          +--rw vomci-function?                   bbf-yang:string-ascii64
+          +--rw onu-management-chain* [nf-type nf-name]
+          |  +--rw nf-type    bbf-vomcit:vomci-entity-type
+          |  +--rw nf-name    bbf-yang:string-ascii64
+          +--rw network-function-links
+             +--rw network-function-link* [name]
+                +--rw name                   string
+                +--rw termination-point-a
+                |  +--rw function-name          string
+                |  +--rw local-endpoint-name    string
+                +--rw termination-point-b
+                   +--rw function-name          string
+                   +--rw local-endpoint-name    string
+  augment /baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device/baa-network-manager:device-management/baa-network-manager:device-state:
+    +--ro onu-state-info
+       +--ro onu-state                         identityref
+       +--ro determined-onu-management-mode?   identityref
+       +--ro detected-serial-number?           bbf-xpon-types:onu-serial-number
+       +--ro detected-registration-id?         bbf-xpon-types:onu-registration-id
+       +--ro vendor-id?                        string
+       +--ro equipment-id?                     string
+       +--ro attachment-point
+       |  +--ro olt-name                    string
+       |  +--ro channel-termination-name    string
+       |  +--ro onu-id?                     bbf-xpon-types:onu-id
+       |  +--ro v-ani-name?                 string
+       |  +--ro olt-local-onu-name?         string
+       +--ro software-images
+       |  +--ro software-image* [id]
+       |     +--ro id              uint8
+       |     +--ro version?        string
+       |     +--ro is-committed    boolean
+       |     +--ro is-active       boolean
+       |     +--ro is-valid        boolean
+       |     +--ro product-code?   string
+       |     +--ro hash?           string
+       +--ro voltmf-msg-data
+          +--ro in-messages?       bbf-yang:performance-counter64
+          +--ro out-messages?      bbf-yang:performance-counter64
+          +--ro messages-errors?   bbf-yang:performance-counter64
+
+  notifications:
+    +---n onu-authentication-report-notification
+       +--ro onu-authentication-status    identityref
+       +--ro olt-name                     string
+       +--ro channel-termination-name     string
+       +--ro onu-id?                      bbf-xpon-types:onu-id
+       +--ro detected-serial-number?      bbf-xpon-types:onu-serial-number
+       +--ro detected-registration-id?    bbf-xpon-types:onu-registration-id
+       +--ro v-ani-name?                  string
+       +--ro olt-local-onu-name?          string
+       +--ro onu-name?                    string
+```
+
 ### Standard ONU Adapter
 
 The management of an ONU utilizes the Device Adapter concept within
@@ -757,6 +784,8 @@ authentication of the ONU succeeds, a set-onu-communication Action
 Request is forwarded to vOMCI Proxy and vOMCI function that is part of
 the ONU management chain.
 
+**Info:** Release 5.0 introduces new options for ONU authentication. Pleaser refer to the ONU Authentication page for mored details. In this section, it is assumed that ONU authentication is performed by the OLT and that the ONU created in the BAA layer is managed trough vOMCI. When an ONU name is not included in the notifications sent by the OLT, the matching of the ONU identification properties is made through parameters such as the attachment point, the Serial Number and the Registration ID.
+
 #### ONU creation with the management chain specified by SDN M&C
 
 In this release, the ONU management chain configuration is expected to be configured by an external management entity. The external management entity will send the ONU management chain details with the create-onu netconf request. In a future release, the BAA layer will be able to support the determination of the ONU management chain.
@@ -779,8 +808,7 @@ The following is an example of the Create ONU request that contains the ONU\'s m
    ~ See the License for the specific language governing permissions and
    ~ limitations under the License.
 -->
-
-<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907656">
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1527307907657">
    <edit-config>
       <target>
          <running />
@@ -792,7 +820,7 @@ The following is an example of the Create ONU request that contains the ONU\'s m
                   <name>onuA</name>
                   <device-management>
                      <type>ONU</type>
-                     <interface-version>1.0</interface-version>
+                     <interface-version>1.1</interface-version>
                      <vendor>BBF</vendor>
                      <model>standard</model>
                      <device-connection>
@@ -801,17 +829,30 @@ The following is an example of the Create ONU request that contains the ONU\'s m
                      </device-connection>
                      <onu-config-info xmlns="urn:bbf:yang:obbaa:onu-management" xmlns:onu="urn:bbf:yang:obbaa:onu-management">
                         <expected-serial-number>ABCD12345678</expected-serial-number>
-                        <expected-attachment-point>
-                           <olt-name>OLT1</olt-name>
-                           <channel-partition-name>CG_1.CPart_1</channel-partition-name>
-                        </expected-attachment-point>
+                        <planned-onu-management-mode xmlns:baa-onu-types="urn:bbf:yang:obbaa:xpon-onu-types">baa-onu-types:use-vomci</planned-onu-management-mode>
+                        <expected-attachment-points>
+                           <list-type>allow-any</list-type>
+                           <expected-attachment-point>
+                              <name>OLT1-CPart_1</name>
+                              <olt-name>OLT1</olt-name>
+                              <channel-partition-name>CG_1.CPart_1</channel-partition-name>
+                           </expected-attachment-point>
+                        </expected-attachment-points>
                         <xpon-technology xmlns:bbf-xpon-types="urn:bbf:yang:bbf-xpon-types">bbf-xpon-types:gpon</xpon-technology>
                         <vomci-onu-management>
-                           <use-vomci-management>true</use-vomci-management>
                            <vomci-function>vomci-vendor-1</vomci-function>
-                           <onu-management-chain>vomci-vendor-1</onu-management-chain>
-                           <onu-management-chain>proxy-1</onu-management-chain>
-                           <onu-management-chain>OLT1</onu-management-chain>
+                           <onu-management-chain>
+                             <nf-type>vomci-function</nf-type>
+                             <nf-name>vomci-vendor-1</nf-name>
+                           </onu-management-chain>
+                           <onu-management-chain>
+                             <nf-type>onu-management-proxy</nf-type>
+                             <nf-name>proxy-1</nf-name>
+                           </onu-management-chain>
+                           <onu-management-chain>
+                             <nf-type>olt</nf-type>
+                             <nf-name>OLT1</nf-name>
+                           </onu-management-chain>
                             <network-function-links>
                              <network-function-link>
                                <name>vOMCI-proxy</name>
@@ -819,9 +860,9 @@ The following is an example of the Create ONU request that contains the ONU\'s m
                                  <function-name>vomci-vendor-1</function-name>
                                  <local-endpoint-name>vOMCi-grpc-1</local-endpoint-name>
                                </termination-point-a>
-                               <termination-point-b>
+                              <termination-point-b>
                                  <function-name>proxy-1</function-name>
-                                 <local-endpoint-name>proxy-grpc-1</local-endpoint-name>
+                                  <local-endpoint-name>proxy-grpc-1</local-endpoint-name>
                                </termination-point-b>
                              </network-function-link>
                               <network-function-link>
@@ -987,12 +1028,21 @@ deletion of the ONU device in the BAA layer, triggers the
 MediatedDeviceEventListener\'s onuDeviceRemoved() method that results in
 Delete-ONU Action request towards vOMCI Proxy and vOMCI function. If a
 MediatedDeviceNetconfSession has been established then the Delete-ONU
-request is transmitted and the session is closed after the response to
-the request is received.
+request is transmitted and the session is closed after the response to the request is received.
 
 <p align="center">
  <img width="800px" height="800px" src="{{site.url}}/architecture/voltmf/onu_delete.png">
 </p>
+
+### ONU Alarm handling via vOMCI
+
+The following picture depicts the general workflow for processing ONU alarms received through the vOMCI function. The alarms are forwarded to the SDN M&C using ietf-alarm (RFC8632) style notifications.
+
+<p align="center">
+ <img width="800px" height="600px" src="{{site.url}}/architecture/voltmf/onu_alarm_handling_sequence.png">
+</p>
+
+Details about the implemented alarms and the processing made in the vOMCI function can be found in [vOMCI - ONU alarm Handling](onu_alarm/index.md#onu_alarm).
 
 ## vOLTMF to vOMCI Messages over MvOLTMF-vOMCI
 
@@ -1071,8 +1121,8 @@ getFormattedRequest(), the GPBFormatter populates the req\_type field in the mes
 |ONUConstants.ONU_GET_OPERATION|get_data|
 |ONUConstants.ONU_COPY_OPERATION|replace_config|
 |ONUConstants.ONU_EDIT_OPERATION|update_config|
-|ONUConstants.CREATE_ONU|rpc|
-|ONUConstants.DELETE_ONU/ ONUConstants.SET_ONU_COMMUNICATION|ONUConstants.DELETE_ONU/ ONUConstants.SET_ONU_COMMUNICATION|
+|ONUConstants.CREATE_ONU|action|
+|ONUConstants.DELETE_ONU/ ONUConstants.SET_ONU_COMMUNICATION|action|
 
 On receiving the responses, the GPBFormatter validates following fields:
 
@@ -1091,7 +1141,7 @@ in ResponseData object it returns.
 |get_resp|ONUConstants.ONU_GET_OPERATION|
 |replace_config_resp|ONUConstants.ONU_COPY_OPERATION|
 |update_config_resp|ONUConstants.ONU_EDIT_OPERATION|
-|rpc_resp|ONUConstants.CREATE_ONU|
+|action_resp|ONUConstants.CREATE_ONU|
 |action_resp|ONUConstants.DELETE_ONU/ ONUConstants.SET_ONU_COMMUNICATION|
 
 ## Sample messages on the MvOLTMF-vOMCI (processed locally by the vOMCI instance)
@@ -1103,42 +1153,42 @@ Create-ONU request towards the vOMCI Function
 
 ```
 Msg {
-header {                       
- msg_id: "1"
- sender_name: "vOLTMF"
- recipient_name: "vomci-vendor-1"
- object_type: VOMCI_FUNCTION
- object_name: "vomci-vendor-1"
-}                                                                     
-body {
- request {                                                                    
-   rpc {
-     input_data: "{\"bbf-vomci-function:create-onu\":{\"name\":\"ont1\"}}"                                      
-   }                                                                  
- }                                                                    
+header {
+  msg_id: "1"
+  sender_name: "vOLTMF"
+  recipient_name: "vomci-vendor-1"
+  object_type: VOMCI_FUNCTION
+  object_name: "vomci-vendor-1"
 }
-}  
+body {
+  request {
+    action {
+      input_data: "{\"bbf-vomci-function:managed-onus\":{\"create-onu\":{\"name\":\"ont1\"}}}"
+    }
+  }
+}
+ }            
 ```
 
 Create-ONU request towards the vOMCI Proxy
 
 ```
-Msg{
-header {                       
- msg_id: "2"
- sender_name: "vOLTMF"
- recipient_name: "proxy-1"
- object_type: VOMCI_PROXY
- object_name: "proxy-1"
+Msg {
+header {
+  msg_id: "2"
+  sender_name: "vOLTMF"
+  recipient_name: "proxy-1"
+  object_type: VOMCI_PROXY
+  object_name: "proxy-1"
 }
 body {
- request {
-   rpc {
-     input_data: "{\"bbf-vomci-proxy:create-onu\":{\"name\":\"ont1\"}}"
-   }
- }
+  request {
+    action {
+      input_data: "{\"bbf-vomci-proxy:managed-onus\":{\"create-onu\":{\"name\":\"ont1\"}}}"
+    }
+  }
 }
-}
+ }  
 ```
 
 Create-ONU response from the vOMCI Function
@@ -1146,22 +1196,22 @@ Create-ONU response from the vOMCI Function
 ```
 Msg{
 header {
- msg_id: "1"
- sender_name: "vomci-vendor-1"
- recipient_name: "vOLTMF"
- object_type: VOMCI_FUNCTION
- object_name: "vomci-vendor-1"
+  msg_id: "1"
+  sender_name: "vomci-vendor-1"
+  recipient_name: "vOLTMF"
+  object_type: VOMCI_FUNCTION
+  object_name: "vomci-vendor-1"
 }
 body {
- response {
-   rpc_resp {
-     status_resp {
-    status_code=0
-     }
-   }
- }
+  response {
+    action_resp {
+      status_resp {
+		 status_code=0
+      }
+    }
+  }
 }
-}
+}   
 ```
 
 Create-ONU response from the vOMCI Proxy
@@ -1176,7 +1226,7 @@ Msg{ header {
 }
 body {
   response {
-    rpc_resp {
+    action_resp {
       status_resp {
 		 status_code=0
       }
@@ -1200,7 +1250,7 @@ header {
 body {
   request {
     action {
-      input_data: "{\"bbf-vomci-function:managed-onus\":{\"managed-onu\":[{\"name\":\"ont1\",\"set-onu-communication\":{\"onu-attachment-point\":{\"olt-name\":\"OLT1,\"channel-termination-name\":\"CT_1\",\"onu-id\":1},\"voltmf-remote-endpoint-name\":\"vOLTMF_Kafka\",\"onu-communication-available\":true,\"olt-remote-endpoint-name\":\"proxy-grpc-1\"}}]}}"     }
+      input_data: "{\"bbf-vomci-function:managed-onus\":{\"managed-onu\":[{\"name\":\"ont1\",\"set-onu-communication\":{\"onu-attachment-point\":{\"olt-name\":\"OLT1,\"channel-termination-name\":\"CT_1\",\"onu-id\":1},\"voltmf-remote-endpoint-name\":\"vOLTMF_Kafka\",\"onu-communication-available\":true,\"olt-remote-endpoint-name\":\"proxy-grpc-1\"}}]}}"}
   }
 }
 ```
@@ -1219,7 +1269,7 @@ header {
 body {
   request {
     action {
-      input_data: "{\"bbf-vomci-proxy:managed-onus\":{\"managed-onu\":[{\"name\":\"ont1\",\"set-onu-communication\":{\"onu-attachment-point\":{\"olt-name\":\"OLT1\", \"channel-termination-name\":\"CT_1\",\"onu-id\":1},\"onu-communication-available\":true,\"vomci-func-remote-endpoint-name\":\"vOMCi-grpc-1\",\"olt-remote-endpoint-name\":\"OLT1\"}}]}}"     }
+      input_data: "{\"bbf-vomci-proxy:managed-onus\":{\"managed-onu\":[{\"name\":\"ont1\",\"set-onu-communication\":{\"onu-attachment-point\":{\"olt-name\":\"OLT1\", \"channel-termination-name\":\"CT_1\",\"onu-id\":1},\"onu-communication-available\":true,\"vomci-func-remote-endpoint-name\":\"vOMCi-grpc-1\",\"olt-remote-endpoint-name\":\"OLT1\"}}]}}"}
   }
 }
 }
@@ -1231,7 +1281,7 @@ Set-ONU-Communication response from the vOMCI Function
 Msg {
 header {
   msg_id: "3"
-  sender_name: "vomci-vendor-1"
+  sender_name: "vomci-vendor-1"
   recipient_name: "vOLTMF"
   object_type: VOMCI_FUNCTION
   object_name: "vomci-vendor-1"
@@ -1244,6 +1294,8 @@ body {
       }
     }
   }
+}
+}
 ```
 
 Set-ONU-Communication response from the vOMCI Proxy
@@ -1317,7 +1369,7 @@ Delete-ONU response from the vOMCI Function
 Msg {
 header {
   msg_id: "5"
-  sender_name: "vomci-vendor-1"
+  sender_name: "vomci-vendor-1"
   recipient_name: "vOLTMF"
   object_type: VOMCI_FUNCTION
   object_name: "vomci-vendor-1"
@@ -1357,7 +1409,216 @@ body {
 }
 ```
 
-## Sample notifications on the MvOLTMF-vOMCI (sent by the vOMCI function)
+Configure endpoints towards the vOMCI function
+
+```
+Msg {
+ header {
+  msg_id: \"2\"
+  sender_name: \"vOLTMF\"
+  recipient_name: \"vomci-vendor-1\"
+  object_name: \"vomci-vendor-1\"
+  object_type: VOMCI_FUNCTION
+}
+body {
+  request {
+    update_config {
+      update_config_replica: {
+         delta_config: {
+"{
+   \"bbf-vomci-function:vomci\": {
+      \"remote-network-function\": {
+         \"nf-client\": {
+            \"enabled\": true,
+            \"nf-initiate\": {
+               \"remote-endpoints\": {
+                  \"remote-endpoint\": [
+                     {
+                        \"name\": \"obbaa-vomci\",
+                        \"nf-type\": \"bbf-network-function-types:voltmf-type\",
+                        \"local-endpoint-name\": \"vOMCI-kfk-1\",
+                        \"kafka-agent\": {
+                           \"kafka-agent-parameters\": {
+                              \"client-id\": \"client-id2\",
+                              \"publication-parameters\": {
+                                 \"topic\": [
+                                    {
+                                       \"name\": \"vomci1-response\",
+                                       \"purpose\": \"VOMCI_RESPONSE\"
+                                    },
+                                    {
+                                       \"name\": \"vomci1-notification\",
+                                       \"purpose\": \"VOMCI_NOTIFICATION\"
+                                    }
+                                 ]
+                              },
+                              \"consumption-parameters\": {
+                                 \"topic\": [
+                                    {
+                                       \"name\": \"vomci1-request\",
+                                       \"purpose\": \"VOMCI_REQUEST\"
+                                    }
+                                 ]
+                              }
+                           }
+                        },
+                        \"access-point\": [
+                           {
+                              \"name\": \"obbaa-vomci\",
+                              \"kafka-agent\": {
+                                 \"kafka-agent-transport-parameters\": {
+                                    \"remote-address\": \"kafka-host\"
+                                 }
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               }
+            }
+         },
+         \"nf-server\": {
+            \"enabled\": true,
+            \"listen\": {
+               \"listen-endpoint\": [
+                  {
+                     \"name\": \"vOMCI-grpc-1\",
+                     \"grpc\": {
+                        \"grpc-server-parameters\": {
+                           \"local-endpoint-name\": \"vOMCI-grpc-1\",
+                           \"local-address\": \"::\",
+                           \"local-port\": 8100
+                        }
+                     }
+                  }
+               ]
+            }
+         }
+      }
+   }
+}"
+       }
+     }
+    }
+  }
+}
+
+```
+
+Configure endpoints towards the vOMCI Proxy
+
+```
+Msg {
+ header {
+  msg_id: \"2\"
+  sender_name: \"vOLTMF\"
+  recipient_name: \"proxy1\"
+  object_name: \"proxy1\"
+  object_type: VOMCI_PROXY
+}
+body {
+  request {
+    update_config {
+      update_config_replica: {
+         delta_config:  {
+"{
+  \"bbf-vomci-proxy:vomci\": {
+    \"remote-network-function\": {
+      \"nf-client\": {
+        \"enabled\": true,
+        \"nf-initiate\": {
+          \"remote-endpoints\": {
+            \"remote-endpoint\": [
+              {
+                \"name\": \"vOLTMF_Kafka_2\",
+                \"nf-type\": \"bbf-network-function-types:voltmf-type\",
+                \"local-endpoint-name\": \"proxy-kfk-1\",
+                \"kafka-agent\": {
+                  \"kafka-agent-parameters\": {
+                    \"client-id\": \"client-id3\",
+                    \"publication-parameters\": {
+                      \"topic\": [
+                        {
+                          \"name\": \"vomci-proxy-request\",
+                          \"purpose\": \"VOMCI_RESPONSE\"
+                        },
+                        {
+                          \"name\": \"vomci-proxy-notification\",
+                          \"purpose\": \"VOMCI_NOTIFICATION\"
+                        }
+                      ]
+                    },
+                    \"consumption-parameters\": {
+                      \"topic\": [
+                        {
+                          \"name\": \"vomci-proxy-request\",
+                          \"purpose\": \"VOMCI_REQUEST\"
+                        }
+                      ]
+                    }
+                  }
+                },
+                \"access-point\": [
+                  {
+                    \"name\": \"vOLTMF_Kafka_2\",
+                    \"kafka-agent\": {
+                      \"kafka-agent-transport-parameters\": {
+                        \"remote-address\": \"kafka-host\",
+                        \"remote-port\": 9092
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                \"name\": \"vOMCI-grpc-1\",
+                \"nf-type\": \"bbf-network-function-types:vomci-function-type\",
+                \"local-endpoint-name\": \"proxy-grpc-2\",
+                \"access-point\": [
+                  {
+                    \"name\": \"vOMCI-grpc-1\",
+                    \"grpc\": {
+                      \"grpc-transport-parameters\": {
+                        \"remote-address\": \"vomci-host\",
+                        \"remote-port\": 8100
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      \"nf-server\": {
+        \"enabled\": true,
+        \"listen\": {
+          \"listen-endpoint\": [
+            {
+              \"name\": \"proxy-grpc-2\",
+              \"grpc\": {
+                \"grpc-server-parameters\": {
+                  \"local-endpoint-name\": \"proxy-grpc-2\",
+                  \"local-address\": \"::\",
+                  \"local-port\": 8433
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}"
+        }
+      }
+    }
+  }
+}
+
+```
+
+## Sample notifications on the MvOLTMF-vOMCI (sent by the vOMCI function)
 
 ONU Alignment Result (aligned) Notification
 
@@ -1371,7 +1632,7 @@ Msg {
   object_name: "ont1"
 }
 body {
-  notification {        
+  notification {
     data: "{\"bbf-vomci-function:onu-alignment-status\":{\"event-time\": \"2021-06-01T15:53:36+00:00\",\"onu-name\": \"ont1\",\"alignment-status\": \"aligned\"}}"
   }
 }
@@ -1397,10 +1658,69 @@ body {
 }
 ```
 
-## Sample messages on the MvOLTMF-vOMCI (translated and forwarded to the ONU)
+ONU Reported Alarms via the vOMCI function
 
+```
+Msg {
+ header {
+  msg_id: "1"
+  sender_name: "vomci-vendor-1"
+  recipient_name: "vOLTMF"
+  object_type: ONU
+  object_name: "ont1"
+}
+body {
+  notification {   
+    event_timestamp: "2022-01-09T13:53:36+00:00"
+    data: "{ "ietf-alarms:alarm-notification": {
+    "resource": "/ietf-interfaces:interfaces/interface[name='eth0']",
+    "alarm-type-id": "bbf-alarm-types:bbf-alarm-type-id",
+    "alarm-type-qualifier": "",
+    "time": "2022-01-09T13:53:36+00:00",
+    "perceived-severity": "major",
+    "alarm-text": "example alarm"
+     }
+	}"
+  }
+}
+}
+```
+
+ONU Cleared Alarms via the vOMCI function
+
+```
+Msg {
+ header {
+  msg_id: "1"
+  sender_name: "vomci-vendor-1"
+  recipient_name: "vOLTMF"
+  object_type: ONU
+  object_name: "ont1"
+}
+body {
+  notification {   
+    event_timestamp: "2022-01-09T13:53:36+00:00"
+    data: "{ "ietf-alarms:alarm-notification": {
+    "resource": "/ietf-interfaces:interfaces/interface[name='eth0']",
+    "alarm-type-id": "bbf-alarm-types:bbf-alarm-type-id",
+    "alarm-type-qualifier": "",
+    "time": "2022-01-09T13:54:36+00:00",
+    "perceived-severity": "cleared",
+    "alarm-text": "example alarm"
+         }
+	}"
+  }
+}
+}
+```
+
+## Sample messages on the MvOLTMF-vOMCI (translated and forwarded to the ONU)
+
+### Replace-Config
 When vOLTMF receives onu-alignment result notification from the
 vOMCI function with alignment-status as \"misaligned\", the vOLTMF tries to align the ONU by sending replace-config request towards the  vOMCI function. For an ONU created with standard onu adapter 1.0 below is the sample replace-config request and response:
+
+replace-config request towards the vOMCI function:
 
 ```
 Msg {
@@ -1425,23 +1745,119 @@ replace-config response from a vOMCI function:
 
 ```
 Msg {
-header {
- msg_id: "2"
- sender_name: "vomci-vendor-1"
- recipient_name: "vOLTMF"
- object_type: ONU
- object_name: "ont1"
+ header {
+  msg_id: "2"
+  sender_name: "vomci-vendor-1"
+  recipient_name: "vOLTMF"
+  object_type: ONU
+  object_name: "ont1"
 }
 body {
- response {
-   replace_config_resp {
-     status_resp{
-   status_code=0
-   }
-   }
- }
+  response {
+    replace_config_resp {
+      status_resp{
+		status_code=0
+	  }
+    }
+  }
 }
 }
 ```
+
+### Get-Data
+
+Information about an ONU can be retrieved by sending a get-data request towards the vOMCI function. This request contains a list of filters which specify which parts of the ONU data model need to be retrieved. For an ONU created with the standard onu adapter 1.0 below is the sample get-data request and response:
+
+get-data request towards the vOMCI function:
+
+```
+Msg {
+  header {
+    msg_id: "3"
+    sender_name: "vOLTMF"
+    recipient_name: "vomci-vendor-1"
+    object_name: "ont1"
+  }
+  body {
+    request {
+      get_data {
+        filter: "{
+          \"ietf-hardware:hardware\": {
+            \"component\": [
+              {
+                \"name\": \"ont1\",
+                \"bbf-software-management:software\": {}
+              }
+            ]
+          }
+        }"
+      }
+    }
+  }
+}
+```
+
+get-data response from the vOMCI function:
+
+```
+Msg {
+  header {
+    msg_id: "3"
+    sender_name: "vomci-vendor-1"
+    recipient_name: "vOLTMF"
+    object_type: ONU
+    object_name: "ont1"
+  }
+  body {
+    response {
+      get_resp {
+        data: "{
+          \"ietf-hardware:hardware\": {
+            \"component\": [
+              {
+                 \"name\": \"ont1\",
+                  \"bbf-software-management:software\": {
+                  \"software\": [
+                    {
+                      \"name\": \"model1-software\",
+                      \"revisions\": {
+                        \"revision\": [
+                          {
+                            \"id\": 1,
+                            \"alias": \"model1-software-rev1\",
+                            \"state": \"in-use\",
+                            \"version\": \"1.0.0\",
+                            \"product-code\": \"pcode\",
+                            \"hash\": \"123456789\",
+                            \"is-valid": true,
+                            \"is-active": true,
+                            \"is-committed": true
+                          },
+                          {
+                            \"id\": 2,
+                            \"alias\": \"model1-software-rev2\",
+                            \"state": \"available\",
+                            \"version\": \"2.0.0\",
+                            \"product-code\": \"pcode\",
+                            \"hash\": \"134323233\",
+                            \"is-valid\": true,
+                            \"is-active\": false,
+                            \"is-committed\": false
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }"
+      }
+    }
+  }
+}
+```
+
 
 [<--Architecture](../index.md#architecture)

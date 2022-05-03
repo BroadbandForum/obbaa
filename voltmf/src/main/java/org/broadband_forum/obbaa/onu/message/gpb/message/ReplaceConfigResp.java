@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.ReplaceConfigResp}
  */
-public final class ReplaceConfigResp extends
+public  final class ReplaceConfigResp extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.ReplaceConfigResp)
     ReplaceConfigRespOrBuilder {
@@ -99,7 +99,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Status status_resp = 1;</code>
    * @return Whether the statusResp field is set.
    */
-  @java.lang.Override
   public boolean hasStatusResp() {
     return statusResp_ != null;
   }
@@ -107,14 +106,12 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Status status_resp = 1;</code>
    * @return The statusResp.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.Status getStatusResp() {
     return statusResp_ == null ? org.broadband_forum.obbaa.onu.message.gpb.message.Status.getDefaultInstance() : statusResp_;
   }
   /**
    * <code>.tr451_vomci_nbi_message.v1.Status status_resp = 1;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.StatusOrBuilder getStatusRespOrBuilder() {
     return getStatusResp();
   }

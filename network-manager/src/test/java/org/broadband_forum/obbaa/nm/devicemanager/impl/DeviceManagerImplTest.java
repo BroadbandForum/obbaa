@@ -188,6 +188,29 @@ public class DeviceManagerImplTest {
     }
 
     @Test
+    public void testDeterminedMgmtModeInOnuStateInfo() {
+        Device onuDevice = new Device();
+        onuDevice.setDeviceName("onu1");
+        DeviceState deviceState = new DeviceState();
+        deviceState.setConfigAlignmentState("Aligned");
+        ConnectionState connectionState = new ConnectionState();
+        connectionState.setConnectionCreationTime(m_now);
+        connectionState.setConnected(true);
+        DeviceMgmt devicemgmt = new DeviceMgmt();
+        devicemgmt.setDeviceState(deviceState);
+        devicemgmt.setDeviceType("ONU");
+        onuDevice.setDeviceManagement(devicemgmt);
+        OnuStateInfo onuStateInfo = new OnuStateInfo();
+        deviceState.setOnuStateInfo(onuStateInfo);
+        onuStateInfo.setDetermineOnuManagementMode("use-vomci");
+        when(m_deviceDao.getDeviceByName("onu1")).thenReturn(onuDevice);
+        when(m_dm.getDevice("onu1")).thenReturn(onuDevice);
+        when(m_deviceDao.getDeviceState("onu1")).thenReturn(deviceState);
+        m_dm.updateOnuStateInfo("onu1", onuStateInfo);
+        assertEquals("use-vomci", m_deviceDao.getDeviceState("onu1").getOnuStateInfo().getDetermineOnuManagementMode());
+    }
+
+    @Test
     public void testUpdateSoftwareImageInOnuStateInfo() {
         Device onuDevice = new Device();
         onuDevice.setDeviceName("onu2");

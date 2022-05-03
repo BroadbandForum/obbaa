@@ -21,7 +21,7 @@
     <parent>
         <artifactId>baa-root-pom</artifactId>
         <groupId>org.broadband-forum.obbaa</groupId>
-        <version>4.1.1</version>
+        <version>5.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>baa-dist</artifactId>
@@ -306,4 +306,59 @@
             </plugin>
     </plugins>
 </build>
+    <profiles>
+        <profile>
+            <id>copy-nf-standard-adapters</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>copy-nf-standard-adapters</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>bbf-nf*.zip</include>
+                                    </includes>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-nf-standard-adapters</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.basedir}</outputDirectory>
+                                    <overwrite>true</overwrite>
+                                    <resources>
+                                        <resource>
+                                            <directory>../../obbaa-yang-modules/nf-standard-adapters/bin</directory>
+                                            <includes>
+                                                <include>*.zip</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

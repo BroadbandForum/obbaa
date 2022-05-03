@@ -1,0 +1,18 @@
+<network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+    <managed-devices>
+        <device>
+            <name>onu1</name>
+            <root>
+                <hardware-state xmlns="urn:ietf:params:xml:ns:yang:ietf-hardware">
+                    <component/>
+                </hardware-state>
+                <hardware xmlns="urn:ietf:params:xml:ns:yang:ietf-hardware">
+                    <component>
+                        <name>onu1</name>
+                        <software xmlns="urn:bbf:yang:bbf-software-management"/>
+                    </component>
+                </hardware>
+            </root>
+        </device>
+    </managed-devices>
+</network-manager>

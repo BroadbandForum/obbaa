@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.pool2.BaseKeyedPooledObjectFactory;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;
 import org.junit.Before;
@@ -91,9 +92,10 @@ public class SwitchableFactoryTest {
 
     private void testFactoryIsInvoked(BaseKeyedPooledObjectFactory factoryToBeUses, BaseKeyedPooledObjectFactory factoryNotToBeUsed)
             throws Exception {
+        PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,"blah");
         verify(factoryToBeUses, never()).create(anyString());
-        m_factory.create("blah");
-        verify(factoryToBeUses).create("blah");
+        m_factory.create(resourceId);
+        verify(factoryToBeUses).create(resourceId);
 
         verify(factoryToBeUses, never()).wrap(anyObject());
         m_factory.wrap(m_pmaSession);

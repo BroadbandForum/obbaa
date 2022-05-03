@@ -25,6 +25,7 @@ import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.device.adapter.DeviceConfigBackup;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResource;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
@@ -51,12 +52,12 @@ final class MessageFormatterHelper {
 
     private MessageFormatterHelper() {}
 
-    static String getJsonForDeltaConfig(EditConfigRequest request, Device onuDevice, AdapterManager adapterManager,
+    static String getJsonForDeltaConfig(EditConfigRequest request, PmaResource resource, AdapterManager adapterManager,
                                         ModelNodeDataStoreManager modelNodeDsm) {
         EditConfigElement configElement = request.getConfigElement();
         List<String> configElementsJsonList = new ArrayList<>();
         if (configElement != null) {
-            SchemaRegistry deviceSchemaRegistry = AdapterUtils.getAdapterContext(onuDevice, adapterManager).getSchemaRegistry();
+            SchemaRegistry deviceSchemaRegistry = AdapterUtils.getAdapterContext(resource, adapterManager).getSchemaRegistry();
             DeviceJsonUtils deviceJsonUtils = new DeviceJsonUtils(deviceSchemaRegistry, modelNodeDsm);
             for (Element element : configElement.getConfigElementContents()) {
                 DataSchemaNode deviceRootSchemaNode =
@@ -97,7 +98,7 @@ final class MessageFormatterHelper {
                         .getJSONObject(ONUConstants.DEVICE_MANAGEMENT).toString();
             }
             filterElementsJsonList.add(filterElementJsonString.substring(1, filterElementJsonString.length() - 1));
-            LOGGER.info("JSON converted string for the GET request of the filter element is " + filterElementJsonString);
+            LOGGER.debug("JSON converted string for the GET request of the filter element is " + filterElementJsonString);
         }
         return "{\"" + ONUConstants.NETWORK_MANAGER + ONUConstants.COLON + deviceLeaf + "\""
                + ONUConstants.COLON + "{" + String.join(",", filterElementsJsonList) + "}}";

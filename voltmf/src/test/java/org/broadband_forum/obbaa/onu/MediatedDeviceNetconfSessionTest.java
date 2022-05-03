@@ -39,6 +39,7 @@ import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
+import org.broadband_forum.obbaa.nbiadapter.netconf.NbiNetconfServerMessageListener;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
@@ -131,6 +132,8 @@ public class MediatedDeviceNetconfSessionTest {
 
     @Mock
     private DeviceMgmt m_deviceMgmt;
+    @Mock
+    private NbiNetconfServerMessageListener m_nbiNetconfServerMessageListener;
 
     @Before
     public void setUp() {
@@ -168,7 +171,7 @@ public class MediatedDeviceNetconfSessionTest {
     private MediatedDeviceNetconfSession getNewMDNSessionForNewDevice() {
         return new MediatedDeviceNetconfSession(m_mediatedDevice, m_oltDeviceName, m_onuId, m_channelTermRef, m_labels,
                 m_kafkaProducer, m_modelNodeDSM, m_adapterManager, m_kafkaCommunicationPool,
-                m_schemaRegistry, m_messageFormatter, m_txService, m_networkFunctionDao, m_deviceDao);
+                m_schemaRegistry, m_messageFormatter, m_txService, m_networkFunctionDao, m_deviceDao, m_nbiNetconfServerMessageListener);
     }
 
     private void verifySessionIntegrity(MediatedDeviceNetconfSession session, String messageIdOne, String messageIdTwo,

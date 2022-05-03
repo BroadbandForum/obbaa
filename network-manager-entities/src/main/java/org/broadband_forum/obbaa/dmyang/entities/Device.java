@@ -36,7 +36,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 @Entity
 @IdClass(DevicePK.class)
 @YangList(name = "device", namespace = DeviceManagerNSConstants.NS)
-public class Device implements Comparable<Device> {
+public class Device implements Comparable<Device>, PmaResource {
     @Id
     @YangParentId
     @Column(name = YangParentId.PARENT_ID_FIELD_NAME)

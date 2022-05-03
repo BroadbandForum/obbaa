@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.UpdateConfigReplica}
  */
-public final class UpdateConfigReplica extends
+public  final class UpdateConfigReplica extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.UpdateConfigReplica)
     UpdateConfigReplicaOrBuilder {
@@ -96,7 +96,6 @@ private static final long serialVersionUID = 0L;
    * <code>bytes delta_config = 1;</code>
    * @return The deltaConfig.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString getDeltaConfig() {
     return deltaConfig_;
   }
@@ -412,7 +411,6 @@ private static final long serialVersionUID = 0L;
      * <code>bytes delta_config = 1;</code>
      * @return The deltaConfig.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString getDeltaConfig() {
       return deltaConfig_;
     }

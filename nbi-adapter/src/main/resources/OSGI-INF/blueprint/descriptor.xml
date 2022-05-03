@@ -27,6 +27,7 @@
     </reference>
     <reference id="aggregator" interface="org.broadband_forum.obbaa.aggregator.api.Aggregator" availability="mandatory"/>
     <reference id="schemaRegistry" interface="org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry" availability="mandatory"/>
+    <reference id="deviceManager" interface="org.broadband_forum.obbaa.nm.devicemanager.DeviceManager" availability="mandatory"/>
 
     <bean id="nbiNetconfAuth" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiSshNetconfAuth">
     </bean>
@@ -34,6 +35,7 @@
     <bean id="nbiNetconfServerMessageListener" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiNetconfServerMessageListener">
         <argument ref="netconfServer"/>
         <argument ref="aggregator"/>
+        <argument ref="deviceManager"/>
     </bean>
 
     <bean id="nbiNetconfServer" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiSshNetconfServer" init-method="start"

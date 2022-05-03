@@ -28,7 +28,7 @@
 
     <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>protocol-translation-snmp</artifactId>
-    <version>4.1.1</version>
+    <version>5.0.0</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -37,7 +37,7 @@
     </modules>
 
     <properties>
-        <obbaa-release.version>4.1.1</obbaa-release.version>
+        <obbaa-release.version>5.0.0</obbaa-release.version>
         <adapterType>OLT</adapterType>
         <adapterModel>protocolsnmp</adapterModel>
         <adapterVendor>sample</adapterVendor>

@@ -21,6 +21,7 @@
     <jpa:enable />
     <tx:enable-annotations/>
     <reference id="deviceDao" interface="org.broadband_forum.obbaa.dmyang.dao.DeviceDao" availability="mandatory"/>
+    <reference id="networkFunctionDao" interface="org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao" availability="mandatory"/>
     <reference id="persistenceMgrUtil" interface="org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil" availability="mandatory"/>
 
     <bean id="txService" class="org.broadband_forum.obbaa.dmyang.tx.TxService"/>
@@ -77,6 +78,7 @@
         <argument ref="clientDispatcher"/>
         <property name="deviceDao" ref="deviceDao"/>
         <property name="txService" ref="txService"/>
+        <property name="networkFunctionDao" ref="networkFunctionDao"/>
     </bean>
 
     <bean id="timer" class="org.broadband_forum.obbaa.connectors.sbi.netconf.impl.TimerService" init-method="init" destroy-method="destroy">

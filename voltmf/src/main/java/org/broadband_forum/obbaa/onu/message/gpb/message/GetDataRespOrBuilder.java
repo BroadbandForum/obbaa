@@ -27,4 +27,24 @@ public interface GetDataRespOrBuilder extends
    * @return The data.
    */
   com.google.protobuf.ByteString getData();
+
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 3;</code>
+   * @return The datastoreTag.
+   */
+  java.lang.String getDatastoreTag();
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 3;</code>
+   * @return The bytes for datastoreTag.
+   */
+  com.google.protobuf.ByteString
+      getDatastoreTagBytes();
 }

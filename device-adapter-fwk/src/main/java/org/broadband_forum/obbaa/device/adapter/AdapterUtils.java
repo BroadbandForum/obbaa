@@ -26,7 +26,9 @@ import java.io.IOException;
 
 import org.broadband_forum.obbaa.device.adapter.util.SystemProperty;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResource;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -48,6 +50,36 @@ public final class AdapterUtils {
         return adapterManager.getAdapterContext(new DeviceAdapterId(
                 device.getDeviceManagement().getDeviceType(), device.getDeviceManagement().getDeviceInterfaceVersion(),
                 device.getDeviceManagement().getDeviceModel(), device.getDeviceManagement().getDeviceVendor()));
+    }
+
+    public static AdapterContext getAdapterContext(NetworkFunction networkFunction, AdapterManager adapterManager) {
+        String adapterType;
+        switch (networkFunction.getType()) {
+            case "bbf-nf-types:vomci-function-type":
+                adapterType = "nf-vomci";
+                break;
+            case "bbf-nf-types:vomci-proxy-type":
+                adapterType = "nf-vproxy";
+                break;
+            default:
+                //unsupported type
+                LOGGER.error("Unsupported type \"{}\"", networkFunction.getType());
+                return null;
+        }
+        DeviceAdapter deviceAdapter = AdapterBuilder.createAdapterBuilder()
+                .setDeviceAdapterId(new DeviceAdapterId(adapterType, "1.0", "standard", "BBF"))
+                .build();
+        return getStandardAdapterContext(adapterManager, deviceAdapter);
+    }
+
+    public static AdapterContext getAdapterContext(PmaResource resource, AdapterManager adapterManager) {
+        if (resource instanceof Device) {
+            return getAdapterContext((Device) resource, adapterManager);
+        }
+        if (resource instanceof NetworkFunction) {
+            return getAdapterContext((NetworkFunction) resource, adapterManager);
+        }
+        return null;
     }
 
     public static AdapterContext getStandardAdapterContext(AdapterManager adapterManager, DeviceAdapter deviceAdapter) {

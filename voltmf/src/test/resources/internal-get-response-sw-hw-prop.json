@@ -1,9 +1,65 @@
 {
-  "olt-name": "OLT1",
-  "payload": "{\"identifier\":\"0\",\"operation\":\"get\",\"data\":{\"network-manager:device-management\":{\"device-state\":{\"bbf-obbaa-onu-management:onu-state-info\":{\"equipment-id\":\"test1\",\"software-images\":{\"software-image\":[{\"id\":\"1\",\"version\":\"1111\",\"is-committed\":\"false\",\"is-active\":\"false\",\"is-valid\":\"true\",\"product-code\":\"test1111\",\"hash\":\"11\"},{\"id\":\"0\",\"version\":\"0000\",\"is-committed\":\"true\",\"is-active\":\"true\",\"is-valid\":\"true\",\"product-code\":\"test\",\"hash\":\"00\"}]}}}}},\"status\":\"OK\"}",
-  "onu-name": "onu",
-  "channel-termination-ref": "CT_1",
-  "event": "response",
-  "onu-id": "1"
+  "ietf-hardware-state:hardware": {
+    "component": [
+      {
+        "name": "ont1",
+        "class": "iana-hardware:chassis",
+        "hardware-rev": "HWREV_1",
+        "mfg-name": "manufacturer1",
+        "model-name": "EqptModelName_1",
+        "serial-num": "ABCD12345678"
+      }
+    ]
+  },
+  "ietf-hardware:hardware": {
+    "component": [
+      {
+        "name": "ont1",
+        "bbf-software-management:software": {
+          "software": [
+            {
+              "name": "model1-software",
+              "revisions": {
+                "maximum-number-of-revisions": 2,
+                "revision": [
+                  {
+                    "id": 1,
+                    "alias": "model1-software-rev1",
+                    "state": "in-use",
+                    "last-changed": "2022-01-09T13:53:36+00:00",
+                    "version": "1.0.0",
+                    "product-code": "pcode",
+                    "hash": "123456789",
+                    "is-valid": true,
+                    "is-active": true,
+                    "is-committed": true
+                  },
+                  {
+                    "id": 2,
+                    "alias": "model1-software-rev2",
+                    "state": "available",
+                    "last-changed": "2022-01-09T13:55:36+00:00",
+                    "version": "2.0.0",
+                    "product-code": "pcode",
+                    "hash": "134323233",
+                    "is-valid": true,
+                    "is-active": false,
+                    "is-committed": false
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "ietf-interfaces:interfaces-state": {
+    "interface": [
+      {
+        "name": "ont1_uni1",
+        "oper-status": "up"
+      }
+    ]
+  }
 }
-

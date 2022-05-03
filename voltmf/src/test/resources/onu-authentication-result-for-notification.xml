@@ -1,0 +1,10 @@
+<onu-authentication-report-notification xmlns="urn:bbf:yang:obbaa:onu-management">
+<onu-authentication-status>unable-to-authenticate-onu</onu-authentication-status>
+<olt-name>OLT1</olt-name>
+<channel-termination-ref>CT_1</channel-termination-ref>
+<onu-id>1</onu-id>
+<detected-serial-number>ABCD12345678</detected-serial-number>
+<detected-registration-id>REG123</detected-registration-id>
+<v-ani-name>vomci-use</v-ani-name>
+<olt-local-onu-name>ont1</olt-local-onu-name>
+</onu-authentication-report-notification>

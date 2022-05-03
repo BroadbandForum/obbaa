@@ -37,6 +37,8 @@
         <class>org.broadband_forum.obbaa.dmyang.entities.ActualAttachmentPoint</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.SoftwareImage</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.ExpectedAttachmentPoint</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.ExpectedAttachmentPoints</class>
+        <class>org.broadband_forum.obbaa.dmyang.entities.ExpectedAttachmentPointPK</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.VomciOnuManagement</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.OnuManagementChain</class>
         <class>org.broadband_forum.obbaa.dmyang.entities.OnuManagementChainPK</class>

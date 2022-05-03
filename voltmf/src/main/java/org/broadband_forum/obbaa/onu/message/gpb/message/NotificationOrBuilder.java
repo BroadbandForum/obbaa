@@ -8,7 +8,19 @@ public interface NotificationOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>bytes data = 1;</code>
+   * <code>string event_timestamp = 1;</code>
+   * @return The eventTimestamp.
+   */
+  java.lang.String getEventTimestamp();
+  /**
+   * <code>string event_timestamp = 1;</code>
+   * @return The bytes for eventTimestamp.
+   */
+  com.google.protobuf.ByteString
+      getEventTimestampBytes();
+
+  /**
+   * <code>bytes data = 2;</code>
    * @return The data.
    */
   com.google.protobuf.ByteString getData();

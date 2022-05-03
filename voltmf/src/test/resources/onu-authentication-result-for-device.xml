@@ -1,0 +1,11 @@
+<onu-authentication-report-notification xmlns="urn:bbf:yang:obbaa:onu-management">
+<onu-authentication-status>vomci-expected-by-olt-but-inconsistent-pmaa-mgmt-mode</onu-authentication-status>
+<olt-name>OLT1</olt-name>
+<channel-termination-ref>CT_1</channel-termination-ref>
+<detected-serial-number>ABCD12345678</detected-serial-number>
+<detected-registration-id>REG123</detected-registration-id>
+<onu-id>1</onu-id>
+<v-ani-name>vomci-use</v-ani-name>
+<olt-local-onu-name>ONU1</olt-local-onu-name>
+<onu-name>ONU1</onu-name>
+</onu-authentication-report-notification>

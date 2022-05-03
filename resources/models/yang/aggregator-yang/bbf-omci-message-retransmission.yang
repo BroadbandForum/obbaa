@@ -22,8 +22,6 @@ module bbf-omci-message-retransmission {
 
      Editor:      Dechao Zhang, China Mobile
 
-     PS Leader:   Yves Hertoghs, VMWare
-
      WA Director: George Dobrowski, Morris Creek Consulting
 
      WA Director: Bruno Cornaglia, Vodafone";
@@ -75,11 +73,11 @@ module bbf-omci-message-retransmission {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2021-02-07 {
+  revision 2021-08-19 {
     description
       "Initial revision.";
     reference
-      "TBD";
+      "TR-451: Section 5.8.3 OMCI Message Retransmission Capability";
   }
 
   // Features
@@ -91,45 +89,35 @@ module bbf-omci-message-retransmission {
        ITU G.988 section B.2.1 Message flow control and
        error recovery.";
   }
-  
-
-  // RPCs
-
-  rpc reset-omci-msg-retrans-data {
-    description
-      "Provides the capability to reset the counters of the 
-       omc-msg-retrans-data.";
-  }
 
   // Groupings
-  grouping omci-msg-retrans-data {
+  grouping omci-msg-retrans-statistics {
     description
-      "Top-level grouping for monitoring of
-       the OMCI message retransmission capability.";
+      "Top-level grouping for monitoring statistics of the OMCI 
+       message retransmission capability.";
     leaf last-reset-time {
       type yang:date-and-time;
       description
-        "The date and time that the counters were last
-         reset or the function was enabled.";
+        "The date and time that the counters were last reset or the 
+         function was enabled.";
     }
     leaf out-low-messages {
       type bbf-yang:performance-counter64;
       description
-        "The number of ITU G.988 OMCI ME 
-         low-priority messages that have been sent by the function.";
+        "The number of ITU G.988 OMCI ME low-priority messages that 
+         have been sent by the function.";
     }
     leaf in-low-messages {
       type bbf-yang:performance-counter64;
       description
-        "The number of ITU G.988 OMCI ME 
-         low-priority messages that have been received by 
-         the function.";
+        "The number of ITU G.988 OMCI ME ow-priority messages that 
+         have been received by the function.";
     }
     leaf low-messages-retransmissions {
       type bbf-yang:performance-counter64;
       description
-        "The number of ITU G.988 OMCI ME
-         low-priority messages that have been retransmitted.";
+        "The number of ITU G.988 OMCI ME low-priority messages that 
+         have been retransmitted.";
     }
     leaf out-high-messages {
       type bbf-yang:performance-counter64;
@@ -141,87 +129,79 @@ module bbf-omci-message-retransmission {
     leaf in-high-messages {
       type bbf-yang:performance-counter64;
       description
-         "The number of ITU G.988 OMCI ME
-          high-priority messages that have been received by
-          the function.";
+         "The number of ITU G.988 OMCI ME high-priority messages 
+          that have been received by the function.";
     }
     leaf high-messages-retransmissions {
       type bbf-yang:performance-counter64;
       description
-        "The number of ITU G.988 OMCI ME 
-         high-priority messages that have been retransmitted.";
+        "The number of ITU G.988 OMCI ME high-priority messages 
+         that have been retransmitted.";
     }
     leaf min-onu-rtt {
       type uint32;
       units "milliseconds";
       description
-        "The number of minimum round trip time (rtt) 
-         in milliseconds, for any request to the ONU.";
+        "The number of minimum round trip time (rtt) in milliseconds,
+         for any request to the ONU.";
     }
     leaf max-onu-rtt {
       type uint32;
       units "milliseconds";
       description
-        "The number of maximum round trip time (rtt) 
-         in milliseconds, for any request to the ONU.";
+        "The number of maximum round trip time (rtt) in milliseconds,
+         for any request to the ONU.";
     }
   }
   
   grouping omci-msg-retrans-grouping {
     description
-      "Top-level grouping for management of
-       the OMCI message retransmission capability.";
-    container omci-msg-retrans {
+      "Top-level grouping for management of the OMCI message 
+       retransmission capability.";
+    leaf enabled {
+      type boolean;
+      default "true";
       description
-        "Configuration settings for the OMCI
-         message retransmission capability.";
-      leaf enabled {
-        type boolean;
-        default "true";
-        description
-          "Administratively enable the use of the OMCI message retrans
-           capability for the network function.";
+        "Administratively enable the use of the OMCI message 
+         retransmission capability for the network function.";
+    }
+    leaf low-transmission-timeout {
+      type uint16 {
+        range "10..max";
       }
-      leaf low-transmission-timeout {
-        type uint16 {
-          range "10..max";
-        }
-        units "milliseconds";
-        default "1000";
-        description
-          "The maximum number of milliseconds that a
-           the retransmission function waits for an acknowledge
-           before transmitting the low priority message(Tmax0).";
+      units "milliseconds";
+      default "1000";
+      description
+        "The maximum number of milliseconds that the retransmission
+         function waits for an acknowledge before transmitting the 
+         low priority message (Tmax0).";
+    }
+    leaf high-transmission-timeout {
+      type uint16 {
+        range "10..max";
       }
-      leaf high-transmission-timeout {
-        type uint16 {
-          range "10..max";
-        }
-        units "milliseconds";
-        default "1000";
-        description
-          "The maximum number of milliseconds that a
-           the retransmission function waits for an acknowledge
-           before transmitting the high priority message(Tmax1).";
+      units "milliseconds";
+      default "1000";
+      description
+        "The maximum number of milliseconds that the retransmission 
+         function waits for an acknowledge before transmitting the 
+         high priority message (Tmax1).";
+    }
+    leaf low-message-retry {
+      type uint8 {
+        range "0..max";
       }
-      leaf low-message-retry {
-        type uint8 {
-          range "0..max";
-        }
-        default "3";
-        description
-          "The maximum retries for a low priority message
-           (Rmax0).";
+      default "3";
+      description
+        "The maximum retries for a low priority message (Rmax0).";
+    }
+    leaf high-message-retry {
+      type uint8 {
+        range "0..max";
       }
-      leaf high-message-retry {
-        type uint8 {
-          range "0..max";
-        }
-        default "3";
-        description
-          "The maximum retries for a high priority message
-           (Rmax1).";
-      }
-    } 
+      default "3";
+      description
+        "The maximum retries for a high priority message (Rmax1).";
+    }
   }
 }

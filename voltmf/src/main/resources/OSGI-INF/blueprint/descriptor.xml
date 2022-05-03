@@ -38,6 +38,17 @@
     <reference id="networkFunctionDao" interface="org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao" availability="mandatory"/>
     <reference id="networkFunctionManager" interface="org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager" availability="mandatory"/>
 
+    <reference id="netconfServer" interface="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetconfServer"
+               availability="mandatory" filter="component=nm">
+    </reference>
+    <reference id="aggregator" interface="org.broadband_forum.obbaa.aggregator.api.Aggregator" availability="mandatory"/>
+
+    <bean id="nbiNetconfServerMessageListener" class="org.broadband_forum.obbaa.nbiadapter.netconf.NbiNetconfServerMessageListener">
+        <argument ref="netconfServer"/>
+        <argument ref="aggregator"/>
+        <argument ref="deviceManager"/>
+    </bean>
+
     <!--<bean id="kafkaProducerJson" class="org.broadband_forum.obbaa.onu.kafka.producer.OnuKafkaProducerJson" init-method="init" destroy-method="destroy">
         <argument ref="blueprintBundle"/>
     </bean>-->
@@ -70,6 +81,7 @@
         <argument ref="gpbFormatter"/>
         <argument ref="networkFunctionDao"/>
         <argument ref="deviceDao"/>
+        <argument ref="nbiNetconfServerMessageListener"/>
     </bean>
 
     <bean id="mediatedDeviceEventListener" class="org.broadband_forum.obbaa.onu.MediatedDeviceEventListener" init-method="init" destroy-method="destroy">

@@ -45,6 +45,16 @@ public final class Tr451VomciNbiMessage {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_tr451_vomci_nbi_message_v1_Hello_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_tr451_vomci_nbi_message_v1_NFInformation_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_tr451_vomci_nbi_message_v1_NFInformation_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_tr451_vomci_nbi_message_v1_NFInformation_NfTypesEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_tr451_vomci_nbi_message_v1_NFInformation_NfTypesEntry_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_tr451_vomci_nbi_message_v1_HelloResp_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -137,76 +147,85 @@ public final class Tr451VomciNbiMessage {
       "omci_nbi_message.v1\"i\n\003Msg\0222\n\006header\030\001 \001" +
       "(\0132\".tr451_vomci_nbi_message.v1.Header\022." +
       "\n\004body\030\002 \001(\0132 .tr451_vomci_nbi_message.v" +
-      "1.Body\"\350\001\n\006Header\022\016\n\006msg_id\030\001 \001(\t\022\023\n\013sen" +
+      "1.Body\"\201\002\n\006Header\022\016\n\006msg_id\030\001 \001(\t\022\023\n\013sen" +
       "der_name\030\002 \001(\t\022\026\n\016recipient_name\030\003 \001(\t\022C" +
       "\n\013object_type\030\004 \001(\0162..tr451_vomci_nbi_me" +
       "ssage.v1.Header.OBJECT_TYPE\022\023\n\013object_na" +
-      "me\030\005 \001(\t\"G\n\013OBJECT_TYPE\022\007\n\003ONU\020\000\022\022\n\016VOMC" +
+      "me\030\005 \001(\t\"`\n\013OBJECT_TYPE\022\007\n\003ONU\020\000\022\022\n\016VOMC" +
       "I_FUNCTION\020\001\022\017\n\013VOMCI_PROXY\020\002\022\n\n\006VOLTMF\020" +
-      "\003\"\306\001\n\004Body\0226\n\007request\030\001 \001(\0132#.tr451_vomc" +
-      "i_nbi_message.v1.RequestH\000\0228\n\010response\030\002" +
-      " \001(\0132$.tr451_vomci_nbi_message.v1.Respon" +
-      "seH\000\022@\n\014notification\030\003 \001(\0132(.tr451_vomci" +
-      "_nbi_message.v1.NotificationH\000B\n\n\010msg_bo" +
-      "dy\"\360\002\n\007Request\0222\n\005hello\030\002 \001(\0132!.tr451_vo" +
-      "mci_nbi_message.v1.HelloH\000\0227\n\010get_data\030\003" +
-      " \001(\0132#.tr451_vomci_nbi_message.v1.GetDat" +
-      "aH\000\022C\n\016replace_config\030\004 \001(\0132).tr451_vomc" +
-      "i_nbi_message.v1.ReplaceConfigH\000\022A\n\rupda" +
-      "te_config\030\005 \001(\0132(.tr451_vomci_nbi_messag" +
-      "e.v1.UpdateConfigH\000\022.\n\003rpc\030\006 \001(\0132\037.tr451" +
-      "_vomci_nbi_message.v1.RPCH\000\0224\n\006action\030\007 " +
-      "\001(\0132\".tr451_vomci_nbi_message.v1.ActionH" +
-      "\000B\n\n\010req_type\"\243\003\n\010Response\022;\n\nhello_resp" +
-      "\030\003 \001(\0132%.tr451_vomci_nbi_message.v1.Hell" +
-      "oRespH\000\022;\n\010get_resp\030\004 \001(\0132\'.tr451_vomci_" +
-      "nbi_message.v1.GetDataRespH\000\022L\n\023replace_" +
-      "config_resp\030\005 \001(\0132-.tr451_vomci_nbi_mess" +
-      "age.v1.ReplaceConfigRespH\000\022J\n\022update_con" +
-      "fig_resp\030\006 \001(\0132,.tr451_vomci_nbi_message" +
-      ".v1.UpdateConfigRespH\000\0227\n\010rpc_resp\030\007 \001(\013" +
-      "2#.tr451_vomci_nbi_message.v1.RPCRespH\000\022" +
-      "=\n\013action_resp\030\010 \001(\0132&.tr451_vomci_nbi_m" +
-      "essage.v1.ActionRespH\000B\013\n\tresp_type\"&\n\005H" +
-      "ello\022\035\n\025service_endpoint_name\030\001 \001(\t\"\344\001\n\t" +
-      "HelloResp\022\035\n\025service_endpoint_name\030\001 \001(\t" +
-      "\022L\n\014capabilities\030\002 \003(\01626.tr451_vomci_nbi" +
-      "_message.v1.HelloResp.ServerCapability\"j" +
-      "\n\020ServerCapability\022\032\n\026NO_CAPABILITY_REPO" +
-      "RTED\020\000\022\032\n\026ONU_STATE_ONLY_SUPPORT\020\001\022\036\n\032ON" +
-      "U_CONFIG_REPLICA_SUPPORT\020\002\"\031\n\007GetData\022\016\n" +
-      "\006filter\030\001 \003(\014\"T\n\013GetDataResp\0227\n\013status_r" +
-      "esp\030\001 \001(\0132\".tr451_vomci_nbi_message.v1.S" +
-      "tatus\022\014\n\004data\030\002 \001(\014\"$\n\rReplaceConfig\022\023\n\013" +
-      "config_inst\030\001 \001(\014\"L\n\021ReplaceConfigResp\0227" +
+      "\003\022\027\n\023VOMCI_FUNCTION_TYPE\020\004\"\306\001\n\004Body\0226\n\007r" +
+      "equest\030\001 \001(\0132#.tr451_vomci_nbi_message.v" +
+      "1.RequestH\000\0228\n\010response\030\002 \001(\0132$.tr451_vo" +
+      "mci_nbi_message.v1.ResponseH\000\022@\n\014notific" +
+      "ation\030\003 \001(\0132(.tr451_vomci_nbi_message.v1" +
+      ".NotificationH\000B\n\n\010msg_body\"\360\002\n\007Request\022" +
+      "2\n\005hello\030\002 \001(\0132!.tr451_vomci_nbi_message" +
+      ".v1.HelloH\000\0227\n\010get_data\030\003 \001(\0132#.tr451_vo" +
+      "mci_nbi_message.v1.GetDataH\000\022C\n\016replace_" +
+      "config\030\004 \001(\0132).tr451_vomci_nbi_message.v" +
+      "1.ReplaceConfigH\000\022A\n\rupdate_config\030\005 \001(\013" +
+      "2(.tr451_vomci_nbi_message.v1.UpdateConf" +
+      "igH\000\022.\n\003rpc\030\006 \001(\0132\037.tr451_vomci_nbi_mess" +
+      "age.v1.RPCH\000\0224\n\006action\030\007 \001(\0132\".tr451_vom" +
+      "ci_nbi_message.v1.ActionH\000B\n\n\010req_type\"\243" +
+      "\003\n\010Response\022;\n\nhello_resp\030\003 \001(\0132%.tr451_" +
+      "vomci_nbi_message.v1.HelloRespH\000\022;\n\010get_" +
+      "resp\030\004 \001(\0132\'.tr451_vomci_nbi_message.v1." +
+      "GetDataRespH\000\022L\n\023replace_config_resp\030\005 \001" +
+      "(\0132-.tr451_vomci_nbi_message.v1.ReplaceC" +
+      "onfigRespH\000\022J\n\022update_config_resp\030\006 \001(\0132" +
+      ",.tr451_vomci_nbi_message.v1.UpdateConfi" +
+      "gRespH\000\0227\n\010rpc_resp\030\007 \001(\0132#.tr451_vomci_" +
+      "nbi_message.v1.RPCRespH\000\022=\n\013action_resp\030" +
+      "\010 \001(\0132&.tr451_vomci_nbi_message.v1.Actio" +
+      "nRespH\000B\013\n\tresp_type\"&\n\005Hello\022\035\n\025service" +
+      "_endpoint_name\030\001 \001(\t\"\277\002\n\rNFInformation\022H" +
+      "\n\010nf_types\030\001 \003(\01326.tr451_vomci_nbi_messa" +
+      "ge.v1.NFInformation.NfTypesEntry\022L\n\014capa" +
+      "bilities\030\002 \003(\01626.tr451_vomci_nbi_message" +
+      ".v1.NFInformation.NFCapability\032.\n\014NfType" +
+      "sEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"f" +
+      "\n\014NFCapability\022\032\n\026NO_CAPABILITY_REPORTED" +
+      "\020\000\022\032\n\026ONU_STATE_ONLY_SUPPORT\020\001\022\036\n\032ONU_CO" +
+      "NFIG_REPLICA_SUPPORT\020\002\"t\n\tHelloResp\022\035\n\025s" +
+      "ervice_endpoint_name\030\001 \001(\t\022H\n\025network_fu" +
+      "nction_info\030\002 \003(\0132).tr451_vomci_nbi_mess" +
+      "age.v1.NFInformation\"\031\n\007GetData\022\016\n\006filte" +
+      "r\030\001 \003(\014\"k\n\013GetDataResp\0227\n\013status_resp\030\001 " +
+      "\001(\0132\".tr451_vomci_nbi_message.v1.Status\022" +
+      "\014\n\004data\030\002 \001(\014\022\025\n\rdatastore_tag\030\003 \001(\t\";\n\r" +
+      "ReplaceConfig\022\023\n\013config_inst\030\001 \001(\014\022\025\n\rda" +
+      "tastore_tag\030\002 \001(\t\"L\n\021ReplaceConfigResp\0227" +
       "\n\013status_resp\030\001 \001(\0132\".tr451_vomci_nbi_me" +
       "ssage.v1.Status\"+\n\023UpdateConfigReplica\022\024" +
       "\n\014delta_config\030\001 \001(\014\"I\n\024UpdateConfigInst" +
       "ance\022\033\n\023current_config_inst\030\001 \001(\014\022\024\n\014del" +
-      "ta_config\030\002 \001(\014\"\274\001\n\014UpdateConfig\022N\n\022upda" +
+      "ta_config\030\002 \001(\014\"\323\001\n\014UpdateConfig\022N\n\022upda" +
       "te_config_inst\030\001 \001(\01320.tr451_vomci_nbi_m" +
       "essage.v1.UpdateConfigInstanceH\000\022P\n\025upda" +
       "te_config_replica\030\002 \001(\0132/.tr451_vomci_nb" +
-      "i_message.v1.UpdateConfigReplicaH\000B\n\n\010re" +
-      "q_type\"K\n\020UpdateConfigResp\0227\n\013status_res" +
-      "p\030\001 \001(\0132\".tr451_vomci_nbi_message.v1.Sta" +
-      "tus\"\031\n\003RPC\022\022\n\ninput_data\030\001 \001(\014\"W\n\007RPCRes" +
-      "p\0227\n\013status_resp\030\001 \001(\0132\".tr451_vomci_nbi" +
-      "_message.v1.Status\022\023\n\013output_data\030\002 \001(\014\"" +
-      "\034\n\006Action\022\022\n\ninput_data\030\001 \001(\014\"Z\n\nActionR" +
-      "esp\0227\n\013status_resp\030\001 \001(\0132\".tr451_vomci_n" +
-      "bi_message.v1.Status\022\023\n\013output_data\030\002 \001(" +
-      "\014\"\034\n\014Notification\022\014\n\004data\030\001 \001(\014\"\210\001\n\005Erro" +
-      "r\022\022\n\nerror_type\030\001 \001(\t\022\021\n\terror_tag\030\002 \001(\t" +
-      "\022\026\n\016error_severity\030\003 \001(\t\022\025\n\rerror_app_ta" +
-      "g\030\004 \001(\t\022\022\n\nerror_path\030\005 \001(\t\022\025\n\rerror_mes" +
-      "sage\030\006 \001(\t\"\247\001\n\006Status\022B\n\013status_code\030\001 \001" +
-      "(\0162-.tr451_vomci_nbi_message.v1.Status.S" +
-      "tatusCode\0220\n\005error\030\002 \003(\0132!.tr451_vomci_n" +
-      "bi_message.v1.Error\"\'\n\nStatusCode\022\006\n\002OK\020" +
-      "\000\022\021\n\rERROR_GENERAL\020\001B5\n1org.broadband_fo" +
-      "rum.obbaa.onu.message.gpb.messageP\001b\006pro" +
-      "to3"
+      "i_message.v1.UpdateConfigReplicaH\000\022\025\n\rda" +
+      "tastore_tag\030\003 \001(\tB\n\n\010req_type\"K\n\020UpdateC" +
+      "onfigResp\0227\n\013status_resp\030\001 \001(\0132\".tr451_v" +
+      "omci_nbi_message.v1.Status\"0\n\003RPC\022\022\n\ninp" +
+      "ut_data\030\001 \001(\014\022\025\n\rdatastore_tag\030\002 \001(\t\"W\n\007" +
+      "RPCResp\0227\n\013status_resp\030\001 \001(\0132\".tr451_vom" +
+      "ci_nbi_message.v1.Status\022\023\n\013output_data\030" +
+      "\002 \001(\014\"3\n\006Action\022\022\n\ninput_data\030\001 \001(\014\022\025\n\rd" +
+      "atastore_tag\030\002 \001(\t\"Z\n\nActionResp\0227\n\013stat" +
+      "us_resp\030\001 \001(\0132\".tr451_vomci_nbi_message." +
+      "v1.Status\022\023\n\013output_data\030\002 \001(\014\"5\n\014Notifi" +
+      "cation\022\027\n\017event_timestamp\030\001 \001(\t\022\014\n\004data\030" +
+      "\002 \001(\014\"\210\001\n\005Error\022\022\n\nerror_type\030\001 \001(\t\022\021\n\te" +
+      "rror_tag\030\002 \001(\t\022\026\n\016error_severity\030\003 \001(\t\022\025" +
+      "\n\rerror_app_tag\030\004 \001(\t\022\022\n\nerror_path\030\005 \001(" +
+      "\t\022\025\n\rerror_message\030\006 \001(\t\"\247\001\n\006Status\022B\n\013s" +
+      "tatus_code\030\001 \001(\0162-.tr451_vomci_nbi_messa" +
+      "ge.v1.Status.StatusCode\0220\n\005error\030\002 \003(\0132!" +
+      ".tr451_vomci_nbi_message.v1.Error\"\'\n\nSta" +
+      "tusCode\022\006\n\002OK\020\000\022\021\n\rERROR_GENERAL\020\001B5\n1or" +
+      "g.broadband_forum.obbaa.onu.message.gpb." +
+      "messageP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -248,98 +267,110 @@ public final class Tr451VomciNbiMessage {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_Hello_descriptor,
         new java.lang.String[] { "ServiceEndpointName", });
-    internal_static_tr451_vomci_nbi_message_v1_HelloResp_descriptor =
+    internal_static_tr451_vomci_nbi_message_v1_NFInformation_descriptor =
       getDescriptor().getMessageTypes().get(6);
+    internal_static_tr451_vomci_nbi_message_v1_NFInformation_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_tr451_vomci_nbi_message_v1_NFInformation_descriptor,
+        new java.lang.String[] { "NfTypes", "Capabilities", });
+    internal_static_tr451_vomci_nbi_message_v1_NFInformation_NfTypesEntry_descriptor =
+      internal_static_tr451_vomci_nbi_message_v1_NFInformation_descriptor.getNestedTypes().get(0);
+    internal_static_tr451_vomci_nbi_message_v1_NFInformation_NfTypesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_tr451_vomci_nbi_message_v1_NFInformation_NfTypesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_tr451_vomci_nbi_message_v1_HelloResp_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_tr451_vomci_nbi_message_v1_HelloResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_HelloResp_descriptor,
-        new java.lang.String[] { "ServiceEndpointName", "Capabilities", });
+        new java.lang.String[] { "ServiceEndpointName", "NetworkFunctionInfo", });
     internal_static_tr451_vomci_nbi_message_v1_GetData_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_tr451_vomci_nbi_message_v1_GetData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_GetData_descriptor,
         new java.lang.String[] { "Filter", });
     internal_static_tr451_vomci_nbi_message_v1_GetDataResp_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_tr451_vomci_nbi_message_v1_GetDataResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_GetDataResp_descriptor,
-        new java.lang.String[] { "StatusResp", "Data", });
+        new java.lang.String[] { "StatusResp", "Data", "DatastoreTag", });
     internal_static_tr451_vomci_nbi_message_v1_ReplaceConfig_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_tr451_vomci_nbi_message_v1_ReplaceConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_ReplaceConfig_descriptor,
-        new java.lang.String[] { "ConfigInst", });
+        new java.lang.String[] { "ConfigInst", "DatastoreTag", });
     internal_static_tr451_vomci_nbi_message_v1_ReplaceConfigResp_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_tr451_vomci_nbi_message_v1_ReplaceConfigResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_ReplaceConfigResp_descriptor,
         new java.lang.String[] { "StatusResp", });
     internal_static_tr451_vomci_nbi_message_v1_UpdateConfigReplica_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_tr451_vomci_nbi_message_v1_UpdateConfigReplica_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_UpdateConfigReplica_descriptor,
         new java.lang.String[] { "DeltaConfig", });
     internal_static_tr451_vomci_nbi_message_v1_UpdateConfigInstance_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_tr451_vomci_nbi_message_v1_UpdateConfigInstance_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_UpdateConfigInstance_descriptor,
         new java.lang.String[] { "CurrentConfigInst", "DeltaConfig", });
     internal_static_tr451_vomci_nbi_message_v1_UpdateConfig_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_tr451_vomci_nbi_message_v1_UpdateConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_UpdateConfig_descriptor,
-        new java.lang.String[] { "UpdateConfigInst", "UpdateConfigReplica", "ReqType", });
+        new java.lang.String[] { "UpdateConfigInst", "UpdateConfigReplica", "DatastoreTag", "ReqType", });
     internal_static_tr451_vomci_nbi_message_v1_UpdateConfigResp_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_tr451_vomci_nbi_message_v1_UpdateConfigResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_UpdateConfigResp_descriptor,
         new java.lang.String[] { "StatusResp", });
     internal_static_tr451_vomci_nbi_message_v1_RPC_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_tr451_vomci_nbi_message_v1_RPC_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_RPC_descriptor,
-        new java.lang.String[] { "InputData", });
+        new java.lang.String[] { "InputData", "DatastoreTag", });
     internal_static_tr451_vomci_nbi_message_v1_RPCResp_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_tr451_vomci_nbi_message_v1_RPCResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_RPCResp_descriptor,
         new java.lang.String[] { "StatusResp", "OutputData", });
     internal_static_tr451_vomci_nbi_message_v1_Action_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_tr451_vomci_nbi_message_v1_Action_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_Action_descriptor,
-        new java.lang.String[] { "InputData", });
+        new java.lang.String[] { "InputData", "DatastoreTag", });
     internal_static_tr451_vomci_nbi_message_v1_ActionResp_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_tr451_vomci_nbi_message_v1_ActionResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_ActionResp_descriptor,
         new java.lang.String[] { "StatusResp", "OutputData", });
     internal_static_tr451_vomci_nbi_message_v1_Notification_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_tr451_vomci_nbi_message_v1_Notification_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_Notification_descriptor,
-        new java.lang.String[] { "Data", });
+        new java.lang.String[] { "EventTimestamp", "Data", });
     internal_static_tr451_vomci_nbi_message_v1_Error_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_tr451_vomci_nbi_message_v1_Error_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_Error_descriptor,
         new java.lang.String[] { "ErrorType", "ErrorTag", "ErrorSeverity", "ErrorAppTag", "ErrorPath", "ErrorMessage", });
     internal_static_tr451_vomci_nbi_message_v1_Status_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_tr451_vomci_nbi_message_v1_Status_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_tr451_vomci_nbi_message_v1_Status_descriptor,

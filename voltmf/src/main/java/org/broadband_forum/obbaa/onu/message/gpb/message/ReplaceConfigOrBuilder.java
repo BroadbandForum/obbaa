@@ -16,4 +16,26 @@ public interface ReplaceConfigOrBuilder extends
    * @return The configInst.
    */
   com.google.protobuf.ByteString getConfigInst();
+
+  /**
+   * <pre>
+   * be used as a replacement of what
+   * exists for the target
+   * </pre>
+   *
+   * <code>string datastore_tag = 2;</code>
+   * @return The datastoreTag.
+   */
+  java.lang.String getDatastoreTag();
+  /**
+   * <pre>
+   * be used as a replacement of what
+   * exists for the target
+   * </pre>
+   *
+   * <code>string datastore_tag = 2;</code>
+   * @return The bytes for datastoreTag.
+   */
+  com.google.protobuf.ByteString
+      getDatastoreTagBytes();
 }

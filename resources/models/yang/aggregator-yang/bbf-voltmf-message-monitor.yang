@@ -18,15 +18,14 @@ module bbf-voltmf-message-monitor {
 
      Editor:      Dechao Zhang, China Mobile
 
-     PS Leader:   Yves Hertoghs, VMWare
-
      WA Director: George Dobrowski, Morris Creek Consulting
 
      WA Director: Bruno Cornaglia, Vodafone";
   description
     "This module contains a collection of YANG definitions needed to
-     monitor the vOLTMF message interactions between the vOLTMF
-     and vOMCI function as described in TR-451.
+     monitor the virtual OLT management function(vOLTMF) message 
+     interactions between the vOLTMF and vOMCI function as described 
+     in TR-451.
 
      Copyright (c) 2019-2021, Broadband Forum
 
@@ -71,40 +70,38 @@ module bbf-voltmf-message-monitor {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2021-02-07 {
+  revision 2021-08-19 {
     description
       "Initial revision.";
     reference
-      "TBD";
+      "TR-451: Section 5.6 vOLT Management Function Description
+               Section 5.7 vOLTMF to vOMCI Function Interface";
   }
   
 
   // Groupings
-  grouping voltmf-msg-data-grouping {
+  grouping voltmf-msg-statistics-grouping {
     description
-      "Top-level grouping for monitoring vOLTMF to
-       vOMCI function messages.";
-    action reset-voltmf-msg-data {
-      description
-        "Provides the capability to reset the counters of the 
-         voltmf-msg-data.";
-    }
+      "Top-level grouping for monitoring vOLTMF to vOMCI function 
+       messages.";
     leaf in-messages {
       type bbf-yang:performance-counter64;
+      config false;
       description
-        "The number of messages
-         that have been sent by the vOLTMF.";
+        "The number of messages that have been sent by the entity.";
     }
     leaf out-messages {
       type bbf-yang:performance-counter64;
+      config false;
       description
-        "The number of messages
-         that have been received by the vOMCI function.";
+        "The number of messages that have been transmitted by the 
+         entity.";
     }
     leaf messages-errors {
       type bbf-yang:performance-counter64;
+      config false;
       description
         "The number of messages that have had errors.";
     }
-  } //voltmf-message data
+  }
 }

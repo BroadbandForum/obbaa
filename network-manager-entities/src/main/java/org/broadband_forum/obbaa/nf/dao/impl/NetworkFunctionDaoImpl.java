@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
+import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
 import org.broadband_forum.obbaa.netconf.persistence.jpa.JPAEntityDataStoreManager;
 import org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao;
@@ -52,6 +53,38 @@ public class NetworkFunctionDaoImpl implements NetworkFunctionDao {
         m_persistenceManagerUtil = persistenceManagerUtil;
     }
 
+    //TODO obbaa-366 same as devicedao but this dao does not extend AbstractDao
+    @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
+    public List<NetworkFunction> findAllNetworkFunctions() {
+        EntityDataStoreManager entityDataStoreManager = m_persistenceManagerUtil.getEntityDataStoreManager();
+        return entityDataStoreManager.findAll(NetworkFunction.class);
+    }
+
+    @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
+    public void updateNetworkFunctionAlignmentState(String networkFunctionName, String verdict) {
+        NetworkFunction networkFunction = getNetworkFunctionByName(networkFunctionName);
+        if (networkFunction != null) {
+            networkFunction.setAlignmentState(verdict);
+        }
+        else {
+            LOGGER.error("Network Function %s does not exist");
+        }
+    }
+
+    @Override
+    public NetworkFunction getNetworkFunctionByName(String networkFunctionName) {
+        Map<String, Object> matchedValues = new HashMap<String, Object>();
+        matchedValues.put(JPAEntityDataStoreManager.buildQueryPath(NetworkFunctionNSConstants.NETWORK_FUNCTION_DB_NAME),
+                networkFunctionName);
+        List<NetworkFunction> networkFunctions = m_persistenceManagerUtil.getEntityDataStoreManager()
+                                                                         .findByMatchValue(NetworkFunction.class,matchedValues);
+        if (networkFunctions != null && !networkFunctions.isEmpty()) {
+            return networkFunctions.get(0);
+        }
+        return null;
+    }
 
     @Override
     public HashSet<String> getKafkaTopicNames(String networkFunctionName, KafkaTopicPurpose kafkaTopicPurpose) {

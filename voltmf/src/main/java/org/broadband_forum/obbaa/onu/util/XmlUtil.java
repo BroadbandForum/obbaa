@@ -60,15 +60,28 @@ public final class XmlUtil {
     }
 
     public static String convertXmlToJson(SchemaRegistry schemaRegistry,
-                                          ModelNodeDataStoreManager modelNodeDsm, String xml) {
+                                          ModelNodeDataStoreManager modelNodeDsm, String xml,
+                                          boolean ignoreRoot) {
         try {
-            Element element = DocumentUtils.stringToDocument(xml).getDocumentElement();
-            return convertElementToJson(element, schemaRegistry, modelNodeDsm);
+            if (ignoreRoot == true) {
+                Element element = DocumentUtils.stringToDocument(xml).getDocumentElement();
+                return convertElementToJson(element, schemaRegistry, modelNodeDsm);
+            } else {
+                Element element = DocumentUtils.stringToDocument(xml).getDocumentElement();
+                List<Element> deviceRootNodes = DocumentUtils.getChildElements(element);
+                return convertElementsToJson(deviceRootNodes, schemaRegistry, modelNodeDsm);
+            }
         } catch (NetconfMessageBuilderException exception) {
             LOGGER.error("Error in convertXmlToJson ", exception);
             return "";
         }
     }
+
+    public static String convertXmlToJson(SchemaRegistry schemaRegistry,
+                                          ModelNodeDataStoreManager modelNodeDsm, String xml) {
+        return convertXmlToJson(schemaRegistry, modelNodeDsm, xml, true);
+    }
+
 
     private static String convertElementsToJson(List<Element> deviceRootNodes, SchemaRegistry schemaRegistry,
                                          ModelNodeDataStoreManager modelNodeDsm) {

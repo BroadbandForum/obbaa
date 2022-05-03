@@ -13,8 +13,10 @@ In this release, the following topics are documented to help in using
 OB-BAA:
 
 -   [Maintenance of Access Nodes](man/index.md#man)
-    
+
 -   [Examples for configuring Access Nodes](can/index.md#can)
+
+-   [Examples for managing ONUs via vOMCI](vomci_onu/index.md#vomci_onu)
 
 -   [Monitoring operations for Device Adapters](mda/index.md#mda)
 
@@ -29,5 +31,7 @@ OB-BAA:
 -   [Integration of whitebox solutions](wbs/index.md#wbs)
 
 -   [Examples for using Control Adapters](control_relay/index.md#using_control_adapter)
+
+-   [Examples for configuring the vOMCI function and vOMCI Proxy](vomci_func_proxy/index.md#vomci_func_proxy)
 
 [<--Installing OB-BAA](../installing/index.md#installing)

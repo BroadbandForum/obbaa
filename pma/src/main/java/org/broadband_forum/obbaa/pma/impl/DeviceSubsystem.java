@@ -29,6 +29,7 @@ import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.device.adapter.DeviceInterface;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
@@ -73,7 +74,17 @@ public class DeviceSubsystem extends AbstractSubSystem {
             Device device = PmaServer.getCurrentDevice();
             DeviceInterface deviceInterface = AdapterUtils.getAdapterContext(device, m_adapterManager).getDeviceInterface();
             Future<NetConfResponse> future = deviceInterface.get(device, getRequest);
-            NetConfResponse response = future.get();
+            NetConfResponse response = null;
+            String deviceType = null;
+            DeviceMgmt deviceMgmt = device.getDeviceManagement();
+            if (deviceMgmt != null) {
+                deviceType = deviceMgmt.getDeviceType();
+            }
+            if (deviceType != null && deviceType.equals("ONU")) {
+                LOGGER.info("Device type is ONU, waiting for response from vOMCI");
+            } else {
+                response = future.get();
+            }
             if (response != null) {
                 return m_util.getStateResponse(attributes, response.getData());
             }
@@ -146,15 +157,18 @@ public class DeviceSubsystem extends AbstractSubSystem {
         } catch (NetconfMessageBuilderException e) {
             throw new RuntimeException(e.getMessage());
         }
-        DeviceInterface deviceInterface = AdapterUtils.getAdapterContext(device, m_adapterManager).getDeviceInterface();
-        try {
-            deviceInterface.veto(device, (EditConfigRequest) RequestScope.getCurrentScope().getFromCache(CURRENT_REQ),
-                    oldDataStoreDoc, updatedDataStoreDoc);
-        } catch (SubSystemValidationException e) {
-            updatedDeviceStore.setDeviceXml(oldDataStore.getDeviceXml());
-            throw e;
+        if (device != null) {
+            DeviceInterface deviceInterface = AdapterUtils.getAdapterContext(device, m_adapterManager).getDeviceInterface();
+            try {
+                deviceInterface.veto(device, (EditConfigRequest) RequestScope.getCurrentScope().getFromCache(CURRENT_REQ),
+                        oldDataStoreDoc, updatedDataStoreDoc);
+            } catch (SubSystemValidationException e) {
+                updatedDeviceStore.setDeviceXml(oldDataStore.getDeviceXml());
+                throw e;
 
+            }
         }
+
 
     }
 }

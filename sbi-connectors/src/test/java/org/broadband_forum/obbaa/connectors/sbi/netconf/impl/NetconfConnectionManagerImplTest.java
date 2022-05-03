@@ -78,6 +78,7 @@ import org.broadband_forum.obbaa.netconf.api.transport.SshNetconfTransport;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
+import org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -92,6 +93,8 @@ public class NetconfConnectionManagerImplTest {
     private NetconfConnectionManagerImpl m_cm;
     @Mock
     private DeviceDao m_deviceDao;
+    @Mock
+    private NetworkFunctionDao m_networkFunctionDao;
     private List<Device> m_devices;
     @Mock
     private NetconfClientDispatcher m_dispatcher;
@@ -155,6 +158,7 @@ public class NetconfConnectionManagerImplTest {
         m_cm.registerDeviceConnectionListener(m_connectionListener);
         m_cm.setTxService(m_txService);
         m_cm.setDeviceDao(m_deviceDao);
+        m_cm.setNetworkFunctionDao(m_networkFunctionDao);
     }
 
     @Test
@@ -196,10 +200,11 @@ public class NetconfConnectionManagerImplTest {
     }
 
     @Test
-    public void testConnMgrClosesConnectionToDeletedDevices1() throws NetconfClientDispatcherException {
+    public void testConnMgrClosesConnectionToDeletedDevices1() throws Exception {
         List<Device> devicePresent = new ArrayList<>();
         Device nokia = spy(createDirectDevice("5"));
         doThrow(new EntityNotFoundException("Entity Not Found")).when(nokia).toString();
+        when(nokia.getDeviceName()).thenReturn(null);
         devicePresent.add(nokia);
         when(m_deviceDao.findAllDevices()).thenReturn(devicePresent);
         try {

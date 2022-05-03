@@ -1,0 +1,18 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+<action xmlns="urn:ietf:params:xml:ns:yang:1">
+<if:interfaces-state xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+<if:interface>
+<if:name>CT_1</if:name>
+<channel-termination xmlns="urn:bbf:yang:bbf-xpon">
+<baa-xpon-onu-auth:onu-authentication-report xmlns:baa-xpon-onu-auth="urn:bbf:yang:obbaa:xpon-onu-authentication">
+<baa-xpon-onu-auth:serial-number>ABCD12345678</baa-xpon-onu-auth:serial-number>
+<baa-xpon-onu-auth:authentication-successful>true</baa-xpon-onu-auth:authentication-successful>
+<baa-xpon-onu-auth:v-ani>test</baa-xpon-onu-auth:v-ani>
+<baa-xpon-onu-auth:onu-name>onu1</baa-xpon-onu-auth:onu-name>
+<baa-xpon-onu-auth:requested-onu-management-mode xmlns:baa-xpon-onu-types="urn:bbf:yang:obbaa:xpon-onu-types">baa-xpon-onu-types:use-vomci</baa-xpon-onu-auth:requested-onu-management-mode>
+</baa-xpon-onu-auth:onu-authentication-report>
+</channel-termination>
+</if:interface>
+</if:interfaces-state>
+</action>
+</rpc>

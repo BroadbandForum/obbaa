@@ -16,7 +16,9 @@
 
 package org.broadband_forum.obbaa.onu.notification;
 
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.DETERMINED_ONU_MANAGEMENT_MODE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.when;
 
 import org.broadband_forum.obbaa.dmyang.entities.Device;
@@ -50,6 +52,9 @@ public class ONUNotificationTest {
     private final String onuId = "25";
     private final String onuPresentAndUnexpectedState = "onu-present-and-unexpected";
     private final String onuPresentAndOnChannelTerm = "onu-present-and-on-intended-channel-termination";
+    private final String determinedOnuManagementMode = "relying-on-vomci";
+    private final String detectedLocationId = "testLocation";
+
     @Mock
     Device onuDevice;
     ONUNotification onuNotification;
@@ -71,6 +76,8 @@ public class ONUNotificationTest {
         assertEquals(onuNotification.getOnuId(), onuId);
         assertEquals(onuNotification.getOnuState(), onuPresentAndUnexpectedState);
         assertEquals(onuNotification.getMappedEvent(), ONUConstants.NOT_APPLICABLE);
+        assertFalse(DocumentUtils.documentToPrettyString(onuNotification.getNotificationElement()).contains(DETERMINED_ONU_MANAGEMENT_MODE));
+        assertFalse(DocumentUtils.documentToPrettyString(onuNotification.getNotificationElement()).contains("detected-loid"));
     }
 
     @Test
@@ -85,6 +92,24 @@ public class ONUNotificationTest {
         assertEquals(onuNotification.getVAniRef(), vaniRef);
         assertEquals(onuNotification.getRegId(), regId);
         assertEquals(onuNotification.getMappedEvent(), ONUConstants.CREATE_ONU);
+        assertFalse(DocumentUtils.documentToPrettyString(onuNotification.getNotificationElement()).contains(DETERMINED_ONU_MANAGEMENT_MODE));
+        assertFalse(DocumentUtils.documentToPrettyString(onuNotification.getNotificationElement()).contains("detected-loid"));
+    }
+
+    @Test
+    public void test_2_1_NotificationFormat() throws NetconfMessageBuilderException {
+        messageFormatter = new GpbFormatter();
+        notification = getDetectNotificationFor_2_1();
+        onuNotification = new ONUNotification(notification, deviceName,messageFormatter);
+        assertEquals(onuNotification.getSerialNo(), serialNum);
+        assertEquals(onuNotification.getChannelTermRef(), chanTermRef);
+        assertEquals(onuNotification.getOnuId(), onuId);
+        assertEquals(onuNotification.getOnuState(), onuPresentAndOnChannelTerm);
+        assertEquals(onuNotification.getVAniRef(), vaniRef);
+        assertEquals(onuNotification.getRegId(), regId);
+        assertEquals(onuNotification.getMappedEvent(), ONUConstants.CREATE_ONU);
+        assertEquals(onuNotification.getDeterminedOnuManagementMode(), determinedOnuManagementMode);
+        assertEquals(onuNotification.getDetectedLoId(), detectedLocationId);
     }
 
     private Notification getDetectNotificationFor_1_0() throws NetconfMessageBuilderException {
@@ -97,6 +122,14 @@ public class ONUNotificationTest {
     private Notification getDetectNotificationFor_2_0() throws NetconfMessageBuilderException {
         String notificationString = TestUtil.loadAsString("/onu-state-change-notification_2_0.txt");
         notificationString = String.format(notificationString, chanTermRef, serialNum, regId, onuPresentAndOnChannelTerm, onuId, vaniRef);
+        Notification notification = new NetconfNotification(DocumentUtils.stringToDocument(notificationString));
+        return notification;
+    }
+
+    private Notification getDetectNotificationFor_2_1() throws NetconfMessageBuilderException {
+        String notificationString = TestUtil.loadAsString("/onu-state-change-notification_2_1.txt");
+        notificationString = String.format(notificationString, chanTermRef, serialNum, regId, onuPresentAndOnChannelTerm, onuId, vaniRef,
+                determinedOnuManagementMode, detectedLocationId);
         Notification notification = new NetconfNotification(DocumentUtils.stringToDocument(notificationString));
         return notification;
     }

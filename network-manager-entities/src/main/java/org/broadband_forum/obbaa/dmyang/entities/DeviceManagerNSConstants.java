@@ -24,7 +24,9 @@ public interface DeviceManagerNSConstants {
     String PREFIX = "baa-network-manager";
     String NS = "urn:bbf:yang:obbaa:network-manager";
     String ONU_MANAGEMENT_NS = "urn:bbf:yang:obbaa:onu-management";
-    String ONU_MANAGEMENT_REVISION = "2021-04-21";
+    String BBF_OBBAA_XPON_ONU_TYPES_NS = "urn:bbf:yang:obbaa:xpon-onu-types";
+    String BBF_OBBAA_XPON_ONU_TYPES_REVISION = "2021-11-10";
+    String ONU_MANAGEMENT_REVISION = "2021-11-10";
     String REVISION = "2021-02-01";
     String NETWORK_MANAGER = "network-manager";
     String MANAGED_DEVICES = "managed-devices";
@@ -70,8 +72,13 @@ public interface DeviceManagerNSConstants {
     String ONU_CONFIG_INFO = "onu-config-info";
     String ONU_STATE_INFO = "onu-state-info";
     String EXPECTED_ATTACHMENT_POINT = "expected-attachment-point";
+    String EXPECTED_ATTACHMENT_POINTS = "expected-attachment-points";
+    String LIST_TYPE = "list-type";
     String OLT_NAME = "olt-name";
     String CHANNEL_PARTITION_NAME = "channel-partition-name";
+    String PLANNED_ONU_MANAGEMENT_MODE = "planned-onu-management-mode";
+    String PLANNED_ONU_MANAGEMENT_MODE_IN_THIS_OLT = "planned-onu-management-mode-in-this-olt";
+    String DETERMINED_ONU_MANAGEMENT_MODE = "determined-onu-management-mode";
     String DEVICE_STATE = "device-state";
     String DEVICE = "device";
     String CONNECTION_MODEL = "connection-model";
@@ -154,10 +161,13 @@ public interface DeviceManagerNSConstants {
     String FUNCTION_NAME = "function-name";
     String LOCAL_ENDPOINT_NAME = "local-endpoint-name";
     String NETWORK_FUNCTION_LINK = "network-function-link";
+    String NETWORK_FUNCTION_NAME = "nf-name";
+    String NETWORK_FUNCTION_TYPE = "nf-type";
+
+    SchemaPath ONU_CONFIG_INFO_SP = SchemaPath.create(true, QName.create(ONU_MANAGEMENT_NS,ONU_MANAGEMENT_REVISION , ONU_CONFIG_INFO));
 
     static String rootPathForDevice(String deviceName) {
         return "/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device"
                 + "[baa-network-manager:name='" + deviceName + "']/baa-network-manager:root";
     }
-
 }

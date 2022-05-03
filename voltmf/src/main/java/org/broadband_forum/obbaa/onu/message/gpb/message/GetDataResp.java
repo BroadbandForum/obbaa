@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.GetDataResp}
  */
-public final class GetDataResp extends
+public  final class GetDataResp extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.GetDataResp)
     GetDataRespOrBuilder {
@@ -17,6 +17,7 @@ private static final long serialVersionUID = 0L;
   }
   private GetDataResp() {
     data_ = com.google.protobuf.ByteString.EMPTY;
+    datastoreTag_ = "";
   }
 
   @java.lang.Override
@@ -67,6 +68,12 @@ private static final long serialVersionUID = 0L;
             data_ = input.readBytes();
             break;
           }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            datastoreTag_ = s;
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -105,7 +112,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Status status_resp = 1;</code>
    * @return Whether the statusResp field is set.
    */
-  @java.lang.Override
   public boolean hasStatusResp() {
     return statusResp_ != null;
   }
@@ -113,14 +119,12 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Status status_resp = 1;</code>
    * @return The statusResp.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.Status getStatusResp() {
     return statusResp_ == null ? org.broadband_forum.obbaa.onu.message.gpb.message.Status.getDefaultInstance() : statusResp_;
   }
   /**
    * <code>.tr451_vomci_nbi_message.v1.Status status_resp = 1;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.StatusOrBuilder getStatusRespOrBuilder() {
     return getStatusResp();
   }
@@ -131,9 +135,52 @@ private static final long serialVersionUID = 0L;
    * <code>bytes data = 2;</code>
    * @return The data.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString getData() {
     return data_;
+  }
+
+  public static final int DATASTORE_TAG_FIELD_NUMBER = 3;
+  private volatile java.lang.Object datastoreTag_;
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 3;</code>
+   * @return The datastoreTag.
+   */
+  public java.lang.String getDatastoreTag() {
+    java.lang.Object ref = datastoreTag_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      datastoreTag_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 3;</code>
+   * @return The bytes for datastoreTag.
+   */
+  public com.google.protobuf.ByteString
+      getDatastoreTagBytes() {
+    java.lang.Object ref = datastoreTag_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      datastoreTag_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
   }
 
   private byte memoizedIsInitialized = -1;
@@ -156,6 +203,9 @@ private static final long serialVersionUID = 0L;
     if (!data_.isEmpty()) {
       output.writeBytes(2, data_);
     }
+    if (!getDatastoreTagBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, datastoreTag_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -172,6 +222,9 @@ private static final long serialVersionUID = 0L;
     if (!data_.isEmpty()) {
       size += com.google.protobuf.CodedOutputStream
         .computeBytesSize(2, data_);
+    }
+    if (!getDatastoreTagBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, datastoreTag_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -195,6 +248,8 @@ private static final long serialVersionUID = 0L;
     }
     if (!getData()
         .equals(other.getData())) return false;
+    if (!getDatastoreTag()
+        .equals(other.getDatastoreTag())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -212,6 +267,8 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + DATA_FIELD_NUMBER;
     hash = (53 * hash) + getData().hashCode();
+    hash = (37 * hash) + DATASTORE_TAG_FIELD_NUMBER;
+    hash = (53 * hash) + getDatastoreTag().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -353,6 +410,8 @@ private static final long serialVersionUID = 0L;
       }
       data_ = com.google.protobuf.ByteString.EMPTY;
 
+      datastoreTag_ = "";
+
       return this;
     }
 
@@ -385,6 +444,7 @@ private static final long serialVersionUID = 0L;
         result.statusResp_ = statusRespBuilder_.build();
       }
       result.data_ = data_;
+      result.datastoreTag_ = datastoreTag_;
       onBuilt();
       return result;
     }
@@ -438,6 +498,10 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getData() != com.google.protobuf.ByteString.EMPTY) {
         setData(other.getData());
+      }
+      if (!other.getDatastoreTag().isEmpty()) {
+        datastoreTag_ = other.datastoreTag_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -592,7 +656,6 @@ private static final long serialVersionUID = 0L;
      * <code>bytes data = 2;</code>
      * @return The data.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString getData() {
       return data_;
     }
@@ -617,6 +680,102 @@ private static final long serialVersionUID = 0L;
     public Builder clearData() {
       
       data_ = getDefaultInstance().getData();
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object datastoreTag_ = "";
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @return The datastoreTag.
+     */
+    public java.lang.String getDatastoreTag() {
+      java.lang.Object ref = datastoreTag_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datastoreTag_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @return The bytes for datastoreTag.
+     */
+    public com.google.protobuf.ByteString
+        getDatastoreTagBytes() {
+      java.lang.Object ref = datastoreTag_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datastoreTag_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @param value The datastoreTag to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDatastoreTag(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      datastoreTag_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDatastoreTag() {
+      
+      datastoreTag_ = getDefaultInstance().getDatastoreTag();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Optional: Datastore tag used to
+     * </pre>
+     *
+     * <code>string datastore_tag = 3;</code>
+     * @param value The bytes for datastoreTag to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDatastoreTagBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      datastoreTag_ = value;
       onChanged();
       return this;
     }

@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>4.1.1</version>
+        <version>5.0.0</version>
     </parent>
 
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -37,6 +37,11 @@
             <artifactId>netconf-api</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.broadband-forum.obbaa</groupId>
+            <artifactId>nbi-adapter</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.broadband-forum.obbaa</groupId>
@@ -107,7 +112,7 @@
         <dependency>
             <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>pma</artifactId>
-            <version>4.1.1</version>
+            <version>5.0.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

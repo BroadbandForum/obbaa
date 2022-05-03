@@ -115,6 +115,7 @@ public class DeviceManagerImpl implements DeviceManager {
     }
 
     @Override
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = {RuntimeException.class})
     public void updateOnuStateInfo(String deviceName, OnuStateInfo onuStateInfo) {
         m_deviceDao.updateOnuStateInfo(deviceName, onuStateInfo);
     }

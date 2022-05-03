@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.Hello}
  */
-public final class Hello extends
+public  final class Hello extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.Hello)
     HelloOrBuilder {
@@ -97,7 +97,6 @@ private static final long serialVersionUID = 0L;
    * <code>string service_endpoint_name = 1;</code>
    * @return The serviceEndpointName.
    */
-  @java.lang.Override
   public java.lang.String getServiceEndpointName() {
     java.lang.Object ref = serviceEndpointName_;
     if (ref instanceof java.lang.String) {
@@ -118,7 +117,6 @@ private static final long serialVersionUID = 0L;
    * <code>string service_endpoint_name = 1;</code>
    * @return The bytes for serviceEndpointName.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getServiceEndpointNameBytes() {
     java.lang.Object ref = serviceEndpointName_;

@@ -9,6 +9,9 @@ module bbf-network-function-server {
   import ietf-tcp-server {
     prefix tcps;
   }
+  import bbf-yang-types {
+    prefix bbf-yang;
+  }
 
   organization
     "Broadband Forum <https://www.broadband-forum.org>
@@ -20,8 +23,6 @@ module bbf-network-function-server {
      Editor:      Tim Carey, Nokia
 
      Editor:      Dechao Zhang, China Mobile
-
-     PS Leader:   Yves Hertoghs, VMWare
 
      WA Director: George Dobrowski, Morris Creek Consulting
 
@@ -73,11 +74,11 @@ module bbf-network-function-server {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2021-02-19 {
+  revision 2021-08-01 {
     description
       "Initial revision.";
     reference
-      "TR-451: Section 5.5 vOMCI Function to OLT Interface";
+      "TBD";
   }
 
   // Groupings
@@ -106,7 +107,7 @@ module bbf-network-function-server {
         description
           "List of endpoints to listen for connections.";
         leaf name {
-          type string;
+          type bbf-yang:string-ascii64;
           description
             "An arbitrary name for the listen endpoint.";
         }
@@ -124,7 +125,7 @@ module bbf-network-function-server {
                   "A wrapper around the gRPC server parameters to 
                    avoid name collisions.";
                 leaf local-endpoint-name {
-                  type string;
+                  type bbf-yang:string-ascii64;
                   description
                     "The name that this entity will use when 
                      reporting the entity as an endpoint.
@@ -155,7 +156,7 @@ module bbf-network-function-server {
             description
               "List of currently connected remote endpoints.";
             leaf name {
-              type string;
+              type bbf-yang:string-ascii64;
               description
                 "Identity of the remote endpoint as provided when the
                  connection was established.";
@@ -165,7 +166,7 @@ module bbf-network-function-server {
             description
               "A notification traceable to a server listen-endpoint 
                and a remote endpoint associated with the 
-               listen-endpoint.This notification is sent when 
+               listen-endpoint. This notification is sent when 
                remote-endpoint is connected or disconnected to/from 
                the listen-endpoint.";
             leaf remote-endpoint {

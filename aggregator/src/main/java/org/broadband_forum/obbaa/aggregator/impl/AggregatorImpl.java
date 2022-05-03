@@ -28,6 +28,7 @@ import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DeviceManagementProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
+import org.broadband_forum.obbaa.aggregator.api.NetworkFunctionConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.NotificationProcessor;
 import org.broadband_forum.obbaa.aggregator.api.ProcessorCapability;
 import org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl.AggregatorRpcMessage;
@@ -43,6 +44,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -121,6 +123,12 @@ public class AggregatorImpl implements Aggregator {
     @Override
     public void addProcessor(NotificationProcessor notificationProcessor) throws DispatchException {
         getNotificationProcessorManager().addProcessor(notificationProcessor);
+    }
+
+    @Override
+    public void addNFCProcessor(Set<ModuleIdentifier> moduleIdentifiers, NetworkFunctionConfigProcessor networkFunctionConfigProcessor)
+            throws DispatchException {
+        getRequestProcessorManager().addNFCProcessor(moduleIdentifiers,networkFunctionConfigProcessor);
     }
 
     @Override
@@ -206,6 +214,9 @@ public class AggregatorImpl implements Aggregator {
         if (networkManagerRpc.isDeviceConfigRequest()) {
             return dispatchDeviceConfigRequest(networkManagerRpc);
         }
+        if (networkManagerRpc.isNetworkFunctionConfigRequest()) {
+            return dispatchNetworkFunctionConfigRequest(networkManagerRpc);
+        }
 
         // Device management is mainly used for adding and deleting devices and other actions.
         return getDeviceManagerAdapter().processRequest(clientInfo, aggregatorRpcMessage.getOriginalMessage());
@@ -227,6 +238,18 @@ public class AggregatorImpl implements Aggregator {
                             .startsWith(PmaAdapter.class.getSimpleName())).findFirst().get();
         }
         return deviceConfigProcessor;
+    }
+
+    private NetworkFunctionConfigProcessor getNetworkManagerProcessor(SingleNetworkFunctionRequest singleNetworkFunctionRequest) {
+        String mountedXmlns = singleNetworkFunctionRequest.getNamespace();
+        NetworkFunctionConfigProcessor networkFunctionConfigProcessor = m_requestProcessorManager
+                .getNFCProcessor(mountedXmlns);
+        if (networkFunctionConfigProcessor == null) {
+            return getRequestProcessorManager().getAllNFConfigProcessors().stream()
+                    .filter(processor -> processor.getClass().getSimpleName()
+                            .startsWith(PmaAdapter.class.getSimpleName())).findFirst().get();
+        }
+        return networkFunctionConfigProcessor;
     }
 
     /**
@@ -278,6 +301,23 @@ public class AggregatorImpl implements Aggregator {
         return singleDeviceResponse;
     }
 
+    private String dispatchSingleNetworkFunctionRequest(SingleNetworkFunctionRequest singleNetworkFunctionRequest)
+            throws DispatchException {
+        NetworkFunctionConfigProcessor networkFunctionConfigProcessor = getNetworkManagerProcessor(singleNetworkFunctionRequest);
+        DispatchException.assertNull(networkFunctionConfigProcessor, OPERATION_NOT_SUPPORT);
+
+        String networkFunctionName = singleNetworkFunctionRequest.getNetworkFunctionName();
+        String request = singleNetworkFunctionRequest.getMessage();
+
+        LOGGER.debug("Dispatch network function config request:\n {} {} {}", networkFunctionConfigProcessor, networkFunctionName, request);
+
+        PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.NETWORK_FUNCTION, networkFunctionName);
+        String singleNetworkFunctionResponse = networkFunctionConfigProcessor.processRequest(resourceId,request);
+        DispatchException.assertNull(singleNetworkFunctionResponse,
+                String.format("Process error of network function %s", networkFunctionName));
+        return singleNetworkFunctionResponse;
+    }
+
     /**
      * Build requests for every device. It will delete the information of network-manager YANG model.
      *
@@ -289,6 +329,11 @@ public class AggregatorImpl implements Aggregator {
             throws DispatchException {
         return networkManagerRpc
                 .buildSingleDeviceRequests(getDeviceManagerAdapter(), networkManagerRpc.getOriginalMessage());
+    }
+
+    private Set<SingleNetworkFunctionRequest> buildSingleNetworkFunctionRequests(NetworkManagerRpc networkManagerRpc)
+            throws DispatchException {
+        return networkManagerRpc.buildSingleNetworkFunctionRequests(networkManagerRpc.getOriginalMessage());
     }
 
     /**
@@ -309,6 +354,19 @@ public class AggregatorImpl implements Aggregator {
 
         //Response
         return networkManagerRpc.packageResponse(responses);
+    }
+
+    private String dispatchNetworkFunctionConfigRequest(NetworkManagerRpc networkManagerRpc) throws DispatchException {
+        Map<Document, String> responses = new HashMap<>();
+        Set<SingleNetworkFunctionRequest> singleNetworkFunctionRequests = buildSingleNetworkFunctionRequests(networkManagerRpc);
+
+        for (SingleNetworkFunctionRequest singleNetworkFunctionRequest : singleNetworkFunctionRequests) {
+            String responseOneNetFunc = dispatchSingleNetworkFunctionRequest(singleNetworkFunctionRequest);
+            responses.put(AggregatorUtils.stringToDocument(responseOneNetFunc), singleNetworkFunctionRequest.getNetworkFunctionName());
+        }
+
+        return networkManagerRpc.packageResponse(responses);
+
     }
 
     /**

@@ -54,6 +54,72 @@
             </resource>
         </resources>
     </build>
-
+    <profiles>
+        <profile>
+            <id>copy-aggregator-yang-modules</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>copy-aggregator-yang-modules</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>*.yang</include>
+                                    </includes>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-aggregator-yang-modules</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.basedir}</outputDirectory>
+                                    <overwrite>true</overwrite>
+                                    <resources>
+                                        <resource>
+                                            <directory>../../../../../obbaa-yang-modules/obbaa-yang/aggregator-yang</directory>
+                                            <includes>
+                                                <include>*.yang</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>../../../../../obbaa-yang-modules/yang-external/standard</directory>
+                                            <includes>
+                                                <include>*.yang</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>../../../../../obbaa-yang-modules/yang-external/draft</directory>
+                                            <includes>
+                                                <include>*.yang</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
 

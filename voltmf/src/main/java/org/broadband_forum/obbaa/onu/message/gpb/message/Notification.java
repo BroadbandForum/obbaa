@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.Notification}
  */
-public final class Notification extends
+public  final class Notification extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.Notification)
     NotificationOrBuilder {
@@ -16,6 +16,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Notification() {
+    eventTimestamp_ = "";
     data_ = com.google.protobuf.ByteString.EMPTY;
   }
 
@@ -50,6 +51,12 @@ private static final long serialVersionUID = 0L;
             done = true;
             break;
           case 10: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            eventTimestamp_ = s;
+            break;
+          }
+          case 18: {
 
             data_ = input.readBytes();
             break;
@@ -86,13 +93,48 @@ private static final long serialVersionUID = 0L;
             org.broadband_forum.obbaa.onu.message.gpb.message.Notification.class, org.broadband_forum.obbaa.onu.message.gpb.message.Notification.Builder.class);
   }
 
-  public static final int DATA_FIELD_NUMBER = 1;
+  public static final int EVENT_TIMESTAMP_FIELD_NUMBER = 1;
+  private volatile java.lang.Object eventTimestamp_;
+  /**
+   * <code>string event_timestamp = 1;</code>
+   * @return The eventTimestamp.
+   */
+  public java.lang.String getEventTimestamp() {
+    java.lang.Object ref = eventTimestamp_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      eventTimestamp_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string event_timestamp = 1;</code>
+   * @return The bytes for eventTimestamp.
+   */
+  public com.google.protobuf.ByteString
+      getEventTimestampBytes() {
+    java.lang.Object ref = eventTimestamp_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      eventTimestamp_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int DATA_FIELD_NUMBER = 2;
   private com.google.protobuf.ByteString data_;
   /**
-   * <code>bytes data = 1;</code>
+   * <code>bytes data = 2;</code>
    * @return The data.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString getData() {
     return data_;
   }
@@ -111,8 +153,11 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
+    if (!getEventTimestampBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, eventTimestamp_);
+    }
     if (!data_.isEmpty()) {
-      output.writeBytes(1, data_);
+      output.writeBytes(2, data_);
     }
     unknownFields.writeTo(output);
   }
@@ -123,9 +168,12 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
+    if (!getEventTimestampBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, eventTimestamp_);
+    }
     if (!data_.isEmpty()) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBytesSize(1, data_);
+        .computeBytesSize(2, data_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -142,6 +190,8 @@ private static final long serialVersionUID = 0L;
     }
     org.broadband_forum.obbaa.onu.message.gpb.message.Notification other = (org.broadband_forum.obbaa.onu.message.gpb.message.Notification) obj;
 
+    if (!getEventTimestamp()
+        .equals(other.getEventTimestamp())) return false;
     if (!getData()
         .equals(other.getData())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
@@ -155,6 +205,8 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + EVENT_TIMESTAMP_FIELD_NUMBER;
+    hash = (53 * hash) + getEventTimestamp().hashCode();
     hash = (37 * hash) + DATA_FIELD_NUMBER;
     hash = (53 * hash) + getData().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
@@ -290,6 +342,8 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      eventTimestamp_ = "";
+
       data_ = com.google.protobuf.ByteString.EMPTY;
 
       return this;
@@ -318,6 +372,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.Notification buildPartial() {
       org.broadband_forum.obbaa.onu.message.gpb.message.Notification result = new org.broadband_forum.obbaa.onu.message.gpb.message.Notification(this);
+      result.eventTimestamp_ = eventTimestamp_;
       result.data_ = data_;
       onBuilt();
       return result;
@@ -367,6 +422,10 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.broadband_forum.obbaa.onu.message.gpb.message.Notification other) {
       if (other == org.broadband_forum.obbaa.onu.message.gpb.message.Notification.getDefaultInstance()) return this;
+      if (!other.getEventTimestamp().isEmpty()) {
+        eventTimestamp_ = other.eventTimestamp_;
+        onChanged();
+      }
       if (other.getData() != com.google.protobuf.ByteString.EMPTY) {
         setData(other.getData());
       }
@@ -399,17 +458,92 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private java.lang.Object eventTimestamp_ = "";
+    /**
+     * <code>string event_timestamp = 1;</code>
+     * @return The eventTimestamp.
+     */
+    public java.lang.String getEventTimestamp() {
+      java.lang.Object ref = eventTimestamp_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        eventTimestamp_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string event_timestamp = 1;</code>
+     * @return The bytes for eventTimestamp.
+     */
+    public com.google.protobuf.ByteString
+        getEventTimestampBytes() {
+      java.lang.Object ref = eventTimestamp_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        eventTimestamp_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string event_timestamp = 1;</code>
+     * @param value The eventTimestamp to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEventTimestamp(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      eventTimestamp_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string event_timestamp = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEventTimestamp() {
+      
+      eventTimestamp_ = getDefaultInstance().getEventTimestamp();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string event_timestamp = 1;</code>
+     * @param value The bytes for eventTimestamp to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEventTimestampBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      eventTimestamp_ = value;
+      onChanged();
+      return this;
+    }
+
     private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
     /**
-     * <code>bytes data = 1;</code>
+     * <code>bytes data = 2;</code>
      * @return The data.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString getData() {
       return data_;
     }
     /**
-     * <code>bytes data = 1;</code>
+     * <code>bytes data = 2;</code>
      * @param value The data to set.
      * @return This builder for chaining.
      */
@@ -423,7 +557,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>bytes data = 1;</code>
+     * <code>bytes data = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearData() {

@@ -9,9 +9,6 @@ module bbf-vomci-entity {
   import bbf-xpon-types {
     prefix bbf-xpon-types;
   }
-  import bbf-omci-message-retransmission {
-    prefix bbf-omci-mr;
-  }
   import bbf-vomci-types {
     prefix bbf-vomcit;
   }
@@ -26,8 +23,6 @@ module bbf-vomci-entity {
      Editor:      Tim Carey, Nokia
 
      Editor:      Dechao Zhang, China Mobile
-
-     PS Leader:   Yves Hertoghs, VMWare
 
      WA Director: George Dobrowski, Morris Creek Consulting
 
@@ -79,11 +74,12 @@ module bbf-vomci-entity {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2021-02-07 {
+  revision 2021-08-19 {
     description
       "Initial revision.";
     reference
-      "TBD";
+      "TR-451: Section 5.2 vOMCI Function Description
+               Section 5.8 vOMCI function to OLT Interface";
   }
 
   // Groupings
@@ -106,12 +102,8 @@ module bbf-vomci-entity {
       leaf onu-id {
         type bbf-xpon-types:onu-id;
         description
-          "This is the TC layer ONU-ID identifier. When
-           configured this is the value which the OLT must assign
-           to an ONU during the ONU's activation using the
-           Assign_ONU-ID PLOAM message. For G-PON the value should
-           be in [0..253], for XG-PON it should be in [0..1022] and
-           for XGS-PON and NG-PON2 it should be in [0..1020].";
+          "This is the TC layer ONU-ID identifier assigned to the 
+           ONU by the OLT during ONU activation.";
         reference
           "ITU-T G.984.3 clause 5.5.2
            ITU-T G.987.3 clause 6.4.2
@@ -120,33 +112,10 @@ module bbf-vomci-entity {
       }
     }
   }
-
-  grouping vomci-entity-settings {
-    description
-      "Grouping for vOMCI entity";
-    leaf entity-name {
-      type bbf-yang:string-ascii64;
-      description
-        "The entity name";
-    }
-    leaf onu-vomci-message-timeout {
-      type uint32;
-      units "milliseconds";
-      description
-        "Timeout in milliseconds.
-         A value of 0 indicates that timeout is not defined.";
-    }
-    uses bbf-omci-mr:omci-msg-retrans-grouping;
-  } //OMC entity data
   
-  grouping vomci-message-data {
+  grouping vomci-message-statistics {
     description
       "Grouping for vOMCI message data statistics";
-    action reset-vomci-message-data {
-      description
-        "Provides the capability to reset the counters of the 
-         vomci-message-data.";
-    }
     leaf out-messages {
       type bbf-yang:performance-counter64;
       description
@@ -156,13 +125,13 @@ module bbf-vomci-entity {
     leaf in-messages {
       type bbf-yang:performance-counter64;
       description
-        "The number of vOMCI messages
-         that have been received by the function.";
+        "The number of vOMCI messages that have been received by the 
+         function.";
     }
     leaf messages-errors {
       type bbf-yang:performance-counter64;
       description
         "The number of vOMCI messages that have had errors.";
     }
-  } //vomci-message data
+  }
 }

@@ -18,12 +18,28 @@ package org.broadband_forum.obbaa.nm.nwfunctionmgr.impl;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao;
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 import org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager;
 import org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionStateProvider;
 
 public class NetworkFunctionManagerImpl implements NetworkFunctionManager {
 
     private Set<NetworkFunctionStateProvider> m_networkFunctionStateProviders = new LinkedHashSet<>();
+    private NetworkFunctionDao m_dao;
+
+    public NetworkFunctionManagerImpl(NetworkFunctionDao dao) {
+        m_dao = dao;
+    }
+
+    @Override
+    public NetworkFunction getNetworkFunction(String networkFunctionName) {
+        NetworkFunction networkFunction = m_dao.getNetworkFunctionByName(networkFunctionName);
+        if (networkFunction == null) {
+            throw new IllegalArgumentException("Network Function " + networkFunctionName + " does not exist");
+        }
+        return networkFunction;
+    }
 
     @Override
     public void removeNetworkFunctionStateProvider(NetworkFunctionStateProvider stateProvider) {
@@ -47,5 +63,10 @@ public class NetworkFunctionManagerImpl implements NetworkFunctionManager {
         for (NetworkFunctionStateProvider provider : m_networkFunctionStateProviders) {
             provider.networkFunctionRemoved(networkFunctionName);
         }
+    }
+
+    @Override
+    public void updateConfigAlignmentState(String networkFunctionName, String verdict) {
+        m_dao.updateNetworkFunctionAlignmentState(networkFunctionName,verdict);
     }
 }

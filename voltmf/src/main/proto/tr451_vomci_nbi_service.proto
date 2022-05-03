@@ -49,9 +49,6 @@ syntax = "proto3";
 // BBF software release registry: http://www.broadband-forum.org/software
 //**************************************************************************
 
-option java_multiple_files = true;
-option java_package = "org.broadband_forum.obbaa.onu.message.gpb.service";
-
 package tr451_vomci_nbi_service.v1;
 
 import "tr451_vomci_nbi_message.proto";

@@ -10,7 +10,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
  *
  * Protobuf type {@code tr451_vomci_nbi_message.v1.Error}
  */
-public final class Error extends
+public  final class Error extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.Error)
     ErrorOrBuilder {
@@ -136,7 +136,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_type = 1;</code>
    * @return The errorType.
    */
-  @java.lang.Override
   public java.lang.String getErrorType() {
     java.lang.Object ref = errorType_;
     if (ref instanceof java.lang.String) {
@@ -157,7 +156,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_type = 1;</code>
    * @return The bytes for errorType.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorTypeBytes() {
     java.lang.Object ref = errorType_;
@@ -182,7 +180,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_tag = 2;</code>
    * @return The errorTag.
    */
-  @java.lang.Override
   public java.lang.String getErrorTag() {
     java.lang.Object ref = errorTag_;
     if (ref instanceof java.lang.String) {
@@ -203,7 +200,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_tag = 2;</code>
    * @return The bytes for errorTag.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorTagBytes() {
     java.lang.Object ref = errorTag_;
@@ -228,7 +224,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_severity = 3;</code>
    * @return The errorSeverity.
    */
-  @java.lang.Override
   public java.lang.String getErrorSeverity() {
     java.lang.Object ref = errorSeverity_;
     if (ref instanceof java.lang.String) {
@@ -249,7 +244,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_severity = 3;</code>
    * @return The bytes for errorSeverity.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorSeverityBytes() {
     java.lang.Object ref = errorSeverity_;
@@ -274,7 +268,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_app_tag = 4;</code>
    * @return The errorAppTag.
    */
-  @java.lang.Override
   public java.lang.String getErrorAppTag() {
     java.lang.Object ref = errorAppTag_;
     if (ref instanceof java.lang.String) {
@@ -295,7 +288,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_app_tag = 4;</code>
    * @return The bytes for errorAppTag.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorAppTagBytes() {
     java.lang.Object ref = errorAppTag_;
@@ -320,7 +312,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_path = 5;</code>
    * @return The errorPath.
    */
-  @java.lang.Override
   public java.lang.String getErrorPath() {
     java.lang.Object ref = errorPath_;
     if (ref instanceof java.lang.String) {
@@ -341,7 +332,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_path = 5;</code>
    * @return The bytes for errorPath.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorPathBytes() {
     java.lang.Object ref = errorPath_;
@@ -366,7 +356,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_message = 6;</code>
    * @return The errorMessage.
    */
-  @java.lang.Override
   public java.lang.String getErrorMessage() {
     java.lang.Object ref = errorMessage_;
     if (ref instanceof java.lang.String) {
@@ -387,7 +376,6 @@ private static final long serialVersionUID = 0L;
    * <code>string error_message = 6;</code>
    * @return The bytes for errorMessage.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorMessageBytes() {
     java.lang.Object ref = errorMessage_;

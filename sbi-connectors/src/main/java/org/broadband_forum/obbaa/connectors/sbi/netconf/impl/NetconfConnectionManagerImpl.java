@@ -51,6 +51,7 @@ import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Authentication;
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResource;
 import org.broadband_forum.obbaa.dmyang.tx.TXTemplate;
 import org.broadband_forum.obbaa.dmyang.tx.TxService;
 import org.broadband_forum.obbaa.netconf.api.NetconfConfigurationBuilderException;
@@ -68,6 +69,8 @@ import org.broadband_forum.obbaa.netconf.api.transport.NetconfTransportOrder;
 import org.broadband_forum.obbaa.netconf.api.transport.NetconfTransportProtocol;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.client.ssh.auth.PasswordLoginProvider;
+import org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao;
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 
 /**
  * Created by kbhatk on 29/9/17.
@@ -76,14 +79,18 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     private static final Logger LOGGER = Logger.getLogger(NetconfConnectionManagerImpl.class);
     private final NetconfClientDispatcher m_dispatcher;
     private DeviceDao m_deviceDao;
+    private NetworkFunctionDao m_networkFunctionDao;
     private TxService m_txService;
     private final CallHomeListenerComposite m_callHomeListenerComposite;
-    private GenericKeyedObjectPool<Device, NetconfClientSession> m_connPool;
+    private GenericKeyedObjectPool<String, NetconfClientSession> m_connPool;
+    private GenericKeyedObjectPool<String, NetconfClientSession> m_nfConnPool;
     private final DeviceMetaNetconfClientSessionKeyedPooledObjectFactory m_factory;
+    private final NetworkFunctionMetaNetconfClientSessionKeyedPooledObjectFactory m_nfFactory;
     private static final String DUID_PATTERN = "DUID/";
     private static final int DUID_VALUE_START_INDEX = 5;
-    private Map<Device, NetconfClientSession> m_callHomeSessions = new ConcurrentHashMap<>();
-    private Map<Device, NetconfClientSession> m_mediatedSessions = new ConcurrentHashMap<>();
+    private Map<String, NetconfClientSession> m_callHomeSessions = new ConcurrentHashMap<>();
+    private Map<String, NetconfClientSession> m_mediatedSessions = new ConcurrentHashMap<>();
+    private Map<String, NetconfClientSession> m_nfMediatedSessions = new ConcurrentHashMap<>();
     private Map<String, NewDeviceInfo> m_newDeviceInfos = new ConcurrentHashMap<>();
     private List<ConnectionListener> m_connectionListeners = new ArrayList<>();
 
@@ -93,7 +100,16 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         m_callHomeListenerComposite = callHomeListenerComposite;
         m_dispatcher = dispatcher;
         m_factory = new DeviceMetaNetconfClientSessionKeyedPooledObjectFactory();
+        m_nfFactory = new NetworkFunctionMetaNetconfClientSessionKeyedPooledObjectFactory();
         setupConnPool();
+    }
+
+    public NetworkFunctionDao getNetworkFunctionDao() {
+        return m_networkFunctionDao;
+    }
+
+    public void setNetworkFunctionDao(NetworkFunctionDao networkFunctionDao) {
+        m_networkFunctionDao = networkFunctionDao;
     }
 
     public DeviceDao getDeviceDao() {
@@ -135,6 +151,14 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         m_connPool.setTimeBetweenEvictionRunsMillis(-1); // Disable Eviction Thread
         m_connPool.setMaxIdlePerKey(1);
         m_connPool.setMinIdlePerKey(1);
+
+        //FIXME obbaa-366 simply copied from above
+        m_nfConnPool = new GenericKeyedObjectPool<>(m_nfFactory);
+        m_nfConnPool.setTestOnBorrow(true);
+        m_nfConnPool.setTestOnBorrow(true);
+        m_nfConnPool.setTimeBetweenEvictionRunsMillis(-1);
+        m_nfConnPool.setMaxIdlePerKey(1);
+        m_nfConnPool.setMinIdlePerKey(1);
     }
 
     void auditConnections() {
@@ -146,13 +170,13 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
                     NetconfClientSession session = null;
                     try {
                         if (!meta.getDeviceManagement().getDeviceConnection().getConnectionModel().equals("call-home")) {
-                            session = m_connPool.borrowObject(meta);
+                            session = m_connPool.borrowObject(meta.getDeviceName());
                         }
                     } catch (Exception e) {
                         LOGGER.debug(String.format("Could not setup connection to device %s", meta), e);
                     } finally {
                         if (session != null) {
-                            m_connPool.returnObject(meta, session);
+                            m_connPool.returnObject(meta.getDeviceName(), session);
                         }
                     }
                 }
@@ -160,40 +184,105 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
                 deletedDevices.removeAll(allDevices);
                 for (Device meta : deletedDevices) {
                     LOGGER.debug(String.format("Device %s has been un-managed, closing the connection", meta));
-                    m_connPool.clear(meta); //this will close any idle connections
+                    m_connPool.clear(meta.getDeviceName()); //this will close any idle connections
                     m_factory.getAllKeys().remove(meta);
                 }
                 return null;
             }
         });
+
+
+        m_txService.executeWithTx(new TXTemplate<Void>() {
+            @Override
+            public Void execute() {
+                List<NetworkFunction> networkFunctions = m_networkFunctionDao.findAllNetworkFunctions();
+                for (NetworkFunction networkFunction : networkFunctions) {
+                    NetconfClientSession session = null;
+                    try {
+                        session = m_nfConnPool.borrowObject(networkFunction.getNetworkFunctionName());
+                    } catch (Exception e) {
+                        LOGGER.debug(String.format("Could not setup connection to network function %s",
+                                networkFunction), e);
+                    } finally {
+                        if (session != null) {
+                            m_nfConnPool.returnObject(networkFunction.getNetworkFunctionName(), session);
+                        }
+                    }
+                }
+                Set<NetworkFunction> deletedNetworkFunctions = new HashSet<>(m_nfFactory.getAllKeys());
+                deletedNetworkFunctions.removeAll(deletedNetworkFunctions);
+                for (NetworkFunction networkFunction : deletedNetworkFunctions) {
+                    LOGGER.debug(String.format("Network Function %s has been un-managed, closing the connection",
+                            networkFunction));
+                    m_nfConnPool.clear(networkFunction.getNetworkFunctionName());
+                    m_nfFactory.getAllKeys().remove(networkFunction);
+                }
+                return null;
+            }
+        });
+
     }
 
-    private NetconfClientSession createSessionToDevice(Device device) {
-        try {
-            if (device.getDeviceManagement().isNetconf()) {
-                NetconfClientSession session = m_dispatcher.createClient(getClientConfig(device)).get();
-                if (session != null) {
-                    LOGGER.info(String.format("Connected to device %s", device));
-                    notifyDeviceConnected(device, session);
-                    return session;
+    private NetconfClientSession createSessionToDevice(String deviceName) {
+        NetconfClientSession session = null;
+        Device device = getDeviceByGivenName(deviceName);
+        if (device != null) {
+            try {
+                if (device.getDeviceManagement().isNetconf()) {
+                    session = m_dispatcher.createClient(getClientConfig(device)).get();
+                    if (session != null) {
+                        LOGGER.info(String.format("Connected to device %s", device));
+                        notifyDeviceConnected(deviceName, session);
+                        return session;
+                    }
                 }
+            } catch (NetconfClientDispatcherException | InterruptedException | ExecutionException e) {
+                LOGGER.debug(String.format("Could not setup connection to device %s", device), e);
             }
-        } catch (NetconfClientDispatcherException | InterruptedException | ExecutionException e) {
-            LOGGER.debug(String.format("Could not setup connection to device %s", device), e);
+            return null;
         }
+        return session;
+    }
+
+    private void notifyDeviceConnected(String deviceName, NetconfClientSession session) {
+        Device device = getDeviceByGivenName(deviceName);
+        if (device != null) {
+            for (ConnectionListener connectionListener : m_connectionListeners) {
+                connectionListener.deviceConnected(device, session);
+            }
+        }
+    }
+
+    private void notifyDeviceDisconnected(String deviceName, NetconfClientSession session) {
+        Device device = getDeviceByGivenName(deviceName);
+        if (device != null) {
+            for (ConnectionListener connectionListener : m_connectionListeners) {
+                connectionListener.deviceDisConnected(device, session);
+            }
+        }
+    }
+
+    //TODO obbaa-366 missing some necessary methods (see createSessionToDevice)
+    private NetconfClientSession createSessionToNetworkFunction(String networkFunctionName) {
         return null;
     }
 
-    private void notifyDeviceConnected(Device device, NetconfClientSession session) {
-        for (ConnectionListener connectionListener : m_connectionListeners) {
-            connectionListener.deviceConnected(device, session);
-        }
+    //TODO obbaa-366
+    private void notifyNetworkFunctionConnected(String networkFunctionName, NetconfClientSession session) {
+
     }
 
-    private void notifyDeviceDisconnected(Device device, NetconfClientSession session) {
-        for (ConnectionListener connectionListener : m_connectionListeners) {
-            connectionListener.deviceDisConnected(device, session);
-        }
+    //TODO obbaa-366
+    private void notifyNetworkFunctionDisconnected(String networkFunctionName, NetconfClientSession session) {
+
+    }
+
+    private NetworkFunction getNetworkFunctionByName(String networkFunctionName) {
+        return m_txService.executeWithTx(() -> m_networkFunctionDao.getNetworkFunctionByName(networkFunctionName));
+    }
+
+    private Device getDeviceByGivenName(String deviceName) {
+        return m_txService.executeWithTx(() -> m_deviceDao.getDeviceByName(deviceName));
     }
 
     private NetconfClientConfiguration getClientConfig(Device device) {
@@ -215,17 +304,22 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         return m_connPool.listAllObjects();
     }
 
-    public NetconfClientSession getMediatedDeviceSession(Device device) {
-        return m_mediatedSessions.get(device);
+    public NetconfClientSession getMediatedDeviceSession(String deviceName) {
+        return m_mediatedSessions.get(deviceName);
     }
 
     @Override
-    public Future<NetConfResponse> executeNetconf(Device device, AbstractNetconfRequest request)
+    public NetconfClientSession getMediatedNetworkFunctionSession(String networkFunctionName) {
+        return m_nfMediatedSessions.get(networkFunctionName);
+    }
+
+    @Override
+    public Future<NetConfResponse> executeNetconf(PmaResource resource, AbstractNetconfRequest request)
             throws IllegalStateException, ExecutionException {
-        return executeWithSession(device, session -> {
+        return executeWithSession(resource, session -> {
             try {
-                LOGGER.info(String.format("Sending RPC to device %s RPC %s", device, request.requestToString()));
-                return wrapLogFuture(device, session.sendRpc(request));
+                LOGGER.info(String.format("Sending RPC to device %s RPC %s", resource, request.requestToString()));
+                return wrapLogFuture(resource, session.sendRpc(request));
             } catch (Exception e) {
                 throw new ExecutionException(e);
             }
@@ -240,7 +334,39 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     }
 
     @Override
-    public <RT> RT executeWithSession(Device device, NetconfTemplate<RT> netconfTemplate)
+    public <RT> RT executeWithSession(PmaResource resource, NetconfTemplate<RT> netconfTemplate)
+            throws IllegalStateException, ExecutionException {
+        if (resource instanceof Device) {
+            return executeWithSession((Device) resource,netconfTemplate);
+        }
+        if (resource instanceof NetworkFunction) {
+            return executeWithSession((NetworkFunction) resource,netconfTemplate);
+        }
+        return null;
+    }
+
+    private  <RT> RT executeWithSession(NetworkFunction networkFunction, NetconfTemplate<RT> netconfTemplate)
+            throws IllegalStateException, ExecutionException {
+        //Since this is a public API from connection manager, we do not want to allow creation of connection to a
+        // "non-managed" device here.
+        if (!isConnected(networkFunction)) {
+            throw new IllegalStateException(String.format("Network Function not connected : %s",
+                    networkFunction.getNetworkFunctionName()));
+        }
+        NetconfClientSession networkFunctionSession = null;
+        try {
+            networkFunctionSession = m_nfConnPool.borrowObject(networkFunction.getNetworkFunctionName());
+            return netconfTemplate.execute(networkFunctionSession);
+        } catch (Exception e) {
+            throw new ExecutionException(e);
+        } finally {
+            if (networkFunctionSession != null) {
+                m_nfConnPool.returnObject(networkFunction.getNetworkFunctionName(), networkFunctionSession);
+            }
+        }
+    }
+
+    private  <RT> RT executeWithSession(Device device, NetconfTemplate<RT> netconfTemplate)
             throws IllegalStateException, ExecutionException {
         //Since this is a public API from connection manager, we do not want to allow creation of connection to a
         // "non-managed" device here.
@@ -249,30 +375,40 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         }
         NetconfClientSession deviceSession = null;
         try {
-            deviceSession = m_connPool.borrowObject(device);
+            deviceSession = m_connPool.borrowObject(device.getDeviceName());
             return netconfTemplate.execute(deviceSession);
         } catch (Exception e) {
             throw new ExecutionException(e);
         } finally {
             if (deviceSession != null) {
-                m_connPool.returnObject(device, deviceSession);
+                m_connPool.returnObject(device.getDeviceName(), deviceSession);
             }
         }
     }
 
     @Override
-    public boolean isConnected(Device device) {
+    public boolean isConnected(PmaResource resource) {
         //active + idle = total
-        return ((m_connPool.getNumActive(device) + m_connPool.getNumIdle(device)) >= 1);
+        if (resource instanceof Device) {
+            Device device = (Device) resource;
+            return ((m_connPool.getNumActive(device.getDeviceName())
+                    + m_connPool.getNumIdle(device.getDeviceName())) >= 1);
+        }
+        if (resource instanceof NetworkFunction) {
+            NetworkFunction networkFunction = (NetworkFunction) resource;
+            return ((m_nfConnPool.getNumActive(networkFunction.getNetworkFunctionName())
+                    + m_nfConnPool.getNumIdle(networkFunction.getNetworkFunctionName())) >= 1);
+        }
+        return false;
     }
 
     @Override
-    public ConnectionState getConnectionState(Device device) {
+    public ConnectionState getConnectionState(PmaResource resource) {
         ConnectionState connectionState = new ConnectionState();
-        if (isConnected(device)) {
+        if (isConnected(resource)) {
             connectionState.setConnected(true);
             try {
-                executeWithSession(device, (NetconfTemplate<Void>) session -> {
+                executeWithSession(resource, (NetconfTemplate<Void>) session -> {
                     connectionState.setConnectionCreationTime(new Date(session.getCreationTime()));
                     connectionState.setDeviceCapability(session.getServerCapabilities());
                     return null;
@@ -307,8 +443,8 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         m_connectionListeners.remove(connectionListener);
     }
 
-    private Future<NetConfResponse> wrapLogFuture(Device device, Future<NetConfResponse> future) {
-        return new LoggingFuture(device, future);
+    private Future<NetConfResponse> wrapLogFuture(PmaResource resource, Future<NetConfResponse> future) {
+        return new LoggingFuture(resource, future);
     }
 
     public void init() {
@@ -336,15 +472,15 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
                     });
                     return null;
                 }
-                addCallHomeSession(callHomeDevice, deviceSession);
+                addCallHomeSession(callHomeDevice.getDeviceName(), deviceSession);
                 NetconfClientSession borrowedSession = null;
                 try {
-                    borrowedSession = m_connPool.borrowObject(callHomeDevice);
+                    borrowedSession = m_connPool.borrowObject(callHomeDevice.getDeviceName());
                 } catch (Exception e) {
                     LOGGER.error("Error while borrowing call-home session", e);
                 } finally {
                     if (borrowedSession != null) {
-                        m_connPool.returnObject(callHomeDevice, borrowedSession);
+                        m_connPool.returnObject(callHomeDevice.getDeviceName(), borrowedSession);
                     }
                 }
                 return null;
@@ -352,30 +488,52 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         });
     }
 
-    private void addCallHomeSession(Device callHomeDeviceInfo, NetconfClientSession deviceSession) {
-        m_callHomeSessions.put(callHomeDeviceInfo, deviceSession);
-        notifyDeviceConnected(callHomeDeviceInfo, deviceSession);
+    private void addCallHomeSession(String callHomeDeviceName, NetconfClientSession deviceSession) {
+        m_callHomeSessions.put(callHomeDeviceName, deviceSession);
+        notifyDeviceConnected(callHomeDeviceName, deviceSession);
         deviceSession.addSessionListener(i -> {
-            m_connPool.clear(callHomeDeviceInfo);
-            notifyDeviceDisconnected(callHomeDeviceInfo, deviceSession);
+            m_connPool.clear(callHomeDeviceName);
+            notifyDeviceDisconnected(callHomeDeviceName, deviceSession);
         });
     }
 
-    public void addMediatedDeviceNetconfSession(Device device, NetconfClientSession deviceSession) {
-        m_mediatedSessions.put(device, deviceSession);
-        notifyDeviceConnected(device, deviceSession);
+    @Override
+    public void addMediatedDeviceNetconfSession(String deviceName, NetconfClientSession deviceSession) {
+        m_mediatedSessions.put(deviceName, deviceSession);
+        notifyDeviceConnected(deviceName, deviceSession);
         deviceSession.addSessionListener(i -> {
-            m_connPool.clear(device);
-            notifyDeviceDisconnected(device, deviceSession);
+            m_connPool.clear(deviceName);
+            notifyDeviceDisconnected(deviceName, deviceSession);
         });
         NetconfClientSession borrowedSession = null;
         try {
-            borrowedSession = m_connPool.borrowObject(device);
+            borrowedSession = m_connPool.borrowObject(deviceName);
         } catch (Exception e) {
             LOGGER.error("Error while borrowing mediated session", e);
         } finally {
             if (borrowedSession != null) {
-                m_connPool.returnObject(device, borrowedSession);
+                m_connPool.returnObject(deviceName, borrowedSession);
+            }
+        }
+    }
+
+    @Override
+    public void addMediatedNetworkFunctionNetconfSession(String networkFunctionName,
+                                                         NetconfClientSession networkFunctionSession) {
+        m_nfMediatedSessions.put(networkFunctionName,networkFunctionSession);
+        notifyNetworkFunctionConnected(networkFunctionName,networkFunctionSession);
+        networkFunctionSession.addSessionListener(i -> {
+            m_nfConnPool.clear(networkFunctionName);
+            notifyNetworkFunctionDisconnected(networkFunctionName,networkFunctionSession);
+        });
+        NetconfClientSession borrowedSession = null;
+        try {
+            borrowedSession = m_nfConnPool.borrowObject(networkFunctionName);
+        } catch (Exception e) {
+            LOGGER.error("Error while borrowing mediated session", e);
+        } finally {
+            if (borrowedSession != null) {
+                m_nfConnPool.returnObject(networkFunctionName, borrowedSession);
             }
         }
     }
@@ -430,15 +588,18 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     }
 
     private class DeviceMetaNetconfClientSessionKeyedPooledObjectFactory
-            extends BaseKeyedPooledObjectFactory<Device, NetconfClientSession> {
+            extends BaseKeyedPooledObjectFactory<String, NetconfClientSession> {
         Set<Device> m_allKeys = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         @Override
-        public NetconfClientSession create(Device key) {
-            m_allKeys.add(key);
-            if (key.isCallhome()) {
+        public NetconfClientSession create(String key) {
+            Device device = getDeviceByGivenName(key);
+            if (device != null) {
+                m_allKeys.add(device);
+            }
+            if (device.isCallhome()) {
                 return m_callHomeSessions.get(key);
-            } else if (key.isMediatedSession()) {
+            } else if (device.isMediatedSession()) {
                 return m_mediatedSessions.get(key);
             }
             NetconfClientSession sessionToDevice = createSessionToDevice(key);
@@ -457,7 +618,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         }
 
         @Override
-        public void destroyObject(Device key, PooledObject<NetconfClientSession> pooledObject) {
+        public void destroyObject(String key, PooledObject<NetconfClientSession> pooledObject) {
             NetconfClientSession session = pooledObject.getObject();
             if (session != null) {
                 session.closeAsync();
@@ -468,7 +629,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         }
 
         @Override
-        public boolean validateObject(Device key, PooledObject<NetconfClientSession> pooledObject) {
+        public boolean validateObject(String key, PooledObject<NetconfClientSession> pooledObject) {
             NetconfClientSession session = pooledObject.getObject();
             if (session == null) {
                 return false;
@@ -477,6 +638,57 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
         }
 
         public Set<Device> getAllKeys() {
+            return m_allKeys;
+        }
+    }
+
+    private class NetworkFunctionMetaNetconfClientSessionKeyedPooledObjectFactory
+            extends BaseKeyedPooledObjectFactory<String, NetconfClientSession> {
+        Set<NetworkFunction> m_allKeys = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+        @Override
+        public NetconfClientSession create(String key) throws Exception {
+            NetworkFunction networkFunction = getNetworkFunctionByName(key);
+            m_allKeys.add(networkFunction);
+            //FIXME obbaa-366 checking map instead of checking through network function (see "create" above)
+            if (m_nfMediatedSessions.containsKey(key)) {
+                return m_nfMediatedSessions.get(key);
+            }
+            NetconfClientSession sessionToNetworkFunction = createSessionToNetworkFunction(key);
+            if (sessionToNetworkFunction != null) {
+                sessionToNetworkFunction.addSessionListener(i -> {
+                    m_nfConnPool.clear();
+                    notifyNetworkFunctionConnected(key,sessionToNetworkFunction);
+                });
+            }
+            return sessionToNetworkFunction;
+        }
+
+        @Override
+        public PooledObject<NetconfClientSession> wrap(NetconfClientSession value) {
+            return new DefaultPooledObject<>(value);
+        }
+
+        @Override
+        public void destroyObject(String key, PooledObject<NetconfClientSession> pooledObject) throws Exception {
+            NetconfClientSession session = pooledObject.getObject();
+            if (session != null) {
+                session.closeAsync();
+            }
+            m_allKeys.remove(key);
+            m_nfMediatedSessions.remove(key);
+        }
+
+        @Override
+        public boolean validateObject(String key, PooledObject<NetconfClientSession> pooledObject) {
+            NetconfClientSession session = pooledObject.getObject();
+            if (session == null) {
+                return false;
+            }
+            return session.isOpen();
+        }
+
+        public Set<NetworkFunction> getAllKeys() {
             return m_allKeys;
         }
     }

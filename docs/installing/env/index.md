@@ -254,11 +254,19 @@ The code base is split across two repositories:
   git clone https://github.com/BroadbandForum/obbaa-vomci.git
 ```
 
-##### Clone OB0BAA Control Relay service repository
+##### Clone OB-BAA Control Relay service repository
 
 ```
   git clone https://github.com/BroadbandForum/obbaa-fc-relay.git
 ```
+
+##### Clone OB-BAA YANG Modules repository
+
+```
+  git clone https://github.com/BroadbandForum/obbaa-yang-modules.git
+```
+**Note: ** The obbaa-yang-modules repository must be checked out to the same directory where obbaa repository is checked out. This step is applicable from R5.0.0 onwards.
+
 
 ### Build OB-BAA
 
@@ -276,20 +284,32 @@ then obbaa.
 
 ```
 Build NETCONF stack
-  Change directory to obbaa-netconf-stack
-  mvn clean install -DskipTests
+	Change directory to obbaa-netconf-stack
+	mvn clean install -DskipTests
+
+Build Yang Repo (This step is applicable from R5.0.0 onwards)
+   Change directory to obbaa-yang-modules
+   make
 
 Build OBBAA
-  Change directory to obbaa
-  mvn clean install -DskipTests
+	Change directory to obbaa
+  mvn clean -P copy-standard-adapters,copy-core-yang-modules,copy-aggregator-yang-modules(to clean up the already loaded yang modules and std adapters. This step is applicable from R5.0.0)
+
+	mvn clean install -DskipTests -P copy-standard-adapters,copy-core-yang-modules,copy-aggregator-yang-modules,copy-nf-standard-adapters (Run this command to copy the standard-adapters zip files and aggregator yang modules into obbaa repo, and compile obbaa repo this step is applicable from R5.0.0)
+
+	mvn clean install (Use this command to build obbaa release < R5.0.0)
 
 Build OBBAA with Unit Test (UT)
   Pre-requisite: Start InfluxDB docker container using the command:
      docker-compose -f ~obbaa/pm-collector/pm-data-handler/persistent-data-handler/influxdb-impl/bamboo-docker/obbaa-influxdb.yml up -d
+
   If InfluxDB is not running there will be UT failures in pm-collector modules.
+
   This step is required only if you are going to run UT in your local environment.
     Change directory obbaa
-    mvn clean install
+    mvn clean install -DskipTests -P copy-standard-adapters,copy-core-yang-modules,copy-aggregator-yang-modules,copy-nf-standard-adapters (This step is applicable from R5.0.0)
+
+mvn clean install
 
 ```
 

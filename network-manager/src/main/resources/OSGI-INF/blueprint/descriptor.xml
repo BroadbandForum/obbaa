@@ -27,6 +27,8 @@
     <reference id="persistenceMgrUtil" interface="org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil"
                availability="mandatory"/>
     <reference id="deviceDao" interface="org.broadband_forum.obbaa.dmyang.dao.DeviceDao" availability="mandatory"/>
+    <reference id="networkFunctionDao" interface="org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao" availability="mandatory"/>
+
     <reference id="softwareImageDao" interface="org.broadband_forum.obbaa.dmyang.dao.SoftwareImageDao" availability="mandatory"/>
     <reference id="adapterManager" interface="org.broadband_forum.obbaa.device.adapter.AdapterManager" availability="mandatory"/>
     <reference id="timerManager" interface="org.broadband_forum.obbaa.netconf.server.model.notification.TimerManager"
@@ -201,7 +203,7 @@
     </bean>
 
     <bean id="bbfNfcRev" class="java.lang.String">
-        <argument value="2021-02-19"/>
+        <argument value="2021-08-01"/>
     </bean>
 
     <bean id="KafkaAgentFeatureQName" class="org.opendaylight.yangtools.yang.common.QName" factory-method="create">
@@ -221,7 +223,7 @@
     </bean>
 
     <bean id="bbfKafkaRev" class="java.lang.String">
-        <argument value="2021-02-19"/>
+        <argument value="2021-08-01"/>
     </bean>
 
     <bean id="KafkaPublicationFeatureQName" class="org.opendaylight.yangtools.yang.common.QName" factory-method="create">
@@ -249,6 +251,7 @@
     </bean>
 
     <bean id="networkFunctionManager" class="org.broadband_forum.obbaa.nm.nwfunctionmgr.impl.NetworkFunctionManagerImpl">
+        <argument ref="networkFunctionDao"/>
     </bean>
 
     <bean id="networkFunctionSubSystem" class="org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionSubsystem">
@@ -303,6 +306,7 @@
                 <value>/yangs/ietf-tcp-common.yang</value>
                 <value>/yangs/ietf-tcp-client.yang</value>
                 <value>/yangs/ietf-tcp-server.yang</value>
+                <value>/yangs/ietf-alarms.yang</value>
                 <value>/yangs/ietf-datastores@2017-08-17.yang</value>
                 <value>/yangs/bbf-device-types.yang</value>
                 <value>/yangs/bbf-network-function-types.yang</value>
@@ -318,11 +322,19 @@
                 <value>/yangs/bbf-voltmf-message-monitor.yang</value>
                 <value>/yangs/bbf-voltmf-entity.yang</value>
                 <value>/yangs/bbf-obbaa-onu-management.yang</value>
+                <value>/yangs/bbf-omci-message-retransmission.yang</value>
+                <value>/yangs/bbf-vomci-network-function-endpoint-filter.yang</value>
+                <value>/yangs/bbf-obbaa-deviations.yang</value>
+                <value>/yangs/bbf-obbaa-xpon-onu-types.yang</value>
+                <value>/yangs/bbf-vomci-entity.yang</value>
                 <value>/yangs/bbf-vomci-function.yang</value>
                 <value>/yangs/bbf-vomci-proxy.yang</value>
-                <value>/yangs/bbf-vomci-entity.yang</value>
-                <value>/yangs/bbf-omci-message-retransmission.yang</value>
-                <value>/yangs/bbf-voltmf-message-monitor.yang</value>
+                <value>/yangs/bbf-alarm-types.yang</value>
+                <value>/yangs/bbf-obbaa-xpon-onu-alarm-types.yang</value>
+                <value>/yangs/bbf-obbaa-ethernet-alarm-types.yang</value>
+                <value>/yangs/bbf-obbaa-network-function-state.yang</value>
+                <value>/yangs/bbf-network-function.yang</value>
+                <value>/yangs/bbf-node-types.yang</value>
             </list>
         </property>
         <property name="entityClasses">

@@ -25,4 +25,4 @@ For build instructions, please refer to [installing section of the OB-BAA docume
 
 ## Contributor License Agreement
 
-Any company or individual interested in participating in this open source project must sign a Contributor License Agreement (more details [here](https://wiki.broadband-forum.org/download/attachments/87557378/OB-BAA%20CLA%2013Dec2017%20%281%29.pdf?version=1&modificationDate=1580411867544&api=v2)).
+Any company or individual interested in participating in this open source project must sign a Contributor License Agreement (more details [here](https://wiki.broadband-forum.org/pages/viewpage.action?pageId=87557378)).

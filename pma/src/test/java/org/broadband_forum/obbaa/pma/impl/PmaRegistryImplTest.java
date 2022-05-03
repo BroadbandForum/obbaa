@@ -46,7 +46,10 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNode
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
+import org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
+import org.broadband_forum.obbaa.pma.NetconfNetworkFunctionAlignmentService;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -66,6 +69,8 @@ public class PmaRegistryImplTest {
     @Mock
     private DeviceManager m_dm;
     @Mock
+    private NetworkFunctionManager m_nfm;
+    @Mock
     private Device m_device1Meta;
 
     private NetConfResponse m_response = new NetConfResponse().setOk(true).setMessageId("1");
@@ -75,6 +80,8 @@ public class PmaRegistryImplTest {
     private NetConfServerImpl m_netconfServer;
     @Mock
     private NetconfDeviceAlignmentService m_das;
+    @Mock
+    private NetconfNetworkFunctionAlignmentService m_nas;
     @Mock
     private EntityRegistry m_entityRegistry;
     @Mock
@@ -107,9 +114,9 @@ public class PmaRegistryImplTest {
         MockitoAnnotations.initMocks(this);
         m_tempDir = Files.createTempDir();
         m_dir = m_tempDir.getAbsolutePath();
-        m_pmaRegistry = new PmaRegistryImpl(m_dm, new PmaServerSessionFactory(m_dir, m_dm, m_netconfServer, m_das, m_entityRegistry,
-                m_schemaReg, m_modelNodeDsmReg, m_adapterManager));
-        m_pmaRegistryTransparentSF = new PmaRegistryImpl(m_dm, new TransparentPmaSessionFactory(m_cm, m_dm));
+        m_pmaRegistry = new PmaRegistryImpl(m_dm,m_nfm, new PmaServerSessionFactory(m_dir, m_dm, m_netconfServer, m_das, m_entityRegistry,
+                m_schemaReg, m_modelNodeDsmReg, m_adapterManager,m_nfm,m_nas));
+        m_pmaRegistryTransparentSF = new PmaRegistryImpl(m_dm,m_nfm, new TransparentPmaSessionFactory(m_cm, m_dm));
         m_deviceAdapterId = new DeviceAdapterId("dpu", "1.0", "standard", "BBF");
         m_deviceAdapter = AdapterBuilder.createAdapterBuilder()
                 .setDeviceAdapterId(m_deviceAdapterId)
@@ -133,7 +140,7 @@ public class PmaRegistryImplTest {
     @Test
     public void testExceptionIsThrownWhenDeviceNotManaged() throws ExecutionException {
         try {
-            m_pmaRegistry.executeNC("device2", "");
+            m_pmaRegistry.executeNC(new PmaResourceId(PmaResourceId.Type.DEVICE,"device2"), "");
             fail("Expected an exception here");
         } catch (IllegalArgumentException e) {
             assertEquals("Device not managed : device2", e.getMessage());
@@ -145,7 +152,7 @@ public class PmaRegistryImplTest {
     public void testExceptionIsThrownWhenNoConnectionToDevice() throws ExecutionException {
         when(m_cm.isConnected(m_device1Meta)).thenReturn(false);
         try {
-            m_pmaRegistry.executeNC("device1", "");
+            m_pmaRegistry.executeNC(new PmaResourceId(PmaResourceId.Type.DEVICE,"device1"), "");
             fail("Expected an exception here");
         } catch (IllegalStateException e) {
             assertEquals("Device not connected : device1", e.getMessage());
@@ -154,7 +161,7 @@ public class PmaRegistryImplTest {
 
     @Test
     public void testExecuteWithPmaSession() throws ExecutionException {
-        String response = m_pmaRegistry.executeWithPmaSession("device1", session -> "response");
+        String response = m_pmaRegistry.executeWithPmaSession(new PmaResourceId(PmaResourceId.Type.DEVICE,"device1"), session -> "response");
         assertEquals("response", response);
     }
 
@@ -162,7 +169,7 @@ public class PmaRegistryImplTest {
     public void testExecuteWithPmaSessionException() throws ExecutionException {
         when(m_adapterManager.getAdapterContext(any())).thenReturn(null);
         try {
-            m_pmaRegistry.executeWithPmaSession("device1", session -> "response");
+            m_pmaRegistry.executeWithPmaSession(new PmaResourceId(PmaResourceId.Type.DEVICE,"device1"), session -> "response");
         } catch (RuntimeException e) {
             assertEquals("Could not get session to Pma device1", e.getMessage());
         }
@@ -170,25 +177,25 @@ public class PmaRegistryImplTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testFullResyncContactsDASTransparentSessionFactory() throws ExecutionException {
-        m_pmaRegistryTransparentSF.forceAlign("device1");
+        m_pmaRegistryTransparentSF.forceAlign(new PmaResourceId(PmaResourceId.Type.DEVICE,"device1"));
     }
 
     @Test
     public void testFullResyncContactsDAS() throws ExecutionException {
-        m_pmaRegistry.forceAlign("device1");
+        m_pmaRegistry.forceAlign(new PmaResourceId(PmaResourceId.Type.DEVICE,"device1"));
         verify(m_das).forceAlign(any(), any());
     }
 
     @Test
     public void testsyncContactsDAS() throws ExecutionException {
-        m_pmaRegistry.align("device1");
+        m_pmaRegistry.align(new PmaResourceId(PmaResourceId.Type.DEVICE,"device1"));
         verify(m_das).align(eq(m_device1Meta), m_netconfResponse.capture());
     }
 
     @Test
     public void testDeviceRemoved() throws ExecutionException {
         m_pmaRegistry.deviceRemoved("device1");
-        m_pmaRegistry.executeWithPmaSession("device1", session -> "response");
+        m_pmaRegistry.executeWithPmaSession(new PmaResourceId(PmaResourceId.Type.DEVICE,"device1"), session -> "response");
 
     }
 

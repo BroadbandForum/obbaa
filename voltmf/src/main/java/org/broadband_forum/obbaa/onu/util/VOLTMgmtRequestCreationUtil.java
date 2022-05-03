@@ -16,13 +16,31 @@
 
 package org.broadband_forum.obbaa.onu.util;
 
+import static org.broadband_forum.obbaa.onu.ONUConstants.AUTH_SCCESSFULL;
+import static org.broadband_forum.obbaa.onu.ONUConstants.BAA_XPON_ONU_AUTH;
+import static org.broadband_forum.obbaa.onu.ONUConstants.BAA_XPON_ONU_TYPES_WITH_XMLNS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.CHANNEL_TERMINATION;
+import static org.broadband_forum.obbaa.onu.ONUConstants.CHANNEL_TERMINATION_NS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.IETF_INTERFACES_NS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.IF_PREFIX;
+import static org.broadband_forum.obbaa.onu.ONUConstants.INTERFACE;
+import static org.broadband_forum.obbaa.onu.ONUConstants.INTERFACES_STATE;
+import static org.broadband_forum.obbaa.onu.ONUConstants.NAME;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_AUTHENTICATION_NS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_AUTHENTICATION_REPORT;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_MGMT_MODE_NS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_NAME;
+import static org.broadband_forum.obbaa.onu.ONUConstants.REQUESTED_ONU_MGMT_MODE;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ROOT;
+import static org.broadband_forum.obbaa.onu.ONUConstants.SERIAL_NUMBER_ONU;
+import static org.broadband_forum.obbaa.onu.ONUConstants.V_ANI;
+
 import java.util.HashMap;
 
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfFilter;
-import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcRequest;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.onu.NotificationRequest;
 import org.broadband_forum.obbaa.onu.ONUConstants;
@@ -37,19 +55,21 @@ public final class VOLTMgmtRequestCreationUtil {
         //Not Called
     }
 
-    public static NetconfRpcRequest prepareCreateOnuRequest(String onuDeviceName, boolean isMsgToProxy) {
+    public static ActionRequest prepareCreateOnuRequest(String onuDeviceName, boolean isMsgToProxy) {
         Document document = DocumentUtils.createDocument();
         String elementNS = ONUConstants.BBF_VOMCI_FUNCTION_NS;
         if (isMsgToProxy) {
             elementNS = ONUConstants.BBF_VOMCI_PROXY_NS;
         }
-        Element createOnuNode = document.createElementNS(elementNS, ONUConstants.CREATE_ONU);
-        Element nameLeaf = document.createElement(ONUConstants.NAME);
+        Element managedOnus = document.createElementNS(elementNS, ONUConstants.MANAGED_ONUS);
+        Element nameLeaf = document.createElementNS(elementNS, ONUConstants.NAME);
         nameLeaf.setTextContent(onuDeviceName);
+        Element createOnuNode = document.createElementNS(elementNS, ONUConstants.CREATE_ONU);
         createOnuNode.appendChild(nameLeaf);
-        document.appendChild(createOnuNode);
-        NetconfRpcRequest request = new NetconfRpcRequest();
-        request.setRpcInput(document.getDocumentElement());
+        managedOnus.appendChild(createOnuNode);
+        document.appendChild(managedOnus);
+        ActionRequest request = new ActionRequest();
+        request.setActionTreeElement(document.getDocumentElement());
         return request;
     }
 
@@ -110,6 +130,37 @@ public final class VOLTMgmtRequestCreationUtil {
         return request;
     }
 
+    public static ActionRequest prepareOnuAuthenicationReportActionRequest(String onuDeviceName, boolean isAuthSuccessful, String vaniName,
+                                                 String requestedOnuMgmtMode, String onuSerialNumber, String channelTerminationName) {
+        Document document = DocumentUtils.createDocument();
+
+        Element interfacesState = document.createElementNS(IETF_INTERFACES_NS, INTERFACES_STATE);
+        interfacesState.setPrefix(IF_PREFIX);
+        Element intf = document.createElementNS(IETF_INTERFACES_NS, INTERFACE);
+        intf.setPrefix(IF_PREFIX);
+        appendElementWithPrefix(IETF_INTERFACES_NS, document, intf, NAME, IF_PREFIX, channelTerminationName);
+        Element channelTermination = document.createElementNS(CHANNEL_TERMINATION_NS, CHANNEL_TERMINATION);
+        document.appendChild(interfacesState);
+        interfacesState.appendChild(intf);
+        intf.appendChild(channelTermination);
+
+        Element onuAuthReport = document.createElementNS(ONU_AUTHENTICATION_NS, ONU_AUTHENTICATION_REPORT);
+        onuAuthReport.setPrefix(BAA_XPON_ONU_AUTH);
+        channelTermination.appendChild(onuAuthReport);
+        appendElementWithPrefix(ONU_AUTHENTICATION_NS, document, onuAuthReport, SERIAL_NUMBER_ONU, BAA_XPON_ONU_AUTH,
+                onuSerialNumber);
+        appendElementWithPrefix(ONU_AUTHENTICATION_NS, document, onuAuthReport, AUTH_SCCESSFULL, BAA_XPON_ONU_AUTH,
+                String.valueOf(isAuthSuccessful));
+        appendElementWithPrefix(ONU_AUTHENTICATION_NS, document, onuAuthReport, V_ANI, BAA_XPON_ONU_AUTH, vaniName);
+        appendElementWithPrefix(ONU_AUTHENTICATION_NS, document, onuAuthReport, ONU_NAME, BAA_XPON_ONU_AUTH, onuDeviceName);
+        appendElementWithxmlnsPrefix(ONU_MGMT_MODE_NS, document, onuAuthReport, REQUESTED_ONU_MGMT_MODE, BAA_XPON_ONU_AUTH,
+                BAA_XPON_ONU_TYPES_WITH_XMLNS, requestedOnuMgmtMode);
+
+        ActionRequest request = new ActionRequest();
+        request.setActionTreeElement(document.getDocumentElement());
+        return request;
+    }
+
     public static Element appendElement(String elementNS, Document document, Element parentElement, String localName,
                                         String... textContents) {
         Element lastElement = null;
@@ -122,8 +173,34 @@ public final class VOLTMgmtRequestCreationUtil {
         return lastElement;
     }
 
+    public static Element appendElementWithPrefix(String elementNS, Document document, Element parentElement, String localName,
+                                                  String prefix, String... textContents) {
+        Element lastElement = null;
+        for (String textContent : textContents) {
+            Element element = document.createElementNS(elementNS, localName);
+            element.setTextContent(textContent);
+            element.setPrefix(prefix);
+            parentElement.appendChild(element);
+            lastElement = element;
+        }
+        return lastElement;
+    }
+
+    public static Element appendElementWithxmlnsPrefix(String elementNS, Document document, Element parentElement, String localName,
+                                                       String prefix, String xmlnsPrefix, String... textContents) {
+        Element lastElement = null;
+        for (String textContent : textContents) {
+            Element element = document.createElement(prefix + ":" + localName);
+            element.setAttribute(xmlnsPrefix, elementNS);
+            element.setTextContent(textContent);
+            parentElement.appendChild(element);
+            lastElement = element;
+        }
+        return lastElement;
+    }
+
     //VOMCI functions is currently not supporting GET request handling.
-    public static GetRequest prepareInternalGetRequest(String deviceName) {
+    public static GetRequest prepareInternalGetRequest(String onuDeviceName) {
         Document document = DocumentUtils.createDocument();
 
         Element onuManager = document.createElementNS(ONUConstants.NETWORK_MANAGER_NAMESPACE, ONUConstants.NETWORK_MANAGER);
@@ -134,22 +211,27 @@ public final class VOLTMgmtRequestCreationUtil {
         managedDevices.appendChild(device);
         Element name = document.createElementNS(ONUConstants.NETWORK_MANAGER_NAMESPACE, ONUConstants.NAME);
         device.appendChild(name);
-        name.setTextContent(deviceName);
+        name.setTextContent(onuDeviceName);
 
-        Element deviceManagement = document.createElementNS(ONUConstants.NETWORK_MANAGER_NAMESPACE, ONUConstants.DEVICE_MANAGEMENT);
-        Element deviceState = document.createElementNS(ONUConstants.NETWORK_MANAGER_NAMESPACE, ONUConstants.DEVICE_STATE);
-        device.appendChild(deviceManagement);
-        deviceManagement.appendChild(deviceState);
+        Element root = document.createElementNS(ONUConstants.NETWORK_MANAGER_NAMESPACE, ROOT);
+        device.appendChild(root);
 
-        Element onuStateInfo = document.createElementNS(ONUConstants.ONU_STATE_INFO_NAMESPACE, ONUConstants.ONU_STATE_INFO);
-        Element equipmentId = document.createElementNS(ONUConstants.ONU_STATE_INFO_NAMESPACE, ONUConstants.EQUIPEMENT_ID);
-        deviceState.appendChild(onuStateInfo);
-        onuStateInfo.appendChild(equipmentId);
 
-        Element softwareImages = document.createElementNS(ONUConstants.ONU_STATE_INFO_NAMESPACE, ONUConstants.SOFTWARE_IMAGES);
-        Element softwareImage = document.createElementNS(ONUConstants.ONU_STATE_INFO_NAMESPACE, ONUConstants.SOFTWARE_IMAGE);
-        onuStateInfo.appendChild(softwareImages);
-        softwareImages.appendChild(softwareImage);
+        Element hardwareState = document.createElementNS(ONUConstants.IETF_HARDWARE_NS, ONUConstants.HARDWARE_STATE);
+        Element component = document.createElementNS(ONUConstants.IETF_HARDWARE_NS, ONUConstants.COMPONENT);
+        hardwareState.appendChild(component);
+        root.appendChild(hardwareState);
+
+        Element hardware = document.createElementNS(ONUConstants.IETF_HARDWARE_NS, ONUConstants.HARDWARE);
+        Element hardwareComponent = document.createElementNS(ONUConstants.IETF_HARDWARE_NS, ONUConstants.COMPONENT);
+        root.appendChild(hardware);
+        hardware.appendChild(hardwareComponent);
+        Element componentName = document.createElementNS(ONUConstants.IETF_HARDWARE_NS, ONUConstants.NAME);
+        componentName.setTextContent(onuDeviceName);
+        Element software = document.createElementNS(ONUConstants.BBF_SW_MGMT_NS, ONUConstants.SOFTWARE);
+        hardwareComponent.appendChild(componentName);
+        hardwareComponent.appendChild(software);
+
         document.appendChild(onuManager);
 
         NetconfFilter requestFilter = new NetconfFilter();
@@ -158,6 +240,33 @@ public final class VOLTMgmtRequestCreationUtil {
 
         GetRequest getRequest = new GetRequest();
         getRequest.setFilter(requestFilter);
+
+        return getRequest;
+    }
+
+    public static GetRequest prepareGetRequestForVani(String oltName, String vaniNAme) {
+
+        Document document = DocumentUtils.createDocument();
+
+        Element interfaces = document.createElementNS(ONUConstants.IETF_INTERFACES_NS, ONUConstants.INTERFACES);
+        interfaces.setPrefix(IF_PREFIX);
+
+        Element interfaceElement = document.createElementNS(ONUConstants.IETF_INTERFACES_NS, ONUConstants.INTERFACE);
+        interfaceElement.setPrefix(IF_PREFIX);
+        interfaces.appendChild(interfaceElement);
+
+        Element nameElement = document.createElementNS(ONUConstants.IETF_INTERFACES_NS, ONUConstants.NAME);
+        nameElement.setTextContent(vaniNAme);
+        nameElement.setPrefix(IF_PREFIX);
+        interfaceElement.appendChild(nameElement);
+
+        document.appendChild(interfaces);
+
+        GetRequest getRequest = new GetRequest();
+        NetconfFilter netconfFilter = new NetconfFilter();
+        netconfFilter.setType(ONUConstants.SUBTREE_FILTER);
+        netconfFilter.addXmlFilter(document.getDocumentElement());
+        getRequest.setFilter(netconfFilter);
 
         return getRequest;
     }

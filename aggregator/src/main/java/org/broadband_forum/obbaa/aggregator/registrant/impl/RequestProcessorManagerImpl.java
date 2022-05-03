@@ -24,6 +24,7 @@ import java.util.Set;
 import org.broadband_forum.obbaa.aggregator.api.DeviceConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.api.GlobalRequestProcessor;
+import org.broadband_forum.obbaa.aggregator.api.NetworkFunctionConfigProcessor;
 import org.broadband_forum.obbaa.aggregator.api.ProcessorCapability;
 import org.broadband_forum.obbaa.aggregator.impl.ProcessorCapabilityImpl;
 import org.broadband_forum.obbaa.aggregator.processor.NetconfMessageUtil;
@@ -42,6 +43,7 @@ public class RequestProcessorManagerImpl implements RequestProcessorManager {
 
     private Map<GlobalRequestProcessor, Set<ModuleIdentifier>> m_commonRequestProcessors = new HashMap<>();
     private Map<DeviceConfigProcessor, Set<ProcessorCapability>> m_deviceRequestProcessors = new HashMap<>();
+    private Map<NetworkFunctionConfigProcessor, Set<ModuleIdentifier>> m_networkFunctionRequestProcessors = new HashMap<>();
 
     @Override
     public void addProcessor(Set<ModuleIdentifier> moduleIdentifiers, GlobalRequestProcessor globalRequestProcessor)
@@ -75,6 +77,24 @@ public class RequestProcessorManagerImpl implements RequestProcessorManager {
         }
         catch (NullPointerException ex) {
             LOGGER.error(ERROR_FORMAT, "addDeviceRequestProcessor", ex);
+            throw new DispatchException(ex);
+        }
+    }
+
+    @Override
+    public void addNFCProcessor(Set<ModuleIdentifier> moduleIdentifiers, NetworkFunctionConfigProcessor networkFunctionConfigProcessor)
+            throws DispatchException {
+        try {
+            Set<ModuleIdentifier> moduleIdentifiersOld = m_networkFunctionRequestProcessors.get(networkFunctionConfigProcessor);
+            if (moduleIdentifiersOld == null) {
+                m_networkFunctionRequestProcessors.put(networkFunctionConfigProcessor,moduleIdentifiers);
+            }
+            else {
+                moduleIdentifiersOld.addAll(moduleIdentifiers);
+            }
+        }
+        catch (NullPointerException ex) {
+            LOGGER.error(ERROR_FORMAT, "addNFConfigProcessor", ex);
             throw new DispatchException(ex);
         }
     }
@@ -123,6 +143,17 @@ public class RequestProcessorManagerImpl implements RequestProcessorManager {
     }
 
     @Override
+    public NetworkFunctionConfigProcessor getNFCProcessor(String xmlns) {
+        for (Map.Entry<NetworkFunctionConfigProcessor, Set<ModuleIdentifier>> entry: m_networkFunctionRequestProcessors.entrySet()) {
+            ModuleIdentifier moduleIdentifier = getModuleByXmlns(xmlns, entry.getValue());
+            if (moduleIdentifier != null) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public GlobalRequestProcessor getProcessor(String xmlns) {
         for (Map.Entry<GlobalRequestProcessor, Set<ModuleIdentifier>> entry : getCommonRequestProcessors().entrySet()) {
             ModuleIdentifier moduleIdentifier = getModuleByXmlns(xmlns, entry.getValue());
@@ -149,6 +180,11 @@ public class RequestProcessorManagerImpl implements RequestProcessorManager {
         }
 
         return null;
+    }
+
+    @Override
+    public Set<NetworkFunctionConfigProcessor> getAllNFConfigProcessors() {
+        return m_networkFunctionRequestProcessors.keySet();
     }
 
     @Override

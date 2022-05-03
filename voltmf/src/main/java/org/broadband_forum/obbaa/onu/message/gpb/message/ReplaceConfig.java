@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.ReplaceConfig}
  */
-public final class ReplaceConfig extends
+public  final class ReplaceConfig extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.ReplaceConfig)
     ReplaceConfigOrBuilder {
@@ -17,6 +17,7 @@ private static final long serialVersionUID = 0L;
   }
   private ReplaceConfig() {
     configInst_ = com.google.protobuf.ByteString.EMPTY;
+    datastoreTag_ = "";
   }
 
   @java.lang.Override
@@ -52,6 +53,12 @@ private static final long serialVersionUID = 0L;
           case 10: {
 
             configInst_ = input.readBytes();
+            break;
+          }
+          case 18: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            datastoreTag_ = s;
             break;
           }
           default: {
@@ -96,9 +103,54 @@ private static final long serialVersionUID = 0L;
    * <code>bytes config_inst = 1;</code>
    * @return The configInst.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString getConfigInst() {
     return configInst_;
+  }
+
+  public static final int DATASTORE_TAG_FIELD_NUMBER = 2;
+  private volatile java.lang.Object datastoreTag_;
+  /**
+   * <pre>
+   * be used as a replacement of what
+   * exists for the target
+   * </pre>
+   *
+   * <code>string datastore_tag = 2;</code>
+   * @return The datastoreTag.
+   */
+  public java.lang.String getDatastoreTag() {
+    java.lang.Object ref = datastoreTag_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      datastoreTag_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * be used as a replacement of what
+   * exists for the target
+   * </pre>
+   *
+   * <code>string datastore_tag = 2;</code>
+   * @return The bytes for datastoreTag.
+   */
+  public com.google.protobuf.ByteString
+      getDatastoreTagBytes() {
+    java.lang.Object ref = datastoreTag_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      datastoreTag_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
   }
 
   private byte memoizedIsInitialized = -1;
@@ -118,6 +170,9 @@ private static final long serialVersionUID = 0L;
     if (!configInst_.isEmpty()) {
       output.writeBytes(1, configInst_);
     }
+    if (!getDatastoreTagBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, datastoreTag_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -130,6 +185,9 @@ private static final long serialVersionUID = 0L;
     if (!configInst_.isEmpty()) {
       size += com.google.protobuf.CodedOutputStream
         .computeBytesSize(1, configInst_);
+    }
+    if (!getDatastoreTagBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, datastoreTag_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -148,6 +206,8 @@ private static final long serialVersionUID = 0L;
 
     if (!getConfigInst()
         .equals(other.getConfigInst())) return false;
+    if (!getDatastoreTag()
+        .equals(other.getDatastoreTag())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -161,6 +221,8 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + CONFIG_INST_FIELD_NUMBER;
     hash = (53 * hash) + getConfigInst().hashCode();
+    hash = (37 * hash) + DATASTORE_TAG_FIELD_NUMBER;
+    hash = (53 * hash) + getDatastoreTag().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -296,6 +358,8 @@ private static final long serialVersionUID = 0L;
       super.clear();
       configInst_ = com.google.protobuf.ByteString.EMPTY;
 
+      datastoreTag_ = "";
+
       return this;
     }
 
@@ -323,6 +387,7 @@ private static final long serialVersionUID = 0L;
     public org.broadband_forum.obbaa.onu.message.gpb.message.ReplaceConfig buildPartial() {
       org.broadband_forum.obbaa.onu.message.gpb.message.ReplaceConfig result = new org.broadband_forum.obbaa.onu.message.gpb.message.ReplaceConfig(this);
       result.configInst_ = configInst_;
+      result.datastoreTag_ = datastoreTag_;
       onBuilt();
       return result;
     }
@@ -374,6 +439,10 @@ private static final long serialVersionUID = 0L;
       if (other.getConfigInst() != com.google.protobuf.ByteString.EMPTY) {
         setConfigInst(other.getConfigInst());
       }
+      if (!other.getDatastoreTag().isEmpty()) {
+        datastoreTag_ = other.datastoreTag_;
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -412,7 +481,6 @@ private static final long serialVersionUID = 0L;
      * <code>bytes config_inst = 1;</code>
      * @return The configInst.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString getConfigInst() {
       return configInst_;
     }
@@ -445,6 +513,107 @@ private static final long serialVersionUID = 0L;
     public Builder clearConfigInst() {
       
       configInst_ = getDefaultInstance().getConfigInst();
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object datastoreTag_ = "";
+    /**
+     * <pre>
+     * be used as a replacement of what
+     * exists for the target
+     * </pre>
+     *
+     * <code>string datastore_tag = 2;</code>
+     * @return The datastoreTag.
+     */
+    public java.lang.String getDatastoreTag() {
+      java.lang.Object ref = datastoreTag_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datastoreTag_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * be used as a replacement of what
+     * exists for the target
+     * </pre>
+     *
+     * <code>string datastore_tag = 2;</code>
+     * @return The bytes for datastoreTag.
+     */
+    public com.google.protobuf.ByteString
+        getDatastoreTagBytes() {
+      java.lang.Object ref = datastoreTag_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datastoreTag_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * be used as a replacement of what
+     * exists for the target
+     * </pre>
+     *
+     * <code>string datastore_tag = 2;</code>
+     * @param value The datastoreTag to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDatastoreTag(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      datastoreTag_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * be used as a replacement of what
+     * exists for the target
+     * </pre>
+     *
+     * <code>string datastore_tag = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDatastoreTag() {
+      
+      datastoreTag_ = getDefaultInstance().getDatastoreTag();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * be used as a replacement of what
+     * exists for the target
+     * </pre>
+     *
+     * <code>string datastore_tag = 2;</code>
+     * @param value The bytes for datastoreTag to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDatastoreTagBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      datastoreTag_ = value;
       onChanged();
       return this;
     }

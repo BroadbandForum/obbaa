@@ -33,6 +33,7 @@ import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.AlignmentOption;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.dmyang.tx.TXTemplate;
 import org.broadband_forum.obbaa.dmyang.tx.TxService;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
@@ -57,7 +58,7 @@ public class AlignmentTimer {
     private AdapterManager m_adapterMgr;
 
     public AlignmentTimer(PmaRegistry pmaRegistry, AdapterManager adaperMgr,
-                          DeviceDao deviceDao, TxService txService) {
+                          DeviceDao deviceDao,TxService txService) {
         m_pmaRegistry = pmaRegistry;
         m_adapterMgr = adaperMgr;
         m_timer = new Timer();
@@ -106,8 +107,9 @@ public class AlignmentTimer {
             public Void execute() {
                 List<Device> devices = m_deviceDao.findAllDevices();
                 for (Device device : devices) {
+                    PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,device.getDeviceName());
                     try {
-                        m_pmaRegistry.executeWithPmaSession(device.getDeviceName(), session -> {
+                        m_pmaRegistry.executeWithPmaSession(resourceId, session -> {
                             if (device.isNeverAligned()) {
                                 LOGGER.debug(String.format("Device %s is " + NEVER_ALIGNED, device));
                                 AlignmentOption alignmentOption = device.getAlignmentOption();
@@ -177,7 +179,8 @@ public class AlignmentTimer {
     }
 
     private boolean deviceHasConfigurations(Device device) throws ExecutionException {
-        return m_pmaRegistry.executeWithPmaSession(device.getDeviceName(), session -> {
+        PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,device.getDeviceName());
+        return m_pmaRegistry.executeWithPmaSession(resourceId, session -> {
             Map<NetConfResponse, List<Notification>> netConfResponseListTreeMap = session.executeNC(new GetConfigRequest()
                     .setSourceRunning().setMessageId("xx")
                     .requestToString());

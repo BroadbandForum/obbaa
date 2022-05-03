@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.GetData}
  */
-public final class GetData extends
+public  final class GetData extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.GetData)
     GetDataOrBuilder {
@@ -99,7 +99,6 @@ private static final long serialVersionUID = 0L;
    * <code>repeated bytes filter = 1;</code>
    * @return A list containing the filter.
    */
-  @java.lang.Override
   public java.util.List<com.google.protobuf.ByteString>
       getFilterList() {
     return filter_;

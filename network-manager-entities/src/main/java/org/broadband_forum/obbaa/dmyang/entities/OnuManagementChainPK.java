@@ -20,14 +20,16 @@ import java.io.Serializable;
 
 public class OnuManagementChainPK implements Serializable {
     private String parentId;
-    private String onuManagementChain;
+    private String nfName;
+    private String nfType;
 
     public OnuManagementChainPK() {
     }
 
-    public OnuManagementChainPK(String parentId, String onuManagementChain) {
+    public OnuManagementChainPK(String parentId, String nfName, String nfType) {
         this.parentId = parentId;
-        this.onuManagementChain = onuManagementChain;
+        this.nfName = nfName;
+        this.nfType = nfType;
     }
 
     public String getParentId() {
@@ -38,12 +40,20 @@ public class OnuManagementChainPK implements Serializable {
         this.parentId = parentId;
     }
 
-    public String getOnuManagementChain() {
-        return onuManagementChain;
+    public String getNfName() {
+        return nfName;
     }
 
-    public void setOnuManagementChain(String onuManagementChain) {
-        this.onuManagementChain = onuManagementChain;
+    public void setNfName(String nfName) {
+        this.nfName = nfName;
+    }
+
+    public String getNfType() {
+        return nfType;
+    }
+
+    public void setNfType(String nfType) {
+        this.nfType = nfType;
     }
 
     @Override
@@ -60,14 +70,18 @@ public class OnuManagementChainPK implements Serializable {
         if (parentId != null ? !parentId.equals(onuManagementChainPK.parentId) : onuManagementChainPK.parentId != null) {
             return false;
         }
-        return onuManagementChain != null ? onuManagementChain.equals(onuManagementChainPK.onuManagementChain)
-                : onuManagementChainPK.onuManagementChain == null;
+        if (nfName != null ? !nfName.equals(onuManagementChainPK.nfName) : onuManagementChainPK.nfName != null) {
+            return false;
+        }
+        return nfType != null ? nfType.equals(onuManagementChainPK.nfType)
+                : onuManagementChainPK.nfType == null;
     }
 
     @Override
     public int hashCode() {
         int result = parentId != null ? parentId.hashCode() : 0;
-        result = 31 * result + (onuManagementChain != null ? onuManagementChain.hashCode() : 0);
+        result = 31 * result + (nfName != null ? nfName.hashCode() : 0);
+        result = 31 * result + (nfType != null ? nfType.hashCode() : 0);
         return result;
     }
 }

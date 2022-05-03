@@ -80,6 +80,10 @@
 
 ## Revision History
 
+### Release 5
+
+* [OB-BAA release 5.0.0 (April 2022)]({{ site.obbaa_readme }}#rel_5_0_0)
+
 ### Release 4
 
 * [OB-BAA release 4.0.0 (September 2020)]({{ site.obbaa_readme }}#rel_4_0_0)
@@ -104,19 +108,18 @@
 | :---: | :---: | :---: | :---: |
 |![Altice](assets/img/altice.jpg){: width="100px" height="80px"}|![Altran](assets/img/altran.png){: width="100px" height="100px"}|![ATT](assets/img/att.png){: width="90px" height="80px"}|![Broadcom](assets/img/broadcom.png){: width="100px" height="100px"}|
 |![BT](assets/img/bt.png){: width="100px" height="100px"}|![Calix](assets/img/calix.png){: width="100px" height="100px"}|![CenturyLink](assets/img/centurylink.jpg){: width="100px" height="100px"}|![ChinaMobile](assets/img/china-mobile.png){: width="100px" height="100px"}|
-|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|![DZS](assets/img/dzs.png){: width="100px" height="100px"}|![CommScope](assets/img/commscope.jpg){: width="100px" height="30px"}|
+|![ChinaTelecom](assets/img/china-telecom-logo.jpg){: width="100px" height="100px"}|![ChinaUnicom](assets/img/china-unicom_logo.jpg){: width="100px" height="80px"}|![CommScope](assets/img/commscope.jpg){: width="100px" height="30px"}|![DZS](assets/img/dzs.png){: width="100px" height="100px"}
 |![Fiberhome](assets/img/fiberhome.jpg){: width="100px" height="60px"}|![Furukawa](assets/img/furukawa.jpg){: width="100px" height="100px"}|![Huawei](assets/img/huawei.jpg){: width="100px" height="100px"}|![ISKRATEL](assets/img/iskratel.jpg){: width="100px" height="100px"}|
-|![nbn](assets/img/nbn.png){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Orange](assets/img/orange.png){: width="100px" height="100px"}|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|
-|![TelecomItalia](assets/img/tim.png){: width="100px" height="60px"}|![UNH](assets/img/iol.png){: width="100px" height="45px"}|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="60px"}||
+|![nbn](assets/img/nbn.png){: width="100px" height="100px"}|![Nokia](assets/img/nokia.png){: width="100px" height="90px"}|![Orange](assets/img/orange.png){: width="100px" height="100px"}|![Reply](assets/img/reply.png){: width="100px" height="60px"}|
+|![Tibit](assets/img/tibit.png){: width="100px" height="45px"}|![TelecomItalia](assets/img/tim.png){: width="100px" height="60px"}|![UNH](assets/img/iol.png){: width="100px" height="45px"}|![Vecima](assets/img/vecima.jpg){: width="100px" height="60px"}|
+|![Vodafone](assets/img/vodafone.png){: width="100px" height="45px"}|![ZTE](assets/img/zte_logo_en.png){: width="100px" height="60px"}|||
 
 
 How to Get Involved
 ===================
 
-Involvement in OB-BAA requires that you sign the Broadband Forum\'s
-[Contribution License Agreement (CLA)/Project Participation
-Agreement](https://wiki.broadband-forum.org/download/attachments/87557378/OB-BAA%20CLA%2013Dec2017%20%281%29.pdf?version=1&modificationDate=1580411867544&api=v2)
-(PDF), and then send the signed agreement to: [info@broadband-forum.org](mailto:info@broadband-forum.org).
+Involvement in OB-BAA requires that you sign the Broadband Forum\'s Contribution License Agreement (CLA)/Project Participation Agreement. 
+Information regarding the agreement can be found [here](https://wiki.broadband-forum.org/pages/viewpage.action?pageId=87557378). Send the signed agreement to: [info@broadband-forum.org](mailto:info@broadband-forum.org).
 
 Issues and bugs can be submitted using the Issues feature on the OB-BAA
 Github repository.

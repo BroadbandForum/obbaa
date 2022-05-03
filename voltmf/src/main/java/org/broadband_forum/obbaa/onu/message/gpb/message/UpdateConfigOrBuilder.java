@@ -37,5 +37,25 @@ public interface UpdateConfigOrBuilder extends
    */
   org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfigReplicaOrBuilder getUpdateConfigReplicaOrBuilder();
 
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 3;</code>
+   * @return The datastoreTag.
+   */
+  java.lang.String getDatastoreTag();
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 3;</code>
+   * @return The bytes for datastoreTag.
+   */
+  com.google.protobuf.ByteString
+      getDatastoreTagBytes();
+
   public org.broadband_forum.obbaa.onu.message.gpb.message.UpdateConfig.ReqTypeCase getReqTypeCase();
 }

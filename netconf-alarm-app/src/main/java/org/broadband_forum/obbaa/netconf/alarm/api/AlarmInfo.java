@@ -63,6 +63,11 @@ public class AlarmInfo {
         this.m_sourceObjectNamespaces = sourceObjectNamespaces;
     }
 
+    public AlarmInfo(String alarmTypeId, String alarmTypeQualifier, String resource, Timestamp time, AlarmSeverity severity,
+                     String alarmText, String deviceName) {
+        this(alarmTypeId, alarmTypeQualifier, null, time, severity, alarmText, deviceName, resource);
+    }
+
     public AlarmInfo(String alarmTypeId, String alarmTypeQualifier, ModelNodeId sourceObject, Timestamp time, AlarmSeverity severity,
                      String alarmText, String deviceName, String sourceObjectString) {
         this.m_alarmTypeId = alarmTypeId;

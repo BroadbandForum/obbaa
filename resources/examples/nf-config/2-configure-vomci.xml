@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   ~ Copyright 2022 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="3">
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <network-functions>
+                    <network-function>
+                        <name>bbf-vomci</name>
+                        <root>
+                            <bbf-vomci-func:vomci xmlns:bbf-vomci-func="urn:bbf:yang:bbf-vomci-function">
+                                <bbf-vomci-func:remote-network-function>
+                                    <bbf-vomci-func:nf-client>
+                                        <bbf-vomci-func:enabled>true</bbf-vomci-func:enabled>
+                                        <bbf-vomci-func:nf-initiate>
+                                            <bbf-vomci-func:remote-endpoints>
+                                                <bbf-vomci-func:remote-endpoint>
+                                                    <bbf-vomci-func:name>vOLTMF_Kafka_1</bbf-vomci-func:name>
+                                                    <bbf-vomci-func:nf-type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:voltmf-type</bbf-vomci-func:nf-type>
+                                                    <bbf-vomci-func:local-endpoint-name>vOMCI-kfk-1</bbf-vomci-func:local-endpoint-name>
+                                                    <bbf-vomci-func:kafka-agent>
+                                                        <bbf-vomci-func:kafka-agent-parameters>
+                                                            <bbf-vomci-func:client-id>client-id2</bbf-vomci-func:client-id>
+                                                            <bbf-vomci-func:publication-parameters>
+                                                                <bbf-vomci-func:topic>
+                                                                    <bbf-vomci-func:name>vomci1-response</bbf-vomci-func:name>
+                                                                    <bbf-vomci-func:purpose>VOMCI_RESPONSE</bbf-vomci-func:purpose>
+                                                                </bbf-vomci-func:topic>
+                                                                <bbf-vomci-func:topic>
+                                                                    <bbf-vomci-func:name>vomci1-notification</bbf-vomci-func:name>
+                                                                    <bbf-vomci-func:purpose>VOMCI_NOTIFICATION</bbf-vomci-func:purpose>
+                                                                </bbf-vomci-func:topic>
+                                                            </bbf-vomci-func:publication-parameters>
+                                                            <bbf-vomci-func:consumption-parameters>
+                                                                <bbf-vomci-func:topic>
+                                                                    <bbf-vomci-func:name>vomci1-request</bbf-vomci-func:name>
+                                                                    <bbf-vomci-func:purpose>VOMCI_REQUEST</bbf-vomci-func:purpose>
+                                                                </bbf-vomci-func:topic>
+                                                            </bbf-vomci-func:consumption-parameters>
+                                                        </bbf-vomci-func:kafka-agent-parameters>
+                                                    </bbf-vomci-func:kafka-agent>
+                                                    <bbf-vomci-func:access-point>
+                                                        <bbf-vomci-func:name>vOLTMF_Kafka_1</bbf-vomci-func:name>
+                                                        <bbf-vomci-func:kafka-agent>
+                                                            <bbf-vomci-func:kafka-agent-transport-parameters>
+                                                                <bbf-vomci-func:remote-address>kafka</bbf-vomci-func:remote-address>
+                                                            </bbf-vomci-func:kafka-agent-transport-parameters>
+                                                        </bbf-vomci-func:kafka-agent>
+                                                    </bbf-vomci-func:access-point>
+                                                </bbf-vomci-func:remote-endpoint>
+                                            </bbf-vomci-func:remote-endpoints>
+                                        </bbf-vomci-func:nf-initiate>
+                                    </bbf-vomci-func:nf-client>
+
+                                    <bbf-vomci-func:nf-server>
+                                        <bbf-vomci-func:enabled>true</bbf-vomci-func:enabled>
+                                        <bbf-vomci-func:listen>
+                                            <bbf-vomci-func:listen-endpoint>
+                                                <bbf-vomci-func:name>vOMCI-grpc-1</bbf-vomci-func:name>
+                                                <bbf-vomci-func:grpc>
+                                                    <bbf-vomci-func:grpc-server-parameters>
+                                                        <bbf-vomci-func:local-endpoint-name>vOMCI-grpc-1</bbf-vomci-func:local-endpoint-name>
+                                                        <bbf-vomci-func:local-address>0.0.0.0</bbf-vomci-func:local-address>
+                                                        <bbf-vomci-func:local-port>58433</bbf-vomci-func:local-port>
+                                                    </bbf-vomci-func:grpc-server-parameters>
+                                                </bbf-vomci-func:grpc>
+                                            </bbf-vomci-func:listen-endpoint>
+                                        </bbf-vomci-func:listen>
+                                    </bbf-vomci-func:nf-server>
+
+                                </bbf-vomci-func:remote-network-function>
+                            </bbf-vomci-func:vomci>
+                        </root>
+                    </network-function>
+                </network-functions>
+            </network-manager>
+        </config>
+    </edit-config>
+</rpc>

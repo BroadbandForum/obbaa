@@ -22,6 +22,7 @@ import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.dmyang.entities.AlignmentOption;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceStateProvider;
@@ -53,11 +54,12 @@ public class DefaultConfigService implements DeviceStateProvider {
     @Override
     public void deviceAdded(String deviceName) {
         Device device = m_deviceManager.getDevice(deviceName);
+        PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,deviceName);
         EditConfigRequest editReq = AdapterUtils.getDefaultEditReq(device, m_adapterManager);
         if (editReq != null) {
             if (AlignmentOption.PUSH.equals(device.getAlignmentOption())) {
                 try {
-                    m_pmaRegistry.executeNC(deviceName, editReq.requestToString());
+                    m_pmaRegistry.executeNC(resourceId, editReq.requestToString());
                 } catch (ExecutionException e) {
                     LOGGER.error(String.format("Error when executing default-config xml request for device %s", deviceName));
                     throw new RuntimeException(e);

@@ -16,10 +16,6 @@
 
 package org.broadband_forum.obbaa.dmyang.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.spy;
-
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,7 +25,8 @@ import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceMgmt;
-import org.broadband_forum.obbaa.dmyang.entities.DeviceState;
+import org.broadband_forum.obbaa.dmyang.entities.ExpectedAttachmentPoint;
+import org.broadband_forum.obbaa.dmyang.entities.ExpectedAttachmentPoints;
 import org.broadband_forum.obbaa.dmyang.entities.NetworkFunctionLink;
 import org.broadband_forum.obbaa.dmyang.entities.NetworkFunctionLinks;
 import org.broadband_forum.obbaa.dmyang.entities.OnuConfigInfo;
@@ -47,11 +44,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.spy;
+
 public class DeviceDaoImplTest extends AbstractUtilTxTest {
 
     public static final String DEVICE_A = "DeviceA";
     public static final String DEVICE_B = "DeviceB";
     public static final String DEVICE_D = "DeviceD";
+    public static final String DEVICE_E = "DeviceE";
     public static final String ONU_DEVICE = "ont1";
     public static final String CONTAINER_MANAGED_DEVICES = "/container=managed-devices";
     public static final String DEVICE_C = "DeviceC";
@@ -95,36 +98,38 @@ public class DeviceDaoImplTest extends AbstractUtilTxTest {
         m_deviceDao.create(device);
     }
 
-    private void createOnuDevice() {
+    private void createOnuDevice(String deviceName) {
         Device device = new Device();
-        device.setDeviceName(DEVICE_D);
+        device.setDeviceName(deviceName);
         device.setParentId(CONTAINER_MANAGED_DEVICES);
 
         Set<OnuManagementChain> onuManagementChainSet = new LinkedHashSet<>();
         OnuManagementChain onuManagementChain = new OnuManagementChain();
-        onuManagementChain.setParentId(DEVICE_D);
-        onuManagementChain.setOnuManagementChain("vomci-vendor-1");
+        onuManagementChain.setParentId(deviceName);
+        onuManagementChain.setNfName("vomci-vendor-1");
+        onuManagementChain.setNfType("vomci-function");
         onuManagementChain.setInsertOrder(0);
         onuManagementChainSet.add(onuManagementChain);
 
         OnuManagementChain onuManagementChain1 = new OnuManagementChain();
-        onuManagementChain1.setParentId(DEVICE_D);
-        onuManagementChain1.setOnuManagementChain("vomci-proxy-1");
+        onuManagementChain1.setParentId(deviceName);
+        onuManagementChain1.setNfName("vomci-proxy-1");
+        onuManagementChain1.setNfType("onu-management-proxy");
         onuManagementChain1.setInsertOrder(1);
         onuManagementChainSet.add(onuManagementChain1);
 
 
         OnuManagementChain onuManagementChain2 = new OnuManagementChain();
-        onuManagementChain2.setParentId(DEVICE_D);
-        onuManagementChain2.setOnuManagementChain("OLT1");
+        onuManagementChain2.setParentId(deviceName);
+        onuManagementChain2.setNfName("OLT1");
+        onuManagementChain2.setNfType("olt");
         onuManagementChain2.setInsertOrder(2);
         onuManagementChainSet.add(onuManagementChain2);
 
         VomciOnuManagement vomciOnuManagement = new VomciOnuManagement();
         vomciOnuManagement.setOnuManagementChains(onuManagementChainSet);
         vomciOnuManagement.setVomciFunction("vomci-vendor-1");
-        vomciOnuManagement.setUseVomciManagement("true");
-        vomciOnuManagement.setParentId(DEVICE_D);
+        vomciOnuManagement.setParentId(deviceName);
 
         NetworkFunctionLinks networkFunctionLinks = new NetworkFunctionLinks();
         networkFunctionLinks.setParentId("NW_FN_LINKS");
@@ -161,16 +166,51 @@ public class DeviceDaoImplTest extends AbstractUtilTxTest {
 
         networkFunctionLinks.setNetworkFunctionLink(networkFunctionLinkSet);
         vomciOnuManagement.setNetworkFunctionLinks(networkFunctionLinks);
+        vomciOnuManagement.setOnuMgmtChainSelection("configured");
 
         OnuConfigInfo onuConfigInfo = new OnuConfigInfo();
-        onuConfigInfo.setParentId(DEVICE_D);
+        onuConfigInfo.setParentId(deviceName);
         onuConfigInfo.setVomciOnuManagement(vomciOnuManagement);
+        onuConfigInfo.setExpectedAttachmentPoints(prepreExpectedAttachmentPoint(deviceName));
+        onuConfigInfo.setPlannedOnuManagementMode("baa-xpon-onu-types:use-vomci");
+        onuConfigInfo.setPlannedOnuManagementModeNs("urn:bbf:yang:obbaa:xpon-onu-types");
+
         DeviceMgmt deviceMgmt = new DeviceMgmt();
-        deviceMgmt.setParentId(DEVICE_D);
+        deviceMgmt.setParentId(deviceName);
         deviceMgmt.setOnuConfigInfo(onuConfigInfo);
         deviceMgmt.setDeviceType(DeviceManagerNSConstants.DEVICE_TYPE_ONU);
         device.setDeviceManagement(deviceMgmt);
         m_deviceDao.create(device);
+    }
+
+    private ExpectedAttachmentPoints prepreExpectedAttachmentPoint(String deviceName) {
+        ExpectedAttachmentPoints expectedAttachmentPoints = new ExpectedAttachmentPoints();
+        expectedAttachmentPoints.setListType("allow-any");
+        expectedAttachmentPoints.setSchemaPath("expected-attachment-points");
+        expectedAttachmentPoints.setParentId(deviceName);
+
+        Set<ExpectedAttachmentPoint> expectedAttachmentPointSet = new HashSet<>();
+        ExpectedAttachmentPoint expectedAttachmentPoint1 = new ExpectedAttachmentPoint();
+        expectedAttachmentPoint1.setName("test1");
+        expectedAttachmentPoint1.setParentId("test1");
+        expectedAttachmentPoint1.setSchemaPath("test-sp1");
+        expectedAttachmentPoint1.setChannelPartitionName("CG_1.CPart_1");
+        expectedAttachmentPoint1.setOltName("olt1");
+        expectedAttachmentPoint1.setPlannedOnuManagementModeInThisOlt("baa-xpon-onu-types:use-vomci");
+        expectedAttachmentPoint1.setPlannedOnuManagementModeInThisOltNs("urn:bbf:yang:obbaa:xpon-onu-types");
+
+        ExpectedAttachmentPoint expectedAttachmentPoint2 = new ExpectedAttachmentPoint();
+        expectedAttachmentPoint2.setName("test2");
+        expectedAttachmentPoint2.setParentId("test2");
+        expectedAttachmentPoint2.setSchemaPath("test2-sp");
+        expectedAttachmentPoint2.setChannelPartitionName("CG_1.CPart_2");
+        expectedAttachmentPoint2.setPlannedOnuManagementModeInThisOlt("baa-xpon-onu-types:use-eomci");
+        expectedAttachmentPoint2.setPlannedOnuManagementModeInThisOltNs("urn:bbf:yang:obbaa:xpon-onu-types");
+
+        expectedAttachmentPointSet.add(expectedAttachmentPoint2);
+        expectedAttachmentPointSet.add(expectedAttachmentPoint1);
+        expectedAttachmentPoints.setExpectedAttachmentPointSet(expectedAttachmentPointSet);
+        return expectedAttachmentPoints;
     }
 
     @Test
@@ -188,23 +228,28 @@ public class DeviceDaoImplTest extends AbstractUtilTxTest {
     }
 
     @Test
-    public void testVomciOnuMgmt() throws Exception {
+    public void testOnuConfigInfo_VomciOnuMgmt() throws Exception {
         beginTx();
-        createOnuDevice();
+        createOnuDevice(DEVICE_D);
         List<Device> deviceList = m_deviceDao.findAll();
         assertEquals(1, deviceList.size());
 
         //test getVomciFunctionName method
         assertEquals("vomci-vendor-1", m_deviceDao.getVomciFunctionName(DEVICE_D));
-        assertEquals("true", m_deviceDao.getDeviceByName(DEVICE_D).getDeviceManagement().getOnuConfigInfo()
-                .getVomciOnuManagement().getUseVomciManagement());
+        assertEquals("configured", m_deviceDao.getDeviceByName(DEVICE_D).getDeviceManagement().getOnuConfigInfo()
+                .getVomciOnuManagement().getOnuMgmtChainSelection());
 
         //test getOnuManagementChains method
         OnuManagementChain[] onuManagementChains = m_deviceDao.getOnuManagementChains(DEVICE_D);
         assertEquals(3, onuManagementChains.length);
-        assertEquals("vomci-vendor-1", onuManagementChains[0].getOnuManagementChain());
-        assertEquals("vomci-proxy-1", onuManagementChains[1].getOnuManagementChain());
-        assertEquals("OLT1", onuManagementChains[2].getOnuManagementChain());
+        assertEquals("vomci-vendor-1", onuManagementChains[0].getNfName());
+        assertEquals("vomci-function", onuManagementChains[0].getNfType());
+
+        assertEquals("vomci-proxy-1", onuManagementChains[1].getNfName());
+        assertEquals("onu-management-proxy", onuManagementChains[1].getNfType());
+
+        assertEquals("OLT1", onuManagementChains[2].getNfName());
+        assertEquals("olt", onuManagementChains[2].getNfType());
 
         //test getRemoteEndpointName method
         assertEquals("vomci-grpc-1", m_deviceDao.getRemoteEndpointName(DEVICE_D, DeviceManagerNSConstants.TERMINATION_POINT_A, "vomci-vendor-1"));
@@ -213,6 +258,14 @@ public class DeviceDaoImplTest extends AbstractUtilTxTest {
         assertEquals("olt-grpc-1", m_deviceDao.getRemoteEndpointName(DEVICE_D, DeviceManagerNSConstants.TERMINATION_POINT_B, "OLT1"));
         assertNull(m_deviceDao.getRemoteEndpointName(DEVICE_D, DeviceManagerNSConstants.TERMINATION_POINT_A, "OLT1"));
 
+        //test OnuConfigInfo values
+        assertEquals("baa-xpon-onu-types:use-vomci", m_deviceDao.getDeviceByName(DEVICE_D).getDeviceManagement().getOnuConfigInfo()
+                .getPlannedOnuManagementMode());
+        assertNotNull(m_deviceDao.getDeviceByName(DEVICE_D).getDeviceManagement().getOnuConfigInfo().getExpectedAttachmentPoints());
+        assertEquals(2, m_deviceDao.getDeviceByName(DEVICE_D).getDeviceManagement().getOnuConfigInfo()
+                .getExpectedAttachmentPoints().getExpectedAttachmentPointSet().size());
+        assertEquals("allow-any", m_deviceDao.getDeviceByName(DEVICE_D).getDeviceManagement().getOnuConfigInfo()
+                .getExpectedAttachmentPoints().getListType());
         closeTx();
     }
 
@@ -220,7 +273,6 @@ public class DeviceDaoImplTest extends AbstractUtilTxTest {
     public void deleteOneDeviceAndAssert() throws Exception {
         beginTx();
         createTwoDevices();
-
 
         List<Device> deviceList = m_deviceDao.findAll();
         assertEquals(2, deviceList.size());

@@ -56,7 +56,9 @@ import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
+import org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionTemplate;
 import org.junit.Before;
@@ -122,6 +124,8 @@ public class AlignmentTimerTest {
     private PmaSession m_pmaSession;
     @Mock
     private DeviceDao m_deviceDao;
+    @Mock
+    private NetworkFunctionDao m_networkFunctionDao;
     private TxService m_txService;
     @Mock
     private PersistenceManagerUtil m_persistenceMgrUtil;
@@ -220,7 +224,7 @@ public class AlignmentTimerTest {
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             return ((PmaSessionTemplate) args[1]).execute(m_pmaSession);
-        }).when(m_pmaRegistry).executeWithPmaSession(anyString(), anyObject());
+        }).when(m_pmaRegistry).executeWithPmaSession(new PmaResourceId(PmaResourceId.Type.DEVICE,anyString()), anyObject());
     }
 
     private Device createDevice(String deviceName) {

@@ -35,6 +35,7 @@ import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -92,6 +93,7 @@ public class DefaultConfigServiceTest {
 
     @Test
     public void testDeviceAddedWithCorrectDefaultXml() throws ExecutionException, IOException, NetconfMessageBuilderException {
+        PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,m_device.getDeviceName());
         String editConfigRequestString = "<rpc message-id=\"e1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">" + System.lineSeparator() +
                 "  <edit-config>" + System.lineSeparator() +
                 "    <target>" + System.lineSeparator() +
@@ -116,14 +118,14 @@ public class DefaultConfigServiceTest {
 
         //when the mechanism is push, there should be interaction with pmaregistry with the edit-config of default config retuned by the adapter-manager
         m_defaultConfigService.deviceAdded(m_device.getDeviceName());
-        verify(m_pmaRegistry).executeNC(m_device.getDeviceName(), editConfigRequestString);
+        verify(m_pmaRegistry).executeNC(resourceId, editConfigRequestString);
 
         // when the mechanism is pull, there should be no interaction with the pmaregistry
         m_deviceMgmt.setPushPmaConfigurationToDevice("false");
         m_device.setDeviceManagement(m_deviceMgmt);
         m_defaultConfigService.deviceAdded(m_device.getDeviceName());
         //only one interaction from push mechanism
-        verify(m_pmaRegistry).executeNC(m_device.getDeviceName(), editConfigRequestString);
+        verify(m_pmaRegistry).executeNC(resourceId, editConfigRequestString);
     }
 
     @Test

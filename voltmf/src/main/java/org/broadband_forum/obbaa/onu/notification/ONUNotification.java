@@ -17,6 +17,7 @@
 package org.broadband_forum.obbaa.onu.notification;
 
 import java.util.Iterator;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
@@ -46,6 +47,7 @@ public class ONUNotification extends NetconfNotification {
     private static final String BBF_XPON_ONU_STATE_NS = "urn:bbf:yang:bbf-xpon-onu-state";
     private static final String BBF_XPON_ONU_STATES_NS = "urn:bbf:yang:bbf-xpon-onu-states";
     private static final String BBF_XPON_NS = "urn:bbf:yang:bbf-xpon";
+    private static final String BBF_OBBAA_XPOUN_ONU_AUTH_NS = "urn:bbf:yang:obbaa:xpon-onu-authentication";
     private static final String ONU_PRESENCE_STATE_CHANGE_XPATH = "/nc:notification/ietf-interfaces:interfaces-state/"
             + "ietf-interfaces:interface/bbf-xpon:channel-termination/bbf-xpon-onu-state:onu-presence-state-change/";
     private String m_serialNumber;
@@ -62,6 +64,8 @@ public class ONUNotification extends NetconfNotification {
     private volatile XPathExpression c_xPathCtermRef;
     private volatile XPathExpression c_xPathOnuStateLastChange;
     private volatile XPathExpression c_xPathVAniRef;
+    private volatile XPathExpression c_xPathDeterminedOnuManagementMode;
+    private volatile XPathExpression c_xPathDetectedLoId;
     private MessageFormatter m_messageFormatter;
 
 
@@ -97,6 +101,9 @@ public class ONUNotification extends NetconfNotification {
                         }
                         if (prefix.equals("bbf-xpon")) {
                             return BBF_XPON_NS;
+                        }
+                        if (prefix.equals("bbf-obbaa-xpon-onu-authentication")) {
+                            return BBF_OBBAA_XPOUN_ONU_AUTH_NS;
                         }
                         return null;
                     }
@@ -141,6 +148,10 @@ public class ONUNotification extends NetconfNotification {
                             + "bbf-xpon-onu-state:last-change/text()");
                     c_xPathVAniRef = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
                             + "bbf-xpon-onu-state:v-ani-ref/text()");
+                    c_xPathDeterminedOnuManagementMode = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
+                            + "bbf-obbaa-xpon-onu-authentication:determined-onu-management-mode/text()");
+                    c_xPathDetectedLoId = xpath.compile(ONU_PRESENCE_STATE_CHANGE_XPATH
+                            + "bbf-obbaa-xpon-onu-authentication:detected-loid/text()");
                 }
             } catch (XPathExpressionException e) {
                 throw new RuntimeException(e);
@@ -251,6 +262,24 @@ public class ONUNotification extends NetconfNotification {
             return c_xPathOnuStateLastChange.evaluate(m_document);
         } catch (XPathExpressionException e) {
             LOGGER.error("Error while evaluating channel term ref", e);
+        }
+        return null;
+    }
+
+    public String getDeterminedOnuManagementMode() {
+        try {
+            return c_xPathDeterminedOnuManagementMode.evaluate(m_document);
+        } catch (XPathExpressionException e) {
+            LOGGER.error("Error while evaluating Determined Onu Management Mode", e);
+        }
+        return null;
+    }
+
+    public String getDetectedLoId() {
+        try {
+            return c_xPathDetectedLoId.evaluate(m_document);
+        } catch (XPathExpressionException e) {
+            LOGGER.error("Error while evaluating DDetected location Id", e);
         }
         return null;
     }

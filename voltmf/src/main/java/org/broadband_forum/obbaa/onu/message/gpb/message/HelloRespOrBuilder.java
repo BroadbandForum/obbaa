@@ -32,47 +32,42 @@ public interface HelloRespOrBuilder extends
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @return A list containing the capabilities.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability> getCapabilitiesList();
+  java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation> 
+      getNetworkFunctionInfoList();
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @return The count of capabilities.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  int getCapabilitiesCount();
+  org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation getNetworkFunctionInfo(int index);
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @param index The index of the element to return.
-   * @return The capabilities at the given index.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability getCapabilities(int index);
+  int getNetworkFunctionInfoCount();
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @return A list containing the enum numeric values on the wire for capabilities.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  java.util.List<java.lang.Integer>
-  getCapabilitiesValueList();
+  java.util.List<? extends org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder> 
+      getNetworkFunctionInfoOrBuilderList();
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @param index The index of the value to return.
-   * @return The enum numeric value on the wire of capabilities at the given index.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  int getCapabilitiesValue(int index);
+  org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder getNetworkFunctionInfoOrBuilder(
+      int index);
 }

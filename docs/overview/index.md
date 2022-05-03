@@ -165,7 +165,7 @@ L1 management plane while the M<sub>inf\_L2-3</sub> and M<sub>fc\_L2-3</sub> int
 provide an abstract (i.e. vendor and technology agnostic) representation
 of the L2-3 management and control plane. The distinction between
 M<sub>inf\_L2-3</sub>/M<sub>fc\_L2-3</sub> and M<sub>inf\_L1</sub> interfaces enables the
-separation of Service Provisioning tasks from Network Operation tasks.
+separation of service provisioning tasks from network operation tasks.
 The functionalities exposed by these interfaces are configurable with
 out-of-the-box configurations that map to standardized Data Models
 (e.g., TR-385 OLT, TR-301 DPU, TR-383 Firmware Management and TR-383
@@ -179,15 +179,9 @@ while other times BAA layer acts as a relay encapsulating the data
 without acting on the data in any way (e.g. DHCP snooping, IGMP
 control). In all cases the data is presented in a vendor and technology
 agnostic way toward the management systems for the type of access node.
-**Note that the proxy and relay capability is not part of this
-release.**
 
 <p align="center">
  <img width="350px" height="275px" src="{{site.url}}/overview/baa_actuator.png">
-</p>
-
-<p align="center">
- <img width="600px" height="300px" src="{{site.url}}/overview/system_functional.png">
 </p>
 
 [<--Introduction](../index.md#introduction)

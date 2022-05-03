@@ -37,6 +37,7 @@ services:
             #Possible Values for PMA_SESSION_FACTORY_TYPE are REGULAR,TRANSPARENT, Default value is REGULAR
             - PMA_SESSION_FACTORY_TYPE=REGULAR
             - MAXIMUM_ALLOWED_ADAPTER_VERSIONS=3
+            - VOLTMF_NAME=vOLTMF
         volumes:
             - /baa/stores:/baa/stores
         networks:
@@ -135,6 +136,7 @@ services:
       container_name: obbaa-vomci
       ports:
         - 8801:8801
+        - 58433:58433
       environment:
         GRPC_SERVER_NAME: vOMCi-grpc-1
         LOCAL_GRPC_SERVER_PORT: 58433
@@ -144,8 +146,12 @@ services:
         KAFKA_REQUEST_TOPICS: "vomci1-request" # if message formatter is JSON "OBBAA_ONU_REQUEST"
         KAFKA_RESPONSE_TOPICS: 'vomci1-response' # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
         KAFKA_NOTIFICATION_TOPICS: "vomci1-notification" # if message formatter is Json "OBBAA_ONU_NOTIFICATION"
+        VOMCI_KAFKA_SENDER_NAME: "bbf-vomci"
+        VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
       networks:
         - baadist_default
+      volumes:
+        - /baa/stores/vomci-vproxy-db:/db
       depends_on:
         - zookeeper
         - kafka
@@ -168,8 +174,12 @@ services:
         KAFKA_REQUEST_TOPICS: "vomci-proxy-request"
         KAFKA_RESPONSE_TOPICS: 'vomci-proxy-response'
         KAFKA_NOTIFICATION_TOPICS: "vomci-proxy-notification"
+        VOMCI_KAFKA_SENDER_NAME: "bbf-vproxy"
+        VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
       networks:
         - baadist_default
+      volumes:
+        - /baa/stores/vomci-vproxy-db:/db
       depends_on:
         - vomci
 

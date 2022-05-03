@@ -69,6 +69,11 @@ public class UnknownONU {
     @Column
     private String equipmentId;
 
+    @Column
+    private String detectedLoId;
+
+    @Column
+    private String determinedOnuManagementMode;
 
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
     private SoftwareImages softwareImages;
@@ -153,12 +158,29 @@ public class UnknownONU {
         this.softwareImages = softwareImages;
     }
 
+    public String getDetectedLoId() {
+        return detectedLoId;
+    }
+
+    public void setDetectedLoId(String detectedLoId) {
+        this.detectedLoId = detectedLoId;
+    }
+
+    public String getDeterminedOnuManagementMode() {
+        return determinedOnuManagementMode;
+    }
+
+    public void setDeterminedOnuManagementMode(String determinedOnuManagementMode) {
+        this.determinedOnuManagementMode = determinedOnuManagementMode;
+    }
+
     @Override
     public String toString() {
         return "UnknownONU [serialNumber = " + serialNumber + ", registrationId = " + registrationId + ", vAniRef = "
                 + vAniRef + ", channel Termination Ref = " + channelTermRef + ", ONU state last change = "
                 + onuStateLastChange + ", ONU ID = "
-                + onuID + ", ONU state = " + onuState + ", EquipmentId = " + equipmentId + "]";
+                + onuID + ", ONU state = " + onuState + ", EquipmentId = " + equipmentId + ", Determined Onu Management Mode = "
+                + determinedOnuManagementMode + ", Detected Location Id = " + detectedLoId + "]";
     }
 
 }

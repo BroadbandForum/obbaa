@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
 
@@ -33,44 +34,44 @@ public interface PmaRegistry {
     /**
      * Executes the given netconfRequest on the device with unique name deviceName.
      *
-     * @param deviceName     - unique identifier of the device.
+     * @param resourceId     - unique identifier of the resource.
      * @param netconfRequest - Netconf request to be executed on the device.
      * @return - Netconf response for the given netconfRequest.
      * @throws IllegalArgumentException - If the device is not managed.
      * @throws IllegalStateException    - If the device is not connected.
      * @throws ExecutionException       - If there are exceptions during execution.
      */
-    Map<NetConfResponse, List<Notification>> executeNC(String deviceName, String netconfRequest) throws IllegalArgumentException,
+    Map<NetConfResponse, List<Notification>> executeNC(PmaResourceId resourceId, String netconfRequest) throws IllegalArgumentException,
             IllegalStateException, ExecutionException;
 
     /**
      * Executes the given sessionTemplate with a PmaSession.
      *
-     * @param deviceName       - unique identifier of the device.
+     * @param resourceId       - unique identifier of the resource.
      * @param sessionTemplate- the template to be executed.
      * @return - result of execution.
      * @throws IllegalArgumentException - If the device is not managed.
      * @throws IllegalStateException    - If the device is not connected.
      * @throws ExecutionException       - If there are exceptions during execution.
      */
-    <RT> RT executeWithPmaSession(String deviceName, PmaSessionTemplate<RT> sessionTemplate)
+    <RT> RT executeWithPmaSession(PmaResourceId resourceId, PmaSessionTemplate<RT> sessionTemplate)
             throws IllegalArgumentException, IllegalStateException, ExecutionException;
 
     /**
      * Executes a copy-config RPC from PMA into the connected device to get the device aligned.
      *
-     * @param deviceName - Key of the device.
+     * @param resourceId - Key of the resource.
      * @throws ExecutionException - If there were problems during the execution.
      */
-    void forceAlign(String deviceName) throws ExecutionException;
+    void forceAlign(PmaResourceId resourceId) throws ExecutionException;
 
     /**
      * API to invoke the edit-config delta alignment on the device.
      *
-     * @param deviceName - Key of the device.
+     * @param resourceId - Key of the resource.
      * @throws ExecutionException - If there were problems during the execution.
      */
-    void align(String deviceName) throws ExecutionException;
+    void align(PmaResourceId resourceId) throws ExecutionException;
 
     /**
      * API to get all the persist configuration of the specific device.
@@ -79,4 +80,6 @@ public interface PmaRegistry {
      * @throws ExecutionException - If there were problems during the execution.
      */
     NetConfResponse getAllPersistCfg(String deviceName) throws ExecutionException;
+
+    void networkFunctionRemoved(String networkFunctionName);
 }

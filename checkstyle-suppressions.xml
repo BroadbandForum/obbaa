@@ -24,6 +24,7 @@
     <suppress files="NetconfConnectionManagerImpl.java" checks="IllegalCatch"/>
     <suppress files="PmaRegistryImpl.java" checks="IllegalCatch"/>
     <suppress files="NetconfDeviceAlignmentServiceImpl.java" checks="IllegalCatch"/>
+    <suppress files="NetconfNetworkFunctionAlignmentServiceImpl.java" checks="IllegalCatch"/>
     <suppress files="StandaloneApp.java" checks="HideUtilityClassConstructor"/>
     <suppress files="DeviceXmlStore.java" checks="MemberName"/>
     <suppress files="org.broadband_forum.obbaa.aggregator.jaxb.*" checks="MemberName"/>
@@ -46,6 +47,7 @@
     <suppress files="PmaAdapter.java" checks="IllegalCatch"/>
     <suppress files="TimerService.java" checks="IllegalCatch"/>
     <suppress files="AlignmentTimer.java" checks="IllegalCatch"/>
+    <suppress files="AlignmentTimerNF.java" checks="IllegalCatch"/>
     <suppress files="PmaServerImpl.java" checks="IllegalCatch"/>
     <suppress files="AbstractBaaMojo.java" checks="IllegalCatch"/>
     <suppress files="YangLibraryMojo.java" checks="IllegalCatch"/>
@@ -73,6 +75,7 @@
     <suppress files="org.broadband_forum.obbaa.onu.entity.*" checks="MemberName"/>
     <suppress files="org.broadband_forum.obbaa.onu.UnknownONUHandler" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.onu.MediatedDeviceNetconfSession" checks="IllegalCatch"/>
+    <suppress files="org.broadband_forum.obbaa.onu.MediatedNetworkFunctionNetconfSession" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.onu.impl.VOLTManagementImpl" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.onu.util.VOLTManagementUtil" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.onu.notification.ONUNotification" checks="MemberName"/>

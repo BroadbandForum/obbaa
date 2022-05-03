@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.HelloResp}
  */
-public final class HelloResp extends
+public  final class HelloResp extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.HelloResp)
     HelloRespOrBuilder {
@@ -17,7 +17,7 @@ private static final long serialVersionUID = 0L;
   }
   private HelloResp() {
     serviceEndpointName_ = "";
-    capabilities_ = java.util.Collections.emptyList();
+    networkFunctionInfo_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -57,27 +57,13 @@ private static final long serialVersionUID = 0L;
             serviceEndpointName_ = s;
             break;
           }
-          case 16: {
-            int rawValue = input.readEnum();
+          case 18: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              capabilities_ = new java.util.ArrayList<java.lang.Integer>();
+              networkFunctionInfo_ = new java.util.ArrayList<org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation>();
               mutable_bitField0_ |= 0x00000001;
             }
-            capabilities_.add(rawValue);
-            break;
-          }
-          case 18: {
-            int length = input.readRawVarint32();
-            int oldLimit = input.pushLimit(length);
-            while(input.getBytesUntilLimit() > 0) {
-              int rawValue = input.readEnum();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                capabilities_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              capabilities_.add(rawValue);
-            }
-            input.popLimit(oldLimit);
+            networkFunctionInfo_.add(
+                input.readMessage(org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.parser(), extensionRegistry));
             break;
           }
           default: {
@@ -96,7 +82,7 @@ private static final long serialVersionUID = 0L;
           e).setUnfinishedMessage(this);
     } finally {
       if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        capabilities_ = java.util.Collections.unmodifiableList(capabilities_);
+        networkFunctionInfo_ = java.util.Collections.unmodifiableList(networkFunctionInfo_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -115,128 +101,6 @@ private static final long serialVersionUID = 0L;
             org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.class, org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.Builder.class);
   }
 
-  /**
-   * <pre>
-   * supported by the
-   * server
-   * </pre>
-   *
-   * Protobuf enum {@code tr451_vomci_nbi_message.v1.HelloResp.ServerCapability}
-   */
-  public enum ServerCapability
-      implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <code>NO_CAPABILITY_REPORTED = 0;</code>
-     */
-    NO_CAPABILITY_REPORTED(0),
-    /**
-     * <code>ONU_STATE_ONLY_SUPPORT = 1;</code>
-     */
-    ONU_STATE_ONLY_SUPPORT(1),
-    /**
-     * <code>ONU_CONFIG_REPLICA_SUPPORT = 2;</code>
-     */
-    ONU_CONFIG_REPLICA_SUPPORT(2),
-    UNRECOGNIZED(-1),
-    ;
-
-    /**
-     * <code>NO_CAPABILITY_REPORTED = 0;</code>
-     */
-    public static final int NO_CAPABILITY_REPORTED_VALUE = 0;
-    /**
-     * <code>ONU_STATE_ONLY_SUPPORT = 1;</code>
-     */
-    public static final int ONU_STATE_ONLY_SUPPORT_VALUE = 1;
-    /**
-     * <code>ONU_CONFIG_REPLICA_SUPPORT = 2;</code>
-     */
-    public static final int ONU_CONFIG_REPLICA_SUPPORT_VALUE = 2;
-
-
-    public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
-            "Can't get the number of an unknown enum value.");
-      }
-      return value;
-    }
-
-    /**
-     * @param value The numeric wire value of the corresponding enum entry.
-     * @return The enum associated with the given numeric wire value.
-     * @deprecated Use {@link #forNumber(int)} instead.
-     */
-    @java.lang.Deprecated
-    public static ServerCapability valueOf(int value) {
-      return forNumber(value);
-    }
-
-    /**
-     * @param value The numeric wire value of the corresponding enum entry.
-     * @return The enum associated with the given numeric wire value.
-     */
-    public static ServerCapability forNumber(int value) {
-      switch (value) {
-        case 0: return NO_CAPABILITY_REPORTED;
-        case 1: return ONU_STATE_ONLY_SUPPORT;
-        case 2: return ONU_CONFIG_REPLICA_SUPPORT;
-        default: return null;
-      }
-    }
-
-    public static com.google.protobuf.Internal.EnumLiteMap<ServerCapability>
-        internalGetValueMap() {
-      return internalValueMap;
-    }
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        ServerCapability> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<ServerCapability>() {
-            public ServerCapability findValueByNumber(int number) {
-              return ServerCapability.forNumber(number);
-            }
-          };
-
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
-        getValueDescriptor() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalStateException(
-            "Can't get the descriptor of an unrecognized enum value.");
-      }
-      return getDescriptor().getValues().get(ordinal());
-    }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptorForType() {
-      return getDescriptor();
-    }
-    public static final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptor() {
-      return org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.getDescriptor().getEnumTypes().get(0);
-    }
-
-    private static final ServerCapability[] VALUES = values();
-
-    public static ServerCapability valueOf(
-        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
-          "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
-      return VALUES[desc.getIndex()];
-    }
-
-    private final int value;
-
-    private ServerCapability(int value) {
-      this.value = value;
-    }
-
-    // @@protoc_insertion_point(enum_scope:tr451_vomci_nbi_message.v1.HelloResp.ServerCapability)
-  }
-
   public static final int SERVICE_ENDPOINT_NAME_FIELD_NUMBER = 1;
   private volatile java.lang.Object serviceEndpointName_;
   /**
@@ -247,7 +111,6 @@ private static final long serialVersionUID = 0L;
    * <code>string service_endpoint_name = 1;</code>
    * @return The serviceEndpointName.
    */
-  @java.lang.Override
   public java.lang.String getServiceEndpointName() {
     java.lang.Object ref = serviceEndpointName_;
     if (ref instanceof java.lang.String) {
@@ -268,7 +131,6 @@ private static final long serialVersionUID = 0L;
    * <code>string service_endpoint_name = 1;</code>
    * @return The bytes for serviceEndpointName.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getServiceEndpointNameBytes() {
     java.lang.Object ref = serviceEndpointName_;
@@ -283,83 +145,60 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int CAPABILITIES_FIELD_NUMBER = 2;
-  private java.util.List<java.lang.Integer> capabilities_;
-  private static final com.google.protobuf.Internal.ListAdapter.Converter<
-      java.lang.Integer, org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability> capabilities_converter_ =
-          new com.google.protobuf.Internal.ListAdapter.Converter<
-              java.lang.Integer, org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability>() {
-            public org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability convert(java.lang.Integer from) {
-              @SuppressWarnings("deprecation")
-              org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability result = org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability.valueOf(from);
-              return result == null ? org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability.UNRECOGNIZED : result;
-            }
-          };
+  public static final int NETWORK_FUNCTION_INFO_FIELD_NUMBER = 2;
+  private java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation> networkFunctionInfo_;
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @return A list containing the capabilities.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  @java.lang.Override
-  public java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability> getCapabilitiesList() {
-    return new com.google.protobuf.Internal.ListAdapter<
-        java.lang.Integer, org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability>(capabilities_, capabilities_converter_);
+  public java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation> getNetworkFunctionInfoList() {
+    return networkFunctionInfo_;
   }
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @return The count of capabilities.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  @java.lang.Override
-  public int getCapabilitiesCount() {
-    return capabilities_.size();
+  public java.util.List<? extends org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder> 
+      getNetworkFunctionInfoOrBuilderList() {
+    return networkFunctionInfo_;
   }
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @param index The index of the element to return.
-   * @return The capabilities at the given index.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  @java.lang.Override
-  public org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability getCapabilities(int index) {
-    return capabilities_converter_.convert(capabilities_.get(index));
+  public int getNetworkFunctionInfoCount() {
+    return networkFunctionInfo_.size();
   }
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @return A list containing the enum numeric values on the wire for capabilities.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  @java.lang.Override
-  public java.util.List<java.lang.Integer>
-  getCapabilitiesValueList() {
-    return capabilities_;
+  public org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation getNetworkFunctionInfo(int index) {
+    return networkFunctionInfo_.get(index);
   }
   /**
    * <pre>
    *used to listen on the session
    * </pre>
    *
-   * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-   * @param index The index of the value to return.
-   * @return The enum numeric value on the wire of capabilities at the given index.
+   * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
    */
-  @java.lang.Override
-  public int getCapabilitiesValue(int index) {
-    return capabilities_.get(index);
+  public org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder getNetworkFunctionInfoOrBuilder(
+      int index) {
+    return networkFunctionInfo_.get(index);
   }
-  private int capabilitiesMemoizedSerializedSize;
 
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
@@ -375,16 +214,11 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    getSerializedSize();
     if (!getServiceEndpointNameBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, serviceEndpointName_);
     }
-    if (getCapabilitiesList().size() > 0) {
-      output.writeUInt32NoTag(18);
-      output.writeUInt32NoTag(capabilitiesMemoizedSerializedSize);
-    }
-    for (int i = 0; i < capabilities_.size(); i++) {
-      output.writeEnumNoTag(capabilities_.get(i));
+    for (int i = 0; i < networkFunctionInfo_.size(); i++) {
+      output.writeMessage(2, networkFunctionInfo_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -398,17 +232,9 @@ private static final long serialVersionUID = 0L;
     if (!getServiceEndpointNameBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, serviceEndpointName_);
     }
-    {
-      int dataSize = 0;
-      for (int i = 0; i < capabilities_.size(); i++) {
-        dataSize += com.google.protobuf.CodedOutputStream
-          .computeEnumSizeNoTag(capabilities_.get(i));
-      }
-      size += dataSize;
-      if (!getCapabilitiesList().isEmpty()) {  size += 1;
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32SizeNoTag(dataSize);
-      }capabilitiesMemoizedSerializedSize = dataSize;
+    for (int i = 0; i < networkFunctionInfo_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(2, networkFunctionInfo_.get(i));
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -427,7 +253,8 @@ private static final long serialVersionUID = 0L;
 
     if (!getServiceEndpointName()
         .equals(other.getServiceEndpointName())) return false;
-    if (!capabilities_.equals(other.capabilities_)) return false;
+    if (!getNetworkFunctionInfoList()
+        .equals(other.getNetworkFunctionInfoList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -441,9 +268,9 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + SERVICE_ENDPOINT_NAME_FIELD_NUMBER;
     hash = (53 * hash) + getServiceEndpointName().hashCode();
-    if (getCapabilitiesCount() > 0) {
-      hash = (37 * hash) + CAPABILITIES_FIELD_NUMBER;
-      hash = (53 * hash) + capabilities_.hashCode();
+    if (getNetworkFunctionInfoCount() > 0) {
+      hash = (37 * hash) + NETWORK_FUNCTION_INFO_FIELD_NUMBER;
+      hash = (53 * hash) + getNetworkFunctionInfoList().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -573,6 +400,7 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
+        getNetworkFunctionInfoFieldBuilder();
       }
     }
     @java.lang.Override
@@ -580,8 +408,12 @@ private static final long serialVersionUID = 0L;
       super.clear();
       serviceEndpointName_ = "";
 
-      capabilities_ = java.util.Collections.emptyList();
-      bitField0_ = (bitField0_ & ~0x00000001);
+      if (networkFunctionInfoBuilder_ == null) {
+        networkFunctionInfo_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      } else {
+        networkFunctionInfoBuilder_.clear();
+      }
       return this;
     }
 
@@ -610,11 +442,15 @@ private static final long serialVersionUID = 0L;
       org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp result = new org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp(this);
       int from_bitField0_ = bitField0_;
       result.serviceEndpointName_ = serviceEndpointName_;
-      if (((bitField0_ & 0x00000001) != 0)) {
-        capabilities_ = java.util.Collections.unmodifiableList(capabilities_);
-        bitField0_ = (bitField0_ & ~0x00000001);
+      if (networkFunctionInfoBuilder_ == null) {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          networkFunctionInfo_ = java.util.Collections.unmodifiableList(networkFunctionInfo_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.networkFunctionInfo_ = networkFunctionInfo_;
+      } else {
+        result.networkFunctionInfo_ = networkFunctionInfoBuilder_.build();
       }
-      result.capabilities_ = capabilities_;
       onBuilt();
       return result;
     }
@@ -667,15 +503,31 @@ private static final long serialVersionUID = 0L;
         serviceEndpointName_ = other.serviceEndpointName_;
         onChanged();
       }
-      if (!other.capabilities_.isEmpty()) {
-        if (capabilities_.isEmpty()) {
-          capabilities_ = other.capabilities_;
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          ensureCapabilitiesIsMutable();
-          capabilities_.addAll(other.capabilities_);
+      if (networkFunctionInfoBuilder_ == null) {
+        if (!other.networkFunctionInfo_.isEmpty()) {
+          if (networkFunctionInfo_.isEmpty()) {
+            networkFunctionInfo_ = other.networkFunctionInfo_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureNetworkFunctionInfoIsMutable();
+            networkFunctionInfo_.addAll(other.networkFunctionInfo_);
+          }
+          onChanged();
         }
-        onChanged();
+      } else {
+        if (!other.networkFunctionInfo_.isEmpty()) {
+          if (networkFunctionInfoBuilder_.isEmpty()) {
+            networkFunctionInfoBuilder_.dispose();
+            networkFunctionInfoBuilder_ = null;
+            networkFunctionInfo_ = other.networkFunctionInfo_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+            networkFunctionInfoBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getNetworkFunctionInfoFieldBuilder() : null;
+          } else {
+            networkFunctionInfoBuilder_.addAllMessages(other.networkFunctionInfo_);
+          }
+        }
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -803,12 +655,30 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.util.List<java.lang.Integer> capabilities_ =
+    private java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation> networkFunctionInfo_ =
       java.util.Collections.emptyList();
-    private void ensureCapabilitiesIsMutable() {
+    private void ensureNetworkFunctionInfoIsMutable() {
       if (!((bitField0_ & 0x00000001) != 0)) {
-        capabilities_ = new java.util.ArrayList<java.lang.Integer>(capabilities_);
+        networkFunctionInfo_ = new java.util.ArrayList<org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation>(networkFunctionInfo_);
         bitField0_ |= 0x00000001;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder> networkFunctionInfoBuilder_;
+
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation> getNetworkFunctionInfoList() {
+      if (networkFunctionInfoBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(networkFunctionInfo_);
+      } else {
+        return networkFunctionInfoBuilder_.getMessageList();
       }
     }
     /**
@@ -816,90 +686,48 @@ private static final long serialVersionUID = 0L;
      *used to listen on the session
      * </pre>
      *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @return A list containing the capabilities.
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
      */
-    public java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability> getCapabilitiesList() {
-      return new com.google.protobuf.Internal.ListAdapter<
-          java.lang.Integer, org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability>(capabilities_, capabilities_converter_);
-    }
-    /**
-     * <pre>
-     *used to listen on the session
-     * </pre>
-     *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @return The count of capabilities.
-     */
-    public int getCapabilitiesCount() {
-      return capabilities_.size();
-    }
-    /**
-     * <pre>
-     *used to listen on the session
-     * </pre>
-     *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @param index The index of the element to return.
-     * @return The capabilities at the given index.
-     */
-    public org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability getCapabilities(int index) {
-      return capabilities_converter_.convert(capabilities_.get(index));
-    }
-    /**
-     * <pre>
-     *used to listen on the session
-     * </pre>
-     *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @param index The index to set the value at.
-     * @param value The capabilities to set.
-     * @return This builder for chaining.
-     */
-    public Builder setCapabilities(
-        int index, org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability value) {
-      if (value == null) {
-        throw new NullPointerException();
+    public int getNetworkFunctionInfoCount() {
+      if (networkFunctionInfoBuilder_ == null) {
+        return networkFunctionInfo_.size();
+      } else {
+        return networkFunctionInfoBuilder_.getCount();
       }
-      ensureCapabilitiesIsMutable();
-      capabilities_.set(index, value.getNumber());
-      onChanged();
-      return this;
     }
     /**
      * <pre>
      *used to listen on the session
      * </pre>
      *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @param value The capabilities to add.
-     * @return This builder for chaining.
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
      */
-    public Builder addCapabilities(org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability value) {
-      if (value == null) {
-        throw new NullPointerException();
+    public org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation getNetworkFunctionInfo(int index) {
+      if (networkFunctionInfoBuilder_ == null) {
+        return networkFunctionInfo_.get(index);
+      } else {
+        return networkFunctionInfoBuilder_.getMessage(index);
       }
-      ensureCapabilitiesIsMutable();
-      capabilities_.add(value.getNumber());
-      onChanged();
-      return this;
     }
     /**
      * <pre>
      *used to listen on the session
      * </pre>
      *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @param values The capabilities to add.
-     * @return This builder for chaining.
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
      */
-    public Builder addAllCapabilities(
-        java.lang.Iterable<? extends org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability> values) {
-      ensureCapabilitiesIsMutable();
-      for (org.broadband_forum.obbaa.onu.message.gpb.message.HelloResp.ServerCapability value : values) {
-        capabilities_.add(value.getNumber());
+    public Builder setNetworkFunctionInfo(
+        int index, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation value) {
+      if (networkFunctionInfoBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureNetworkFunctionInfoIsMutable();
+        networkFunctionInfo_.set(index, value);
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.setMessage(index, value);
       }
-      onChanged();
       return this;
     }
     /**
@@ -907,88 +735,236 @@ private static final long serialVersionUID = 0L;
      *used to listen on the session
      * </pre>
      *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @return This builder for chaining.
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
      */
-    public Builder clearCapabilities() {
-      capabilities_ = java.util.Collections.emptyList();
-      bitField0_ = (bitField0_ & ~0x00000001);
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     *used to listen on the session
-     * </pre>
-     *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @return A list containing the enum numeric values on the wire for capabilities.
-     */
-    public java.util.List<java.lang.Integer>
-    getCapabilitiesValueList() {
-      return java.util.Collections.unmodifiableList(capabilities_);
-    }
-    /**
-     * <pre>
-     *used to listen on the session
-     * </pre>
-     *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @param index The index of the value to return.
-     * @return The enum numeric value on the wire of capabilities at the given index.
-     */
-    public int getCapabilitiesValue(int index) {
-      return capabilities_.get(index);
-    }
-    /**
-     * <pre>
-     *used to listen on the session
-     * </pre>
-     *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @param index The index of the value to return.
-     * @return The enum numeric value on the wire of capabilities at the given index.
-     * @return This builder for chaining.
-     */
-    public Builder setCapabilitiesValue(
-        int index, int value) {
-      ensureCapabilitiesIsMutable();
-      capabilities_.set(index, value);
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     *used to listen on the session
-     * </pre>
-     *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @param value The enum numeric value on the wire for capabilities to add.
-     * @return This builder for chaining.
-     */
-    public Builder addCapabilitiesValue(int value) {
-      ensureCapabilitiesIsMutable();
-      capabilities_.add(value);
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     *used to listen on the session
-     * </pre>
-     *
-     * <code>repeated .tr451_vomci_nbi_message.v1.HelloResp.ServerCapability capabilities = 2;</code>
-     * @param values The enum numeric values on the wire for capabilities to add.
-     * @return This builder for chaining.
-     */
-    public Builder addAllCapabilitiesValue(
-        java.lang.Iterable<java.lang.Integer> values) {
-      ensureCapabilitiesIsMutable();
-      for (int value : values) {
-        capabilities_.add(value);
+    public Builder setNetworkFunctionInfo(
+        int index, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder builderForValue) {
+      if (networkFunctionInfoBuilder_ == null) {
+        ensureNetworkFunctionInfoIsMutable();
+        networkFunctionInfo_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.setMessage(index, builderForValue.build());
       }
-      onChanged();
       return this;
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public Builder addNetworkFunctionInfo(org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation value) {
+      if (networkFunctionInfoBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureNetworkFunctionInfoIsMutable();
+        networkFunctionInfo_.add(value);
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public Builder addNetworkFunctionInfo(
+        int index, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation value) {
+      if (networkFunctionInfoBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureNetworkFunctionInfoIsMutable();
+        networkFunctionInfo_.add(index, value);
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public Builder addNetworkFunctionInfo(
+        org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder builderForValue) {
+      if (networkFunctionInfoBuilder_ == null) {
+        ensureNetworkFunctionInfoIsMutable();
+        networkFunctionInfo_.add(builderForValue.build());
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public Builder addNetworkFunctionInfo(
+        int index, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder builderForValue) {
+      if (networkFunctionInfoBuilder_ == null) {
+        ensureNetworkFunctionInfoIsMutable();
+        networkFunctionInfo_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public Builder addAllNetworkFunctionInfo(
+        java.lang.Iterable<? extends org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation> values) {
+      if (networkFunctionInfoBuilder_ == null) {
+        ensureNetworkFunctionInfoIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, networkFunctionInfo_);
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public Builder clearNetworkFunctionInfo() {
+      if (networkFunctionInfoBuilder_ == null) {
+        networkFunctionInfo_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public Builder removeNetworkFunctionInfo(int index) {
+      if (networkFunctionInfoBuilder_ == null) {
+        ensureNetworkFunctionInfoIsMutable();
+        networkFunctionInfo_.remove(index);
+        onChanged();
+      } else {
+        networkFunctionInfoBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder getNetworkFunctionInfoBuilder(
+        int index) {
+      return getNetworkFunctionInfoFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder getNetworkFunctionInfoOrBuilder(
+        int index) {
+      if (networkFunctionInfoBuilder_ == null) {
+        return networkFunctionInfo_.get(index);  } else {
+        return networkFunctionInfoBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public java.util.List<? extends org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder> 
+         getNetworkFunctionInfoOrBuilderList() {
+      if (networkFunctionInfoBuilder_ != null) {
+        return networkFunctionInfoBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(networkFunctionInfo_);
+      }
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder addNetworkFunctionInfoBuilder() {
+      return getNetworkFunctionInfoFieldBuilder().addBuilder(
+          org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder addNetworkFunctionInfoBuilder(
+        int index) {
+      return getNetworkFunctionInfoFieldBuilder().addBuilder(
+          index, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     *used to listen on the session
+     * </pre>
+     *
+     * <code>repeated .tr451_vomci_nbi_message.v1.NFInformation network_function_info = 2;</code>
+     */
+    public java.util.List<org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder> 
+         getNetworkFunctionInfoBuilderList() {
+      return getNetworkFunctionInfoFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder> 
+        getNetworkFunctionInfoFieldBuilder() {
+      if (networkFunctionInfoBuilder_ == null) {
+        networkFunctionInfoBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformation.Builder, org.broadband_forum.obbaa.onu.message.gpb.message.NFInformationOrBuilder>(
+                networkFunctionInfo_,
+                ((bitField0_ & 0x00000001) != 0),
+                getParentForChildren(),
+                isClean());
+        networkFunctionInfo_ = null;
+      }
+      return networkFunctionInfoBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

@@ -30,7 +30,6 @@ import javax.persistence.OneToOne;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangAttribute;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangChild;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangContainer;
-import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangLeafList;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangParentId;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangSchemaPath;
 
@@ -48,15 +47,15 @@ public class VomciOnuManagement {
     @Column(length = 1000)
     private String schemaPath;
 
-    @YangAttribute(name = DeviceManagerNSConstants.USE_VOMCI_MANAGEMENT)
-    @Column(name = "useVomciManagement")
-    private String useVomciManagement;
+    @YangAttribute(name = "onu-management-chain-selection")
+    @Column(name = "onuMgmtChainSelection")
+    private String onuMgmtChainSelection;
 
     @YangAttribute(name = DeviceManagerNSConstants.VOMCI_FUNCTION)
     @Column(name = "vomciFunction")
     private String vomciFunction;
 
-    @YangLeafList(name = DeviceManagerNSConstants.ONU_MANAGEMEMT_CHAIN)
+    @YangChild
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<OnuManagementChain> onuManagementChains = new LinkedHashSet<>();
 
@@ -89,21 +88,20 @@ public class VomciOnuManagement {
     }
 
 
-    public String getUseVomciManagement() {
-        return useVomciManagement;
-    }
-
-    public void setUseVomciManagement(String useVomciManagement) {
-        this.useVomciManagement = useVomciManagement;
-    }
-
-
     public Set<OnuManagementChain> getOnuManagementChains() {
         return onuManagementChains;
     }
 
     public void setOnuManagementChains(Set<OnuManagementChain> onuManagementChains) {
         this.onuManagementChains = onuManagementChains;
+    }
+
+    public String getOnuMgmtChainSelection() {
+        return onuMgmtChainSelection;
+    }
+
+    public void setOnuMgmtChainSelection(String onuMgmtChainSelection) {
+        this.onuMgmtChainSelection = onuMgmtChainSelection;
     }
 
 
@@ -124,9 +122,6 @@ public class VomciOnuManagement {
         if (schemaPath != null ? !schemaPath.equals(that.schemaPath) : that.schemaPath != null) {
             return false;
         }
-        if (useVomciManagement != null ? !useVomciManagement.equals(that.useVomciManagement) : that.useVomciManagement != null) {
-            return false;
-        }
         if (vomciFunction != null ? !vomciFunction.equals(that.vomciFunction) : that.vomciFunction != null) {
             return false;
         }
@@ -139,7 +134,6 @@ public class VomciOnuManagement {
     public int hashCode() {
         int result = parentId != null ? parentId.hashCode() : 0;
         result = 31 * result + (schemaPath != null ? schemaPath.hashCode() : 0);
-        result = 31 * result + (useVomciManagement != null ? useVomciManagement.hashCode() : 0);
         result = 31 * result + (vomciFunction != null ? vomciFunction.hashCode() : 0);
         result = 31 * result + (onuManagementChains != null ? onuManagementChains.hashCode() : 0);
         return result;

@@ -22,6 +22,18 @@ module bbf-obbaa-onu-management {
       prefix bbf-voltmf-msg-mon;
     }
     
+    import bbf-obbaa-xpon-onu-types {
+      prefix baa-xpon-onu-types;
+    }
+    
+    import bbf-yang-types {
+       prefix bbf-yang;
+    }
+
+    import bbf-vomci-types {
+       prefix bbf-vomcit;
+    }
+    
     organization
       "Broadband Forum <https://www.broadband-forum.org>";
 
@@ -32,9 +44,10 @@ module bbf-obbaa-onu-management {
 
     description
       "This module contains a collection of YANG definitions for 
-       the management of ONUs.
+       the management of ONUs. This module is applicable to the device 
+       aggregation function of OB-BAA.
        
-       Copyright 2020 Broadband Forum
+       Copyright 2020-2021 Broadband Forum
        
        Licensed under the Apache License, Version 2.0 (the \"License\");
        you may not use this file except in compliance with the License.
@@ -48,9 +61,18 @@ module bbf-obbaa-onu-management {
        limitations under the License. 
       ";
     
+    revision 2021-11-10 {
+       description
+         "Changes to support ONU Authentication in OB-BAA Rel 5.0.0.";
+       reference
+          "https://obbaa.broadband-forum.org/";
+    }
+    
     revision 2021-04-21 {
        description
          "Changes to support vOMCI function enhancements in OB-BAA Rel 4.1.0.";
+       reference
+          "https://obbaa.broadband-forum.org/";
     }
     
     revision 2020-07-15 {
@@ -60,15 +82,111 @@ module bbf-obbaa-onu-management {
         "broadband_forum";
     }
 
+    grouping onu-state-general-parameters {
+       description 
+          "General ONU state parameters.";
+       
+       leaf detected-serial-number {
+          type bbf-xpon-types:onu-serial-number;
+          description
+            "The serial number of the Optical Network Unit (ONU).";
+          reference
+            "ITU-T G.984.3, clause 9.2.4.1
+             ITU-T G.987.3, clause 11.3.3.2
+             ITU-T G.9807.1, clauses C11.2.6.1, C11.2.6.2 and
+             C11.3.4.1
+             ITU-T G.989.3, clauses 11.2.6.1, 11.2.6.2 and 11.3.4.1.";
+       }
+       
+       leaf detected-registration-id {
+          type bbf-xpon-types:onu-registration-id;
+          description
+            "The registration ID value which the Optical Line
+             Termination (OLT) has received from the Optical Network
+             Unit (ONU). This leaf is not present if the ONU has not
+             provided any registration ID to the OLT. Registration ID
+             may be useful in identifying a particular ONU installed
+             at a particular location. Each octet is represented as 2
+             hexadecimal characters, therefore the leaf must contain an
+             even number of characters. For ITU-T G.984.3, the leaf
+             can only be up to 20 octets long (refer to 'password'),
+             for ITU-T G.987.3, ITU-T G.9807.3 and ITU-T G.989.3
+             the leaf can be up to 72 octets long.";
+          reference
+            "ITU-T G.984.3 clause 9.2.4.2
+             ITU-T G.987.3 clause 11.3.4.2
+             ITU-T G.9807.3 clause C.11.3.4.2
+             ITU-T G.989.3 clause 11.3.4.2";
+       }
+    }
+    
+    grouping onu-state-attachment-point-parameters {
+       description 
+          "Defines state parameters regarding an ONU's attachment point";
+       
+       leaf olt-name {
+          type string;
+          mandatory true;
+          description
+            "A reference to the OLT where the ONU is attached";
+       }
+        
+       leaf channel-termination-name {
+          type string;
+          mandatory true;
+          description
+            "The local name of the channel termination in the OLT where the ONU is attached";
+       }
+        
+       leaf onu-id {
+          type bbf-xpon-types:onu-id;
+          description
+            "This is the ITU-T Transmission Convergence (TC) layer ONU-ID
+             identifier which the Optical Line Termination (OLT) has
+             assigned to the Optical Network Unit (ONU) during the ONU's
+             activation using the Assign_ONU-ID PLOAM message. It
+             identifies an ONU on a channel group and is unique on a
+             channel group.";
+          reference
+            "ITU-T G.984.3 clause 5.5.2
+             ITU-T G.987.3 clause 6.4.2
+             ITU-T G.9807.1 clause C.6.1.5.6
+             ITU-T G.989.3 clause 6.1.5.6";
+       }
+    }
+    
+    grouping onu-auth-parameters {
+       description 
+          "Parameters related to ONU authentication.";
+       
+       leaf v-ani-name {
+          type string;
+          description
+            "The virtual Access Network Interface (vANI) corresponding to
+             this Optical Network Unit (ONU). This leaf is not present if the 
+             OLT could not determine a vANI corresponding to the ONU.";
+       }
+        
+       leaf olt-local-onu-name {
+          type string;
+          description
+            "The local name of the ONU as known in the Optical Line Termination 
+            (OLT). This leaf would typically reflect the onu-name configured 
+            in the corresponding virtual Access Network Interface (vANI). This
+            leaf is not present if the OLT could not determine a vANI
+            corresponding to the ONU.";
+       }
+    }
+    
     augment '/baa-network-manager:network-manager/baa-network-manager:managed-devices/'
           + 'baa-network-manager:device/baa-network-manager:device-management' {
        when
            "/baa-network-manager:network-manager/baa-network-manager:managed-devices/"
          + "baa-network-manager:device/baa-network-manager:device-management/"
-         + "baa-network-manager:type = 'ONU'" {
+         + "baa-network-manager:type = 'ONU'";
+       
          description
            "Additional information for a ONU";
-         }
          
          container onu-config-info {
            description 
@@ -128,33 +246,134 @@ module bbf-obbaa-onu-management {
                   TWDM NG-PON2, PtP NG-PON2, XGS-PON, XG-PON, G-PON).";
            }
            
-           container expected-attachment-point {
+           leaf planned-onu-management-mode {
+              type identityref {
+                base baa-xpon-onu-types:onu-management-config-base;
+              }
+              default baa-xpon-onu-types:use-vomci;
               description
-                "The ONU expected attachment point";
-              
-              leaf olt-name {
-                type leafref {
-                    path '/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device/baa-network-manager:name';
-                }
-                description
-                  "A reference to the OLT where the ONU is expected";
+                 "Indicates whether embedded OMCI (eOMCI) or vOMCI is to be 
+                 used, when it is not configured explicity for a specified 
+                 expected attachment point.";
+           }
+
+           
+           container expected-attachment-points {
+              description 
+                 "Container for holding attachment point information.";
+           
+              leaf list-type {                
+                 type enumeration {
+                    enum strict {
+                       description
+                          "The ONU is only permitted in the attachment points
+                          specified in the 'expected-attachment-point' list.
+                          Other attachments are not allowed.";
+                    }
+                    enum allow-any {
+                       description
+                          "The ONU is permitted in any attachment point. In
+                          this case, the 'expected-attachment-point' list 
+                          is used to specify configuration which is 
+                          specific for a given attachment point.";
+                    }
+                 }
+                 default allow-any;
+                 description 
+                    "This leaf defines how the 'expected-attachment-point'
+                    list must be interpreted.";
               }
               
-              leaf channel-partition-name {
-                type string;                
-                description
-                  "The local name of the channel-partition in the OLT where the ONU is expected.";
+              list expected-attachment-point {
+                 key "name";
+                 
+                 description
+                   "The list of allowed attachment points for an ONU.";
+                 
+                 leaf name {
+                    type string;
+                    description
+                       "Attachment point name.";
+                 }
+                 
+                 leaf olt-name {
+                   type leafref {
+                       path '/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device/baa-network-manager:name';
+                   }
+                   mandatory true;
+                   description
+                     "A reference to the OLT where the ONU is expected";
+                 }
+                 
+                 leaf channel-partition-name {
+                   type string;                
+                   description
+                     "The local name of the channel-partition in the OLT where the
+                      ONU is expected. If not specified, the ONU will be allowed on 
+                      any channel partition of the OLT.";
+                 }
+                 
+                 leaf planned-onu-management-mode-in-this-olt { 
+                    type identityref {
+                      base baa-xpon-onu-types:onu-management-config-base;
+                    }
+                    description
+                      "When configured, indicated whether eOMCI or vOMCI 
+                       must be used for this ONU in this OLT. 
+                       When not configured, the 'planned-onu-management-mode' 
+                       global YANG leaf per ONU will determine whether eOMCI
+                       or vOMCI must be used for this ONU, independent of
+                       the OLT on which it is showing-up.";
+                 }
               }
            }
+           
            container vomci-onu-management {
               description
-                "Configuration and state date needed to manage 
-                 ONU's via vOMCI";
+                "Configuration and state date needed to manage ONU's via 
+                 vOMCI.";
+              
+              //Should include the onu-management-chain, but at the time of 
+              //this change, the onu-management-chain definition makes it
+              //unusable. A workaround was applied to the local copy of
+              //bbf-voltmf-entity.
               uses bbf-voltmf-entity:vomci-onu-config;
-            }
-            
-         }
+             
+              list onu-management-chain {
+                 key "nf-type nf-name";
+                 ordered-by user;
+                  
+                 description
+                    "The ordered list of ONU Management Proxy, vOMCI function, 
+                     vOMCI Proxy and OLT entities to use for this ONU's 
+                     management. When the ONU Management Proxy is not deployed, 
+                     the list is ordered from the vOMCI function to the OLT 
+                     inclusive. If the vomci-function choice is used for the 
+                     vomci-function-selection then list contains the vOMCI 
+                     function instance. When the ONU Management Proxy is 
+                     deployed, the list is ordered with the ONU Management Proxy
+                      and then the OLT.";
+                 
+                 leaf nf-type {
+                   type bbf-vomcit:vomci-entity-type;
+                   description 
+                      "The type of function: ONU Management Proxy, 
+                      vOMCI function, vOMCI Proxy or OLT.";
+                 }
+                 leaf nf-name {                    
+                   type bbf-yang:string-ascii64;
+                   description 
+                      "Reference to the function instance. In the OB-BAA case,
+                      it will reference a device in the device list or a 
+                      an instance in the configured network function list. In 
+                      the future, the network functions may be discovered";
+                 }
+              }
+           }
+       }
     }
+    
+    
     
     augment '/baa-network-manager:network-manager/baa-network-manager:managed-devices/'
        + 'baa-network-manager:device/baa-network-manager:device-management/'
@@ -162,14 +381,15 @@ module bbf-obbaa-onu-management {
     when
         "/baa-network-manager:network-manager/baa-network-manager:managed-devices/"
       + "baa-network-manager:device/baa-network-manager:device-management/"
-      + "baa-network-manager:type = 'ONU'" {
+      + "baa-network-manager:type = 'ONU'";
+      
       description
         "Additional information for a ONU";
-      }
       
       container onu-state-info {
         description 
-          "Information about an ONU.";
+          "Information about an ONU. These parameters are only available when
+           the ONU is authenticated";
         
         leaf onu-state {
           type identityref {
@@ -177,43 +397,27 @@ module bbf-obbaa-onu-management {
           }
           mandatory true;
           description
-            "This leaf presents the state of the ONU. The most
-             specific applicable identity should be provided as
+            "This leaf presents the state of the ONU, as reported by the OLT.
+             The most specific applicable identity should be provided as
              value.";
         }
         
-        leaf detected-serial-number {
-           type bbf-xpon-types:onu-serial-number;
+        leaf determined-onu-management-mode {
+           type identityref {
+             base baa-xpon-onu-types:onu-management-state-base;
+           }
            description
-             "The serial number of the Optical Network Unit (ONU).";
+             "This YANG leaf may only be present when the corresponding 
+              Optical Network Unit (ONU) is present on a channel 
+              termination and has been successfully authenticated. 
+              It provides the ONU management mode as best determined  
+              by the Optical Line Termination (OLT), ideally  
+              discriminating between eOMCI and vOMCI."; 
            reference
-             "ITU-T G.984.3, clause 9.2.4.1
-              ITU-T G.987.3, clause 11.3.3.2
-              ITU-T G.9807.1, clauses C11.2.6.1, C11.2.6.2 and
-              C11.3.4.1
-              ITU-T G.989.3, clauses 11.2.6.1, 11.2.6.2 and 11.3.4.1.";
+             "WT-489";
         }
         
-        leaf detected-registration-id {
-           type bbf-xpon-types:onu-registration-id;
-           description
-             "The registration ID value which the Optical Line
-              Termination (OLT) has received from the Optical Network
-              Unit (ONU). This leaf is not present if the ONU has not
-              provided any registration ID to the OLT. Registration ID
-              may be useful in identifying a particular ONU installed
-              at a particular location. Each octet is represented as 2
-              hexadecimal characters, therefore the leaf must contain an
-              even number of characters. For ITU-T G.984.3, the leaf
-              can only be up to 20 octets long (refer to 'password'),
-              for ITU-T G.987.3, ITU-T G.9807.3 and ITU-T G.989.3
-              the leaf can be up to 72 octets long.";
-           reference
-             "ITU-T G.984.3 clause 9.2.4.2
-              ITU-T G.987.3 clause 11.3.4.2
-              ITU-T G.9807.3 clause C.11.3.4.2
-              ITU-T G.989.3 clause 11.3.4.2";
-         }
+        uses onu-state-general-parameters;
         
         leaf vendor-id {
           type string {
@@ -239,37 +443,9 @@ module bbf-obbaa-onu-management {
            description
              "The current ONU attachment point";
            
-           leaf olt-name {
-             type leafref {
-                 path '/baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device/baa-network-manager:name';
-             }
-             mandatory true;
-             description
-               "A reference to the OLT where the ONU is attached";
-           }
+           uses onu-state-attachment-point-parameters;
            
-           leaf channel-termination-name {
-              type string;
-              mandatory true;
-              description
-                "The local name of the channel termination in the OLT where the ONU is attached";
-           }
-           
-           leaf onu-id {
-              type bbf-xpon-types:onu-id;
-              description
-                "This is the ITU-T Transmission Convergence (TC) layer ONU-ID
-                 identifier which the Optical Line Termination (OLT) has
-                 assigned to the Optical Network Unit (ONU) during the ONU's
-                 activation using the Assign_ONU-ID PLOAM message. It
-                 identifies an ONU on a channel group and is unique on a
-                 channel group.";
-              reference
-                "ITU-T G.984.3 clause 5.5.2
-                 ITU-T G.987.3 clause 6.4.2
-                 ITU-T G.9807.1 clause C.6.1.5.6
-                 ITU-T G.989.3 clause 6.1.5.6";
-            }
+           uses onu-auth-parameters;
         }
         
         container software-images {
@@ -354,7 +530,7 @@ module bbf-obbaa-onu-management {
                 "This container contains the counters for the vOLTMF messages
                  sent between the vOLTMF and vOMCI funciton.";
    
-             uses bbf-voltmf-msg-mon:voltmf-msg-data-grouping;
+             uses bbf-voltmf-msg-mon:voltmf-msg-statistics-grouping;
           }
         
         
@@ -431,4 +607,34 @@ module bbf-obbaa-onu-management {
       
     }
     
+    // Notifications
+    notification onu-authentication-report-notification {       
+       description 
+          "A notification to report ONU authentication events for a given 
+          ONU.";
+       
+       leaf onu-authentication-status {
+          type identityref {
+             base baa-xpon-onu-types:onu-authentication-notification-base;
+          }
+          mandatory true;
+          description 
+             "Identifies the authentication event.";
+       }
+       
+       uses onu-state-attachment-point-parameters;
+
+       uses onu-state-general-parameters;
+
+       uses onu-auth-parameters;
+       
+       leaf onu-name {
+          type string;
+          description
+            "The name of the ONU in the BAA device list if it was possible 
+             for the BAA to associate it to a particular device instance.";
+       }
+       
+    }
+
 }

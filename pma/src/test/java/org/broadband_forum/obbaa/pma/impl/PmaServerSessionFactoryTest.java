@@ -39,7 +39,10 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNode
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityRegistry;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
+import org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
+import org.broadband_forum.obbaa.pma.NetconfNetworkFunctionAlignmentService;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.junit.After;
 import org.junit.Before;
@@ -53,6 +56,10 @@ public class PmaServerSessionFactoryTest {
     private PmaServerSessionFactory m_factory;
     @Mock
     private DeviceManager m_dm;
+    @Mock
+    private NetconfNetworkFunctionAlignmentService m_nas;
+    @Mock
+    private NetworkFunctionManager m_nfm;
     @Mock
     private NetConfServerImpl m_netconfServer;
     @Mock
@@ -87,7 +94,7 @@ public class PmaServerSessionFactoryTest {
         m_tempDir = Files.createTempDir();
         String deviceFileBaseDir = m_tempDir.getAbsolutePath();
         m_factory = new PmaServerSessionFactory(deviceFileBaseDir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaRegistry,
-                m_modelNodeDsmRegistry, m_adapterManager);
+                m_modelNodeDsmRegistry, m_adapterManager,m_nfm,m_nas);
         m_deviceAdapterId = new DeviceAdapterId("dpu", "1.0", "standard", "BBF");
         m_deviceAdapter = AdapterBuilder.createAdapterBuilder()
                 .setDeviceAdapterId(m_deviceAdapterId)
@@ -120,7 +127,7 @@ public class PmaServerSessionFactoryTest {
         String deviceFileBaseDir = m_tempFile.getAbsolutePath();
         try {
             new PmaServerSessionFactory(deviceFileBaseDir, m_dm, m_netconfServer, m_das, m_entityRegistry, m_schemaRegistry,
-                    m_modelNodeDsmRegistry, m_adapterManager).init();
+                    m_modelNodeDsmRegistry, m_adapterManager,m_nfm,m_nas).init();
             fail("Expected an exception to be thrown here");
         } catch (Exception e) {
             assertTrue(e instanceof RuntimeException);
@@ -130,7 +137,7 @@ public class PmaServerSessionFactoryTest {
 
     @Test
     public void testFacoryCreatesPmaServerSessions() throws Exception {
-        PmaSession pmaServer = m_factory.create(m_deviceKey);
+        PmaSession pmaServer = m_factory.create(new PmaResourceId(PmaResourceId.Type.DEVICE,m_deviceKey));
         assertTrue(pmaServer instanceof PmaServerSession);
 
     }

@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.netconf.api.client.NotificationListener;
 import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
@@ -106,7 +107,8 @@ public class DeviceNotificationListener implements NotificationListener {
             GetConfigRequest getConfig = new GetConfigRequest();
             getConfig.setSourceRunning();
             getConfig.setMessageId("internal");
-            Map<NetConfResponse, List<Notification>> response = m_pmaRegistry.executeNC(deviceName, getConfig.requestToString());
+            PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,deviceName);
+            Map<NetConfResponse, List<Notification>> response = m_pmaRegistry.executeNC(resourceId, getConfig.requestToString());
             String xpathExpression;
             List<String> evaluatedXpath = new ArrayList<>();
             Pair<String, Element> channelTermRefAndDetectedRefId = fetchChannelRefAndDetectedRefId(notification);

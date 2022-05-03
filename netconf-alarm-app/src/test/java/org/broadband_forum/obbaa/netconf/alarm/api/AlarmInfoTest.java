@@ -25,6 +25,7 @@ public class AlarmInfoTest {
     private static final String TEST_DEVICE_ID2 = "testDeviceId2";
     private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final String RESOURCETYPE_STRING = "ams:mobject-manager/prefix=XDSL Port/ne=myNE/agent=IACM/relative=R1.S1.LT1.P1";
+    private static final String RESOURCE_STRING = "/ietf-interfaces:interfaces/interface[name='eth0']";
 
 
     private ModelNodeId m_sourceObject = mock(ModelNodeId.class);
@@ -115,7 +116,7 @@ public class AlarmInfoTest {
         m_alarmInfo2 = new AlarmInfo(TEST_ALARM_TYPE_ID, "", m_sourceObject, m_raisedTime, m_severity2,
                 TEST_ADDITIONAL_INFO, TEST_DEVICE_ID);
         assertFalse(m_alarmInfo.equals(m_alarmInfo2));
-        m_alarmInfo = new AlarmInfo(TEST_ALARM_TYPE_ID, "", null, m_raisedTime, m_severity,
+       m_alarmInfo = new AlarmInfo(TEST_ALARM_TYPE_ID, "", RESOURCE_STRING , m_raisedTime, m_severity,
                 TEST_ADDITIONAL_INFO, TEST_DEVICE_ID);
         m_alarmInfo2 = new AlarmInfo(TEST_ALARM_TYPE_ID, "", m_sourceObject, m_raisedTime, m_severity,
                 TEST_ADDITIONAL_INFO, TEST_DEVICE_ID);

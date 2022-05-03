@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import org.broadband_forum.obbaa.aggregator.api.DeviceManagementProcessor;
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.impl.SingleDeviceRequest;
+import org.broadband_forum.obbaa.aggregator.impl.SingleNetworkFunctionRequest;
 import org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl.AggregatorUtils;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.schema.rpc.RpcOperationType;
@@ -39,6 +40,7 @@ import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
+import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.schema.NetworkFunction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -128,6 +130,10 @@ public class NetworkManagerRpc {
         return getNetworkManager().getManagedDevices().getDevices();
     }
 
+    public List<NetworkFunction> getNetworkFunctions() {
+        return getNetworkManager().getManagedNetworkFunctions().getNetworkFunctions();
+    }
+
     /**
      * Get managed-devices of network-manager YANG model.
      *
@@ -212,6 +218,20 @@ public class NetworkManagerRpc {
         return new SingleDeviceRequest(deviceName, deviceType, parentDocument);
     }
 
+    private SingleNetworkFunctionRequest buildSingleNetworkFunctionRequest(String rpcMessage, NetworkFunction networkFunction)
+        throws DispatchException {
+        Node frameworkParent = buildRpcFramework(rpcMessage);
+        Document parentDocument = frameworkParent.getOwnerDocument();
+        for (Document childDocument : networkFunction.getRoot().getDocuments()) {
+            appendChilds(parentDocument,frameworkParent,childDocument);
+        }
+        if (networkFunction.getRoot().getDocuments().isEmpty() && frameworkParent.getLocalName().equals("filter")) {
+            frameworkParent.getParentNode().removeChild(frameworkParent);
+        }
+        //ignoring network function type
+        return new SingleNetworkFunctionRequest(networkFunction.getNetworkFunctionName(),null, parentDocument);
+    }
+
     /**
      * Append child nodes of another document.
      *
@@ -252,6 +272,21 @@ public class NetworkManagerRpc {
         return singleDeviceRequests;
     }
 
+    public Set<SingleNetworkFunctionRequest> buildSingleNetworkFunctionRequests(String rpcMessage)
+        throws DispatchException {
+        List<NetworkFunction> networkFunctions = getNetworkManager().getManagedNetworkFunctions().getNetworkFunctions();
+        Set<SingleNetworkFunctionRequest> singleNetworkFunctionRequests = new HashSet<>();
+
+        for (NetworkFunction networkFunction : networkFunctions) {
+            if (networkFunction.getRoot() != null && networkFunction.getRoot().getDocuments() != null) {
+                SingleNetworkFunctionRequest request = buildSingleNetworkFunctionRequest(rpcMessage,networkFunction);
+                singleNetworkFunctionRequests.add(request);
+            }
+        }
+
+        return singleNetworkFunctionRequests;
+    }
+
     /**
      * Get original message.
      *
@@ -285,6 +320,21 @@ public class NetworkManagerRpc {
         }
         catch (NullPointerException ex) {
             //No information of device
+        }
+
+        return false;
+    }
+
+    public boolean isNetworkFunctionConfigRequest() {
+        try {
+            for (NetworkFunction networkFunction : getNetworkFunctions()) {
+                if (networkFunction.getRoot() != null) {
+                    return true;
+                }
+            }
+        }
+        catch (NullPointerException ex) {
+            //No information of network functions
         }
 
         return false;

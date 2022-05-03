@@ -1,0 +1,11 @@
+{
+  "ietf-alarms:alarm-notification": {
+      "resource": "/ietf-hardware:hardware/component[name='ontAniPort_ont1']",
+      "alarm-type-id": "bbf-hardware-transceiver-alarm-types:rx-power-low",
+      "alarm-type-qualifier": "",
+      "time": "2022-01-09T13:53:36+00:00",
+      "perceived-severity": "cleared",
+      "alarm-text": "example alarm cleared"
+    }
+  }
+}

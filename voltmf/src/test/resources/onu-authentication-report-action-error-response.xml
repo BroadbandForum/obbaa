@@ -1,0 +1,9 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <rpc-error xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <error-type>application</error-type>
+        <error-tag>invalid-value</error-tag>
+        <error-severity>error</error-severity>
+        <error-app-tag xmlns:baa-xpon-onu-types="urn:bbf:yang:obbaa:xpon-onu-types">baa-xpon-onu-types:onu-not-present</error-app-tag>
+        <error-message>The ONU is not present on the channel termination.</error-message>
+    </rpc-error>
+</rpc-reply>

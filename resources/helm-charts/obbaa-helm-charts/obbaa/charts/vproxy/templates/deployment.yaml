@@ -13,6 +13,10 @@ spec:
       labels:
         app: vproxy
     spec:
+      volumes:
+        - name: vomci-vproxy-volume
+          persistentVolumeClaim:
+            claimName: vomci-vproxy-pvclaim
       containers:
         - name: vproxy
           image: broadbandforum/obbaa-vproxy:latest
@@ -36,7 +40,14 @@ spec:
               value: "vomci-proxy-response"
             - name: KAFKA_NOTIFICATION_TOPICS
               value: "vomci-proxy-notification"
+            - name: VOMCI_KAFKA_SENDER_NAME
+              value: "bbf-vproxy"
+            - name: VOMCI_KAFKA_VOLTMF_NAME
+              value: "vOLTMF"
           ports:
             - containerPort: 8433
               name: port8433
+          volumeMounts:
+            - name: vomci-vproxy-volume
+              mountPath: /db
       restartPolicy: Always

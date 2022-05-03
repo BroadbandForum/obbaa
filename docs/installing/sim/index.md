@@ -10,9 +10,13 @@ via the BAA layer NBI:
 1.  Device Simulator =\> Simulates a NETCONF device. OB-BAA connects to
     the device via NETCONF and deploys the instructions passed on to it
     by Controller.
+    * [pOLT Simulator](polt/index.md#polt_sim) =\> Simulates the physical OLT for interactions between the OLT and the BAA layer.
+
 
 2.  Controller Simulator =\> Simulates a SDN M&C. Connects to OB-BAA via
     its Northbound NETCONF protocol adapter.
+
+3.  [ONU Simulator](onu/index.md#onu_sim) =\> For simulating ONU functionality related with processing and responding to OMCI messages. The ONU simulator can also be used to test the scale of the BAA layer.
 
 These simulators are loaded with the YANG modules that are to be tested
 or demonstrated.

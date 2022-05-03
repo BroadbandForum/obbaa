@@ -13,6 +13,10 @@ spec:
       labels:
         app: vomci
     spec:
+      volumes:
+        - name: vomci-vproxy-volume
+          persistentVolumeClaim:
+            claimName: vomci-vproxy-pvclaim
       containers:
         - name: vomci
           image: broadbandforum/obbaa-vomci:latest
@@ -30,7 +34,14 @@ spec:
               value: "vomci1-response" # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
             - name: KAFKA_NOTIFICATION_TOPICS
               value: "vomci1-notification" # if message formatter is JSON "OBBAA_ONU_NOTIFICATION"
+            - name: VOMCI_KAFKA_SENDER_NAME
+              value: "bbf-vomci"
+            - name: VOMCI_KAFKA_VOLTMF_NAME
+              value: "vOLTMF"
           ports:
             - containerPort: 8081
               name: port8081
+          volumeMounts:
+            - name: vomci-vproxy-volume
+              mountPath: /db
       restartPolicy: Always

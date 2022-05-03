@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "network-manager", namespace = "urn:bbf:yang:obbaa:network-manager")
 public class NetworkManager {
     private ManagedDevices m_managedDevices;
+    private ManagedNetworkFunctions m_managedNetworkFunctions;
 
     @XmlElement(name = "managed-devices")
     public ManagedDevices getManagedDevices() {
@@ -17,5 +18,14 @@ public class NetworkManager {
 
     public void setManagedDevices(ManagedDevices managedDevices) {
         m_managedDevices = managedDevices;
+    }
+
+    @XmlElement(name = "network-functions")
+    public ManagedNetworkFunctions getManagedNetworkFunctions() {
+        return m_managedNetworkFunctions;
+    }
+
+    public void setManagedNetworkFunctions(ManagedNetworkFunctions managedNetworkFunctions) {
+        m_managedNetworkFunctions = managedNetworkFunctions;
     }
 }

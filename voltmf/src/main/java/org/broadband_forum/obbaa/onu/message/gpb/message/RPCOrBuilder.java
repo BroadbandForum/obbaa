@@ -12,4 +12,24 @@ public interface RPCOrBuilder extends
    * @return The inputData.
    */
   com.google.protobuf.ByteString getInputData();
+
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 2;</code>
+   * @return The datastoreTag.
+   */
+  java.lang.String getDatastoreTag();
+  /**
+   * <pre>
+   * Optional: Datastore tag used to
+   * </pre>
+   *
+   * <code>string datastore_tag = 2;</code>
+   * @return The bytes for datastoreTag.
+   */
+  com.google.protobuf.ByteString
+      getDatastoreTagBytes();
 }

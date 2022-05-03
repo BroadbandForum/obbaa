@@ -3,6 +3,10 @@ module bbf-vomci-proxy {
   namespace "urn:bbf:yang:bbf-vomci-proxy";
   prefix bbf-vomci-proxy;
 
+  import bbf-yang-types {
+    prefix bbf-yang;
+  }
+
   import bbf-vomci-types {
     prefix bbf-vomcit;
   }
@@ -29,8 +33,6 @@ module bbf-vomci-proxy {
      Editor:      Tim Carey, Nokia
 
      Editor:      Dechao Zhang, China Mobile
-
-     PS Leader:   Yves Hertoghs, VMWare
 
      WA Director: George Dobrowski, Morris Creek Consulting
 
@@ -82,15 +84,15 @@ module bbf-vomci-proxy {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2020-02-07 {
+  revision 2020-08-19 {
     description
       "Initial revision.";
     reference
-      "TR-451: Section 5.2 vOMCI Function";
+      "TR-451: Section 5.4 vOMCI Proxy
+               Section 5.8 vOMCI function to OLT Interface";
   }
 
   // Features
-
   feature nf-client-supported {
     description
       "Indicates that client connectivity to network function's
@@ -103,23 +105,21 @@ module bbf-vomci-proxy {
        endpoints are supported.";
   }
   
-  // RPCs
-  rpc create-onu {
-    description
-      "Provides the ability to create an ONU within the 
-       vOMCI function.";
-    input {
-      leaf name {
-        type bbf-vomcit:onu-name;
-        description
-          "The unique name of the ONU.";
-      }
-    }
-  }
-
   container managed-onus {
     description
       "The ONUs that are being managed by this entity.";
+    action create-onu {
+      description
+        "Provides the ability to create an ONU within the 
+         vOMCI Proxy.";
+      input {
+        leaf name {
+          type bbf-vomcit:onu-name;
+          description
+            "The unique name of the ONU.";
+        }
+      }
+    }
     list managed-onu {
       key "name";
       config false;
@@ -133,66 +133,65 @@ module bbf-vomci-proxy {
       action delete-onu {
         description
           "Provides the ability to delete an ONU within the 
-           vOMCI function.";
+           vOMCI Proxy.";
       }
       action set-onu-communication {
         description
           "Provides the ability to configure the information necessary
            to establish if an ONU can be communicated with by the
-           vOMCI function along with remote endpoint to use.";
+           vOMCI Proxy along with remote endpoint to use.";
         input {
           leaf onu-communication-available {
             type boolean;
             description
-              "When true, the ONU is able to be communicated
-               with across the ONU management chain of entities.";
+              "When true, the ONU is able to be communicated with 
+               across the ONU management chain of entities.";
           }
           leaf olt-remote-endpoint-name {
-            type string;
+            type bbf-yang:string-ascii64;
             description
-              "The remote endpoint name to use for transmitting
-               vOMCI messages toward the OLT.";
+              "The remote endpoint name to use for transmitting vOMCI 
+               messages toward the OLT.";
           }
-          leaf vomci-func-remote-endpoint-name {
-            type string;
+          leaf vomci-function-remote-endpoint-name {
+            type bbf-yang:string-ascii64;
             description
-              "The remote endpoint name to use for transmitting
-               vOMCI messages toward the vOMCI function.";
+              "The remote endpoint name to use for transmitting vOMCI 
+               messages toward the vOMCI function.";
           }
           uses bbf-vomci-ent:vomci-onu-header;
         }
       }
-  
       uses bbf-vomci-ent:vomci-onu-header;
       leaf onu-communication-available {
         type boolean;
         description
-          "When true, the ONU is able to be communicated
-           with across the ONU management chain of entities.";
+          "When true, the ONU is able to be communicated with across 
+           the ONU management chain of entities.";
       }
       leaf olt-remote-endpoint-name {
-        type string;
+        type bbf-yang:string-ascii64;
         description
-          "The name remote endpoint to use for transmitting
-           vOMCI messages toward the OLT.";
+          "The name remote endpoint to use for transmitting vOMCI 
+           messages toward the OLT.";
       }
-      leaf vomci-func-remote-endpoint-name {
-        type string;
+      leaf vomci-function-remote-endpoint-name {
+        type bbf-yang:string-ascii64;
         description
-          "The remote endpoint name to use for transmitting
-           vOMCI messages toward the vOMCI function.";
+          "The remote endpoint name to use for transmitting vOMCI 
+           messages toward the vOMCI function.";
       }
       
-      container vomci-message-data {
+      container statistics {
         description
-          "vOMCI message data statistics.";
-        uses bbf-vomci-ent:vomci-message-data;
-      }
-      container omci-message-retransmission-data {
-        description
-          "The statistics for the OMCI message retransmission 
-           capability.";
-        uses bbf-omci-mr:omci-msg-retrans-data;
+          "vOMCI message and retransmission statistics.";
+        action reset {
+          description
+            "Provides the capability to reset the counters of the 
+             vomci-statistics.";
+        }
+        uses bbf-vomci-ent:vomci-message-statistics;
+        uses bbf-omci-mr:omci-msg-retrans-statistics;
       }
     }
   }
@@ -207,25 +206,17 @@ module bbf-vomci-proxy {
       units "seconds";
       default "900";
       description
-        "The maximum number of seconds that a
-         vOMCI message is transmitted and has not been responded.
-         The timeout used to cleanup stale vOMCI messages
-         The timeout is only applicable when OMCI message
-         retransmission capability is not currently enabled
-         for this entity.";
+        "The maximum number of seconds that a vOMCI message is 
+         transmitted and has not been responded.The timeout used to 
+         cleanup stale vOMCI messages. The timeout is only applicable 
+         when OMCI message retransmission capability is not currently 
+         enabled for this entity.";
     }
   
     container omci-message-retransmission {
       if-feature "bbf-omci-mr:omci-msg-retrans-supported";
       description
         "OMCI message retransmission capability configuration data.";
-      leaf enabled {
-        type boolean;
-        default "true";
-        description
-          "Administratively enable the use of the OMCI message
-           retransmission capability for the network function.";
-      }
       uses bbf-omci-mr:omci-msg-retrans-grouping;
     } //OMCI message retransmission capability
   
@@ -241,9 +232,8 @@ module bbf-vomci-proxy {
           type boolean;
           default "true";
           description
-            "Administratively enable the use of the 
-             client connectivity capability to the 
-             network function.";
+            "Administratively enable the use of the client 
+             connectivity capability to the network function.";
         }
         uses bbf-nfc:nf-endpoint-grouping;
       } //nf-client
@@ -256,25 +246,23 @@ module bbf-vomci-proxy {
           type boolean;
           default "true";
           description
-            "Administratively enable the use of the 
-             server connectivity capability for connecting 
-             network function.";
+            "Administratively enable the use of the server 
+             connectivity capability for connecting network 
+             function.";
         }
         uses bbf-nfs:nf-server-grouping;
       } //nf-server
     }
-  }
-  
-  container vomci-state {
-    config false;
-    description
-      "The state data associated with the vOMCI Proxy.";
-       
-    container omci-message-retransmission-data {
+    container statistics {
+      config false;
       description
-        "The statistics for the OMCI message retransmission 
-         capability.";
-      uses bbf-omci-mr:omci-msg-retrans-data;
+        "The OMCI function statistics.";
+      action reset {
+        description
+          "Provides the capability to reset the counters of the 
+           statistics.";
+      }
+      uses bbf-omci-mr:omci-msg-retrans-statistics;
     }
   }
 }

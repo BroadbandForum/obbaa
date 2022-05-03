@@ -18,11 +18,14 @@ package org.broadband_forum.obbaa.onu.message;
 
 import java.util.Arrays;
 
+import org.broadband_forum.obbaa.nf.entities.NetworkFunctionNSConstants;
+
 /**
  * <p>
  * Enum to help convert the object type between proto data and NetworkWideTag object
  * </p>
  * Created by Filipe Cláudio (Altice Labs) on 19/05/2021.
+ * Updated by Miguel Melo (Altice Labs) on 25/01/2022.
  */
 public enum ObjectType {
     ONU(0),
@@ -31,6 +34,10 @@ public enum ObjectType {
     VOLTMF(3);
 
     private int m_code;
+    private static final String YANG_ONU = NetworkFunctionNSConstants.ONU_FUNCTION;
+    private static final String YANG_VOMCI_FUNCTION = NetworkFunctionNSConstants.VOMCI_FUNCTION;
+    private static final String YANG_VOMCI_PROXY = NetworkFunctionNSConstants.PROXY_FUNCTION;
+    private static final String YANG_VOLTMF = NetworkFunctionNSConstants.VOLTMF_FUNCTION;
 
     ObjectType(int code) {
         this.m_code = code;
@@ -55,5 +62,28 @@ public enum ObjectType {
                 .filter(objectType -> objectType.name().equals(name.toUpperCase()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static ObjectType getObjectTypeFromYangString(String yang) {
+        /*
+        * This function receive something like this: bbf-nf-types:vomci-function-type
+        * The namespace "bbf-nf-types" does matter for the purpose of this function.
+        * */
+        if (yang == null) {
+            return null;
+        }
+        String networkFunctionYang = yang.split(":")[1];
+        switch (networkFunctionYang) {
+            case YANG_ONU:
+                return ObjectType.ONU;
+            case YANG_VOMCI_FUNCTION:
+                return ObjectType.VOMCI_FUNCTION;
+            case YANG_VOMCI_PROXY:
+                return ObjectType.VOMCI_PROXY;
+            case YANG_VOLTMF:
+                return ObjectType.VOLTMF;
+            default:
+                return null;
+        }
     }
 }

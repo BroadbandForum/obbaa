@@ -25,7 +25,7 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangAttribute;
-import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangLeafList;
+import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangList;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangOrderByUser;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangParentId;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangSchemaPath;
@@ -33,8 +33,8 @@ import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangSchemaPath;
 
 @Entity
 @IdClass(OnuManagementChainPK.class)
-@YangLeafList(name = ONU_MANAGEMEMT_CHAIN, namespace = ONU_MANAGEMENT_NS, revision = ONU_MANAGEMENT_REVISION)
-public class OnuManagementChain {
+@YangList(name = ONU_MANAGEMEMT_CHAIN, namespace = ONU_MANAGEMENT_NS, revision = ONU_MANAGEMENT_REVISION)
+public class OnuManagementChain implements Comparable<OnuManagementChain> {
 
     @Id
     @YangParentId
@@ -46,20 +46,25 @@ public class OnuManagementChain {
     private String schemaPath;
 
     @Id
-    @Column(name = "onuManagementChain")
-    @YangAttribute(name = ONU_MANAGEMEMT_CHAIN)
-    private String onuManagementChain;
+    @Column(name = "nfName")
+    @YangAttribute(name = DeviceManagerNSConstants.NETWORK_FUNCTION_NAME)
+    private String nfName;
+
+    @Id
+    @YangAttribute(name = DeviceManagerNSConstants.NETWORK_FUNCTION_TYPE)
+    @Column(name = "nfType")
+    private String nfType;
 
     @Column
     @YangOrderByUser
     private Integer insertOrder;
 
-    public String getOnuManagementChain() {
-        return onuManagementChain;
+    public String getNfName() {
+        return nfName;
     }
 
-    public void setOnuManagementChain(String onuManagementChain) {
-        this.onuManagementChain = onuManagementChain;
+    public void setNfName(String nfName) {
+        this.nfName = nfName;
     }
 
     public String getParentId() {
@@ -86,6 +91,15 @@ public class OnuManagementChain {
         this.insertOrder = insertOrder;
     }
 
+    public String getNfType() {
+        return nfType;
+    }
+
+    public void setNfType(String nfType) {
+        this.nfType = nfType;
+    }
+
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -105,7 +119,7 @@ public class OnuManagementChain {
         if (insertOrder != null ? !insertOrder.equals(that.insertOrder) : that.insertOrder != null) {
             return false;
         }
-        return onuManagementChain != null ? onuManagementChain.equals(that.onuManagementChain) : that.onuManagementChain == null;
+        return nfName != null ? nfName.equals(that.nfName) : that.nfName == null;
 
     }
 
@@ -113,8 +127,13 @@ public class OnuManagementChain {
     public int hashCode() {
         int result = parentId != null ? parentId.hashCode() : 0;
         result = 31 * result + (schemaPath != null ? schemaPath.hashCode() : 0);
-        result = 31 * result + (onuManagementChain != null ? onuManagementChain.hashCode() : 0);
+        result = 31 * result + (nfName != null ? nfName.hashCode() : 0);
         result = 31 * result + (insertOrder != null ? insertOrder.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public int compareTo(OnuManagementChain other) {
+        return nfName.compareTo(other.getNfName());
     }
 }

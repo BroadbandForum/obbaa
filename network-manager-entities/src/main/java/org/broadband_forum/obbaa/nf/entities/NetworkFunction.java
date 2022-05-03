@@ -21,6 +21,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 
+import org.broadband_forum.obbaa.dmyang.entities.AlignmentOption;
+import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResource;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.AttributeType;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangAttribute;
 import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangAttributeNS;
@@ -39,7 +42,7 @@ import org.broadband_forum.obbaa.netconf.stack.api.annotations.YangSchemaPath;
 @IdClass(NetworkFunctionPK.class)
 @YangList(name = NetworkFunctionNSConstants.NETWORK_FUNCTION, namespace = NetworkFunctionNSConstants.NS,
         revision = NetworkFunctionNSConstants.REVISION)
-public class NetworkFunction implements Comparable<NetworkFunction> {
+public class NetworkFunction implements Comparable<NetworkFunction>, PmaResource {
     @Id
     @YangParentId
     @Column(name = YangParentId.PARENT_ID_FIELD_NAME)
@@ -67,6 +70,14 @@ public class NetworkFunction implements Comparable<NetworkFunction> {
     @YangAttribute(name = NetworkFunctionNSConstants.REMOTE_ENDPOINT_NAME)
     @Column(name = "remote_endpoint_name")
     private String remoteEndpointName;
+
+    //TODO obbaa-366 there is no yang for this yet
+    @Column(name = "alignmentState")
+    private String alignmentState = DeviceManagerNSConstants.NEVER_ALIGNED;
+
+    //TODO obbaa-366 there is no yang for this yet
+    @Column(name = "alignmentOption")
+    private AlignmentOption alignmentOption = AlignmentOption.PUSH;
 
     public String getParentId() {
         return parentId;
@@ -141,6 +152,14 @@ public class NetworkFunction implements Comparable<NetworkFunction> {
                 : networkFunction.remoteEndpointName != null) {
             return false;
         }
+        if (alignmentState != null ? !alignmentState.equals(networkFunction.alignmentState) :
+                networkFunction.alignmentState != null) {
+            return false;
+        }
+        if (alignmentOption != null ? !alignmentOption.equals(networkFunction.alignmentOption) :
+                networkFunction.alignmentOption != null) {
+            return false;
+        }
         return networkFunctionName != null ? networkFunctionName.equals(networkFunction.networkFunctionName)
                 : networkFunction.networkFunctionName == null;
 
@@ -153,6 +172,8 @@ public class NetworkFunction implements Comparable<NetworkFunction> {
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (remoteEndpointName != null ? remoteEndpointName.hashCode() : 0);
         result = 31 * result + (networkFunctionName != null ? networkFunctionName.hashCode() : 0);
+        result = 31 * result + (alignmentState != null ? alignmentState.hashCode() : 0);
+        result = 31 * result + (alignmentOption != null ? alignmentOption.hashCode() : 0);
         return result;
     }
 
@@ -173,4 +194,36 @@ public class NetworkFunction implements Comparable<NetworkFunction> {
         return networkFunctionName.compareTo(other.getNetworkFunctionName());
     }
 
+    //TODO obbaa-366 should use a NetworkFunctionMgmt (see Device.java), but yang is not defined for network functions
+    public String getAlignmentState() {
+        return alignmentState;
+    }
+
+    public void setAlignmentState(String alignmentState) {
+        this.alignmentState = alignmentState;
+    }
+
+    public boolean isAligned() {
+        return alignmentState.equals(DeviceManagerNSConstants.ALIGNED) && !isInError();
+    }
+
+    public boolean isNeverAligned() {
+        return alignmentState.equals(DeviceManagerNSConstants.NEVER_ALIGNED);
+    }
+
+    public boolean isInError() {
+        return alignmentState.equals(DeviceManagerNSConstants.IN_ERROR);
+    }
+
+    public boolean isAlignmentUnknown() {
+        return alignmentState.equals(DeviceManagerNSConstants.ALIGNMENT_UNKNOWN);
+    }
+
+    public AlignmentOption getAlignmentOption() {
+        return alignmentOption;
+    }
+
+    public void setAlignmentOption(AlignmentOption alignmentOption) {
+        this.alignmentOption = alignmentOption;
+    }
 }

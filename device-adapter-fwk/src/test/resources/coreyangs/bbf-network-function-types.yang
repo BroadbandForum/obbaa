@@ -19,8 +19,6 @@ module bbf-network-function-types {
 
      Editor:      Dechao Zhang, China Mobile
 
-     PS Leader:   Yves Hertoghs, VMWare
-
      WA Director: George Dobrowski, Morris Creek Consulting
 
      WA Director: Bruno Cornaglia, Vodafone";
@@ -72,11 +70,11 @@ module bbf-network-function-types {
      This version of this YANG module is part of WT-454; see
      the WT itself for full legal notices.";
 
-   revision 2021-03-01 {
+   revision 2021-08-01 {
     description
       "Initial release";
     reference
-      "Broadband Forum TR-451";
+      "TBD";
   }
 
   // Identities
@@ -118,6 +116,40 @@ module bbf-network-function-types {
     base access-vnf-type;
     description
       "Virtual OLT management network function.";
+  }
+  identity onu-management-proxy-type {
+    base access-vnf-type;
+    description
+      "ONU Management Proxy network function.";
+  }
+  
+  // Network function topologies
+  identity nf-topology {
+    description
+      "Base identity for defining the topology which connects network 
+       functions(NF)";
+  } 
+  identity mesh-topology {
+    base nf-topology; 
+    description
+      "Identity for a mesh type of topology that connects NFs.";
+  }
+  identity star-topology {
+    base nf-topology; 
+    description
+      "Identity for a star type of topology that connects NFs.";
+  }
+  identity point-to-point-topology {
+    base nf-topology; 
+    description
+      "Identity for a point to point type of topology that 
+       connects NFs.";
+  }
+  identity other-topology {
+    base nf-topology; 
+    description
+      "Identity for a point type of topology that connects NFs that 
+       isn't already defined.";
   }
 }
 

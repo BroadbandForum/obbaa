@@ -20,46 +20,72 @@
         <interface-version>interface1</interface-version>
         <model>model1</model>
         <vendor>vendor1</vendor>
+        <description>This is an adapter for model1.dpu provided by vendor1</description>
         <is-netconf>false</is-netconf>
         <factory-garment-tag>
-            <percentage-adherence-to-standard-module>83%</percentage-adherence-to-standard-module>
-            <augmented-standard-module>ietf-hardware</augmented-standard-module>
-            <augmented-standard-module>iana-hardware</augmented-standard-module>
-            <deviated-standard-module>ietf-hardware</deviated-standard-module>
-            <deviated-standard-module>iana-hardware</deviated-standard-module>
             <number-of-modules-present-in-standard-adapter>12</number-of-modules-present-in-standard-adapter>
             <total-number-of-modules-present>15</total-number-of-modules-present>
+            <percentage-adherence-to-standard-module>83%</percentage-adherence-to-standard-module>
+            <deviated-standard-module>ietf-hardware</deviated-standard-module>
+            <deviated-standard-module>iana-hardware</deviated-standard-module>
             <percentage-of-standard-modules-having-deviation>20%</percentage-of-standard-modules-having-deviation>
+            <augmented-standard-module>ietf-hardware</augmented-standard-module>
+            <augmented-standard-module>iana-hardware</augmented-standard-module>
             <percentage-of-standard-modules-having-augments>20%</percentage-of-standard-modules-having-augments>
         </factory-garment-tag>
+        <in-use>true</in-use>
+        <devices-related>
+            <device-count>1</device-count>
+            <device>DeviceA(BasedAdapter1)</device>
+        </devices-related>
         <yang-modules>
-                      <module>
+            <module>
+                <name>bbf-alarm-types</name>
+                <revision>2020-05-11</revision>
+            </module>
+            <module>
                 <name>bbf-device-types</name>
-                <revision>2020-11-11</revision>
+                <revision>2021-06-02</revision>
             </module>
             <module>
                 <name>bbf-grpc-client</name>
-                <revision>2021-02-19</revision>
+                <revision>2021-08-01</revision>
             </module>
             <module>
                 <name>bbf-kafka-agent</name>
-                <revision>2021-02-19</revision>
+                <revision>2021-08-01</revision>
+            </module>
+            <module>
+                <name>bbf-network-function</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-network-function-client</name>
-                <revision>2021-02-19</revision>
+                <revision>2021-08-01</revision>
             </module>
             <module>
                 <name>bbf-network-function-server</name>
-                <revision>2021-02-19</revision>
+                <revision>2021-08-01</revision>
             </module>
             <module>
                 <name>bbf-network-function-types</name>
-                <revision>2021-03-01</revision>
+                <revision>2021-08-01</revision>
+            </module>
+            <module>
+                <name>bbf-node-types</name>
+                <revision>2021-06-02</revision>
+            </module>
+            <module>
+                <name>bbf-obbaa-deviations</name>
+                <revision>2021-11-10</revision>
             </module>
             <module>
                 <name>bbf-obbaa-device-adapters</name>
                 <revision>2018-08-31</revision>
+            </module>
+            <module>
+                <name>bbf-obbaa-ethernet-alarm-types</name>
+                <revision>2022-01-31</revision>
             </module>
             <module>
                 <name>bbf-obbaa-module-library-check</name>
@@ -70,44 +96,60 @@
                 <revision>2019-01-29</revision>
             </module>
             <module>
+                <name>bbf-obbaa-network-function-state</name>
+                <revision>2022-04-04</revision>
+            </module>
+            <module>
                 <name>bbf-obbaa-network-manager</name>
                 <revision>2021-02-01</revision>
             </module>
             <module>
                 <name>bbf-obbaa-onu-management</name>
-                <revision>2021-04-21</revision>
+                <revision>2021-11-10</revision>
             </module>
             <module>
                 <name>bbf-obbaa-pma-device-config</name>
                 <revision>2018-06-15</revision>
             </module>
             <module>
-               <name>bbf-omci-message-retransmission</name>
-               <revision>2021-02-07</revision>
+                <name>bbf-obbaa-xpon-onu-alarm-types</name>
+                <revision>2022-01-31</revision>
+            </module>
+            <module>
+                <name>bbf-obbaa-xpon-onu-types</name>
+                <revision>2021-11-10</revision>
+            </module>
+            <module>
+                <name>bbf-omci-message-retransmission</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-voltmf-entity</name>
-                <revision>2021-02-07</revision>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-voltmf-message-monitor</name>
-                <revision>2021-02-07</revision>
+                <revision>2021-08-19</revision>
             </module>
             <module>
-               <name>bbf-vomci-entity</name>
-               <revision>2021-02-07</revision>
+                <name>bbf-vomci-entity</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
-               <name>bbf-vomci-function</name>
-               <revision>2021-02-07</revision>
+                <name>bbf-vomci-function</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
-               <name>bbf-vomci-proxy</name>
-               <revision>2020-02-07</revision>
+                <name>bbf-vomci-network-function-endpoint-filter</name>
+                <revision>2021-08-19</revision>
+            </module>
+            <module>
+                <name>bbf-vomci-proxy</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-vomci-types</name>
-                <revision>2020-12-01</revision>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-xpon-onu-types</name>
@@ -124,6 +166,10 @@
             <module>
                 <name>iana-if-type</name>
                 <revision>2017-01-19</revision>
+            </module>
+            <module>
+                <name>ietf-alarms</name>
+                <revision>2019-09-11</revision>
             </module>
             <module>
                 <name>ietf-crypto-types</name>
@@ -178,56 +224,75 @@
                 <revision>2013-07-15</revision>
             </module>
         </yang-modules>
-        <description>This is an adapter for model1.dpu provided by vendor1</description>
-        <in-use>true</in-use>
-        <devices-related>
-            <device-count>1</device-count>
-            <device>DeviceA(BasedAdapter1)</device>
-        </devices-related>
     </device-adapter>
     <device-adapter>
         <type>olt</type>
         <interface-version>interface2</interface-version>
         <model>model2</model>
         <vendor>vendor2</vendor>
+        <description>This is an adapter for model2.olt provided by vendor2</description>
         <is-netconf>true</is-netconf>
+        <developer>test</developer>
+        <revision>2019-01-02</revision>
+        <upload-date>2019-01-01T00:00:00.000Z</upload-date>
         <factory-garment-tag>
-            <percentage-adherence-to-standard-module>66%</percentage-adherence-to-standard-module>
-            <augmented-standard-module>ietf-interfaces</augmented-standard-module>
-            <deviated-standard-module>ietf-interfaces</deviated-standard-module>
             <number-of-modules-present-in-standard-adapter>15</number-of-modules-present-in-standard-adapter>
             <total-number-of-modules-present>20</total-number-of-modules-present>
+            <percentage-adherence-to-standard-module>66%</percentage-adherence-to-standard-module>
+            <deviated-standard-module>ietf-interfaces</deviated-standard-module>
             <percentage-of-standard-modules-having-deviation>10%</percentage-of-standard-modules-having-deviation>
+            <augmented-standard-module>ietf-interfaces</augmented-standard-module>
             <percentage-of-standard-modules-having-augments>10%</percentage-of-standard-modules-having-augments>
         </factory-garment-tag>
+        <in-use>false</in-use>
         <yang-modules>
-                        <module>
+            <module>
+                <name>bbf-alarm-types</name>
+                <revision>2020-05-11</revision>
+            </module>
+            <module>
                 <name>bbf-device-types</name>
-                <revision>2020-11-11</revision>
+                <revision>2021-06-02</revision>
             </module>
             <module>
                 <name>bbf-grpc-client</name>
-                <revision>2021-02-19</revision>
+                <revision>2021-08-01</revision>
             </module>
             <module>
                 <name>bbf-kafka-agent</name>
-                <revision>2021-02-19</revision>
+                <revision>2021-08-01</revision>
+            </module>
+            <module>
+                <name>bbf-network-function</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-network-function-client</name>
-                <revision>2021-02-19</revision>
+                <revision>2021-08-01</revision>
             </module>
             <module>
                 <name>bbf-network-function-server</name>
-                <revision>2021-02-19</revision>
+                <revision>2021-08-01</revision>
             </module>
             <module>
                 <name>bbf-network-function-types</name>
-                <revision>2021-03-01</revision>
+                <revision>2021-08-01</revision>
+            </module>
+            <module>
+                <name>bbf-node-types</name>
+                <revision>2021-06-02</revision>
+            </module>
+            <module>
+                <name>bbf-obbaa-deviations</name>
+                <revision>2021-11-10</revision>
             </module>
             <module>
                 <name>bbf-obbaa-device-adapters</name>
                 <revision>2018-08-31</revision>
+            </module>
+            <module>
+                <name>bbf-obbaa-ethernet-alarm-types</name>
+                <revision>2022-01-31</revision>
             </module>
             <module>
                 <name>bbf-obbaa-module-library-check</name>
@@ -238,44 +303,60 @@
                 <revision>2019-01-29</revision>
             </module>
             <module>
+                <name>bbf-obbaa-network-function-state</name>
+                <revision>2022-04-04</revision>
+            </module>
+            <module>
                 <name>bbf-obbaa-network-manager</name>
                 <revision>2021-02-01</revision>
             </module>
             <module>
                 <name>bbf-obbaa-onu-management</name>
-                <revision>2021-04-21</revision>
+                <revision>2021-11-10</revision>
             </module>
             <module>
                 <name>bbf-obbaa-pma-device-config</name>
                 <revision>2018-06-15</revision>
             </module>
             <module>
-               <name>bbf-omci-message-retransmission</name>
-               <revision>2021-02-07</revision>
+                <name>bbf-obbaa-xpon-onu-alarm-types</name>
+                <revision>2022-01-31</revision>
+            </module>
+            <module>
+                <name>bbf-obbaa-xpon-onu-types</name>
+                <revision>2021-11-10</revision>
+            </module>
+            <module>
+                <name>bbf-omci-message-retransmission</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-voltmf-entity</name>
-                <revision>2021-02-07</revision>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-voltmf-message-monitor</name>
-                <revision>2021-02-07</revision>
+                <revision>2021-08-19</revision>
             </module>
             <module>
-               <name>bbf-vomci-entity</name>
-               <revision>2021-02-07</revision>
+                <name>bbf-vomci-entity</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
-               <name>bbf-vomci-function</name>
-               <revision>2021-02-07</revision>
+                <name>bbf-vomci-function</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
-               <name>bbf-vomci-proxy</name>
-               <revision>2020-02-07</revision>
+                <name>bbf-vomci-network-function-endpoint-filter</name>
+                <revision>2021-08-19</revision>
+            </module>
+            <module>
+                <name>bbf-vomci-proxy</name>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-vomci-types</name>
-                <revision>2020-12-01</revision>
+                <revision>2021-08-19</revision>
             </module>
             <module>
                 <name>bbf-xpon-onu-types</name>
@@ -292,6 +373,10 @@
             <module>
                 <name>iana-if-type</name>
                 <revision>2017-01-19</revision>
+            </module>
+            <module>
+                <name>ietf-alarms</name>
+                <revision>2019-09-11</revision>
             </module>
             <module>
                 <name>ietf-crypto-types</name>
@@ -346,10 +431,5 @@
                 <revision>2013-07-15</revision>
             </module>
         </yang-modules>
-        <description>This is an adapter for model2.olt provided by vendor2</description>
-        <in-use>false</in-use>
-        <revision>2019-01-02</revision>
-        <upload-date>2019-01-01T00:00:00.000Z</upload-date>
-        <developer>test</developer>
     </device-adapter>
 </device-adapters>

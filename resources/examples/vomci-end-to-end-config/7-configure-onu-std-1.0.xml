@@ -1,0 +1,542 @@
+<!--
+   ~ Copyright 2022 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="6" >
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device>
+                        <name>ont1</name>
+                        <root>
+                            <hw:hardware xmlns:hw="urn:ietf:params:xml:ns:yang:ietf-hardware">
+                                <hw:component>
+                                    <hw:name>ont1</hw:name>
+                                    <hw:admin-state>unlocked</hw:admin-state>
+                                    <hw:class xmlns:ianahw="urn:ietf:params:xml:ns:yang:iana-hardware">ianahw:chassis</hw:class>
+                                    <hw:parent-rel-pos>1</hw:parent-rel-pos>
+                                </hw:component>
+                                <hw:component>
+                                    <hw:name>ontCard_ont1_1</hw:name>
+                                    <hw:admin-state>unlocked</hw:admin-state>
+                                    <hw:class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:board</hw:class>
+                                    <hw:parent>ont1</hw:parent>
+                                    <hw:parent-rel-pos>1</hw:parent-rel-pos>
+                                </hw:component>
+                                <hw:component>
+                                    <hw:name>ontCage_ont1</hw:name>
+                                    <hw:class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:cage</hw:class>
+                                    <hw:parent>ontCard_ont1_1</hw:parent>
+                                    <hw:parent-rel-pos>1</hw:parent-rel-pos>
+                                </hw:component>
+                                <hw:component>
+                                    <hw:name>ontSfp_ont1</hw:name>
+                                    <hw:class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:transceiver</hw:class>
+                                    <hw:parent>ontCage_ont1</hw:parent>
+                                    <hw:parent-rel-pos>1</hw:parent-rel-pos>
+                                </hw:component>
+                                <hw:component>
+                                    <hw:name>ontAniPort_ont1</hw:name>
+                                    <hw:class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:transceiver-link</hw:class>
+                                    <hw:parent>ontSfp_ont1</hw:parent>
+                                    <hw:parent-rel-pos>1</hw:parent-rel-pos>
+                                </hw:component>
+                                <hw:component>
+                                    <hw:name>ontUni_ont1_1_1</hw:name>
+                                    <hw:class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:transceiver-link</hw:class>
+                                    <hw:parent>ontCard_ont1_1</hw:parent>
+                                    <!-- <hw:parent-rel-pos>2</hw:parent-rel-pos> -->
+                                    <hw:parent-rel-pos>1</hw:parent-rel-pos>
+                                </hw:component>
+                            </hw:hardware>
+                            <bbf-qos-cls:classifiers xmlns:bbf-qos-cls="urn:bbf:yang:bbf-qos-classifiers">
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_eg0</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>0</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:match-all/>
+                                        <bbf-qos-plc:pbit-marking-list xmlns:bbf-qos-plc="urn:bbf:yang:bbf-qos-policing">
+                                            <bbf-qos-plc:index>0</bbf-qos-plc:index>
+                                            <bbf-qos-plc:pbit-value>0</bbf-qos-plc:pbit-value>
+                                        </bbf-qos-plc:pbit-marking-list>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_eg1</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>1</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:match-all/>
+                                        <bbf-qos-plc:pbit-marking-list xmlns:bbf-qos-plc="urn:bbf:yang:bbf-qos-policing">
+                                            <bbf-qos-plc:index>0</bbf-qos-plc:index>
+                                            <bbf-qos-plc:pbit-value>1</bbf-qos-plc:pbit-value>
+                                        </bbf-qos-plc:pbit-marking-list>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_eg2</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>2</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:match-all/>
+                                        <bbf-qos-plc:pbit-marking-list xmlns:bbf-qos-plc="urn:bbf:yang:bbf-qos-policing">
+                                            <bbf-qos-plc:index>0</bbf-qos-plc:index>
+                                            <bbf-qos-plc:pbit-value>2</bbf-qos-plc:pbit-value>
+                                        </bbf-qos-plc:pbit-marking-list>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_eg3</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>3</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:match-all/>
+                                        <bbf-qos-plc:pbit-marking-list xmlns:bbf-qos-plc="urn:bbf:yang:bbf-qos-policing">
+                                            <bbf-qos-plc:index>0</bbf-qos-plc:index>
+                                            <bbf-qos-plc:pbit-value>3</bbf-qos-plc:pbit-value>
+                                        </bbf-qos-plc:pbit-marking-list>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_eg4</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>4</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:match-all/>
+                                        <bbf-qos-plc:pbit-marking-list xmlns:bbf-qos-plc="urn:bbf:yang:bbf-qos-policing">
+                                            <bbf-qos-plc:index>0</bbf-qos-plc:index>
+                                            <bbf-qos-plc:pbit-value>4</bbf-qos-plc:pbit-value>
+                                        </bbf-qos-plc:pbit-marking-list>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_eg5</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>5</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:match-all/>
+                                        <bbf-qos-plc:pbit-marking-list xmlns:bbf-qos-plc="urn:bbf:yang:bbf-qos-policing">
+                                            <bbf-qos-plc:index>0</bbf-qos-plc:index>
+                                            <bbf-qos-plc:pbit-value>5</bbf-qos-plc:pbit-value>
+                                        </bbf-qos-plc:pbit-marking-list>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_eg6</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>6</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:match-all/>
+                                        <bbf-qos-plc:pbit-marking-list xmlns:bbf-qos-plc="urn:bbf:yang:bbf-qos-policing">
+                                            <bbf-qos-plc:index>0</bbf-qos-plc:index>
+                                            <bbf-qos-plc:pbit-value>6</bbf-qos-plc:pbit-value>
+                                        </bbf-qos-plc:pbit-marking-list>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_eg7</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>7</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:match-all/>
+                                        <bbf-qos-plc:pbit-marking-list xmlns:bbf-qos-plc="urn:bbf:yang:bbf-qos-policing">
+                                            <bbf-qos-plc:index>0</bbf-qos-plc:index>
+                                            <bbf-qos-plc:pbit-value>7</bbf-qos-plc:pbit-value>
+                                        </bbf-qos-plc:pbit-marking-list>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_ing0</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>0</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:tag>
+                                            <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                            <bbf-qos-cls:in-pbit-list>0</bbf-qos-cls:in-pbit-list>
+                                        </bbf-qos-cls:tag>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_ing1</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>1</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:tag>
+                                            <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                            <bbf-qos-cls:in-pbit-list>1</bbf-qos-cls:in-pbit-list>
+                                        </bbf-qos-cls:tag>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_ing2</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>2</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:tag>
+                                            <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                            <bbf-qos-cls:in-pbit-list>2</bbf-qos-cls:in-pbit-list>
+                                        </bbf-qos-cls:tag>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_ing3</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>3</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:tag>
+                                            <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                            <bbf-qos-cls:in-pbit-list>3</bbf-qos-cls:in-pbit-list>
+                                        </bbf-qos-cls:tag>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_ing4</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>4</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:tag>
+                                            <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                            <bbf-qos-cls:in-pbit-list>4</bbf-qos-cls:in-pbit-list>
+                                        </bbf-qos-cls:tag>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_ing5</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>5</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:tag>
+                                            <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                            <bbf-qos-cls:in-pbit-list>5</bbf-qos-cls:in-pbit-list>
+                                        </bbf-qos-cls:tag>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_ing6</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>6</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:tag>
+                                            <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                            <bbf-qos-cls:in-pbit-list>6</bbf-qos-cls:in-pbit-list>
+                                        </bbf-qos-cls:tag>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                                <bbf-qos-cls:classifier-entry>
+                                    <bbf-qos-cls:name>classifier_ing7</bbf-qos-cls:name>
+                                    <bbf-qos-cls:filter-operation>bbf-qos-cls:match-all-filter</bbf-qos-cls:filter-operation>
+                                    <bbf-qos-cls:classifier-action-entry-cfg>
+                                        <bbf-qos-cls:action-type>bbf-qos-cls:scheduling-traffic-class</bbf-qos-cls:action-type>
+                                        <bbf-qos-cls:scheduling-traffic-class>7</bbf-qos-cls:scheduling-traffic-class>
+                                    </bbf-qos-cls:classifier-action-entry-cfg>
+                                    <bbf-qos-cls:match-criteria>
+                                        <bbf-qos-cls:any-protocol/>
+                                        <bbf-qos-cls:dscp-range>any</bbf-qos-cls:dscp-range>
+                                        <bbf-qos-cls:tag>
+                                            <bbf-qos-cls:index>0</bbf-qos-cls:index>
+                                            <bbf-qos-cls:in-pbit-list>7</bbf-qos-cls:in-pbit-list>
+                                        </bbf-qos-cls:tag>
+                                    </bbf-qos-cls:match-criteria>
+                                </bbf-qos-cls:classifier-entry>
+                            </bbf-qos-cls:classifiers>
+                            <bbf-qos-pol:qos-policy-profiles xmlns:bbf-qos-pol="urn:bbf:yang:bbf-qos-policies">
+                                <bbf-qos-pol:policy-profile>
+                                    <bbf-qos-pol:name>IPP0</bbf-qos-pol:name>
+                                    <bbf-qos-pol:policy-list>
+                                        <bbf-qos-pol:name>POLICY_ING</bbf-qos-pol:name>
+                                    </bbf-qos-pol:policy-list>
+                                </bbf-qos-pol:policy-profile>
+                                <bbf-qos-pol:policy-profile>
+                                    <bbf-qos-pol:name>QPP0</bbf-qos-pol:name>
+                                    <bbf-qos-pol:policy-list>
+                                        <bbf-qos-pol:name>POLICY_EG</bbf-qos-pol:name>
+                                    </bbf-qos-pol:policy-list>
+                                </bbf-qos-pol:policy-profile>
+                            </bbf-qos-pol:qos-policy-profiles>
+                            <bbf-xpongemtcont:xpongemtcont xmlns:bbf-xpongemtcont="urn:bbf:yang:bbf-xpongemtcont">
+                                <bbf-xpongemtcont:gemports>
+                                    <bbf-xpongemtcont:gemport>
+                                        <bbf-xpongemtcont:name>gem_ont1</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
+                                        <bbf-xpongemtcont:gemport-id>3072</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
+                                        <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
+                                        <bbf-xpongemtcont:traffic-class>0</bbf-xpongemtcont:traffic-class>
+                                        <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
+                                    </bbf-xpongemtcont:gemport>
+                                </bbf-xpongemtcont:gemports>
+                                <bbf-xpongemtcont:tconts>
+                                    <bbf-xpongemtcont:tcont>
+                                        <bbf-xpongemtcont:name>tcont_ont1</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:alloc-id>1024</bbf-xpongemtcont:alloc-id>
+                                        <bbf-xpongemtcont:interface-reference>ontAni_ont1</bbf-xpongemtcont:interface-reference>
+                                        <bbf-xpongemtcont:traffic-descriptor-profile-ref>TDP0</bbf-xpongemtcont:traffic-descriptor-profile-ref>
+                                        <bbf-xpongemtcont-qos:tm-root xmlns:bbf-xpongemtcont-qos="urn:bbf:yang:bbf-xpongemtcont-qos"/>
+                                    </bbf-xpongemtcont:tcont>
+                                </bbf-xpongemtcont:tconts>
+                                <bbf-xpongemtcont:traffic-descriptor-profiles>
+                                    <bbf-xpongemtcont:traffic-descriptor-profile>
+                                        <bbf-xpongemtcont:name>TDP0</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:assured-bandwidth>10000000</bbf-xpongemtcont:assured-bandwidth>
+                                        <bbf-xpongemtcont:fixed-bandwidth>10000000</bbf-xpongemtcont:fixed-bandwidth>
+                                        <bbf-xpongemtcont:maximum-bandwidth>30000000</bbf-xpongemtcont:maximum-bandwidth>
+                                    </bbf-xpongemtcont:traffic-descriptor-profile>
+                                </bbf-xpongemtcont:traffic-descriptor-profiles>
+                            </bbf-xpongemtcont:xpongemtcont>
+                            <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                                <if:interface>
+                                    <if:name>ontAni_ont1</if:name>
+                                    <if:enabled>true</if:enabled>
+                                    <bbf-if-port-ref:port-layer-if xmlns:bbf-if-port-ref="urn:bbf:yang:bbf-interface-port-reference">ontAniPort_ont1</bbf-if-port-ref:port-layer-if>
+                                    <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:ani</if:type>
+                                    <bbf-xponani:ani xmlns:bbf-xponani="urn:bbf:yang:bbf-xponani">
+                                        <bbf-xponani:management-gemport-aes-indicator>false</bbf-xponani:management-gemport-aes-indicator>
+                                        <bbf-xponani:onu-id>1</bbf-xponani:onu-id>
+                                        <bbf-xponani:upstream-fec>true</bbf-xponani:upstream-fec>
+                                    </bbf-xponani:ani>
+                                    <bbf-if-pm:performance xmlns:bbf-if-pm="urn:bbf:yang:bbf-interfaces-performance-management">
+                                        <bbf-if-pm:enable>false</bbf-if-pm:enable>
+                                    </bbf-if-pm:performance>
+                                    <bbf-qos-tm:tm-root xmlns:bbf-qos-tm="urn:bbf:yang:bbf-qos-traffic-mngt"/>
+                                </if:interface>
+                                <if:interface>
+                                    <if:name>enet_uni_ont1_1_1</if:name>
+                                    <if:enabled>true</if:enabled>
+                                    <bbf-if-port-ref:port-layer-if xmlns:bbf-if-port-ref="urn:bbf:yang:bbf-interface-port-reference">ontUni_ont1_1_1</bbf-if-port-ref:port-layer-if>
+                                    <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</if:type>
+                                    <eth-if:ethernet xmlns:eth-if="urn:ieee:params:xml:ns:yang:ieee802-ethernet-interface">
+                                        <eth-if:duplex>full</eth-if:duplex>
+                                        <eth-if:auto-negotiation/>
+                                        <eth-if:flow-control>
+                                            <eth-if:force-flow-control>false</eth-if:force-flow-control>
+                                            <eth-if:pause/>
+                                            <eth-if:pfc/>
+                                        </eth-if:flow-control>
+                                    </eth-if:ethernet>
+                                    <bbf-if-usg:interface-usage xmlns:bbf-if-usg="urn:bbf:yang:bbf-interface-usage"/>
+                                    <bbf-l2-fwd:mac-learning xmlns:bbf-l2-fwd="urn:bbf:yang:bbf-l2-forwarding">
+                                        <bbf-l2-fwd:mac-learning-enable>true</bbf-l2-fwd:mac-learning-enable>
+                                        <bbf-l2-fwd:mac-learning-failure-action>forward</bbf-l2-fwd:mac-learning-failure-action>
+                                        <bbf-l2-fwd:max-number-mac-addresses>4294967295</bbf-l2-fwd:max-number-mac-addresses>
+                                        <bbf-l2-fwd:number-committed-mac-addresses>1</bbf-l2-fwd:number-committed-mac-addresses>
+                                    </bbf-l2-fwd:mac-learning>
+                                    <dot1x:pae xmlns:dot1x="urn:ieee:std:802.1X:yang:ieee802-dot1x">
+                                        <dot1x:logon-nid/>
+                                        <dot1x:logon-process>
+                                            <dot1x:logon>false</dot1x:logon>
+                                        </dot1x:logon-process>
+                                        <dot1x:port-capabilities/>
+                                    </dot1x:pae>
+                                    <bbf-if-pm:performance xmlns:bbf-if-pm="urn:bbf:yang:bbf-interfaces-performance-management">
+                                        <bbf-if-pm:enable>false</bbf-if-pm:enable>
+                                    </bbf-if-pm:performance>
+                                    <bbf-qos-tm:tm-root xmlns:bbf-qos-tm="urn:bbf:yang:bbf-qos-traffic-mngt"/>
+                                </if:interface>
+                                <if:interface>
+                                    <if:name>enet_vlan_ont1</if:name>
+                                    <if:enabled>true</if:enabled>
+                                    <bbf-qos-pol:ingress-qos-policy-profile xmlns:bbf-qos-pol="urn:bbf:yang:bbf-qos-policies">IPP0</bbf-qos-pol:ingress-qos-policy-profile>
+                                    <if:type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</if:type>
+                                    <bbf-qos-sched:egress-tm-objects xmlns:bbf-qos-sched="urn:bbf:yang:bbf-qos-enhanced-scheduling"/>
+                                    <bbf-subif:inline-frame-processing xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                                        <bbf-subif:egress-rewrite>
+                                            <bbf-subif-tag:pop-tags xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">1</bbf-subif-tag:pop-tags>
+                                        </bbf-subif:egress-rewrite>
+                                        <bbf-subif:ingress-rule>
+                                            <bbf-subif:rule>
+                                                <bbf-subif:name>rule_1</bbf-subif:name>
+                                                <bbf-subif:priority>100</bbf-subif:priority>
+                                                <bbf-subif:flexible-match>
+                                                    <bbf-subif-tag:match-criteria xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                                                        <bbf-subif-tag:any-frame/>
+                                                        <bbf-subif-tag:any-protocol/>
+                                                        <bbf-subif-tag:ethernet-frame-type>any</bbf-subif-tag:ethernet-frame-type>
+                                                        <bbf-subif-tag:untagged/>
+                                                    </bbf-subif-tag:match-criteria>
+                                                </bbf-subif:flexible-match>
+                                                <bbf-subif:ingress-rewrite>
+                                                    <bbf-subif-tag:pop-tags xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">0</bbf-subif-tag:pop-tags>
+                                                    <bbf-subif-tag:push-tag xmlns:bbf-subif-tag="urn:bbf:yang:bbf-sub-interface-tagging">
+                                                        <bbf-subif-tag:index>0</bbf-subif-tag:index>
+                                                        <bbf-subif-tag:dot1q-tag>
+                                                            <bbf-subif-tag:dei-from-tag-index>0</bbf-subif-tag:dei-from-tag-index>
+                                                            <bbf-subif-tag:pbit-from-tag-index>0</bbf-subif-tag:pbit-from-tag-index>
+                                                            <bbf-subif-tag:tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</bbf-subif-tag:tag-type>
+                                                            <bbf-subif-tag:vlan-id>115</bbf-subif-tag:vlan-id>
+                                                        </bbf-subif-tag:dot1q-tag>
+                                                    </bbf-subif-tag:push-tag>
+                                                </bbf-subif:ingress-rewrite>
+                                            </bbf-subif:rule>
+                                        </bbf-subif:ingress-rule>
+                                    </bbf-subif:inline-frame-processing>
+                                    <bbf-if-usg:interface-usage xmlns:bbf-if-usg="urn:bbf:yang:bbf-interface-usage"/>
+                                    <bbf-l2-fwd:mac-learning xmlns:bbf-l2-fwd="urn:bbf:yang:bbf-l2-forwarding">
+                                        <bbf-l2-fwd:mac-learning-enable>true</bbf-l2-fwd:mac-learning-enable>
+                                        <bbf-l2-fwd:mac-learning-failure-action>forward</bbf-l2-fwd:mac-learning-failure-action>
+                                        <bbf-l2-fwd:max-number-mac-addresses>4294967295</bbf-l2-fwd:max-number-mac-addresses>
+                                        <bbf-l2-fwd:number-committed-mac-addresses>1</bbf-l2-fwd:number-committed-mac-addresses>
+                                    </bbf-l2-fwd:mac-learning>
+                                    <bbf-if-pm:performance xmlns:bbf-if-pm="urn:bbf:yang:bbf-interfaces-performance-management">
+                                        <bbf-if-pm:enable>false</bbf-if-pm:enable>
+                                    </bbf-if-pm:performance>
+                                    <bbf-subif:subif-lower-layer xmlns:bbf-subif="urn:bbf:yang:bbf-sub-interfaces">
+                                        <bbf-subif:interface>enet_uni_ont1_1_1</bbf-subif:interface>
+                                    </bbf-subif:subif-lower-layer>
+                                    <bbf-subprof:subscriber-profile xmlns:bbf-subprof="urn:bbf:yang:bbf-subscriber-profiles"/>
+                                    <bbf-qos-tm:tm-root xmlns:bbf-qos-tm="urn:bbf:yang:bbf-qos-traffic-mngt"/>
+                                </if:interface>
+                            </if:interfaces>
+                            <bbf-qos-pol:policies xmlns:bbf-qos-pol="urn:bbf:yang:bbf-qos-policies">
+                                <bbf-qos-pol:policy>
+                                    <bbf-qos-pol:name>POLICY_ING</bbf-qos-pol:name>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_ing0</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_ing1</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_ing2</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_ing3</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_ing4</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_ing5</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_ing6</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_ing7</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                </bbf-qos-pol:policy>
+                                <bbf-qos-pol:policy>
+                                    <bbf-qos-pol:name>POLICY_EG</bbf-qos-pol:name>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_eg0</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_eg1</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_eg2</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_eg3</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_eg4</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_eg5</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_eg6</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                    <bbf-qos-pol:classifiers>
+                                        <bbf-qos-pol:name>classifier_eg7</bbf-qos-pol:name>
+                                    </bbf-qos-pol:classifiers>
+                                </bbf-qos-pol:policy>
+                            </bbf-qos-pol:policies>
+                        </root>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </config>
+    </edit-config>
+</rpc>

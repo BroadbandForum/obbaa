@@ -9,6 +9,9 @@ module bbf-network-function-client {
   import ietf-tcp-client {
     prefix tcpc;
   }
+  import bbf-yang-types {
+    prefix bbf-yang;
+  }
   import bbf-network-function-types {
     prefix bbf-nf-types;
   }
@@ -29,8 +32,6 @@ module bbf-network-function-client {
      Editor:      Tim Carey, Nokia
 
      Editor:      Dechao Zhang, China Mobile
-
-     PS Leader:   Yves Hertoghs, VMWare
 
      WA Director: George Dobrowski, Morris Creek Consulting
 
@@ -82,11 +83,11 @@ module bbf-network-function-client {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2021-02-19 {
+  revision 2021-08-01 {
     description
       "Initial revision.";
     reference
-      "TR-451: Section 5.5 vOMCI Function to OLT Interface";
+      "TBD";
   }
 
   // Features
@@ -116,16 +117,15 @@ module bbf-network-function-client {
           "Remote endpoints that the client will connect.";
           list remote-endpoint {
             key "name";
-            min-elements 1;
             description
               "List of remote endpoints the client is to
                initiate connections to in parallel.";
             leaf name {
-              type string;
+              type bbf-yang:string-ascii64;
               description
                 "An arbitrary name for the remote endpoint.";
             }
-            leaf type {
+            leaf nf-type {
               type identityref {
                 base "bbf-nf-types:nf-type";
               }
@@ -133,8 +133,13 @@ module bbf-network-function-client {
                 "The type of remote communication endpoint
                  (e.g, vOMCI-proxy, vOMCI-function, vOLTMF, OLT)";
             }
+            leaf on-demand {
+               type boolean;
+               description
+                 "The client is used as an on-demand connection.";
+            }
             leaf local-endpoint-name {
-              type string;
+              type bbf-yang:string-ascii64;
               description
                 "The name that this entity will use when reporting 
                  the entity as an endpoint. For example, see 
@@ -184,7 +189,7 @@ module bbf-network-function-client {
                will attempt to connect to in the specified sequence.
                Defining more than one enables high-availability.";
             leaf name {
-              type string;
+              type bbf-yang:string-ascii64;
               description
                 "An arbitrary name for the access point.";
             }

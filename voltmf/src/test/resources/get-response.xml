@@ -1,0 +1,22 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="120">
+    <data>
+        <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+                <device>
+                    <name>OLT1</name>
+                    <root>
+                        <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                            <if:interface>
+                                <if:name>test</if:name>
+                                <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:v-ani</if:type>
+                                <bbf-xponvani:v-ani xmlns:bbf-xponvani="urn:bbf:yang:bbf-xponvani">
+                                    <bbf-xponvani:onu-name>test</bbf-xponvani:onu-name>
+                                </bbf-xponvani:v-ani>
+                            </if:interface>
+                        </if:interfaces>
+                    </root>
+                </device>
+            </managed-devices>
+        </network-manager>
+    </data>
+</rpc-reply>

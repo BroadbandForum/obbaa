@@ -135,3 +135,36 @@ spec:
   resources:
     requests:
       storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vomci-vproxy-volume
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /baa/stores/vomci-vproxy-db
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: vomci-vproxy-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vomci-vproxy-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+

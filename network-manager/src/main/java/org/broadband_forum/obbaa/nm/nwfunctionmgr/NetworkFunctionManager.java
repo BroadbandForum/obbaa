@@ -15,7 +15,11 @@
  */
 package org.broadband_forum.obbaa.nm.nwfunctionmgr;
 
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
+
 public interface NetworkFunctionManager {
+
+    NetworkFunction getNetworkFunction(String networkFunctionName);
 
     void removeNetworkFunctionStateProvider(NetworkFunctionStateProvider stateProvider);
 
@@ -24,5 +28,7 @@ public interface NetworkFunctionManager {
     void networkFunctionAdded(String networkFunctionName);
 
     void networkFunctionRemoved(String networkFunctionName);
+
+    void updateConfigAlignmentState(String networkFunctionName, String verdict);
 
 }

@@ -22,17 +22,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
-import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResource;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.jetbrains.annotations.NotNull;
 
 public class LoggingFuture implements Future<NetConfResponse> {
     private static final Logger LOGGER = Logger.getLogger(LoggingFuture.class);
     private final Future<NetConfResponse> m_innerFuture;
-    private final Device m_device;
+    private final PmaResource m_device;
 
-    public LoggingFuture(Device device, Future<NetConfResponse> future) {
-        m_device = device;
+    public LoggingFuture(PmaResource resource, Future<NetConfResponse> future) {
+        m_device = resource;
         m_innerFuture = future;
     }
 

@@ -24,10 +24,14 @@ import java.util.Arrays;
 
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.broadband_forum.obbaa.device.adapter.AdapterBuilder;
 import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapter;
+import org.broadband_forum.obbaa.device.adapter.DeviceAdapterId;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NetConfServerImpl;
@@ -39,15 +43,23 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.EntityR
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.SingleXmlObjectDSM;
 import org.broadband_forum.obbaa.netconf.persistence.EntityDataStoreManager;
 import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
+import org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager;
 import org.broadband_forum.obbaa.pma.DeviceXmlStore;
 import org.broadband_forum.obbaa.pma.NetconfDeviceAlignmentService;
+import org.broadband_forum.obbaa.pma.NetconfNetworkFunctionAlignmentService;
 import org.broadband_forum.obbaa.pma.PmaServer;
 import org.broadband_forum.obbaa.pma.PmaSession;
 import org.broadband_forum.obbaa.pma.PmaSessionFactory;
-import org.jetbrains.annotations.NotNull;
 
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+//TODO obbaa-366 create methods and attributes for networkFunctions
 public class PmaServerSessionFactory extends PmaSessionFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PmaServerSessionFactory.class);
     private final DeviceManager m_deviceManager;
     private final EntityRegistry m_entityRegistry;
     private final SchemaRegistry m_schemaRegistry;
@@ -57,10 +69,14 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     private final PersistenceManagerUtil m_persistenceMgrUtil = new DummyPersistenceUtil();
     private final NetconfDeviceAlignmentService m_das;
     private AdapterManager m_adapterManager;
+    private final NetworkFunctionManager m_networkFunctionManager;
+    private final NetconfNetworkFunctionAlignmentService m_nas;
+    private final String m_networkFunctionFileBaseDirPath;
 
     public PmaServerSessionFactory(String deviceFileBaseDirPath, DeviceManager deviceManager, NetConfServerImpl netconfServer,
                                    NetconfDeviceAlignmentService das, EntityRegistry entityRegistry, SchemaRegistry schemaRegistry,
-                                   ModelNodeDSMRegistry modelNodeDsmRegistry, AdapterManager adapterManager) {
+                                   ModelNodeDSMRegistry modelNodeDsmRegistry, AdapterManager adapterManager,
+                                   NetworkFunctionManager networkFunctionManager, NetconfNetworkFunctionAlignmentService nas) {
         m_das = das;
         m_entityRegistry = entityRegistry;
         m_schemaRegistry = schemaRegistry;
@@ -69,6 +85,10 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
         m_netconfServer = netconfServer;
         m_deviceFileBaseDirPath = deviceFileBaseDirPath;
         m_adapterManager = adapterManager;
+
+        m_networkFunctionManager = networkFunctionManager;
+        m_nas = nas;
+        m_networkFunctionFileBaseDirPath = deviceFileBaseDirPath;
     }
 
     public void init() throws AnnotationAnalysisException {
@@ -87,14 +107,23 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     }
 
     @Override
-    public PmaSession create(String key) {
-        Device device = m_deviceManager.getDevice(key);
-        PmaServer pmaServer = createPmaServer(device);
-        return new PmaServerSession(device, pmaServer, m_das);
+    public PmaSession create(PmaResourceId resourceId) {
+        if (resourceId.getResourceType() == PmaResourceId.Type.DEVICE) {
+            Device device = m_deviceManager.getDevice(resourceId.getResourceName());
+            PmaServer pmaServer = createPmaServer(device);
+            return new PmaServerSession(device, pmaServer, m_das);
+        }
+
+        if (resourceId.getResourceType() == PmaResourceId.Type.NETWORK_FUNCTION) {
+            NetworkFunction networkFunction = m_networkFunctionManager.getNetworkFunction(resourceId.getResourceName());
+            PmaServer pmaServer = createPmaServer(networkFunction);
+            return new PmaServerSession(networkFunction,pmaServer,m_nas);
+        }
+        return null;
     }
 
     @Override
-    public boolean validateObject(String key, PooledObject<PmaSession> session) {
+    public boolean validateObject(PmaResourceId key, PooledObject<PmaSession> session) {
         return ((PmaServerSession) session.getObject()).isActive();
     }
 
@@ -111,10 +140,45 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
                         AdapterUtils.getAdapter(device, m_adapterManager)), m_deviceFileBaseDirPath);
     }
 
+    //TODO obbaa-366 NetworkFunction has no getNetworkFunctionManagement() method (see createPmaServer above ^)
+    private PmaServer createPmaServer(NetworkFunction networkFunction) {
+        String adapterType;
+        switch (networkFunction.getType()) {
+            case "bbf-nf-types:vomci-function-type":
+                adapterType = "nf-vomci";
+                break;
+            case "bbf-nf-types:vomci-proxy-type":
+                adapterType = "nf-vproxy";
+                break;
+            default:
+                //unsupported type
+                LOGGER.error("Unsupported type \"{}\"", networkFunction.getType());
+                return null;
+        }
+        //TODO obbaa-366 create network function specific adapters, for now, create one along side the device adapters
+        DeviceAdapter deviceAdapter = AdapterBuilder.createAdapterBuilder()
+                .setDeviceAdapterId(new DeviceAdapterId(adapterType, "1.0", "standard", "BBF"))
+                .build();
+        return new PmaServerImplNf(networkFunction, m_netconfServer, getNsmAndStore(networkFunction, deviceAdapter),
+                getStandardAdapterContext(m_adapterManager,
+                        deviceAdapter), m_networkFunctionFileBaseDirPath);
+    }
+
     private Pair<ModelNodeDataStoreManager, DeviceXmlStore> getDsmAndStore(Device device) {
         DeviceXmlStore deviceStore = new DeviceXmlStore(getDeviceStoreFilePath(device.getDeviceName()));
         AdapterContext adapterContext = getStandardAdapterContext(m_adapterManager,
                 AdapterUtils.getAdapter(device, m_adapterManager));
+        SingleXmlObjectDSM<DeviceXmlStore> dsm = new SingleXmlObjectDSM<>(deviceStore, m_persistenceMgrUtil,
+                m_entityRegistry, adapterContext.getSchemaRegistry(), adapterContext.getModelNodeHelperRegistry(),
+                adapterContext.getSubSystemRegistry(), adapterContext.getDsmRegistry());
+        return new Pair<>(dsm, deviceStore);
+    }
+
+    private Pair<ModelNodeDataStoreManager, DeviceXmlStore> getNsmAndStore(NetworkFunction networkFunction, DeviceAdapter deviceAdapter) {
+        DeviceXmlStore deviceStore = new DeviceXmlStore(getNetFuncStoreFilePath(networkFunction.getNetworkFunctionName()));
+
+        AdapterContext adapterContext = getStandardAdapterContext(m_adapterManager,
+                deviceAdapter);
         SingleXmlObjectDSM<DeviceXmlStore> dsm = new SingleXmlObjectDSM<>(deviceStore, m_persistenceMgrUtil,
                 m_entityRegistry, adapterContext.getSchemaRegistry(), adapterContext.getModelNodeHelperRegistry(),
                 adapterContext.getSubSystemRegistry(), adapterContext.getDsmRegistry());
@@ -129,6 +193,25 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     @Override
     public void deviceDeleted(String deviceName) {
         deleteStoreFile(deviceName);
+    }
+
+    //TODO obbaa-366 should use same store file as devices or create a new one?
+    @Override
+    public void networkFunctionDeleted(String networkFunctionName) {
+        deleteNetFuncStoreFile(networkFunctionName);
+    }
+
+    private void deleteNetFuncStoreFile(String networkFunctionName) {
+        String filePath = getNetFuncStoreFilePath(networkFunctionName);
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    @NotNull
+    private String getNetFuncStoreFilePath(String networkFunctionName) {
+        return m_networkFunctionFileBaseDirPath + File.separator + networkFunctionName + "_running_ds_nf.xml";
     }
 
     private void deleteStoreFile(String deviceName) {

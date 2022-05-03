@@ -66,12 +66,22 @@ public class OnuConfigInfo {
     @Column(name = "xponTechnology_ns")
     private String xponTechnologyNs;
 
-    @YangChild
-    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
-    private ExpectedAttachmentPoint expectedAttachmentPoint;
+    @YangAttribute(name = DeviceManagerNSConstants.PLANNED_ONU_MANAGEMENT_MODE, attributeType = AttributeType.IDENTITY_REF_CONFIG_ATTRIBUTE)
+    @Column(name = "plannedOnuManagementMode")
+    private String plannedOnuManagementMode;
+
+    @YangAttributeNS(belongsToAttribute = DeviceManagerNSConstants.PLANNED_ONU_MANAGEMENT_MODE,
+            attributeNamespace = DeviceManagerNSConstants.ONU_MANAGEMENT_NS,
+            attributeRevision = DeviceManagerNSConstants.ONU_MANAGEMENT_REVISION)
+    @Column(name = "plannedOnuManagementMode_ns")
+    private String plannedOnuManagementModeNs;
 
     @YangChild
-    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(targetEntity = ExpectedAttachmentPoints.class, cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
+    private ExpectedAttachmentPoints expectedAttachmentPoints;
+
+    @YangChild
+    @OneToOne(targetEntity = VomciOnuManagement.class, cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, orphanRemoval = true)
     private VomciOnuManagement vomciOnuManagement;
 
     public String getParentId() {
@@ -114,12 +124,21 @@ public class OnuConfigInfo {
         this.vendorName = vendorName;
     }
 
-    public ExpectedAttachmentPoint getExpectedAttachmentPoint() {
-        return expectedAttachmentPoint;
+    public ExpectedAttachmentPoints getExpectedAttachmentPoints() {
+        return expectedAttachmentPoints;
     }
 
-    public void setExpectedAttachmentPoint(ExpectedAttachmentPoint attachmentPoint) {
-        this.expectedAttachmentPoint = attachmentPoint;
+    public void setExpectedAttachmentPoints(ExpectedAttachmentPoints expectedAttachmentPoints) {
+        this.expectedAttachmentPoints = expectedAttachmentPoints;
+    }
+
+
+    public String getPlannedOnuManagementMode() {
+        return plannedOnuManagementMode;
+    }
+
+    public void setPlannedOnuManagementMode(String plannedOnuManagementMode) {
+        this.plannedOnuManagementMode = plannedOnuManagementMode;
     }
 
     public String getXponTechnology() {
@@ -146,6 +165,14 @@ public class OnuConfigInfo {
         this.xponTechnologyNs = xponTechnologyNs;
     }
 
+    public String getPlannedOnuManagementModeNs() {
+        return plannedOnuManagementModeNs;
+    }
+
+    public void setPlannedOnuManagementModeNs(String plannedOnuManagementModeNs) {
+        this.plannedOnuManagementModeNs = plannedOnuManagementModeNs;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -166,10 +193,6 @@ public class OnuConfigInfo {
         if (expectedSerialNumber != null ? !expectedSerialNumber.equals(that.expectedSerialNumber) : that.expectedSerialNumber != null) {
             return false;
         }
-        if (expectedAttachmentPoint != null ? !expectedAttachmentPoint.equals(that.expectedAttachmentPoint)
-                : that.expectedAttachmentPoint != null) {
-            return false;
-        }
         if (vendorName != null ? !vendorName.equals(that.vendorName) : that.vendorName != null) {
             return false;
         }
@@ -182,6 +205,10 @@ public class OnuConfigInfo {
         if (vomciOnuManagement != null ? !vomciOnuManagement.equals(that.vomciOnuManagement) : that.vomciOnuManagement != null) {
             return false;
         }
+        if (plannedOnuManagementMode != null ? !plannedOnuManagementMode.equals(that.plannedOnuManagementMode) :
+                that.plannedOnuManagementMode != null) {
+            return false;
+        }
         return expectedRegistrationId != null
                 ? expectedRegistrationId.equals(that.expectedRegistrationId) : that.expectedRegistrationId == null;
 
@@ -191,13 +218,14 @@ public class OnuConfigInfo {
     public int hashCode() {
         int result = parentId != null ? parentId.hashCode() : 0;
         result = 31 * result + (schemaPath != null ? schemaPath.hashCode() : 0);
-        result = 31 * result + (expectedAttachmentPoint != null ? expectedAttachmentPoint.hashCode() : 0);
         result = 31 * result + (expectedSerialNumber != null ? expectedSerialNumber.hashCode() : 0);
         result = 31 * result + (expectedRegistrationId != null ? expectedRegistrationId.hashCode() : 0);
         result = 31 * result + (vendorName != null ? vendorName.hashCode() : 0);
         result = 31 * result + (xponTechnology != null ? xponTechnology.hashCode() : 0);
         result = 31 * result + (xponTechnologyNs != null ? xponTechnologyNs.hashCode() : 0);
         result = 31 * result + (vomciOnuManagement != null ? vomciOnuManagement.hashCode() : 0);
+        result = 31 * result + (plannedOnuManagementMode != null ? plannedOnuManagementMode.hashCode() : 0);
+        result = 31 * result + (plannedOnuManagementModeNs != null ? plannedOnuManagementModeNs.hashCode() : 0);
         return result;
     }
 }

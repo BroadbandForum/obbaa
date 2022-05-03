@@ -17,7 +17,10 @@
 package org.broadband_forum.obbaa.pma;
 
 import org.apache.commons.pool2.BaseKeyedPooledObjectFactory;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 
-public abstract class PmaSessionFactory extends BaseKeyedPooledObjectFactory<String, PmaSession> {
+public abstract class PmaSessionFactory extends BaseKeyedPooledObjectFactory<PmaResourceId, PmaSession> {
     public abstract void deviceDeleted(String deviceName);
+
+    public abstract void networkFunctionDeleted(String networkFunctionName);
 }

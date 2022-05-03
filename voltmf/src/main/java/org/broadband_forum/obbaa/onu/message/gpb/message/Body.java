@@ -6,7 +6,7 @@ package org.broadband_forum.obbaa.onu.message.gpb.message;
 /**
  * Protobuf type {@code tr451_vomci_nbi_message.v1.Body}
  */
-public final class Body extends
+public  final class Body extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:tr451_vomci_nbi_message.v1.Body)
     BodyOrBuilder {
@@ -170,7 +170,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Request request = 1;</code>
    * @return Whether the request field is set.
    */
-  @java.lang.Override
   public boolean hasRequest() {
     return msgBodyCase_ == 1;
   }
@@ -178,7 +177,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Request request = 1;</code>
    * @return The request.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.Request getRequest() {
     if (msgBodyCase_ == 1) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.Request) msgBody_;
@@ -188,7 +186,6 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.tr451_vomci_nbi_message.v1.Request request = 1;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.RequestOrBuilder getRequestOrBuilder() {
     if (msgBodyCase_ == 1) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.Request) msgBody_;
@@ -201,7 +198,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Response response = 2;</code>
    * @return Whether the response field is set.
    */
-  @java.lang.Override
   public boolean hasResponse() {
     return msgBodyCase_ == 2;
   }
@@ -209,7 +205,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Response response = 2;</code>
    * @return The response.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.Response getResponse() {
     if (msgBodyCase_ == 2) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.Response) msgBody_;
@@ -219,7 +214,6 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.tr451_vomci_nbi_message.v1.Response response = 2;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.ResponseOrBuilder getResponseOrBuilder() {
     if (msgBodyCase_ == 2) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.Response) msgBody_;
@@ -232,7 +226,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Notification notification = 3;</code>
    * @return Whether the notification field is set.
    */
-  @java.lang.Override
   public boolean hasNotification() {
     return msgBodyCase_ == 3;
   }
@@ -240,7 +233,6 @@ private static final long serialVersionUID = 0L;
    * <code>.tr451_vomci_nbi_message.v1.Notification notification = 3;</code>
    * @return The notification.
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.Notification getNotification() {
     if (msgBodyCase_ == 3) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.Notification) msgBody_;
@@ -250,7 +242,6 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.tr451_vomci_nbi_message.v1.Notification notification = 3;</code>
    */
-  @java.lang.Override
   public org.broadband_forum.obbaa.onu.message.gpb.message.NotificationOrBuilder getNotificationOrBuilder() {
     if (msgBodyCase_ == 3) {
        return (org.broadband_forum.obbaa.onu.message.gpb.message.Notification) msgBody_;
@@ -659,7 +650,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Request request = 1;</code>
      * @return Whether the request field is set.
      */
-    @java.lang.Override
     public boolean hasRequest() {
       return msgBodyCase_ == 1;
     }
@@ -667,7 +657,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Request request = 1;</code>
      * @return The request.
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.Request getRequest() {
       if (requestBuilder_ == null) {
         if (msgBodyCase_ == 1) {
@@ -761,7 +750,6 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.tr451_vomci_nbi_message.v1.Request request = 1;</code>
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.RequestOrBuilder getRequestOrBuilder() {
       if ((msgBodyCase_ == 1) && (requestBuilder_ != null)) {
         return requestBuilder_.getMessageOrBuilder();
@@ -800,7 +788,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Response response = 2;</code>
      * @return Whether the response field is set.
      */
-    @java.lang.Override
     public boolean hasResponse() {
       return msgBodyCase_ == 2;
     }
@@ -808,7 +795,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Response response = 2;</code>
      * @return The response.
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.Response getResponse() {
       if (responseBuilder_ == null) {
         if (msgBodyCase_ == 2) {
@@ -902,7 +888,6 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.tr451_vomci_nbi_message.v1.Response response = 2;</code>
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.ResponseOrBuilder getResponseOrBuilder() {
       if ((msgBodyCase_ == 2) && (responseBuilder_ != null)) {
         return responseBuilder_.getMessageOrBuilder();
@@ -941,7 +926,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Notification notification = 3;</code>
      * @return Whether the notification field is set.
      */
-    @java.lang.Override
     public boolean hasNotification() {
       return msgBodyCase_ == 3;
     }
@@ -949,7 +933,6 @@ private static final long serialVersionUID = 0L;
      * <code>.tr451_vomci_nbi_message.v1.Notification notification = 3;</code>
      * @return The notification.
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.Notification getNotification() {
       if (notificationBuilder_ == null) {
         if (msgBodyCase_ == 3) {
@@ -1043,7 +1026,6 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.tr451_vomci_nbi_message.v1.Notification notification = 3;</code>
      */
-    @java.lang.Override
     public org.broadband_forum.obbaa.onu.message.gpb.message.NotificationOrBuilder getNotificationOrBuilder() {
       if ((msgBodyCase_ == 3) && (notificationBuilder_ != null)) {
         return notificationBuilder_.getMessageOrBuilder();

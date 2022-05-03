@@ -18,8 +18,6 @@ module bbf-vomci-types {
 
      Editor:      Dechao Zhang, China Mobile
 
-     PS Leader:   Yves Hertoghs, VMWare
-
      WA Director: George Dobrowski, Morris Creek Consulting
 
      WA Director: Bruno Cornaglia, Vodafone";
@@ -27,7 +25,7 @@ module bbf-vomci-types {
     "This module contains a collection of YANG definitions needed to
      for types used in the vOMCI solution as described in TR-451.
 
-     Copyright (c) 2019-2020, Broadband Forum
+     Copyright (c) 2019-2021, Broadband Forum
 
      Redistribution and use in source and binary forms, with or
      without modification, are permitted provided that the following
@@ -70,11 +68,11 @@ module bbf-vomci-types {
      This version of this YANG module is part of TR-451; see
      the TR itself for full legal notices.";
 
-  revision 2020-12-01 {
+  revision 2021-08-19 {
     description
       "Initial revision.";
     reference
-      "TBD";
+      "TR-451";
   }
 
   // Definitions
@@ -113,18 +111,15 @@ module bbf-vomci-types {
   typedef onu-discovery-result {
     type enumeration {
       enum successful {
-        value 1;
         description
           "The ONU discovery procedure was successful.";
       }
       enum failed-connectivity {
-        value 2;
         description
           "The ONU discovery procedure failed to discover the ONU
            because the ONU is not reachable.";
       }
       enum failed-unknown {
-        value 3;
         description
           "The ONU discovery procedure failed to discover the ONU
            because the ONU is not known to the vOLTMF.";
@@ -170,6 +165,67 @@ module bbf-vomci-types {
       "The name assigned to the OLT device.";
   }
 
+  typedef onu-vendor-software-version {
+    type bbf-yang:string-ascii64;
+    description
+      "The vendor and software version for a vendor formatted
+       as 'vendor_id-software_version'.";
+  }
+
+  typedef onu-management-chain-selection {
+    type enumeration {
+      enum vomci-policy {
+        description
+          "Identifies that the ONU management chain is computed 
+           using a policy to select the vOMCI function instance.";
+      }
+      enum configured {
+        description
+          "Identifies that the ONU management chain is configured by 
+           an external entity.";
+      }
+      enum vomci-function {
+        description
+          "Identifies that the ONU management chain is computed 
+           using the type of vOMCI function to select the vOMCI 
+           function instance.";
+      }
+    }
+    description
+      "The types of ONU discover results";
+  }
+
+  typedef vomci-entity-type {
+    type enumeration {
+      enum voltmf {
+        description
+          "Identifies the type of vOMCI entity as a Virtualized OLT
+           Management Function.";
+      }
+      enum onu-management-proxy {
+        description
+          "Identifies the type of vOMCI entity as an ONU Management 
+           Proxy.";
+      }
+      enum vomci-function {
+        description
+          "Identifies the type of vOMCI entity as a Virtualized OMCI
+           function.";
+      }
+      enum vomci-proxy {
+        description
+          "Identifies the type of vOMCI entity as a Virtualized OMCI
+           Proxy.";
+      }
+      enum olt {
+        description
+          "Identifies the type of vOMCI entity as an OLT.";
+      }
+    }
+    description
+      "The types of entities in the vOMCI solution.";
+  }
+
   // Identities
   // vOMCI communication identities
   identity vomci-communication-status {
@@ -205,5 +261,23 @@ module bbf-vomci-types {
        to exchange vOMCI messages for an unspecified reason.";
   }
 
+  // vOMCI Network function capabilities
+  identity vomci-network-function-capability {
+    description
+      "Base identity for defining the capabilities of a vOMCI 
+       entity.";
+  } 
+  identity stateful-vomci-network-function {
+    base vomci-network-function-capability; 
+    description
+      "Identity for that describes the network function as 
+       stateful.";
+  }
+  identity replica-vomci-network-function {
+    base vomci-network-function-capability; 
+    description
+      "Identity for that describes the network function as 
+       supporting replicas.";
+  }
 }
 

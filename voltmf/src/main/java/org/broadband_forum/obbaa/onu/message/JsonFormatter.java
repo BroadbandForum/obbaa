@@ -36,6 +36,7 @@ import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 import org.broadband_forum.obbaa.onu.NotificationRequest;
 import org.broadband_forum.obbaa.onu.ONUConstants;
 import org.broadband_forum.obbaa.onu.exception.MessageFormatterException;
@@ -85,6 +86,35 @@ public class JsonFormatter implements MessageFormatter {
                 break;
         }
         return requestJsonString;
+    }
+
+    @Override
+    public String getFormattedRequestForNF(AbstractNetconfRequest request,
+                                           String operationType,
+                                           NetworkFunction networkFunction,
+                                           ModelNodeDataStoreManager modelNodeDsm,
+                                           AdapterManager adapterManager)
+            throws NetconfMessageBuilderException, MessageFormatterException {
+        return null;
+    }
+
+    // NOT USED
+    @Override
+    public String getFormattedHelloRequest(String msgId, String networkFunctionName,
+                                           ObjectType type, String localEndpointName) throws MessageFormatterException {
+        return null;
+    }
+
+    // NOT USED
+    @Override
+    public boolean isHelloResponse(Object responseObject) throws MessageFormatterException {
+        return false;
+    }
+
+    // NOT USED
+    @Override
+    public HelloResponseData getHelloResponseData(Object responseObject) throws MessageFormatterException {
+        return null;
     }
 
     private String getFormattedMessageForInternalGet(NotificationRequest request, NetworkWideTag networkWideTag) {

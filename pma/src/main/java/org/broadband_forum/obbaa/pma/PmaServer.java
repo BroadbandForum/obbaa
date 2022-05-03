@@ -20,20 +20,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.broadband_forum.obbaa.dmyang.entities.Device;
+import org.broadband_forum.obbaa.dmyang.entities.PmaResource;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.messages.Notification;
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 
 public interface PmaServer {
-    ThreadLocal<Device> CURRENT_DEVICE = new ThreadLocal<>();
+    ThreadLocal<PmaResource> CURRENT_DEVICE = new ThreadLocal<>();
     ThreadLocal<DeviceXmlStore> CURRENT_DEVICE_XML_STORE = new ThreadLocal<>();
     ThreadLocal<DeviceXmlStore> BACKUP_DEVICE_XML_STORE = new ThreadLocal<>();
     NetconfClientInfo PMA_USER = new NetconfClientInfo("PMA_USER", 1);
 
     Map<NetConfResponse, List<Notification>> executeNetconf(AbstractNetconfRequest request);
 
-    static void setCurrentDevice(Device device) {
+    static void setCurrentDevice(PmaResource device) {
         CURRENT_DEVICE.set(device);
     }
 
@@ -42,7 +44,10 @@ public interface PmaServer {
     }
 
     static Device getCurrentDevice() {
-        return CURRENT_DEVICE.get();
+        if (CURRENT_DEVICE.get() instanceof Device) {
+            return (Device) CURRENT_DEVICE.get();
+        }
+        return null;
     }
 
     static void setCurrentDeviceXmlStore(DeviceXmlStore deviceXmlStore) {
@@ -67,6 +72,21 @@ public interface PmaServer {
 
     static DeviceXmlStore getBackupDeviceXmlStore() {
         return BACKUP_DEVICE_XML_STORE.get();
+    }
+
+    //methods for network functions
+    /*TODO obbaa-366 missing attributes for network functions, currently
+    *  using device attributes*/
+    static void setCurrentNetworkFunction(PmaResource networkFunction) {
+        CURRENT_DEVICE.set(networkFunction);
+    }
+
+    static NetworkFunction getCurrentNetworkFunction() {
+        PmaResource resource = CURRENT_DEVICE.get();
+        if (resource instanceof NetworkFunction) {
+            return (NetworkFunction) resource;
+        }
+        return null;
     }
 
     boolean isActive();

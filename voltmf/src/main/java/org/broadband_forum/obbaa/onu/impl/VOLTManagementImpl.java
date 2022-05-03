@@ -16,6 +16,12 @@
 
 package org.broadband_forum.obbaa.onu.impl;
 
+import static org.broadband_forum.obbaa.onu.ONUConstants.EOMCI_USED_BY_OLT_CONFLICTING_WITH_PMAA_MGMT_FOR_OLT;
+import static org.broadband_forum.obbaa.onu.ONUConstants.IETF_ALARM_NS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED;
+import static org.broadband_forum.obbaa.onu.ONUConstants.UNABLE_TO_AUTHENTICATE_ONU;
+import static org.broadband_forum.obbaa.onu.ONUConstants.VOMCI_EXPECTED_BY_OLT_BUT_INCONSISTENT_PMAA_MGMT_MODE;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,24 +29,30 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.alarm.util.AlarmNotificationUtil;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.ActualAttachmentPoint;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.dmyang.entities.SoftwareImage;
+import org.broadband_forum.obbaa.nbiadapter.netconf.NbiNetconfServerMessageListener;
+import org.broadband_forum.obbaa.netconf.alarm.api.AlarmInfo;
 import org.broadband_forum.obbaa.netconf.alarm.api.AlarmService;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
-import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcRequest;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
+import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
@@ -49,8 +61,10 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNode
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxTemplate;
 import org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao;
+import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.onu.MediatedDeviceNetconfSession;
+import org.broadband_forum.obbaa.onu.MediatedNetworkFunctionNetconfSession;
 import org.broadband_forum.obbaa.onu.NotificationRequest;
 import org.broadband_forum.obbaa.onu.ONUConstants;
 import org.broadband_forum.obbaa.onu.UnknownONUHandler;
@@ -60,6 +74,7 @@ import org.broadband_forum.obbaa.onu.exception.MessageFormatterException;
 import org.broadband_forum.obbaa.onu.kafka.consumer.OnuKafkaConsumer;
 import org.broadband_forum.obbaa.onu.kafka.producer.OnuKafkaProducer;
 import org.broadband_forum.obbaa.onu.message.GpbFormatter;
+import org.broadband_forum.obbaa.onu.message.HelloResponseData;
 import org.broadband_forum.obbaa.onu.message.JsonFormatter;
 import org.broadband_forum.obbaa.onu.message.MessageFormatter;
 import org.broadband_forum.obbaa.onu.message.NetworkWideTag;
@@ -69,6 +84,7 @@ import org.broadband_forum.obbaa.onu.notification.ONUNotification;
 import org.broadband_forum.obbaa.onu.util.VOLTManagementUtil;
 import org.broadband_forum.obbaa.onu.util.VOLTMgmtRequestCreationUtil;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
+import org.w3c.dom.Element;
 
 /**
  * <p>
@@ -93,21 +109,24 @@ public class VOLTManagementImpl implements VOLTManagement {
     private ThreadPoolExecutor m_processRequestResponsePool;
     private ThreadPoolExecutor m_processNotificationRequestPool;
     private ThreadPoolExecutor m_kafkaCommunicationPool;
-    private MessageFormatter m_messageFormatter;
-    private NetworkFunctionDao m_networkFunctionDao;
-    private DeviceDao m_deviceDao;
+    private final MessageFormatter m_messageFormatter;
+    private final NetworkFunctionDao m_networkFunctionDao;
+    private final DeviceDao m_deviceDao;
     private OnuKafkaConsumer m_onuKafkaconsumer;
     private Map<String, Set<String>> m_kafkaConsumerTopicMap;
     private Map<String, ArrayList<Boolean>> m_networkFunctionResponse;
+    private Map<String, HelloResponseData> m_helloResponseMessages;
     private AtomicLong m_messageId = new AtomicLong(0);
     private Set<String> m_onuDevicesCreated;
+    private NbiNetconfServerMessageListener m_nbiNetconfServerMessageListener;
 
     public VOLTManagementImpl(TxService txService, DeviceManager deviceManager, AlarmService alarmService,
                               OnuKafkaProducer kafkaProducer, UnknownONUHandler unknownONUHandler,
                               NetconfConnectionManager connectionManager, ModelNodeDataStoreManager modelNodeDSM,
                               NotificationService notificationService, AdapterManager adapterManager,
                               PmaRegistry pmaRegistry, SchemaRegistry schemaRegistry, MessageFormatter messageFormatter,
-                              NetworkFunctionDao networkFunctionDao, DeviceDao deviceDao) {
+                              NetworkFunctionDao networkFunctionDao, DeviceDao deviceDao,
+                              NbiNetconfServerMessageListener nbiNetconfServerMessageListener) {
         m_txService = txService;
         m_deviceManager = deviceManager;
         m_alarmService = alarmService;
@@ -125,6 +144,8 @@ public class VOLTManagementImpl implements VOLTManagement {
         m_kafkaConsumerTopicMap = new HashMap<>();
         m_networkFunctionResponse = new HashMap<>();
         m_onuDevicesCreated = new HashSet<>();
+        m_helloResponseMessages = new HashMap<>();
+        m_nbiNetconfServerMessageListener = nbiNetconfServerMessageListener;
     }
 
 
@@ -140,15 +161,46 @@ public class VOLTManagementImpl implements VOLTManagement {
 
     @Override
     public void networkFunctionAdded(String networkFunctionName) {
-        LOGGER.debug("network function added, updating the subscription");
         VOLTManagementUtil.updateKafkaSubscriptions(networkFunctionName, m_messageFormatter, m_networkFunctionDao,
                 m_onuKafkaconsumer, m_kafkaConsumerTopicMap);
+        LOGGER.info("network function added, updating the subscription");
+        Object message = null;
+        try {
+            NetworkFunction networkFunction = m_networkFunctionDao.getNetworkFunctionByName(networkFunctionName);
+            String localEndpointName = m_networkFunctionDao.getLocalEndpointName(networkFunctionName);
+            if (networkFunction != null) {
+                MediatedNetworkFunctionNetconfSession mediatedSession =
+                        VOLTManagementUtil.getMediatedNetworkFunctionNetconfSession(networkFunction.getNetworkFunctionName(),
+                                m_connectionManager);
+                if (mediatedSession == null) {
+                    mediatedSession = new MediatedNetworkFunctionNetconfSession(networkFunction,m_kafkaProducer,
+                            m_modelNodeDSM,m_adapterManager,m_kafkaCommunicationPool,m_messageFormatter,m_txService,
+                            m_networkFunctionDao, this);
+                    m_connectionManager.addMediatedNetworkFunctionNetconfSession(networkFunctionName, mediatedSession);
+                }
+
+                ObjectType objectType = ObjectType.getObjectTypeFromYangString(networkFunction.getType());
+                if (objectType != null) {
+                    message = m_messageFormatter.getFormattedHelloRequest(String.valueOf(m_messageId.addAndGet(1)),
+                            networkFunctionName,objectType,localEndpointName);
+                    VOLTManagementUtil.sendKafkaMessage(message,networkFunctionName,m_txService, m_networkFunctionDao, m_kafkaProducer);
+                } else {
+                    LOGGER.info("The Object Type of the given Network Function yang is null.");
+                }
+            } else {
+                LOGGER.info("The network function name provided is not a valid one. Received: " + networkFunctionName);
+            }
+        } catch (MessageFormatterException e) {
+            LOGGER.debug(e);
+        }
     }
 
     @Override
     public void networkFunctionRemoved(String networkFunctionName) {
         LOGGER.debug("network function removed, removing the subscription");
         VOLTManagementUtil.removeSubscriptions(networkFunctionName, m_onuKafkaconsumer, m_kafkaConsumerTopicMap);
+        m_helloResponseMessages.remove(networkFunctionName);
+        m_pmaRegistry.networkFunctionRemoved(networkFunctionName);
     }
 
     public void init() {
@@ -169,6 +221,20 @@ public class VOLTManagementImpl implements VOLTManagement {
     public void onuNotificationProcess(ONUNotification onuNotification, String oltDeviceName) {
         // TO DO:: Perform ONU authentication -
         String onuSerialNum = onuNotification.getSerialNo();
+        // legacy OLT == true When OLT doesn't support WT.489 yang modules. (i.e OLT interface version != 2.1)
+        Boolean legacyOLT = true;
+        if (onuNotification.getDeterminedOnuManagementMode() != null && !onuNotification.getDeterminedOnuManagementMode().equals("")) {
+            legacyOLT = false;
+        }
+        Boolean onuAuthenticatedByOLT = false;
+        if (onuNotification != null) {
+            onuAuthenticatedByOLT = VOLTManagementUtil.isOnuAuthenticatedByOLTAndHasNoErrors(onuNotification.getOnuState());
+        }
+        Boolean oltNotifiesVomciToBeUsed = false;
+        if (onuNotification.getDeterminedOnuManagementMode() != null
+                && onuNotification.getDeterminedOnuManagementMode().contains(ONUConstants.RELYING_ON_VOMCI)) {
+            oltNotifiesVomciToBeUsed = true;
+        }
         Device onuDevice = null;
         try {
             onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDeviceWithSerialNumber(onuSerialNum));
@@ -176,18 +242,37 @@ public class VOLTManagementImpl implements VOLTManagement {
             LOGGER.info("ONU device not found with serial number: " + onuSerialNum);
         }
         if (onuDevice == null) {
-            LOGGER.info(String.format("ONU notification request %s is received for ONU device, but unable to find"
-                    + " pre-configured device based on the serial number: %s", onuNotification.getOnuState(), onuSerialNum));
-
-            // If ONU authentication fails create unknown ONU and persist in DB
-            if (ONUConstants.ONU_DETECTED.equals(onuNotification.getMappedEvent())
-                    || ONUConstants.CREATE_ONU.equals(onuNotification.getMappedEvent())) {
+            if (onuNotification.getMappedEvent().equals(ONUConstants.ONU_DETECTED)
+                    || onuNotification.getMappedEvent().equals(ONUConstants.CREATE_ONU)) {
+                // If ONU authentication fails create unknown ONU and persist in DB
                 VOLTManagementUtil.persistUnknownOnuToDB(oltDeviceName, onuNotification, m_txService, m_unknownOnuHandler);
                 /* below commented line will be uncommented/enabled after vomci has the get request & response handling support */
                 //VOLTManagementUtil.sendGetRequest(onuNotification, m_messageFormatter, m_txService, m_deviceDao, m_networkFunctionDao,
                 //        m_kafkaProducer);
-            } else if (ONUConstants.ONU_UNDETECTED.equals(onuNotification.getMappedEvent())
-                    || ONUConstants.DELETE_ONU.equals(onuNotification.getMappedEvent())) {
+                if (!legacyOLT) {
+                    if (onuAuthenticatedByOLT) {
+                        if (oltNotifiesVomciToBeUsed) {
+                            LOGGER.info(String.format("vomci expected by olt but device not found in pmaa. Send  Onu Authentication Report "
+                                            + "Notification with Authentication status: %s",
+                                    ONUConstants.VOMCI_EXPECTED_BY_OLT_BUT_MISSING_ONU_CONFIG));
+                            VOLTManagementUtil.sendOnuAuthenticationResultNotification(onuDevice, onuNotification,
+                                    m_connectionManager, m_notificationService, ONUConstants.VOMCI_EXPECTED_BY_OLT_BUT_MISSING_ONU_CONFIG,
+                                    m_deviceManager, m_txService);
+                        } else {
+                            LOGGER.info("OLT want the ONU to be managed by eOMCI and PMAA does not have the ONU configrued,"
+                                    + " ONU to be manage by OLT in eOMCI mode");
+                        }
+                    } else { // OBBAA-459
+                        LOGGER.info(String.format("OLT: unable to authenticate ONU. send  Onu Authentication Report Notification "
+                                + " with Authentication status: %s", ONUConstants.UNABLE_TO_AUTHENTICATE_ONU));
+                        VOLTManagementUtil.sendOnuAuthenticationResultNotification(onuDevice, onuNotification,
+                                m_connectionManager, m_notificationService, ONUConstants.UNABLE_TO_AUTHENTICATE_ONU, m_deviceManager,
+                                m_txService);
+                        LOGGER.info(String.format("ONU notification request %s is received for ONU device, but unable to find"
+                                + " pre-configured device based on the serial number: %s", onuNotification.getOnuState(), onuSerialNum));
+                    }
+                }
+            } else {
                 UnknownONU onuEntity = VOLTManagementUtil.buildUnknownOnu(oltDeviceName, onuNotification);
                 m_txService.executeWithTxRequiresNew((TxTemplate<Void>) () -> {
                     UnknownONU matchedOnu = m_unknownOnuHandler.findUnknownOnuEntity(onuEntity.getSerialNumber(),
@@ -205,18 +290,33 @@ public class VOLTManagementImpl implements VOLTManagement {
                     if (!onuDevice.isAligned()) {
                         Device finalOnuDevice = onuDevice;
                         m_txService.executeWithTxRequiresNew((TxTemplate<Void>) () -> {
-                            UnknownONU onuEntity = VOLTManagementUtil.buildUnknownOnu(oltDeviceName, onuNotification);
-                            VOLTManagementUtil.updateOnuStateInfoInDevice(finalOnuDevice, onuEntity, m_deviceManager);
+                            UnknownONU unknownOnuEntity = VOLTManagementUtil.buildUnknownOnu(oltDeviceName, onuNotification);
+                            LOGGER.info(String.format("update onu state info in device %s", finalOnuDevice.getDeviceName()));
+                            VOLTManagementUtil.updateOnuStateInfoInDevice(finalOnuDevice, unknownOnuEntity, m_deviceManager,
+                                    m_txService);
                             return null;
                         });
-                        HashMap<String, String> labels = VOLTMgmtRequestCreationUtil.getLabels(onuDevice);
-                        if (m_messageFormatter instanceof JsonFormatter) {
-                            NotificationRequest request = VOLTMgmtRequestCreationUtil.prepareDetectForPreconfiguredDevice(
-                                    onuDevice.getDeviceName(), onuNotification, labels);
-                            VOLTManagementUtil.sendKafkaNotification(request, m_messageFormatter, m_kafkaProducer);
+                        if (legacyOLT) {
+                            sendSetOnuCommunication(onuDevice.getDeviceName(), true, onuNotification.getOltDeviceName(),
+                                    onuNotification.getChannelTermRef(), onuNotification.getOnuId());
                         } else {
-                            sendSetOnuCommunication(onuDevice.getDeviceName(), true, oltDeviceName, onuNotification.getChannelTermRef(),
-                                    onuNotification.getOnuId());
+                            Boolean finalOltNotifiesVomciToBeUsed = oltNotifiesVomciToBeUsed;
+                            Boolean finalOnuAuthenticatedByOLT = onuAuthenticatedByOLT;
+                            Runnable runnable = new Runnable() {
+                                public void run() {
+                                    evaluateOnuStatusAndSendOnuAuthReportNotification(onuNotification, finalOnuAuthenticatedByOLT,
+                                            finalOltNotifiesVomciToBeUsed, finalOnuDevice.getDeviceName());
+                                    return;
+
+                                }
+                            };
+                            Thread thread = new Thread(runnable);
+                            thread.start();
+                            try {
+                                thread.join();
+                            } catch (InterruptedException e) {
+                                LOGGER.error("Error while joining thread");
+                            }
                         }
                     }
                 } else if (ONUConstants.ONU_UNDETECTED.equals(onuNotification.getMappedEvent())
@@ -248,6 +348,137 @@ public class VOLTManagementImpl implements VOLTManagement {
         }
     }
 
+    private void evaluateOnuStatusAndSendOnuAuthReportNotification(ONUNotification onuNotification, Boolean onuAuthenticatedByOLT,
+                                                                   Boolean oltNotifiesVomciToBeUsed, String deviceName) {
+        Device onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(deviceName));
+        if (onuDevice != null) {
+            if (!onuAuthenticatedByOLT) {
+                String requestedMgmtMode = null;
+                if (VOLTManagementUtil.isVomciToBeUsed(onuDevice)) {
+                    requestedMgmtMode = ONUConstants.USE_VOMCI;
+                } else {
+                    requestedMgmtMode = ONUConstants.USE_EOMCI;
+                }
+                String oltDeviceName = onuDevice.getDeviceManagement().getDeviceState().getOnuStateInfo()
+                        .getActualAttachmentPoint().getOltName();
+                String vaniName = onuDevice.getDeviceManagement().getDeviceState().getOnuStateInfo()
+                        .getActualAttachmentPoint().getvAniName();
+                if (vaniName == null) {
+                    vaniName = onuNotification.getVAniRef();
+                }
+                processActionRequestResponse(oltDeviceName, onuDevice, requestedMgmtMode, vaniName, onuNotification);
+            }
+            if (onuAuthenticatedByOLT && oltNotifiesVomciToBeUsed && !VOLTManagementUtil.isVomciToBeUsed(onuDevice)) {
+                LOGGER.info(String.format("Expected and Actual ONU Management mode does not match, Send Onu Authentication Report "
+                                + "Notification with Authentication status: %s",
+                        ONUConstants.VOMCI_EXPECTED_BY_OLT_BUT_INCONSISTENT_PMAA_MGMT_MODE));
+                VOLTManagementUtil.sendOnuAuthenticationResultNotification(onuDevice, null, m_connectionManager,
+                        m_notificationService, ONUConstants.VOMCI_EXPECTED_BY_OLT_BUT_INCONSISTENT_PMAA_MGMT_MODE, m_deviceManager,
+                        m_txService);
+            } else if (onuAuthenticatedByOLT && oltNotifiesVomciToBeUsed && VOLTManagementUtil.isVomciToBeUsed(onuDevice)) {
+                HashMap<String, String> labels = VOLTMgmtRequestCreationUtil.getLabels(onuDevice);
+                if (m_messageFormatter instanceof JsonFormatter) {
+                    NotificationRequest request = VOLTMgmtRequestCreationUtil.prepareDetectForPreconfiguredDevice(
+                            onuDevice.getDeviceName(), onuNotification, labels);
+                    VOLTManagementUtil.sendKafkaNotification(request, m_messageFormatter, m_kafkaProducer);
+                } else {
+                    LOGGER.info("Set ONU comunication triggered");
+                    sendSetOnuCommunication(onuDevice.getDeviceName(), true, onuNotification.getOltDeviceName(),
+                            onuNotification.getChannelTermRef(), onuNotification.getOnuId());
+
+                }
+            } else if (onuAuthenticatedByOLT && !oltNotifiesVomciToBeUsed && VOLTManagementUtil.isVomciToBeUsed(onuDevice)) {
+                LOGGER.info(String.format("Expected and Actual ONU Management mode does not match, Send Onu Authentication Report "
+                                + "Notification with Authentication status: %s",
+                        ONUConstants.EOMCI_USED_BY_OLT_CONFLICTING_WITH_PMAA_MGMT_FOR_OLT));
+                VOLTManagementUtil.sendOnuAuthenticationResultNotification(onuDevice, null, m_connectionManager,
+                        m_notificationService, ONUConstants.EOMCI_USED_BY_OLT_CONFLICTING_WITH_PMAA_MGMT_FOR_OLT, m_deviceManager,
+                        m_txService);
+            } else if (onuAuthenticatedByOLT && !oltNotifiesVomciToBeUsed && !VOLTManagementUtil.isVomciToBeUsed(onuDevice)) {
+                LOGGER.info(String.format("OLT & PMAA wants the ONU %s to be managed by eOMCI", onuDevice.getDeviceName()));
+            }
+        }
+    }
+
+    private void validateResponseAndSendOnuAuthReportNotification(String response, String requestedMgmtMode, Device onuDevice,
+                                                                  ONUNotification onuNotification) {
+        if (response != null) {
+            String onuAuthStatus = null;
+            if (response.equals(ONUConstants.OK_RESPONSE)) {
+                if (requestedMgmtMode.contains(ONUConstants.USE_VOMCI)) {
+                    onuAuthStatus = ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED;
+                    sendSetOnuCommunication(onuDevice.getDeviceName(), true, onuNotification.getOltDeviceName(),
+                            onuNotification.getChannelTermRef(), onuNotification.getOnuId());
+                } else if (requestedMgmtMode.contains(ONUConstants.USE_EOMCI)) {
+                    onuAuthStatus = ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED;
+                    LOGGER.info(String.format("OLT & PMAA wants the ONU %s to be managed by eOMCI", onuDevice.getDeviceName()));
+                }
+            } else if (response.contains(ONUConstants.ONU_NOT_PRESENT)) {
+                onuAuthStatus = UNABLE_TO_AUTHENTICATE_ONU;
+            } else if (response.contains(ONUConstants.ONU_MGMT_MODE_MISMATCH_WITH_VANI)) {
+                if (requestedMgmtMode.equals(ONUConstants.USE_VOMCI)) {
+                    onuAuthStatus = EOMCI_USED_BY_OLT_CONFLICTING_WITH_PMAA_MGMT_FOR_OLT;
+                } else if (requestedMgmtMode.equals(ONUConstants.USE_EOMCI)) {
+                    onuAuthStatus = VOMCI_EXPECTED_BY_OLT_BUT_INCONSISTENT_PMAA_MGMT_MODE;
+                }
+            } else if (response.contains(ONUConstants.BAA_XPON_ONU_NAME_MISMATCH_WITH_VANI)) {
+                onuAuthStatus = UNABLE_TO_AUTHENTICATE_ONU;
+            } else if (response.contains(ONUConstants.UNDETERMINED_ERROR)) {
+                onuAuthStatus = UNABLE_TO_AUTHENTICATE_ONU;
+            }
+
+            if (onuAuthStatus != null && !onuAuthStatus.equals(ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED)) {
+                VOLTManagementUtil.sendOnuAuthenticationResultNotification(onuDevice, onuNotification, m_connectionManager,
+                        m_notificationService, onuAuthStatus, m_deviceManager, m_txService);
+            }
+        }
+    }
+
+    private void processActionRequestResponse(String oltNAme, Device onuDevice, String requestedMgmtMode,
+                                                String vaniName, ONUNotification onuNotification) {
+        String channelTerminationName = onuDevice.getDeviceManagement().getDeviceState().getOnuStateInfo()
+                .getActualAttachmentPoint().getChannelTerminationRef();
+        ActionRequest actionRequest = VOLTMgmtRequestCreationUtil.prepareOnuAuthenicationReportActionRequest(onuDevice.getDeviceName(),
+                false, vaniName, requestedMgmtMode, onuDevice.getDeviceManagement().getOnuConfigInfo().getExpectedSerialNumber(),
+                channelTerminationName);
+        VOLTManagementUtil.setMessageId(actionRequest, m_messageId);
+        final NetConfResponse[] response = {null};
+        final String[] actionResponse = {null};
+        Device oltDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(oltNAme));
+        try {
+            LOGGER.info(String.format("Sending action request to OLT: %s", actionRequest.requestToString()));
+            if (oltDevice != null) {
+                Future<NetConfResponse> netConfResponseFuture = VOLTManagementUtil.sendOnuAuthenticationActionRequest(oltDevice,
+                        m_connectionManager, actionRequest);
+                LOGGER.info(String.format("Netconf response future: %s", netConfResponseFuture.toString()));
+                Runnable runnable = new Runnable() {
+                    public void run() {
+                        try {
+                            response[0] = netConfResponseFuture.get();
+                            LOGGER.info(String.format("response is: %s", response[0].responseToString()));
+                            if (response[0] != null) {
+                                if (!response[0].isOk()) {
+                                    actionResponse[0] = VOLTManagementUtil.getErrorAppTagFromActionResponse(response[0]);
+                                } else {
+                                    actionResponse[0] = ONUConstants.OK_RESPONSE;
+                                }
+                            }
+                            validateResponseAndSendOnuAuthReportNotification(actionResponse[0], requestedMgmtMode, onuDevice,
+                                    onuNotification);
+                        } catch (InterruptedException | ExecutionException e) {
+                            LOGGER.error("failed to get response from netconf future: ", e);
+                        }
+                        return;
+                    }
+                };
+                Thread thread = new Thread(runnable);
+                thread.start();
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while executing action request");
+        }
+    }
+
     @Override
     public void deviceAdded(String deviceName) {
         m_processNotificationRequestPool.execute(() -> {
@@ -271,11 +502,13 @@ public class VOLTManagementImpl implements VOLTManagement {
                                         unknownONU, labels);
                                 VOLTManagementUtil.sendKafkaNotification(request, m_messageFormatter, m_kafkaProducer);
                             } else {
-                                sendSetOnuCommunication(deviceName, true, unknownONU.getOltDeviceName(), unknownONU.getChannelTermRef(),
-                                        unknownONU.getOnuId());
+                                if (VOLTManagementUtil.isVomciToBeUsed(device)) {
+                                    sendSetOnuCommunication(deviceName, true, unknownONU.getOltDeviceName(),
+                                            unknownONU.getChannelTermRef(), unknownONU.getOnuId());
+                                }
                             }
 
-                            VOLTManagementUtil.updateOnuStateInfoInDevice(device, unknownONU, m_deviceManager);
+                            VOLTManagementUtil.updateOnuStateInfoInDevice(device, unknownONU, m_deviceManager, m_txService);
                             m_unknownOnuHandler.deleteUnknownOnuEntity(unknownONU);
                         }
                     }
@@ -291,10 +524,10 @@ public class VOLTManagementImpl implements VOLTManagement {
         List<Pair<ObjectType, String>> managementChain = VOLTManagementUtil.getManagementChain(onuDeviceName, m_txService, m_deviceDao);
         if (!managementChain.isEmpty()) {
             for (Pair<ObjectType, String> networkFunction : managementChain) {
-                NetconfRpcRequest rpcRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(onuDeviceName,
+                ActionRequest actionRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(onuDeviceName,
                         networkFunction.getFirst().toString().equals(String.valueOf(ObjectType.VOMCI_PROXY)));
-                LOGGER.debug("Prepared Create ONU RPC request " + rpcRequest.requestToString());
-                Object kafkaMessage = getFormattedKafkaMessage(rpcRequest, onuDeviceName, networkFunction.getSecond(),
+                LOGGER.debug("Prepared Create ONU Action request " + actionRequest.requestToString());
+                Object kafkaMessage = getFormattedKafkaMessage(actionRequest, onuDeviceName, networkFunction.getSecond(),
                         networkFunction.getSecond(), networkFunction.getFirst(), ONUConstants.CREATE_ONU);
                 if (kafkaMessage != null) {
                     VOLTManagementUtil.sendKafkaMessage(kafkaMessage, networkFunction.getSecond(),
@@ -430,6 +663,7 @@ public class VOLTManagementImpl implements VOLTManagement {
                 if (m_networkFunctionResponse.containsKey(deviceName)) {
                     m_networkFunctionResponse.remove(deviceName);
                 }
+                VOLTManagementUtil.removeMatchedAttachmentPointFromMap(deviceName);
             }
         });
     }
@@ -447,18 +681,20 @@ public class VOLTManagementImpl implements VOLTManagement {
     }
 
     private void handleUndetect(Device onuDevice, ONUNotification notification) {
-        MediatedDeviceNetconfSession deviceSession = VOLTManagementUtil.getMediatedDeviceNetconfSession(onuDevice,m_connectionManager);
+        MediatedDeviceNetconfSession deviceSession = VOLTManagementUtil.getMediatedDeviceNetconfSession(onuDevice, m_connectionManager);
         if (deviceSession != null) {
             if (m_messageFormatter instanceof JsonFormatter) {
                 deviceSession.closeAsync();
             } else {
-                sendSetOnuCommunication(onuDevice.getDeviceName(), false, notification.getOltDeviceName(),
-                        notification.getChannelTermRef(), notification.getOnuId());
+                if (VOLTManagementUtil.isVomciToBeUsed(onuDevice)) {
+                    sendSetOnuCommunication(onuDevice.getDeviceName(), false, notification.getOltDeviceName(),
+                            notification.getChannelTermRef(), notification.getOnuId());
+                }
             }
 
         } else if (notification != null) {
             if (m_messageFormatter instanceof JsonFormatter) {
-                NotificationRequest request  = VOLTMgmtRequestCreationUtil.prepareUndetectKafkaMessage(onuDevice, notification,
+                NotificationRequest request = VOLTMgmtRequestCreationUtil.prepareUndetectKafkaMessage(onuDevice, notification,
                         VOLTMgmtRequestCreationUtil.getLabels(onuDevice));
                 VOLTManagementUtil.sendKafkaNotification(request, m_messageFormatter, m_kafkaProducer);
             }
@@ -468,37 +704,47 @@ public class VOLTManagementImpl implements VOLTManagement {
     @Override
     public void processResponse(Object responseObject) {
         try {
-            ResponseData initialResponseData = m_messageFormatter.getResponseData(responseObject);
-            ResponseData responseData = VOLTManagementUtil.updateOperationTypeInResponseData(initialResponseData, m_messageFormatter);
-            if (responseData != null) {
-                if (responseData.getOperationType().equals(ONUConstants.ONU_DETECTED)
-                        || responseData.getOperationType().equals(ONUConstants.ONU_UNDETECTED)) {
-                    /** Since this is notification response, spawn new thread out of processNotificationResponseTask pool.
-                     * Therefore, do not block this main Kafka thread nor any other process request response threads.
-                     * All DETECTs/UNDETECTs responses must be processed under processNotificationResponseTask pool.
-                     * Since the main Kafka thread is freed immediately, and all other process request response threads are
-                     * initiated under processNotificationResponse pool, it eliminates any possible cases of the deadlock and it
-                     * improves efficiency and response time of processing other responses.
-                     */
+            if (m_messageFormatter.isHelloResponse(responseObject)) {
+                LOGGER.info("Received an Hello Response Message.");
+                HelloResponseData helloResponseData = m_messageFormatter.getHelloResponseData(responseObject);
+                if (helloResponseData != null) {
                     m_processNotificationResponsePool.execute(() -> {
-                        processNotificationResponse(responseData.getOnuName(), responseData.getOperationType(),
-                                responseData.getIdentifier(), responseData.getResponseStatus(), responseData.getFailureReason(),
-                                responseData.getResponsePayload());
-                    });
-                } else {
-                    /**
-                     * Since this is request response, spawn new thread out of processRequestResponseTask pool.
-                     * Also, do not block this main Kafka thread nor any other process notification response threads.
-                     * All request responses GETs/COPY-CONFIGs/EDIT-CONFIGs must be processes under processRequestResponseTask pool.
-                     * Since it immediately frees the main Kafka thread, it would not get blocked by bootstrap mechanism in case
-                     * of DETECT response with OK status.
-                     */
-                    m_processRequestResponsePool.execute(() -> {
-                        processRequestResponse(responseData);
+                        processHelloRequestResponse(helloResponseData);
                     });
                 }
             } else {
-                LOGGER.error("Error while processing response. Response Data could not be formed ");
+                ResponseData initialResponseData = m_messageFormatter.getResponseData(responseObject);
+                ResponseData responseData = VOLTManagementUtil.updateOperationTypeInResponseData(initialResponseData, m_messageFormatter);
+                if (responseData != null) {
+                    if (responseData.getOperationType().equals(ONUConstants.ONU_DETECTED)
+                            || responseData.getOperationType().equals(ONUConstants.ONU_UNDETECTED)) {
+                        /** Since this is notification response, spawn new thread out of processNotificationResponseTask pool.
+                         * Therefore, do not block this main Kafka thread nor any other process request response threads.
+                         * All DETECTs/UNDETECTs responses must be processed under processNotificationResponseTask pool.
+                         * Since the main Kafka thread is freed immediately, and all other process request response threads are
+                         * initiated under processNotificationResponse pool, it eliminates any possible cases of the deadlock and it
+                         * improves efficiency and response time of processing other responses.
+                         */
+                        m_processNotificationResponsePool.execute(() -> {
+                            processNotificationResponse(responseData.getOnuName(), responseData.getOperationType(),
+                                    responseData.getIdentifier(), responseData.getResponseStatus(), responseData.getFailureReason(),
+                                    responseData.getResponsePayload());
+                        });
+                    } else {
+                        /**
+                         * Since this is request response, spawn new thread out of processRequestResponseTask pool.
+                         * Also, do not block this main Kafka thread nor any other process notification response threads.
+                         * All request responses GETs/COPY-CONFIGs/EDIT-CONFIGs must be processes under processRequestResponseTask pool.
+                         * Since it immediately frees the main Kafka thread, it would not get blocked by bootstrap mechanism in case
+                         * of DETECT response with OK status.
+                         */
+                        m_processRequestResponsePool.execute(() -> {
+                            processRequestResponse(responseData);
+                        });
+                    }
+                } else {
+                    LOGGER.error("Error while processing response. Response Data could not be formed ");
+                }
             }
         } catch (MessageFormatterException e) {
             LOGGER.error(e.getMessage());
@@ -570,17 +816,17 @@ public class VOLTManagementImpl implements VOLTManagement {
                         MediatedDeviceNetconfSession newMediatedSession = new MediatedDeviceNetconfSession(onuDevice,
                                 oltDeviceName, onuId, channelTermRef, labels, m_kafkaProducer,
                                 m_modelNodeDSM, m_adapterManager, m_kafkaCommunicationPool, m_schemaRegistry, m_messageFormatter,
-                                m_txService, m_networkFunctionDao, m_deviceDao);
-                        m_connectionManager.addMediatedDeviceNetconfSession(onuDevice, newMediatedSession);
+                                m_txService, m_networkFunctionDao, m_deviceDao, m_nbiNetconfServerMessageListener);
+                        m_connectionManager.addMediatedDeviceNetconfSession(onuDeviceName, newMediatedSession);
 
                         //VOMCI functions is currently not supporting GET request handling, commenting this code for now.
                         //Also Ignoring "testProcessDetectResponseWhenDevicePresentSendsGetRequest()" UT
-                        //newMediatedSession.onGet(VOLTMFRequestCreationUtil.prepareInternalGetRequest(onuDevice.getDeviceName()));
-
+                        sendInternalGetOnMediatedDeviceSession(onuDeviceName, newMediatedSession);
                     } else {
                         LOGGER.debug(String.format("Mediated Device Netconf Session already exists with the device %s "
                                 + "while processing DETECT OK response notification with id %s", onuDeviceName, identifier));
                         mediatedSession.open();
+                        sendInternalGetOnMediatedDeviceSession(onuDeviceName, mediatedSession);
                     }
 
                     //Send notification to BAA NBI
@@ -592,6 +838,12 @@ public class VOLTManagementImpl implements VOLTManagement {
             LOGGER.warn(String.format("ONU Device is not found based on its name: %s "
                     + "Processing %s response notification with id %s has failed", onuDeviceName, operationType, identifier));
         }
+    }
+
+    private void sendInternalGetOnMediatedDeviceSession(String onuDeviceName, MediatedDeviceNetconfSession mediatedDeviceNetconfSession) {
+        GetRequest getRequest = VOLTMgmtRequestCreationUtil.prepareInternalGetRequest(onuDeviceName);
+        getRequest.setMessageId(ONUConstants.DEFAULT_MESSAGE_ID);
+        mediatedDeviceNetconfSession.onGet(getRequest);
     }
 
     protected void processRequestResponse(ResponseData responseData) {
@@ -633,11 +885,21 @@ public class VOLTManagementImpl implements VOLTManagement {
                 case ONUConstants.ONU_GET_OPERATION:
                     if (!identifier.equals(ONUConstants.DEFAULT_MESSAGE_ID)) {
                         //Internal GET response has indentifier = 0
+                        data = "{" + ONUConstants.DOUBLE_QUOTES + ONUConstants.NETWORK_MANAGER + ONUConstants.COLON
+                                + ONUConstants.ROOT + ONUConstants.DOUBLE_QUOTES + ONUConstants.COLON + data + "}";
+                        LOGGER.info(String.format("Processing Get response  :%s", data));
                         response = mediatedSession.processGetResponse(identifier, responseStatus, data, failureReason);
+                        if (response != null) {
+                            m_nbiNetconfServerMessageListener.addResponseIntoMap(identifier, response.responseToString());
+                        } else {
+                            LOGGER.error("Failed to process Get response, Response is NULL");
+                        }
                         LOGGER.debug("Processing " + operationType + " response with id "
                                 + identifier + " is " + (response == null ? "failed" : "successful"));
                     } else {
-                        equipmentId = VOLTManagementUtil.processInternalGetResponseAndRetrieveHwProperties(responseStatus, data);
+                        String onuSerialNumber = onuDevice.getDeviceManagement().getOnuConfigInfo().getExpectedSerialNumber();
+                        equipmentId = VOLTManagementUtil.processInternalGetResponseAndRetrieveHwProperties(responseStatus, data,
+                                onuSerialNumber);
                         softwareImageSet = VOLTManagementUtil.processInternalGetResponseAndRetrieveSWProperties(responseStatus, data);
                         String finalEquipmentId = equipmentId;
                         Set<SoftwareImage> finalSoftwareImageSet = softwareImageSet;
@@ -650,7 +912,6 @@ public class VOLTManagementImpl implements VOLTManagement {
                             }
                             return null;
                         });
-
                     }
                     VOLTManagementUtil.removeRequestFromMap(identifier);
                     break;
@@ -719,7 +980,8 @@ public class VOLTManagementImpl implements VOLTManagement {
                         m_networkFunctionResponse.put(onuDeviceName, responseArray);
                     }
                     int mgmtChainSize = VOLTManagementUtil.getManagementChain(onuDeviceName, m_txService, m_deviceDao).size();
-                    if (mgmtChainSize <= m_networkFunctionResponse.get(onuDeviceName).size()) {
+                    if (VOLTManagementUtil.isVomciToBeUsed(onuDevice)
+                            && mgmtChainSize <= m_networkFunctionResponse.get(onuDeviceName).size()) {
                         MediatedDeviceNetconfSession devSession = VOLTManagementUtil.getMediatedDeviceNetconfSession(onuDevice,
                                 m_connectionManager);
                         ArrayList<Boolean> respArray = m_networkFunctionResponse.get(onuDeviceName);
@@ -737,8 +999,9 @@ public class VOLTManagementImpl implements VOLTManagement {
                                     MediatedDeviceNetconfSession newDeviceMediatedSession = new MediatedDeviceNetconfSession(onuDevice,
                                             oltDeviceName, onuId1, channelTermRef1, null, m_kafkaProducer,
                                             m_modelNodeDSM, m_adapterManager, m_kafkaCommunicationPool, m_schemaRegistry,
-                                            m_messageFormatter, m_txService, m_networkFunctionDao, m_deviceDao);
-                                    m_connectionManager.addMediatedDeviceNetconfSession(onuDevice, newDeviceMediatedSession);
+                                            m_messageFormatter, m_txService, m_networkFunctionDao, m_deviceDao,
+                                            m_nbiNetconfServerMessageListener);
+                                    m_connectionManager.addMediatedDeviceNetconfSession(onuDeviceName, newDeviceMediatedSession);
                                     m_connectionManager.getConnectionState(onuDevice).setConnected(true);
                                     if (onuDevice.isAligned()) {
                                         VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
@@ -786,12 +1049,10 @@ public class VOLTManagementImpl implements VOLTManagement {
                     break;
                 default:
                     LOGGER.warn(String.format("Unknown response for device %s of type %s from vOMCI. Unable to process it ",
-                            operationType));
+                            onuDeviceName, operationType));
             }
         } else {
-            if (operationType.equals(ONUConstants.ONU_GET_OPERATION) && identifier.equals(ONUConstants.DEFAULT_MESSAGE_ID)) {
-                VOLTManagementUtil.retrieveAndUpdateHwSwPropertiesForUnknownONU(responseData, m_txService, m_unknownOnuHandler);
-            } else if (operationType.equals(ONUConstants.DELETE_ONU)) {
+            if (operationType.equals(ONUConstants.DELETE_ONU)) {
                 if (responseStatus.equals(ONUConstants.OK_RESPONSE)) {
                     MediatedDeviceNetconfSession deviceSession = VOLTManagementUtil.getMediatedDeviceNetconfSession(onuDevice,
                             m_connectionManager);
@@ -816,10 +1077,38 @@ public class VOLTManagementImpl implements VOLTManagement {
                 if (m_networkFunctionResponse.containsKey(onuDeviceName)) {
                     m_networkFunctionResponse.remove(onuDeviceName);
                 }
+            } else if (operationType.equals(NetconfResources.EDIT_CONFIG)
+                    || operationType.equals(NetconfResources.COPY_CONFIG)) {
+                MediatedNetworkFunctionNetconfSession networkFunctionNetconfSession =
+                        VOLTManagementUtil.getMediatedNetworkFunctionNetconfSession(senderName, m_connectionManager);
+                if (networkFunctionNetconfSession != null) {
+                    NetConfResponse response = networkFunctionNetconfSession.processResponse(identifier,
+                            operationType,
+                            responseStatus,
+                            failureReason);
+                    LOGGER.info("Processing " + operationType + " response with id "
+                            + identifier + " is " + (response == null ? "failed" : "successful"));
+                } else {
+                    LOGGER.info("Session for sender'" + senderName + "' not found.");
+                }
+                VOLTManagementUtil.removeRequestFromMap(identifier);
             } else {
                 LOGGER.warn(String.format("Unknown operation type %s ", operationType));
             }
         }
+    }
+
+    /*
+    This method will need further implementations to process the received information.
+    For now it only saves the received response in a Map (m_helloResponseMessages).
+    */
+    protected void processHelloRequestResponse(HelloResponseData responseData) {
+        // the sender name is the network function name
+        m_helloResponseMessages.put(responseData.getSenderName(),responseData);
+        VOLTManagementUtil.removeRequestFromMap(responseData.getIdentifier());
+        LOGGER.info("Processing hello message response from " + responseData.getSenderName() + " with id "
+                + responseData.getIdentifier() + " was successfully processed");
+        LOGGER.info("\nReceived hello message response: " + responseData.toString());
     }
 
     @Override
@@ -834,38 +1123,80 @@ public class VOLTManagementImpl implements VOLTManagement {
                 Device onuDevice = null;
                 if (responseData.getOperationType().equals(NetconfResources.NOTIFICATION) && responseData.getObjectType()
                         .equals(ObjectType.ONU)) {
-                    onuAlignmentStatus = VOLTManagementUtil.processNotificationAndRetrieveOnuAlignmentStatus(notificationData);
-                    if (onuAlignmentStatus != null) {
-                        if (onuAlignmentStatus.equals(ONUConstants.ALIGNED)) {
-                            try {
-                                onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
-                            } catch (IllegalArgumentException e) {
-                                LOGGER.error(String.format("Device with name %s does not exist: %s", onuName, e));
-                            }
-                            if (onuDevice != null) {
+                    if (notificationData.contains(ONUConstants.VOMCI_FUNC_ONU_ALIGNMENT_STATUS_JSON_KEY)) {
+                        onuAlignmentStatus = VOLTManagementUtil.processNotificationAndRetrieveOnuAlignmentStatus(notificationData);
+                        if (onuAlignmentStatus != null) {
+                            if (onuAlignmentStatus.equals(ONUConstants.ALIGNED)) {
+                                try {
+                                    onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
+                                } catch (IllegalArgumentException e) {
+                                    LOGGER.error(String.format("Device with name %s does not exist: %s", onuName, e));
+                                }
+                                if (onuDevice != null) {
+                                    m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                                        m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.ALIGNED);
+                                        return null;
+                                    });
+                                    if (m_connectionManager.getConnectionState(onuDevice).isConnected()) {
+                                        VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
+                                                m_notificationService);
+                                    }
+                                }
+                            } else {
                                 m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
-                                    m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.ALIGNED);
+                                    m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.NEVER_ALIGNED);
                                     return null;
                                 });
-                                if (m_connectionManager.getConnectionState(onuDevice).isConnected()) {
-                                    VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
-                                            m_notificationService);
+                            }
+                        } else {
+                            LOGGER.error("ONU Alignment Status received from notification is NULL");
+                        }
+                    } else {
+                        onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
+
+                        AlarmInfo internalAlarmInfo = VOLTManagementUtil.processVomciNotificationAndPrepareAlarmInfo(
+                                notificationData, onuName);
+
+                        SchemaRegistry onuDeviceSchemaRegistry = VOLTManagementUtil.getDeviceSchemaRegistry(m_adapterManager, onuDevice);
+
+                        Element alarmNotificationElement = VOLTManagementUtil.prepareAlarmNotificationElementFromAlarmInfo(
+                                internalAlarmInfo);
+                        LOGGER.info(String.format("Converted alarm notification: %s", DocumentUtils
+                                .documentToPrettyString(alarmNotificationElement)));
+
+                        List<AlarmInfo> alarmInfoList = AlarmNotificationUtil.extractAndCreateAlarmEntryFromNotification(
+                                alarmNotificationElement, onuDeviceSchemaRegistry, onuDevice, IETF_ALARM_NS);
+
+                        if (alarmInfoList != null && !alarmInfoList.isEmpty()) {
+                            for (AlarmInfo alarmInfo : alarmInfoList) {
+                                AlarmInfo updatedAlarmInfo = VOLTManagementUtil.updateDeviceInstanceIdentifierInAlarmInfo(alarmInfo,
+                                        onuName);
+                                if (alarmInfo != null) {
+                                    if (alarmInfo.getSeverity().toString().equalsIgnoreCase(ONUConstants.CLEARED)) {
+                                        LOGGER.info(String.format("Clearing ONU Alarm : %s", updatedAlarmInfo));
+                                        m_alarmService.clearAlarm(updatedAlarmInfo);
+                                    } else {
+                                        LOGGER.info(String.format("Raising ONU Alarm : %s", updatedAlarmInfo));
+                                        m_alarmService.raiseAlarm(updatedAlarmInfo);
+                                    }
+                                } else {
+                                    LOGGER.info(String.format("Error while converting the received alarm-notification to AlarmInfo. "
+                                            + "Notification received from vOMCI is: %s ", responseData));
                                 }
                             }
                         } else {
-                            m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
-                                m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.NEVER_ALIGNED);
-                                return null;
-                            });
+                            LOGGER.info(String.format("AlarmInfo List is either empty or null"));
                         }
-                    } else {
-                        LOGGER.error("ONU Alignment Status received from notification is NULL");
                     }
                 }
             }
-        } catch (MessageFormatterException e) {
+        } catch (MessageFormatterException | NetconfMessageBuilderException e) {
             LOGGER.error(e.getMessage());
         }
 
+    }
+
+    public void setAndIncrementVoltmfInternalMessageId(AbstractNetconfRequest request) {
+        VOLTManagementUtil.setMessageId(request, m_messageId);
     }
 }

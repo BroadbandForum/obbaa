@@ -28,13 +28,16 @@ ENV https_proxy $https_proxy
 RUN apk add --no-cache bash
 
 RUN mkdir /baa
-ARG version=4.1.1
+ARG version=5.0.0
 ADD target/baa-dist*.tar.gz /baa
 
 RUN ln -s /baa/baa-dist-${version} /baa/baa-dist
 
 #setup default callhome certficates and keys
 RUN cp -r /baa/baa-dist/conf/tls /
+
+#copy network-function's standard adapter
+COPY bbf-nf-*.zip /baa/baa-dist/nfStandardAdapters/
 
 ENV ver $version
 CMD /baa/baa-dist/bin/start.sh

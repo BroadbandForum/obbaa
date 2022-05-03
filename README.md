@@ -1,11 +1,28 @@
-# OB-BAA R4.1.1 Release Notes (29 October 2021)
+# OB-BAA R5.0.0 Release Notes (30 April 2022)
+
+
+<a name="rel_5_0_0"></a>
+
+Release 5.0.0 Highlights:
+=========================
+
+This release provides enhancements and fixes to the existing OB-BAA software that:
+
+- policy based authentication of ONU by the BAA layer or notification to another management entity.
+- additional enhancements for the vOMCI solution (e.g., ONU alarm handling) in support of future BBF vOMCI plugfests.
+- scale testing: For single OLT device, 512+ ONUs created and 127 ONU's connected and aligned
+
+## Restrictions:
+1. Sporadically OB-BAA may not auto-detect link loss with devices (e.g., after device start). When a new provisioning/force alignment is attempted the connection will be restored. 
+
+2. Sometimes Kafka will not have the required topics being available when it started, hence vOMCI functionality might not work properly in that case. As a workaround after starting OB-BAA micro-services using docker compose file, we should restart the vomci container (wait for a minute to have the vomci container up and running) and restart vproxy container. This would solve the problem.
 
 <a name="rel_4_1_1"></a>
 
 Release 4.1.1 Highlights:
 =========================
 
-This release provides enhancements and fixes to the existing OB-BAA software related that:
+This release provides enhancements and fixes to the existing OB-BAA software that:
 
 -   adds the update configuration actions needed in vOMCI implementations.
 -   permits multiple ONUs to be managed.
