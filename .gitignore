@@ -1,4 +1,3 @@
-
 *.iml
 */bin
 *.classpath
@@ -10,4 +9,10 @@
 **/dist/
 /**/.idea/
 **/.flattened-pom.xml
+token
+tmp
+**/standard-adapters/*.zip
+**/resources/coreyangs/*.yang
+**/yang/aggregator-yang/*.yang
+**/baa-dist/bbf-nf-*.zip
 
