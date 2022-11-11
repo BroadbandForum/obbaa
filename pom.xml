@@ -117,7 +117,7 @@
         <apache.xmlresolver.version>1.2_5</apache.xmlresolver.version>
         <jaxp.ri.version>1.4.5_1</jaxp.ri.version>
         <sm-osgi.xbean.version>2.6.0_2</sm-osgi.xbean.version>
-        <xmlbeans.version>2.6.0</xmlbeans.version>
+        <xmlbeans.version>3.0.0</xmlbeans.version>
         <maven.plugin.api.version>2.0</maven.plugin.api.version>
         <maven.project.version>2.0</maven.project.version>
         <plexus.classworlds.version>2.4.1</plexus.classworlds.version>
