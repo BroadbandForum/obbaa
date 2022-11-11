@@ -405,7 +405,7 @@ public class AdapterManagerImplTest {
             assertEquals("Error while deploying adapter", e.getMessage());
             String message = e.getCause().getMessage();
             assertTrue(message.contains("ValidationException"));
-            assertTrue(message.contains("errorMessage=An unexpected element leaf-not-present is present"));
+            assertTrue(message.contains("errorMessage=An unexpected element 'leaf-not-present' is present"));
             assertTrue(message.contains("errorTag=unknown-element"));
             assertTrue(message.contains("errorSeverity=error"));
             assertTrue(message.contains("errorType=application"));

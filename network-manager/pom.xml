@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -92,6 +92,16 @@
             <artifactId>netconf-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${http-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -143,15 +153,15 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
-                        <Dynamic-Import-Package>org.hibernate.proxy, javassist.util.proxy, *</Dynamic-Import-Package>
+                        <Dynamic-Import-Package>*</Dynamic-Import-Package>
                         <Import-Package>
-                            org.hibernate.proxy,
-                            javassist.util.proxy,
+                            javax.sql.*,
                             javax.persistence.metamodel,
                             org.hibernate.jpa,
                             org.broadband_forum.obbaa.netconf.alarm.entity,
@@ -160,8 +170,15 @@
                             org.broadband_forum.obbaa.netconf.api.server,
                             org.broadband_forum.obbaa.netconf.api.messages,
                             org.broadband_forum.obbaa.netconf.api.client,
+                            org.broadband_forum.obbaa.netconf.api.server.notification,
+                            org.broadband_forum.obbaa.connectors.sbi.netconf,
+                            org.broadband_forum.obbaa.device.adapter,
+                            org.broadband_forum.obbaa.netconf.server.model.notification,
+                            org.broadband_forum.obbaa.netconf.server.ssh.auth,
+                            org.broadband_forum.obbaa.netconf.mn.fwk.server.model.service,
                             *
                         </Import-Package>
+                        <_removeheaders>Import-Service,Export-Service</_removeheaders>
                         <Meta-Persistence>META-INF/persistence.xml</Meta-Persistence>
                     </instructions>
                 </configuration>

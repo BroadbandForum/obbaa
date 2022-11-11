@@ -1,9 +1,9 @@
 <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-<if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-        <if:interface>
-            <if:name>TestInterface</if:name>
-            <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
-            <if:description>InterfaceDescription</if:description>
-        </if:interface>
-    </if:interfaces>
+   <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+      <if:interface>
+         <if:name>TestInterface</if:name>
+         <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
+         <if:description>InterfaceDescription</if:description>
+      </if:interface>
+   </if:interfaces>
 </config>

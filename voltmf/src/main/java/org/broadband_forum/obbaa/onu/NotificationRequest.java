@@ -54,6 +54,11 @@ public class NotificationRequest extends AbstractNetconfRequest {
         return null;
     }
 
+    @Override
+    public String getRpcType() {
+        return null;
+    }
+
     public String getOnuDeviceName() {
         return m_onuDeviceName;
     }

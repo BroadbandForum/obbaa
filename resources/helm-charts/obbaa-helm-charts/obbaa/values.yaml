@@ -25,6 +25,8 @@ global:
   #enabled: true
   control-relay:
   #enabled: true
+  microservices-discovery:
+  #enabled: true
 
 zookeeper:
   #enabled: true
@@ -56,6 +58,10 @@ baa:
       PMA_SESSION_FACTORY_TYPE: REGULAR
       MAXIMUM_ALLOWED_ADAPTER_VERSIONS: 3
       VOLTMF_NAME: vOLTMF
+      BAA_MICRO_SERVICE_DISCOVERY_API_ADDRESS: "microservices-discovery:8093"
+      BAA_KUBERNETES_NAMESPACE: obbaa
+      # Below tag shall be set as false if the BAA is going to be tested for Scalability/Performance
+      NC_ENABLE_POST_EDIT_DS_VALIDATION_SUPPORT: True
   resources:
     requests:
       cpu: 0.2
@@ -101,6 +107,12 @@ vomci:
       KAFKA_NOTIFICATION_TOPICS: "vomci1-notification" # if message formatter is Json "OBBAA_ONU_NOTIFICATION"
       VOMCI_KAFKA_SENDER_NAME: "bbf-vomci"
       VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
+      BBF_OBBAA_VNF_NAME: "BBF-VOMCI"
+      BBF_OBBAA_VNF_TYPE: "VOMCI"
+      BBF_OBBAA_VNF_VERSION: "1.0.0"
+      BBF_OBBAA_VNF_VENDOR: "BBF"
+      BBF_OBBAA_VNF_INSTANCE_NAME: "BBF-vomci-instance1"
+      BBF_OBBBA_VNF_ADMIN_STATE: "unlocked"
   resources:
     requests:
       cpu: 0.2
@@ -128,6 +140,12 @@ vproxy:
       KAFKA_NOTIFICATION_TOPICS: "vomci-proxy-notification"
       VOMCI_KAFKA_SENDER_NAME: "bbf-vproxy"
       VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
+      BBF_OBBAA_VNF_NAME: "BBF-VPROXY"
+      BBF_OBBAA_VNF_TYPE: "VPROXY"
+      BBF_OBBAA_VNF_VERSION: "1.0.0"
+      BBF_OBBAA_VNF_VENDOR: "BBF"
+      BBF_OBBAA_VNF_INSTANCE_NAME: "BBF-vproxy-instance1"
+      BBF_OBBBA_VNF_ADMIN_STATE: "unlocked"
   resources:
     requests:
       cpu: 0.2
@@ -214,3 +232,20 @@ control-relay:
     requests:
       cpu: 0.2
       memory: 0.5Gi
+
+microservices-discovery:
+  image:
+    registry: #broadbandforum
+    #repository: #microservices-discovery
+    tag: latest
+  service:
+    type: ClusterIP
+  hostAliases:
+    #ip: 192.168.49.1
+  env:
+    open:
+      #DUMMY_ENV: test
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.2Gi

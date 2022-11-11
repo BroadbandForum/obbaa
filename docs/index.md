@@ -83,6 +83,7 @@
 ### Release 5
 
 * [OB-BAA release 5.0.0 (April 2022)]({{ site.obbaa_readme }}#rel_5_0_0)
+* [OB-BAA release 5.1.0 (August 2022)]({{ site.obbaa_readme }}#rel_5_1_0)
 
 ### Release 4
 

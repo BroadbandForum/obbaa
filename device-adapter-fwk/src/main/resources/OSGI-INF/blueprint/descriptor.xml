@@ -80,7 +80,11 @@
         <argument ref="subsystemRegistry"/>
     </bean>
 
-    <bean id="subsystemRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistryImpl"/>
+    <bean id="globalCompositeSubSystem" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.CompositeSubSystemImpl"/>
+
+    <bean id="subsystemRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistryImpl">
+        <property name="compositeSubSystem" ref="globalCompositeSubSystem" />
+    </bean>
 
     <bean id="annotationBasedDSM"
           class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.emn.AnnotationBasedModelNodeDataStoreManager">
@@ -157,6 +161,7 @@
         <argument ref="subsystemRegistry"/>
         <argument ref="dataStoreValidator"/>
         <argument ref="transactionService"/>
+        <argument ref="netconfLogger"/>
         <property name="notificationService" ref="notificationService"/>
         <property name="namespaceContext" ref="schemaRegistry"/>
         <property name="nbiNotificationHelper" ref="nbiNotificationHelper"/>

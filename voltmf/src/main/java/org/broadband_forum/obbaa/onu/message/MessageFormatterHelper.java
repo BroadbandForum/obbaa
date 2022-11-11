@@ -75,7 +75,7 @@ final class MessageFormatterHelper {
                                                          AdapterManager adapterManager, ModelNodeDataStoreManager modelNodeDsm) {
         SchemaRegistry deviceSchemaRegistry;
         String deviceLeaf;
-        if (request.getMessageId().equals(ONUConstants.DEFAULT_MESSAGE_ID)) {
+        if ((request.getMessageId() != null) && (request.getMessageId().equals(ONUConstants.DEFAULT_MESSAGE_ID))) {
             deviceLeaf = ONUConstants.DEVICE_MANAGEMENT;
             deviceSchemaRegistry = schemaRegistry;
         } else {
@@ -90,7 +90,7 @@ final class MessageFormatterHelper {
                     element.getNamespaceURI());
             String filterElementJsonString = JsonUtil.convertFromXmlToJsonIgnoreEmptyLeaves(Arrays.asList(element),
                     deviceRootSchemaNode, deviceSchemaRegistry, modelNodeDsm);
-            if (request.getMessageId().equals(ONUConstants.DEFAULT_MESSAGE_ID)) {
+            if ((request.getMessageId() != null) && (request.getMessageId().equals(ONUConstants.DEFAULT_MESSAGE_ID))) {
                 //retrieve only DeviceState attributes from filterElementJsonString
                 JSONObject jsonObject = new JSONObject(filterElementJsonString);
                 filterElementJsonString = jsonObject.getJSONObject(ONUConstants.OBBAA_NETWORK_MANAGER)
@@ -100,8 +100,14 @@ final class MessageFormatterHelper {
             filterElementsJsonList.add(filterElementJsonString.substring(1, filterElementJsonString.length() - 1));
             LOGGER.debug("JSON converted string for the GET request of the filter element is " + filterElementJsonString);
         }
-        return "{\"" + ONUConstants.NETWORK_MANAGER + ONUConstants.COLON + deviceLeaf + "\""
-               + ONUConstants.COLON + "{" + String.join(",", filterElementsJsonList) + "}}";
+        if ((request.getMessageId() != null) && (request.getMessageId().equals(ONUConstants.DEFAULT_MESSAGE_ID))) {
+            //kept for backwards compatibility. Need to check if it is still necessary. Used with JSON formatter?
+            //vOMCI should not have knowledge of the network-manager
+            return "{\"" + ONUConstants.NETWORK_MANAGER + ONUConstants.COLON + deviceLeaf + "\""
+                    + ONUConstants.COLON + "{" + String.join(",", filterElementsJsonList) + "}}";
+        } else {
+            return "{" + String.join(",", filterElementsJsonList) + "}";
+        }
     }
 
     static void validateBackupDatastore(String onuDeviceName, String messageId, DeviceConfigBackup backupDatastore)

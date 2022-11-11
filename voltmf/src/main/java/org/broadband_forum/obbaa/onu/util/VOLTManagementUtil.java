@@ -357,7 +357,29 @@ public final class VOLTManagementUtil {
         return alignmentStatus;
     }
 
-    public static AlarmInfo processVomciNotificationAndPrepareAlarmInfo(String notificationData, String onuDeviceName) {
+    public static boolean processAlarmMisaligmentNotification(String notificationData, String headerOnuName) {
+        String onuName = "";
+        if (!notificationData.isEmpty()) {
+            try {
+                JSONObject getResponseDataJson = new JSONObject(notificationData);
+                onuName = getResponseDataJson.getJSONObject(ONUConstants.VOMCI_FUNC_ALARM_MISALIGNMENT_JSON_KEY)
+                        .optString(ONUConstants.VOMCI_FUNC_ALARM_MISALIGNMENT_ONU_NAME);
+                if (onuName.equals(headerOnuName)) {
+                    return true;
+                } else {
+                    LOGGER.warn(String.format("Notification ONU name '%s' does not match the header name '%s'", onuName, onuName));
+                }
+            } catch (JSONException e) {
+                LOGGER.error("Unable to form JSONObject " + e);
+            }
+        } else {
+            LOGGER.info("Received notification without information");
+        }
+        return false;
+    }
+
+    public static AlarmInfo processVomciNotificationAndPrepareAlarmInfo(String notificationData, String onuDeviceName,
+                                                                        boolean isNotification) {
         String resource = null;
         String alarmTypeId = null;
         AlarmSeverity alarmSeverity = null;
@@ -368,14 +390,29 @@ public final class VOLTManagementUtil {
 
         if (!notificationData.isEmpty()) {
             try {
-                JSONObject getResponseDataJson = new JSONObject(notificationData);
-                JSONObject ietfAlarms = getResponseDataJson.getJSONObject(ONUConstants.IETF_ALARMS_ALARM_NOTIFICATION_JSON_KEY);
+                JSONObject ietfAlarms = null;
+                if (isNotification == true) {
+                    JSONObject getResponseDataJson = new JSONObject(notificationData);
+                    ietfAlarms = getResponseDataJson.getJSONObject(ONUConstants.IETF_ALARMS_ALARM_NOTIFICATION_JSON_KEY);
+                } else {
+                    ietfAlarms = new JSONObject(notificationData);
+                }
                 resource = ietfAlarms.optString(ONUConstants.RESOURCE_JSON_KEY);
                 alarmTypeId = ietfAlarms.optString(ONUConstants.ALARM_TYPE_ID_JSON_KEY);
                 alarmTypeQualifier = ietfAlarms.optString(ONUConstants.ALARM_TYPE_QUALIFIER_JSON_KEY);
-                time = convertStringToTimestamp(ietfAlarms.optString(ONUConstants.TIME_JSON_KEY));
-                alarmSeverityString = ietfAlarms.optString(ONUConstants.PERCEIVED_SEVERITY_JSON_KEY);
-                alarmText = ietfAlarms.optString(ONUConstants.ALARM_TEXT_JSON_KEY);
+                if (isNotification == true) {
+                    time = convertStringToTimestamp(ietfAlarms.optString(ONUConstants.TIME_JSON_KEY));
+                    alarmSeverityString = ietfAlarms.optString(ONUConstants.PERCEIVED_SEVERITY_JSON_KEY);
+                    alarmText = ietfAlarms.optString(ONUConstants.ALARM_TEXT_JSON_KEY);
+                } else {
+                    JSONArray statusChange = ietfAlarms.getJSONArray(ONUConstants.IETF_ALARMS_STATUS_CHANGE);
+                    if (statusChange.length() > 0) {
+                        JSONObject lastChange = statusChange.getJSONObject(0);
+                        time = convertStringToTimestamp(lastChange.optString(ONUConstants.TIME_JSON_KEY));
+                        alarmSeverityString = lastChange.optString(ONUConstants.PERCEIVED_SEVERITY_JSON_KEY);
+                        alarmText = lastChange.optString(ONUConstants.ALARM_TEXT_JSON_KEY);
+                    }
+                }
             } catch (JSONException e) {
                 LOGGER.error("Unable to form JSONObject " + e);
             }
@@ -790,7 +827,8 @@ public final class VOLTManagementUtil {
             if (responseData.getOperationType().equals(NetconfResources.RPC)
                     || responseData.getOperationType().equals(NetconfResources.ACTION)
                     || responseData.getOperationType().equals(NetconfResources.COPY_CONFIG)
-                    || responseData.getOperationType().equals(NetconfResources.EDIT_CONFIG)) {
+                    || responseData.getOperationType().equals(NetconfResources.EDIT_CONFIG)
+                    || responseData.getOperationType().equals(NetconfResources.GET)) {
                 if (m_requestMap.get(identifier) != null) {
                     String operationType = m_requestMap.get(identifier).getSecond();
                     String onuName = m_requestMap.get(identifier).getFirst();

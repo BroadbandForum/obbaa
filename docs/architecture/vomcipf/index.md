@@ -376,6 +376,13 @@ body {
     }
 }
 ```
+## ONU Alarm Handling
+
+The vOMCI function receives the ONU alarm's status then to send notifications that reflect alarm changes. Because of this, the vOMCI function is required to store the status of the ONU's alarms.
+
+Everytime an alarm message is received from the ONU, the vOMCI function checks all the ONU's alarms status received and verifies which alarms have changed its state. Then, the notification with the alarms that changed are sent to vOLTMF
+
+[For more information about the ONU alarm Handling](/voltmf/onu_alarm/index.md#onu_alarm)
 
 ## vOMCI function Communication with the OLT
 

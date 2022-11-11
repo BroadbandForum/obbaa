@@ -28,7 +28,7 @@ ENV https_proxy $https_proxy
 RUN apk add --no-cache bash
 
 RUN mkdir /baa
-ARG version=5.0.0
+ARG version=5.1.0
 ADD target/baa-dist*.tar.gz /baa
 
 RUN ln -s /baa/baa-dist-${version} /baa/baa-dist
@@ -38,6 +38,8 @@ RUN cp -r /baa/baa-dist/conf/tls /
 
 #copy network-function's standard adapter
 COPY bbf-nf-*.zip /baa/baa-dist/nfStandardAdapters/
+
+ENV JAVA_OPTS='-Xms1024M -Xmx2048M -XX:-UseGCOverheadLimit'
 
 ENV ver $version
 CMD /baa/baa-dist/bin/start.sh

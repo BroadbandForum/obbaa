@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </parent>
 
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -34,6 +34,7 @@
         <dependency>
             <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.broadband-forum.obbaa</groupId>
@@ -138,12 +139,14 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
                 <extensions>true</extensions>
                 <inherited>true</inherited>
                 <configuration>
                     <instructions combine.children="append">
                         <Bundle-ClassPath>.;adapter-schema-fwk-${project.version}.jar</Bundle-ClassPath>
-                        <Import-Package>javax.annotation;version=1.1,!javax.annotation,org.apache.xmlbeans.impl.schema;version="2.4",*</Import-Package>
+                        <Import-Package>org.broadband_forum.obbaa.netconf.mn.fwk.schema, javax.annotation;version=1.1,!javax.annotation,org.apache.xmlbeans.impl.schema;version="2.4",*</Import-Package>
+                        <_removeheaders>Import-Service,Export-Service</_removeheaders>
                     </instructions>
                 </configuration>
             </plugin>

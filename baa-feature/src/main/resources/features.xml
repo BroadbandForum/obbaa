@@ -23,20 +23,21 @@
 
     <feature name="pma-feature" version="${project.version}" description="PMAA Feature">
         <feature version="${project.version}">third-party-libs</feature>
+        <!-- netconf-stack specific bundles -->
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/stack-logging-api/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-api/${project.version}</bundle>
-        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-client/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa.netconf/auth-spi/${project.version}</bundle>
-        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-persistence-app/${project.version}</bundle>
-        <bundle>mvn:org.broadband-forum.obbaa.netconf/stack-logging-api/${project.version}</bundle>
-        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-server/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa.netconf/stack-api/${project.version}</bundle>
-        <bundle>mvn:org.broadband-forum.obbaa.netconf/stack-logging-api/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-server/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-persistence-app/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-server-modelnode-fwk/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-client/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa.netconf/netconf-notification-app/${project.version}</bundle>
 
+        <!-- obbaa specific bundles -->
         <bundle>mvn:org.broadband-forum.obbaa/netconf-alarm-app/${project.version}</bundle>
-        <bundle>mvn:org.broadband-forum.obbaa/device-adapter-fwk/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/network-manager-entities/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/device-adapter-fwk/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/sbi-connectors/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/network-manager/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/pma/${project.version}</bundle>
@@ -76,15 +77,16 @@
         <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
         <bundle>mvn:io.netty/netty-resolver/${netty.version}</bundle>
         <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
-        <bundle>mvn:org.bouncycastle/bcprov-jdk16/${bouncy-castle.version}</bundle>
         <bundle>mvn:joda-time/joda-time/${joda-time.version}</bundle>
-        <bundle>mvn:org.apache.sshd/sshd-core/${mina.version}</bundle>
+        <bundle>mvn:org.apache.sshd/sshd-osgi/${mina.version}</bundle>
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
         <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
         <bundle>mvn:commons-collections/commons-collections/${commons-collection.version}</bundle>
         <bundle>mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
         <bundle>mvn:org.apache.commons/commons-lang3/${commons-lang3.version}</bundle>
         <bundle>mvn:javax.servlet/javax.servlet-api/${javax.servlet-api.version}</bundle>
+        <bundle>wrap:mvn:org.apache.httpcomponents/httpclient/${http-client.version}</bundle>
+        <bundle>wrap:mvn:org.apache.httpcomponents/httpcore/${http-core.version}</bundle>
         <bundle><![CDATA[wrap:mvn:org.jdom/jdom/1.1.3$Bundle-SymbolicName=jdom&Bundle-Version=${jdom.version}]]></bundle>
         <bundle>mvn:commons-jxpath/commons-jxpath/${commons-jxpath.version}</bundle>
         <bundle>mvn:javax.ws.rs/javax.ws.rs-api/${javax.ws.rs-api.version}</bundle>
@@ -92,6 +94,40 @@
         <bundle>mvn:org.json/json/${json.version}</bundle>
         <bundle start-level="30" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlbeans/${org.apache.servicemix.bundles.xmlbeans.version}</bundle>
         <bundle><![CDATA[wrap:mvn:org.apache.kafka/kafka-clients/${kafka.client.version}$Bundle-SymbolicName=kafka-client&Bundle-Version=${kafka.client.version}]]></bundle>
+        <!--bundle>mvn:org.apache.aries.proxy/org.apache.aries.proxy.api/1.1.0</bundle>
+        <bundle>mvn:org.apache.aries.proxy/org.apache.aries.proxy.impl/1.0.6</bundle>
+        Karaf 4.2.7 default startup.config features
+        <bundle>mvn:org.apache.karaf.features/org.apache.karaf.features.extension/4.2.7</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.metatype/1.2.2</bundle>
+        <bundle>mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/4.2.7</bundle>
+        <bundle>mvn:org.ops4j.pax.url/pax-url-aether/2.6.1</bundle>
+        <bundle>mvn:org.fusesource.jansi/jansi/1.18</bundle>
+        <bundle>mvn:org.ops4j.pax.logging/pax-logging-api/1.11.2</bundle>
+        <bundle>mvn:org.ops4j.pax.logging/pax-logging-log4j2/1.11.2</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.coordinator/1.0.2</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.configadmin/1.9.16</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.fileinstall/3.6.4</bundle>
+        <bundle>mvn:org.apache.karaf.features/org.apache.karaf.features.core/4.2.7</bundle>
+        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/1.0.1</bundle>
+        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/1.3.1</bundle>
+        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core.compatibility/1.0.0</bundle>
+        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/1.10.2</bundle>
+        <bundle>mvn:org.apache.aries.proxy/org.apache.aries.proxy/1.1.6</bundle>
+        <bundle>mvn:org.apache.aries/org.apache.aries.util/1.1.3</bundle>
+        <bundle>mvn:org.ow2.asm/asm-analysis/7.1</bundle>
+        <bundle>mvn:org.ow2.asm/asm-commons/7.1</bundle>
+        <bundle>mvn:org.ow2.asm/asm-tree/7.1</bundle>
+        <bundle>mvn:org.ow2.asm/asm-util/7.1</bundle>
+        <bundle>mvn:org.ow2.asm/asm/7.1</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.framework/5.6.12</bundle>
+        <bundle>mvn:org.apache.karaf.log/org.apache.karaf.log.core/4.2.7</bundle>
+        <bundle>mvn:org.bouncycastle/bcprov-jdk15on/${bouncy.castle.version}</bundle>
+        <bundle>mvn:org.bouncycastle/bctls-jdk15on/${bouncy.castle.version}</bundle-->
+        <!-- Adding only the Mandatary bundles -->
+        <bundle>mvn:net.sf.ehcache/ehcache/2.10.6</bundle>
+        <bundle>mvn:commons-codec/commons-codec/1.13</bundle>
+        <bundle>wrap:mvn:org.hibernate/hibernate-entitymanager/5.4.2.Final</bundle>
+        <capability>osgi.service;objectClass=javax.sql.DataSource;osgi.jndi.service.name=baa</capability>
     </feature>
 
 </features>

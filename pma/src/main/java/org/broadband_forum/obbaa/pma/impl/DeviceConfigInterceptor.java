@@ -30,6 +30,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.EditConfigOperations;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcError;
 import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorTag;
 import org.broadband_forum.obbaa.netconf.api.util.SchemaPathBuilder;
+import org.broadband_forum.obbaa.netconf.mn.fwk.WritableChangeTreeNode;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.EditChangeNode;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.EditConfigException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.EditContainmentNode;
@@ -55,7 +56,8 @@ public class DeviceConfigInterceptor implements ModelNodeInterceptor {
     }
 
     @Override
-    public void interceptEditConfig(HelperDrivenModelNode modelNode, EditContext editContext) throws EditConfigException {
+    public void interceptEditConfig(HelperDrivenModelNode modelNode, EditContext editContext,
+                                    WritableChangeTreeNode changeTreeNode) throws EditConfigException {
         EditContainmentNode editNode = editContext.getEditNode();
         if (editNode.getName().equals("device-management") && editNode.getNamespace().equals(NS)
                 && isCreateOrMergeOrReplace(editNode.getEditOperation())) {

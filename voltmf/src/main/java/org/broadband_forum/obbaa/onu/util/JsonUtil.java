@@ -322,7 +322,7 @@ public final class JsonUtil {
         }
         SchemaMountRegistry mountRegistry = registry.getMountRegistry();
         SchemaMountRegistryProvider provider = mountRegistry.getProvider(path);
-        return provider.getSchemaRegistry(null, node);
+        return provider.getSchemaRegistry(node);
     }
 
     private static SchemaRegistry lookupSchemaRegistry(ModelNodeDataStoreManager dsm, String moduleName, SchemaNode urlTarget,
@@ -973,7 +973,7 @@ public final class JsonUtil {
             for (Map.Entry<QName, ValueObject> entry : pathNodeValue.getPathKeys().entrySet()) {
                 modelNodeKeyBuilder.appendKey(entry.getKey(), entry.getValue().getStringValue());
             }
-            modelNode = dsm.findNode(path, modelNodeKeyBuilder.build(), parentId);
+            modelNode = dsm.findNode(path, modelNodeKeyBuilder.build(), parentId, globalRegistry);
             parentId = modelNode.getModelNodeId();
         }
 
@@ -983,7 +983,7 @@ public final class JsonUtil {
             SchemaMountRegistryProvider mountedPathProvider = schemaMountRegistry.getProvider(path);
             if (mountedPathProvider != null) {
                 if (modelNode != null) {
-                    mountedRegistry = mountedPathProvider.getSchemaRegistry(modelNode);
+                    mountedRegistry = mountedPathProvider.getSchemaRegistry(modelNode.getModelNodeId());
                     if (mountedRegistry != null) {
                         pnvs.clear();
                     }

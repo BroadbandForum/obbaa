@@ -65,7 +65,11 @@
         <argument ref="modelNodeDSMRegistry"/>
     </bean>
 
-    <bean id="subsystemRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistryImpl"/>
+    <bean id="globalCompositeSubSystem" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.CompositeSubSystemImpl"/>
+
+    <bean id="subsystemRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistryImpl">
+        <property name="compositeSubSystem" ref="globalCompositeSubSystem" />
+    </bean>
 
     <bean id="rootModelNodeAggregator" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.RootModelNodeAggregatorImpl">
         <argument ref="schemaRegistry"/>
@@ -107,6 +111,7 @@
         <argument ref="subsystemRegistry"/>
         <argument ref="dataStoreValidator"/>
         <argument ref="txService"/>
+        <argument ref="netconfLogger"/>
         <property name="notificationService" ref="notificationService"/>
         <property name="namespaceContext" ref="schemaRegistry"/>
         <property name="nbiNotificationHelper" ref="nbiNotificationHelper"/>
@@ -254,7 +259,7 @@
         <argument ref="networkFunctionDao"/>
     </bean>
 
-    <bean id="networkFunctionSubSystem" class="org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionSubsystem">
+    <bean id="networkFunctionMgmtSubSystem" class="org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManagementSubsystem">
         <argument ref="networkFunctionManager"/>
     </bean>
 
@@ -289,7 +294,7 @@
                             <argument value="true"/>
                         </bean>
                     </key>
-                    <ref component-id="networkFunctionSubSystem"/>
+                    <ref component-id="networkFunctionMgmtSubSystem"/>
                 </entry>
             </map>
         </property>
@@ -335,6 +340,7 @@
                 <value>/yangs/bbf-obbaa-network-function-state.yang</value>
                 <value>/yangs/bbf-network-function.yang</value>
                 <value>/yangs/bbf-node-types.yang</value>
+                <value>/yangs/bbf-obbaa-pmaa-onu-types.yang</value>
             </list>
         </property>
         <property name="entityClasses">

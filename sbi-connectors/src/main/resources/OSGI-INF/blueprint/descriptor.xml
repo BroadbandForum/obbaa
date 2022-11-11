@@ -89,6 +89,7 @@
           class="org.broadband_forum.obbaa.netconf.client.dispatcher.NetconfClientDispatcherImpl">
         <argument ref="callHomePool"/>
         <argument ref="callHomePool"/>
+        <argument ref="callHomePool"/>
     </bean>
 
     <bean id="callHomePool" class="java.util.concurrent.Executors" factory-method="newWorkStealingPool"/>

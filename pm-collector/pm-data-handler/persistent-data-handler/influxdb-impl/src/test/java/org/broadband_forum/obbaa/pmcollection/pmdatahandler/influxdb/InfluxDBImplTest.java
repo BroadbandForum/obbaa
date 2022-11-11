@@ -31,6 +31,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -154,6 +155,7 @@ public class InfluxDBImplTest {
      * Test of executeQuery method, of class InfluxDBImpl.
      */
     @Test
+    @Ignore
     public void test2ExecuteQuery() {
         System.out.println("executeQuery");
         String measurement = "unittest";

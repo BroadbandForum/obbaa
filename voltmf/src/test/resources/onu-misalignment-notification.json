@@ -1,0 +1,6 @@
+{
+  "bbf-vomci-function:onu-alarm-misalignment": {
+    "onu-name": "onu1",
+    "detected-sequence-number": 5
+  }
+}

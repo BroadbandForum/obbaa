@@ -1,12 +1,21 @@
-# OB-BAA R5.0.0 Release Notes (30 April 2022)
+# OB-BAA R5.1.0 Release Notes (11 November 2022)
 
+<a name="rel_5_1_0"></a>
+
+Release 5.1.0 Highlights:
+=========================
+
+This release provides enhancements and fixes to the existing OB-BAA software that provides:
+
+- Enhancements to micro services discovery.
+- Scale testing.
 
 <a name="rel_5_0_0"></a>
 
 Release 5.0.0 Highlights:
 =========================
 
-This release provides enhancements and fixes to the existing OB-BAA software that:
+This release provides enhancements and fixes to the existing OB-BAA software that provides:
 
 - policy based authentication of ONU by the BAA layer or notification to another management entity.
 - additional enhancements for the vOMCI solution (e.g., ONU alarm handling) in support of future BBF vOMCI plugfests.

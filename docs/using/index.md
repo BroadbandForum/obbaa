@@ -34,4 +34,8 @@ OB-BAA:
 
 -   [Examples for configuring the vOMCI function and vOMCI Proxy](vomci_func_proxy/index.md#vomci_func_proxy)
 
+-   [Examples for Discovering micro-services](micro_discovery/index.md#micro_discovery)
+
+-   [Sample data on scale testing](scale/index.md#scale_testing)
+
 [<--Installing OB-BAA](../installing/index.md#installing)

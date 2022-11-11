@@ -16,6 +16,7 @@
 
 package org.broadband_forum.obbaa.adapter.threadlocals;
 
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.CompositeSubSystem;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystem;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistryImpl;
@@ -48,7 +49,22 @@ public class ThreadLocalSubsystemRegistry implements SubSystemRegistry {
         getRegistry().undeploy(componentId);
     }
 
+    @Override
+    public CompositeSubSystem getCompositeSubSystem() {
+        return getRegistry().getCompositeSubSystem();
+    }
+
+    @Override
+    public void setCompositeSubSystem(CompositeSubSystem compositeSubSystem) {
+        getRegistry().setCompositeSubSystem(compositeSubSystem);
+    }
+
     public static void clearRegistry() {
         c_registry.remove();
+    }
+
+    @Override
+    public SubSystemRegistry unwrap() {
+        return getRegistry().unwrap();
     }
 }

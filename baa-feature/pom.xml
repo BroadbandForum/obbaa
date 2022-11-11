@@ -21,7 +21,7 @@
     <parent>
         <artifactId>baa-root-pom</artifactId>
         <groupId>org.broadband-forum.obbaa</groupId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -44,7 +44,9 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>

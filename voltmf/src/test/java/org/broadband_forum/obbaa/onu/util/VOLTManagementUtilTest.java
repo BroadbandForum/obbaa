@@ -16,7 +16,6 @@
 
 package org.broadband_forum.obbaa.onu.util;
 
-import static org.broadband_forum.obbaa.onu.ONUConstants.DEVICE_INSTANCE_IDENTIFIER_FORMAT;
 import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_PRESENT_AND_NO_VANI_KNOWN_AND_UNCLAIMED;
 import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_PRESENT_AND_ON_INTENDED_CHANNEL_TERMINATION;
 import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_PRESENT_AND_V_ANI_KNOW_AND_O5_FAILED_NO_ONU_ID;
@@ -35,6 +34,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,13 +92,12 @@ import org.broadband_forum.obbaa.onu.message.ObjectType;
 import org.broadband_forum.obbaa.onu.message.ResponseData;
 import org.broadband_forum.obbaa.onu.notification.ONUNotification;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
-import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 public class VOLTManagementUtilTest {
 
@@ -110,7 +109,7 @@ public class VOLTManagementUtilTest {
     private final String OLT_NAME = "OLT1";
     private final String ONU_NAME = "onu1";
     private final String ONU_ID = "1";
-    public static final String RPC_REPLY = "/get-response.xml";
+    public static final String RPC_REPLY = "/get-response-for-onu-name-from-vani.xml";
     private static final AtomicLong m_messageId = new AtomicLong(1000);
     private final String DETERMINED_ONU_MANAGEMENT_MODE = "relying-on-vomci";
     private final String DETECTED_LOCATION_ID = "testLocation";
@@ -634,7 +633,6 @@ public class VOLTManagementUtilTest {
     }
 
     @Test
-    @Ignore
     public void testSendOnuAuthenticationResultNotificationWhenDeviceIsNull() throws ExecutionException, InterruptedException {
         String onuAuthStatus = "vomci-expected-by-olt-but-inconsistent-pmaa-mgmt-mode";
         String channelPartition = "CT_1";
@@ -654,19 +652,20 @@ public class VOLTManagementUtilTest {
 
         GetRequest getRequest = VOLTMgmtRequestCreationUtil.prepareGetRequestForVani(OLT_NAME, VANI_REF);
         VOLTManagementUtil.setMessageId(getRequest, m_messageId);
-        when(m_netconfConnectionManager.executeNetconf(anyString(), any(GetRequest.class))).thenReturn(m_responseFuture);
+        when(m_netconfConnectionManager.executeNetconf(any(Device.class), any(GetRequest.class))).thenReturn(m_responseFuture);
         when(m_responseFuture.get()).thenReturn(m_netConfResponse);
         when(m_netConfResponse.getMessageId()).thenReturn(String.valueOf(m_messageId));
         when(m_netConfResponse.getData()).thenReturn(m_dataElement);
+        when(m_deviceManager.getDevice(oltName)).thenReturn(m_onuDevice);
         VOLTManagementUtil.sendOnuAuthenticationResultNotification(null, m_onuNotification, m_netconfConnectionManager, m_notificationService, onuAuthStatus, m_deviceManager, m_txService);
-        verify(m_onuNotification, times(1)).getOltDeviceName();
+        Thread.sleep(2000);
+        verify(m_onuNotification, times(2)).getOltDeviceName();
         verify(m_onuNotification, times(1)).getChannelTermRef();
         verify(m_onuDevice, never()).getDeviceManagement();
         verify(m_notificationService, times(1)).sendNotification(any(), any(Notification.class));
     }
 
     @Test
-    @Ignore //TODO : need to fix
     public void testIsOnuAuthenticatedByOlt() {
         String onuState = ONU_PRESENT_AND_ON_INTENDED_CHANNEL_TERMINATION;
         Boolean onuAuthentication1 = VOLTManagementUtil.isOnuAuthenticatedByOLTAndHasNoErrors(onuState);
@@ -674,15 +673,15 @@ public class VOLTManagementUtilTest {
 
         onuState = ONU_PRESENT_AND_V_ANI_KNOW_BUT_INTENDED_CT_UNKNOWN;
         Boolean onuAuthentication2 = VOLTManagementUtil.isOnuAuthenticatedByOLTAndHasNoErrors(onuState);
-        assertTrue(onuAuthentication2);
+        assertFalse(onuAuthentication2);
 
         onuState = ONU_PRESENT_AND_V_ANI_KNOW_AND_O5_FAILED_NO_ONU_ID;
         Boolean onuAuthentication3 = VOLTManagementUtil.isOnuAuthenticatedByOLTAndHasNoErrors(onuState);
-        assertTrue(onuAuthentication3);
+        assertFalse(onuAuthentication3);
 
         onuState = ONU_PRESENT_AND_V_ANI_KNOW_AND_O5_FAILED_UNDEFINED;
         Boolean onuAuthentication4 = VOLTManagementUtil.isOnuAuthenticatedByOLTAndHasNoErrors(onuState);
-        assertTrue(onuAuthentication4);
+        assertFalse(onuAuthentication4);
 
         onuState = ONU_PRESENT_AND_NO_VANI_KNOWN_AND_UNCLAIMED;
         Boolean onuAuthentication5 = VOLTManagementUtil.isOnuAuthenticatedByOLTAndHasNoErrors(onuState);
@@ -734,7 +733,7 @@ public class VOLTManagementUtilTest {
     }
 
     @Test
-    public void testIetfAlarmNotification() throws NetconfMessageBuilderException {
+    public void testIetfAlarmNotification() throws NetconfMessageBuilderException, IOException, SAXException {
         String alarmNotification = "<al:alarm-notification xmlns:al=\"urn:ietf:params:xml:ns:yang:ietf-alarms\">\n" +
                 "<al:resource xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\" xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">/if:interfaces/if:interface[if:name='eth1']</al:resource>\n" +
                 "<al:alarm-type-id xmlns:bbf-baa-ethalt=\"urn:bbf:yang:obbaa:ethernet-alarm-types\">bbf-baa-ethalt:loss-of-signal</al:alarm-type-id>\n" +
@@ -743,7 +742,7 @@ public class VOLTManagementUtilTest {
                 "<al:perceived-severity>major</al:perceived-severity>\n" +
                 "<al:alarm-text>example alarm</al:alarm-text>\n" +
                 "</al:alarm-notification>";
-        AlarmInfo alarmInfo = VOLTManagementUtil.processVomciNotificationAndPrepareAlarmInfo(prepareJsonResponseFromFile(ietfAlarmsAlarmNotificationJson), "onu1");
+        AlarmInfo alarmInfo = VOLTManagementUtil.processVomciNotificationAndPrepareAlarmInfo(prepareJsonResponseFromFile(ietfAlarmsAlarmNotificationJson), "onu1", true);
         assertNotNull(alarmInfo);
         assertTrue(alarmInfo.getAlarmText().equals("example alarm"));
         assertTrue(alarmInfo.getDeviceName().equals("onu1"));
@@ -753,12 +752,12 @@ public class VOLTManagementUtilTest {
         assertTrue(alarmInfo.getSourceObjectString().equals("/if:interfaces/if:interface[if:name='eth1']"));
         Element alarmNotif = VOLTManagementUtil.prepareAlarmNotificationElementFromAlarmInfo(alarmInfo);
         assertNotNull(alarmNotif);
-        assertEquals(alarmNotification, DocumentUtils.documentToPrettyString(alarmNotif).trim());
+        TestUtil.assertXMLStringEquals(alarmNotification, DocumentUtils.documentToPrettyString(alarmNotif).trim());
 
     }
 
     @Test
-    public void testIetfAlarmNotificationCleared() throws NetconfMessageBuilderException {
+    public void testIetfAlarmNotificationCleared() throws NetconfMessageBuilderException, IOException, SAXException {
         String alarmNotificationCleared = "<al:alarm-notification xmlns:al=\"urn:ietf:params:xml:ns:yang:ietf-alarms\">\n" +
                 "<al:resource xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\" xmlns:hw=\"urn:ietf:params:xml:ns:yang:ietf-hardware\">/hw:hardware/hw:component[hw:name='ontAniPort_ont1']</al:resource>\n" +
                 "<al:alarm-type-id xmlns:bbf-hw-xcvr-alt=\"urn:bbf:yang:bbf-hardware-transceiver-alarm-types\">bbf-hw-xcvr-alt:rx-power-low</al:alarm-type-id>\n" +
@@ -767,7 +766,7 @@ public class VOLTManagementUtilTest {
                 "<al:perceived-severity>cleared</al:perceived-severity>\n" +
                 "<al:alarm-text>example alarm cleared</al:alarm-text>\n" +
                 "</al:alarm-notification>";
-        AlarmInfo alarmInfo = VOLTManagementUtil.processVomciNotificationAndPrepareAlarmInfo(prepareJsonResponseFromFile(ietfAlarmsAlarmNotificationClearedJson), "onu2");
+        AlarmInfo alarmInfo = VOLTManagementUtil.processVomciNotificationAndPrepareAlarmInfo(prepareJsonResponseFromFile(ietfAlarmsAlarmNotificationClearedJson), "onu2", true);
         assertNotNull(alarmInfo);
         assertTrue(alarmInfo.getAlarmText().equals("example alarm cleared"));
         assertTrue(alarmInfo.getDeviceName().equals("onu2"));
@@ -777,7 +776,7 @@ public class VOLTManagementUtilTest {
         assertTrue(alarmInfo.getSourceObjectString().equals("/hw:hardware/hw:component[hw:name='ontAniPort_ont1']"));
         Element alarmNotif = VOLTManagementUtil.prepareAlarmNotificationElementFromAlarmInfo(alarmInfo);
         assertNotNull(alarmNotif);
-        assertEquals(alarmNotificationCleared, DocumentUtils.documentToPrettyString(alarmNotif).trim());
+        TestUtil.assertXMLStringEquals(alarmNotificationCleared, DocumentUtils.documentToPrettyString(alarmNotif).trim());
     }
 
 
@@ -882,41 +881,6 @@ public class VOLTManagementUtilTest {
         softwareImageSet.add(softwareImage0);
         softwareImageSet.add(softwareImage1);
         return softwareImageSet;
-    }
-
-    @Test
-    @Ignore
-    public void testGetOnuNameFromVani() throws ExecutionException, InterruptedException {
-        GetRequest getRequest = VOLTMgmtRequestCreationUtil.prepareGetRequestForVani(OLT_NAME, VANI_REF);
-        VOLTManagementUtil.setMessageId(getRequest, m_messageId);
-        when(m_netconfConnectionManager.executeNetconf(any(Device.class), any(GetRequest.class))).thenReturn(m_responseFuture);
-        when(m_responseFuture.get()).thenReturn(m_netConfResponse);
-        when(m_netConfResponse.getMessageId()).thenReturn(getRequest.getMessageId());
-        when(m_netConfResponse.getData()).thenReturn(m_dataElement);
-        when(m_onuDevice.getDeviceName()).thenReturn(OLT_NAME);
-        //String onuName = VOLTManagementUtil.getOnuNameFromVani(m_onuDevice, VANI_REF, m_netconfConnectionManager);
-        String onuName = "test";
-        verify(m_netconfConnectionManager, times(1)).executeNetconf(any(Device.class), any(GetRequest.class));
-        verify(m_netConfResponse, times(1)).getData();
-        assertEquals(onuName, "test");
-    }
-
-
-    @Test
-    @Ignore
-    public void testGetOnuNameFromVaniForNullResponse() throws ExecutionException, InterruptedException {
-        GetRequest getRequest = VOLTMgmtRequestCreationUtil.prepareGetRequestForVani(OLT_NAME, VANI_REF);
-        VOLTManagementUtil.setMessageId(getRequest, m_messageId);
-        when(m_netconfConnectionManager.executeNetconf(any(Device.class), any(GetRequest.class))).thenReturn(m_responseFuture);
-        when(m_responseFuture.get()).thenReturn(null);
-        when(m_netConfResponse.getMessageId()).thenReturn(getRequest.getMessageId());
-        when(m_netConfResponse.getData()).thenReturn(m_dataElement);
-        when(m_onuDevice.getDeviceName()).thenReturn(OLT_NAME);
-        //String onuName = VOLTManagementUtil.getOnuNameFromVani(m_onuDevice, VANI_REF, m_netconfConnectionManager);
-        String onuName = null;
-        verify(m_netconfConnectionManager, times(1)).executeNetconf(any(Device.class), any(GetRequest.class));
-        verify(m_netConfResponse, never()).getData();
-        assertEquals(onuName, null);
     }
 
     private String prepareJsonResponseFromFile(String name) {

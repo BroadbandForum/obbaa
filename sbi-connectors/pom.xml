@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -31,6 +31,7 @@
         <dependency>
             <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-client</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mapdb</groupId>
@@ -59,12 +60,33 @@
             <artifactId>network-manager-entities</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.broadband-forum.obbaa</groupId>
-            <artifactId>network-manager-entities</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
+    <build>
+        <plugins>
+    <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+            <instructions>
+                <Bundle-Version>${project.version}</Bundle-Version>
+                <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
+                <Dynamic-Import-Package>*,  javassist.util.proxy</Dynamic-Import-Package>
+                <Export-Package>org.broadband_forum.obbaa.connectors.sbi.netconf.*</Export-Package>
+                <Import-Package>*,
+                    javassist.util.proxy,
+                    org.hibernate.jpa,
+                    org.hibernate.proxy,
+                    org.broadband_forum.obbaa.nf.dao.*,
+                    org.broadband_forum.obbaa.netconf.client.dispatcher.*
+                </Import-Package>
+                <_removeheaders>Import-Service,Export-Service</_removeheaders>
+            </instructions>
+        </configuration>
+    </plugin>
+</plugins>
+        </build>
 </project>
 
 

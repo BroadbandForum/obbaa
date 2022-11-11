@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
 import org.broadband_forum.obbaa.ipfix.ncclient.api.NcClientService;
 import org.broadband_forum.obbaa.ipfix.ncclient.api.NetConfClientException;
+import org.broadband_forum.obbaa.netconf.api.ClosureReason;
 import org.broadband_forum.obbaa.netconf.api.NetconfConfigurationBuilderException;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientConfiguration;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientDispatcher;
@@ -134,7 +135,7 @@ public class NcClientServiceImpl implements NcClientService {
         m_isSessionAvailable = true;
         m_session.addSessionListener(new NetconfClientSessionListener() {
             @Override
-            public void sessionClosed(int sessionId) {
+            public void sessionClosed(int sessionId, ClosureReason closureReason) {
                 LOGGER.info("Got Session close for " + m_session.getSessionId() + " for host : " + hostname + " port : " + port);
                 m_isSessionAvailable = false;
             }

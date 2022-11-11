@@ -34,6 +34,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,7 +50,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.broadband_forum.obbaa.connectors.sbi.netconf.NetconfConnectionManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterContext;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants;
+import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.ActualAttachmentPoint;
 import org.broadband_forum.obbaa.dmyang.entities.ConnectionState;
@@ -65,7 +69,9 @@ import org.broadband_forum.obbaa.dmyang.entities.OnuStateInfo;
 import org.broadband_forum.obbaa.dmyang.entities.SoftwareImage;
 import org.broadband_forum.obbaa.dmyang.entities.SoftwareImages;
 import org.broadband_forum.obbaa.nbiadapter.netconf.NbiNetconfServerMessageListener;
+import org.broadband_forum.obbaa.netconf.alarm.api.AlarmInfo;
 import org.broadband_forum.obbaa.netconf.alarm.api.AlarmService;
+import org.broadband_forum.obbaa.netconf.alarm.entity.AlarmSeverity;
 import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
@@ -80,6 +86,8 @@ import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
 import org.broadband_forum.obbaa.netconf.api.util.SchemaPathBuilder;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ModelNodeId;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService;
 import org.broadband_forum.obbaa.netconf.server.util.TestUtil;
@@ -151,7 +159,7 @@ import com.google.protobuf.ByteString;
  * Created by Ranjitha.B.R (Nokia) on 22/07/2020.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({VOLTManagementImpl.class, MediatedDeviceNetconfSession.class, JsonUtil.class, QNameModule.class, Optional.class, OnuKafkaConsumer.class})
+@PrepareForTest({VOLTManagementImpl.class, MediatedDeviceNetconfSession.class, JsonUtil.class, QNameModule.class, Optional.class, OnuKafkaConsumer.class, QNameModule.class,AdapterUtils.class, AdapterContext.class})
 public class VOLTManagementImplTest {
 
     @Mock
@@ -257,7 +265,9 @@ public class VOLTManagementImplTest {
     String onuAlignmentMisalignedNoitifcationJson = "/onu-alignment-status-notification-misaligned.json";
     String ietfAlarmsAlarmNotificationJson = "/ietf-alarms-alarm-notification.json";
     String ietfAlarmsAlarmNotificationClearedJson = "/ietf-alarms-alarm-notification-cleared.json";
+    String ietfGetAllAlarmsResponseJson = "/ietf-get-all-alarms-response.json";
     String internalGetResponseJson = "/internal-get-response-sw-hw-prop.json";
+    String onuAlarmMisAlignmentNotificationJson = "/onu-misalignment-notification.json";
 
     private final String ONU_SERIAL_NUMBER = "ABCD12345678";
     private final String ONU_NAME = "onu1";
@@ -942,29 +952,27 @@ public class VOLTManagementImplTest {
     }
 
     @Test
-    @Ignore
     public void testProcessNotificationIetfAlarmsAlarmNotification() throws MessageFormatterException {
+        SchemaRegistryImpl schemaRegistryImpl = Mockito.mock(SchemaRegistryImpl.class);
+        Module module = Mockito.mock(Module.class);
+
         VOLTManagementImpl voltManagement = new VOLTManagementImpl(m_txService, m_deviceManager, m_alarmService, m_kafkaProducerJson, m_unknownOnuHandler,
                 m_connectionManager, m_modelNodeDSM, m_notificationService, m_adapterManager, m_pmaRegistry, m_schemaRegistry, m_gpbFormatter, m_networkFunctionDao,
                 m_deviceDao, m_nbiNetconfServerMessageListener);
 
-        when(m_deviceManager.getDevice(ONU_NAME)).thenReturn(m_vonuDevice);
-        when(m_responseData.getIdentifier()).thenReturn(ONU_ID);
-        when(m_responseData.getSenderName()).thenReturn(SENDER_VOMCI);
-        when(m_responseData.getObjectType()).thenReturn(ObjectType.ONU);
-        when(m_responseData.getOnuName()).thenReturn(ONU_NAME);
         when(m_responseData.getOperationType()).thenReturn(NetconfResources.NOTIFICATION);
         when(m_responseData.getResponsePayload()).thenReturn(prepareJsonResponseFromFile(ietfAlarmsAlarmNotificationJson));
-        when(m_gpbFormatter.getResponseData(any())).thenReturn(m_responseData);
-        when(m_gpbFormatter.getResponseData(m_notificationResponse)).thenReturn(m_responseData);
-        when(m_connectionManager.getConnectionState(m_vonuDevice)).thenReturn(m_connectionState);
-        when(m_vonuDevice.getDeviceManagement()).thenReturn(m_deviceMgmt);
-        when(m_deviceMgmt.getOnuConfigInfo()).thenReturn(m_onuConfigInfo);
-        when(m_onuConfigInfo.getExpectedSerialNumber()).thenReturn(ONU_SERIAL_NUMBER);
-        when(m_deviceMgmt.getDeviceState()).thenReturn(m_deviceState);
-        when(m_deviceState.getOnuStateInfo()).thenReturn(null);
-        when(m_connectionState.isConnected()).thenReturn(true);
+
+        prepareDeviceAndSchemaMocks(schemaRegistryImpl, module);
+
+        //namespaces necessary for the test
+        when(schemaRegistryImpl.getModuleByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(module);
+        when(schemaRegistryImpl.getModuleNameByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(VoltMFTestConstants.NETWORK_MANAGER);
+        when(schemaRegistryImpl.getModuleByNamespace(ONUConstants.BBF_HW_TX_ALARM_TYPE_NS)).thenReturn(module);
+        when(schemaRegistryImpl.getModuleByNamespace(ONUConstants.ETH_ALARM_TYPE_NS)).thenReturn(module);
+
         voltManagement.processNotification(m_notificationResponse);
+
         verify(m_deviceManager, never()).updateConfigAlignmentState(ONU_NAME , DeviceManagerNSConstants.ALIGNED);
         verify(m_connectionManager, never()).getConnectionState(m_vonuDevice);
         verify(m_alarmService, times(1)).raiseAlarm(any());
@@ -972,28 +980,26 @@ public class VOLTManagementImplTest {
     }
 
     @Test
-    @Ignore
     public void testProcessNotificationIetfAlarmsAlarmNotificationCleared() throws MessageFormatterException {
+        SchemaRegistryImpl schemaRegistryImpl = Mockito.mock(SchemaRegistryImpl.class);
+        Module module = Mockito.mock(Module.class);
+
         VOLTManagementImpl voltManagement = new VOLTManagementImpl(m_txService, m_deviceManager, m_alarmService, m_kafkaProducerJson, m_unknownOnuHandler,
                 m_connectionManager, m_modelNodeDSM, m_notificationService, m_adapterManager, m_pmaRegistry, m_schemaRegistry, m_gpbFormatter, m_networkFunctionDao,
                 m_deviceDao, m_nbiNetconfServerMessageListener);
-        when(m_deviceManager.getDevice(ONU_NAME)).thenReturn(m_vonuDevice);
-        when(m_responseData.getIdentifier()).thenReturn(ONU_ID);
-        when(m_responseData.getSenderName()).thenReturn(SENDER_VOMCI);
-        when(m_responseData.getObjectType()).thenReturn(ObjectType.ONU);
-        when(m_responseData.getOnuName()).thenReturn(ONU_NAME);
         when(m_responseData.getOperationType()).thenReturn(NetconfResources.NOTIFICATION);
         when(m_responseData.getResponsePayload()).thenReturn(prepareJsonResponseFromFile(ietfAlarmsAlarmNotificationClearedJson));
-        when(m_gpbFormatter.getResponseData(any())).thenReturn(m_responseData);
-        when(m_gpbFormatter.getResponseData(m_notificationResponse)).thenReturn(m_responseData);
-        when(m_connectionManager.getConnectionState(m_vonuDevice)).thenReturn(m_connectionState);
-        when(m_vonuDevice.getDeviceManagement()).thenReturn(m_deviceMgmt);
-        when(m_deviceMgmt.getOnuConfigInfo()).thenReturn(m_onuConfigInfo);
-        when(m_onuConfigInfo.getExpectedSerialNumber()).thenReturn(ONU_SERIAL_NUMBER);
-        when(m_deviceMgmt.getDeviceState()).thenReturn(m_deviceState);
-        when(m_deviceState.getOnuStateInfo()).thenReturn(null);
-        when(m_connectionState.isConnected()).thenReturn(true);
+
+        prepareDeviceAndSchemaMocks(schemaRegistryImpl, module);
+
+        //namespaces necessary for the test
+        when(schemaRegistryImpl.getModuleByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(module);
+        when(schemaRegistryImpl.getModuleNameByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(VoltMFTestConstants.NETWORK_MANAGER);
+        when(schemaRegistryImpl.getModuleByNamespace(ONUConstants.BBF_HW_TX_ALARM_TYPE_NS)).thenReturn(module);
+        when(schemaRegistryImpl.getModuleByNamespace(ONUConstants.ETH_ALARM_TYPE_NS)).thenReturn(module);
+
         voltManagement.processNotification(m_notificationResponse);
+
         verify(m_deviceManager, never()).updateConfigAlignmentState(ONU_NAME, DeviceManagerNSConstants.ALIGNED);
         verify(m_connectionManager, never()).getConnectionState(m_vonuDevice);
         verify(m_alarmService, times(1)).clearAlarm(any());
@@ -1002,6 +1008,134 @@ public class VOLTManagementImplTest {
 
     @Test
     @Ignore
+    public void testProcessGetAllAlarmsResponse() throws MessageFormatterException {
+        AdapterContext adapterContext = Mockito.mock(AdapterContext.class);
+        SchemaRegistryImpl schemaRegistryImpl = Mockito.mock(SchemaRegistryImpl.class);
+        Module module = Mockito.mock(Module.class);
+
+        prepareDeviceAndSchemaMocks(schemaRegistryImpl, module);
+
+        VOLTManagementImpl voltManagement = new VOLTManagementImpl(m_txService, m_deviceManager, m_alarmService, m_kafkaProducerJson, m_unknownOnuHandler,
+                m_connectionManager, m_modelNodeDSM, m_notificationService, m_adapterManager, m_pmaRegistry, m_schemaRegistry, m_gpbFormatter, m_networkFunctionDao,
+                m_deviceDao, m_nbiNetconfServerMessageListener);
+
+        when(m_responseData.getOperationType()).thenReturn(NetconfResources.GET);
+        when(m_responseData.getResponsePayload()).thenReturn(prepareJsonResponseFromFile(ietfGetAllAlarmsResponseJson));
+
+        //namespaces necessary for the test
+        when(schemaRegistryImpl.getModuleByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(module);
+        when(schemaRegistryImpl.getModuleNameByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(VoltMFTestConstants.NETWORK_MANAGER);
+        when(schemaRegistryImpl.getModuleByNamespace(ONUConstants.BBF_HW_TX_ALARM_TYPE_NS)).thenReturn(module);
+        when(schemaRegistryImpl.getModuleByNamespace(ONUConstants.ETH_ALARM_TYPE_NS)).thenReturn(module);
+
+        //may fail with Null pointer exception if the namespaces are not listed above
+        voltManagement.processGetAllAlarmsResponse(m_responseData);
+
+        AlarmInfo alarm1 = new AlarmInfo("{bbf-baa-ethalt}(urn:bbf:yang:obbaa:ethernet-alarm-types)loss-of-signal"
+                ,""
+                ,new ModelNodeId("/container=interfaces/container=interface/name='enet_uni_ont1_1_1'", "urn:ietf:params:xml:ns:yang:ietf-interfaces")
+                , "xmlns:al=\"urn:ietf:params:xml:ns:yang:ietf-alarms\" xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\" xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\""
+                , new Timestamp(1641713400000L)
+                , AlarmSeverity.MAJOR
+                , "Loss of signal detected."
+                , "onu"
+                , "baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='onu1']/baa-network-manager:root/if:interfaces/if:interface[if:name='enet_uni_ont1_1_1']"
+
+        );
+        AlarmInfo alarm2 = new AlarmInfo("{bbf-baa-ethalt}(urn:bbf:yang:obbaa:ethernet-alarm-types)loss-of-signal"
+                ,""
+                ,new ModelNodeId("/container=interfaces/container=interface/name='enet_uni_ont1_1_2'", "urn:ietf:params:xml:ns:yang:ietf-interfaces")
+                , "xmlns:al=\"urn:ietf:params:xml:ns:yang:ietf-alarms\" xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\" xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\""
+                , new Timestamp(1641713400000L)
+                , AlarmSeverity.MAJOR
+                , "Loss of signal detected."
+                , "onu"
+                , "baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='onu1']/baa-network-manager:root/if:interfaces/if:interface[if:name='enet_uni_ont1_1_2']"
+
+        );
+        AlarmInfo alarm3 = new AlarmInfo("{bbf-hw-xcvr-alt}(urn:bbf:yang:bbf-hardware-transceiver-alarm-types)rx-power-low"
+                ,""
+                ,new ModelNodeId("/container=hardware/container=component/name='ontAniPort_ont1'", "urn:ietf:params:xml:ns:yang:ietf-hardware")
+                , "xmlns:al=\"urn:ietf:params:xml:ns:yang:ietf-alarms\" xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\" xmlns:hw=\"urn:ietf:params:xml:ns:yang:ietf-hardware\""
+                , new Timestamp(1641717000000L)
+                , AlarmSeverity.MAJOR
+                , "Low receive (RX) input power detected."
+                , "onu"
+                , "baa-network-manager:network-manager/baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='onu1']/baa-network-manager:root/hw:hardware/hw:component[hw:name='ontAniPort_ont1']"
+
+        );
+        verify(m_alarmService, times(3)).raiseAlarm(any());
+        verify(m_alarmService, times(1)).raiseAlarm(alarm1);
+        verify(m_alarmService, times(1)).raiseAlarm(alarm2);
+        verify(m_alarmService, times(1)).raiseAlarm(alarm3);
+        verify(m_alarmService, never()).clearAlarm(any());
+    }
+
+    private void prepareDeviceAndSchemaMocks(SchemaRegistryImpl schemaRegistryImpl, Module module) throws MessageFormatterException
+    {
+        AdapterUtils adapterUtils = PowerMockito.mock(AdapterUtils.class);
+        AdapterContext adapterContext = Mockito.mock(AdapterContext.class);
+        QNameModule qNameModule = PowerMockito.mock(QNameModule.class);
+        Optional<Revision> revision = PowerMockito.mock(Optional.class);
+        SchemaPathBuilder schemaPathBuilder = Mockito.mock(SchemaPathBuilder.class);
+        SchemaPath schemaPath = Mockito.mock(SchemaPath.class);
+
+        when(m_deviceManager.getDevice(ONU_NAME)).thenReturn(m_vonuDevice);
+        when(m_responseData.getIdentifier()).thenReturn(ONU_ID);
+        when(m_responseData.getSenderName()).thenReturn(SENDER_VOMCI);
+        when(m_responseData.getObjectType()).thenReturn(ObjectType.ONU);
+        when(m_responseData.getOnuName()).thenReturn(ONU_NAME);
+        when(m_gpbFormatter.getResponseData(any())).thenReturn(m_responseData);
+        when(m_gpbFormatter.getResponseData(m_notificationResponse)).thenReturn(m_responseData);
+        when(m_connectionManager.getConnectionState(m_vonuDevice)).thenReturn(m_connectionState);
+        when(m_vonuDevice.getDeviceManagement()).thenReturn(m_deviceMgmt);
+        when(m_deviceMgmt.getDeviceModel()).thenReturn(AdapterSpecificConstants.STANDARD);
+        when(m_deviceMgmt.getDeviceType()).thenReturn(DeviceManagerNSConstants.DEVICE_TYPE_ONU);
+        when(m_deviceMgmt.getDeviceModel()).thenReturn(AdapterSpecificConstants.STANDARD);
+        when(m_deviceMgmt.getDeviceInterfaceVersion()).thenReturn(VoltMFTestConstants.INTERFACE_VERSION);
+        when(m_deviceMgmt.getOnuConfigInfo()).thenReturn(m_onuConfigInfo);
+        when(m_onuConfigInfo.getExpectedSerialNumber()).thenReturn(ONU_SERIAL_NUMBER);
+        when(m_deviceMgmt.getDeviceState()).thenReturn(m_deviceState);
+        when(m_deviceState.getOnuStateInfo()).thenReturn(null);
+        when(m_connectionState.isConnected()).thenReturn(true);
+        when(adapterUtils.getAdapterContext(m_vonuDevice, m_adapterManager)).thenReturn(adapterContext);
+        when(adapterContext.getSchemaRegistry()).thenReturn(schemaRegistryImpl);
+        when(module.getQNameModule()).thenReturn(qNameModule);
+        when(qNameModule.getRevision()).thenReturn(revision);
+        when(schemaPathBuilder.build()).thenReturn(schemaPath);
+        when(m_connectionManager.getMediatedDeviceSession(deviceName)).thenReturn(m_mediatedDeviceNCsession);
+
+        when(m_adapterManager.getStdAdapterContextRegistry())
+                .thenReturn(new HashMap<String, AdapterContext>(){{
+                    put(DeviceManagerNSConstants.DEVICE_TYPE_ONU+"-"+VoltMFTestConstants.INTERFACE_VERSION, adapterContext);
+                }});
+    }
+
+    @Test
+    public void testProcessAlarmMisalignmentNotification() throws MessageFormatterException {
+        SchemaRegistryImpl schemaRegistryImpl = Mockito.mock(SchemaRegistryImpl.class);
+        Module module = Mockito.mock(Module.class);
+
+        when(m_responseData.getOperationType()).thenReturn(NetconfResources.NOTIFICATION);
+        when(m_responseData.getResponsePayload()).thenReturn(prepareJsonResponseFromFile(onuAlarmMisAlignmentNotificationJson));
+
+        prepareDeviceAndSchemaMocks(schemaRegistryImpl, module);
+
+        //namespaces necessary for the test
+        when(schemaRegistryImpl.getModuleByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(module);
+        when(schemaRegistryImpl.getModuleNameByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(VoltMFTestConstants.NETWORK_MANAGER);
+        when(schemaRegistryImpl.getModuleByNamespace(VoltMFTestConstants.VOMCI_FUNCTION_NAMESPACE)).thenReturn(module);
+
+        VOLTManagementImpl voltManagement = new VOLTManagementImpl(m_txService, m_deviceManager, m_alarmService, m_kafkaProducerJson, m_unknownOnuHandler,
+                m_connectionManager, m_modelNodeDSM, m_notificationService, m_adapterManager, m_pmaRegistry, m_schemaRegistry, m_gpbFormatter, m_networkFunctionDao,
+                m_deviceDao, m_nbiNetconfServerMessageListener);
+
+        voltManagement.processNotification(m_responseData);
+
+        verify(m_mediatedDeviceNCsession, times(1)).sendGetAllAlarmsToOnu(any());
+    }
+
+    @Test
     public void testOnuNotificationProcessForDeviceNull() throws Exception {
         String serialNumber = "ABCD12345678";
         String registrationId = "REG123";
@@ -1021,15 +1155,17 @@ public class VOLTManagementImplTest {
         when(m_deviceManager.getDeviceWithSerialNumber(ONU_SERIAL_NUMBER)).thenReturn(null);
         GetRequest getRequest = VOLTMgmtRequestCreationUtil.prepareGetRequestForVani(oltName, vaniName);
         VOLTManagementUtil.setMessageId(getRequest, m_messageId);
-        when(m_connectionManager.executeNetconf(m_oltDevice, getRequest)).thenReturn(m_responseFuture);
+        when(m_connectionManager.executeNetconf(any(Device.class), any(GetRequest.class))).thenReturn(m_responseFuture);
         when(m_responseFuture.get()).thenReturn(m_netConfResponse);
         when(m_netConfResponse.getMessageId()).thenReturn(String.valueOf(m_messageId));
         when(m_netConfResponse.getData()).thenReturn(m_dataElement);
         when(m_onuNotification.getMappedEvent()).thenReturn(ONUConstants.CREATE_ONU);
         when(m_onuNotification.getDeterminedOnuManagementMode()).thenReturn(RELYING_ON_VOMCI);
         when(m_oltDevice.getDeviceName()).thenReturn("OLT1");
+        when(m_deviceManager.getDevice(oltName)).thenReturn(m_oltDevice);
         when(m_deviceManager.getDevice(anyString())).thenReturn(m_oltDevice);
         m_voltManagement.onuNotificationProcess(m_onuNotification, oltName);
+        Thread.sleep(2000);
         verify(m_onuNotification, times(5)).getSerialNo();
         verify(m_onuNotification, times(7)).getDeterminedOnuManagementMode();
         verify(m_notificationService, times(1)).sendNotification(any(), any());
@@ -1154,7 +1290,6 @@ public class VOLTManagementImplTest {
     }
 
     @Test
-    @Ignore
     public void testOnuNotificationProcessForUnableToAuthOnu() throws Exception {
         String serialNumber = "ABCD12345678";
         String oltName = "OLT1";
@@ -1184,6 +1319,7 @@ public class VOLTManagementImplTest {
         when(m_onuConfigInfo.getExpectedSerialNumber()).thenReturn(serialNumber);
         when(m_onuConfigInfo.getExpectedRegistrationId()).thenReturn(registrationId);
         when(m_deviceManager.getDeviceWithSerialNumber(ONU_SERIAL_NUMBER)).thenReturn(null);
+        when(m_deviceManager.getDevice(oltName)).thenReturn(m_oltDevice);
         when(m_vonuDevice.isMediatedSession()).thenReturn(true);
         when(m_vonuDevice.getDeviceManagement()).thenReturn(m_deviceMgmt);
         when(m_deviceMgmt.getOnuConfigInfo()).thenReturn(m_onuConfigInfo);
@@ -1203,9 +1339,10 @@ public class VOLTManagementImplTest {
         when(m_netconfRpcErrorList.get(0)).thenReturn(m_netconfRpcError);
         when(m_netconfRpcError.getErrorAppTag()).thenReturn(ONU_MGMT_MODE_MISMATCH_WITH_VANI);
         m_voltManagement.onuNotificationProcess(m_onuNotification, oltName);
+        Thread.sleep(2000);
         verify(m_notificationService, times(1)).sendNotification(any(), any());
         verify(m_vonuDevice, never()).getDeviceManagement();
-        verify(m_onuNotification, times(1)).getOltDeviceName();
+        verify(m_onuNotification, times(2)).getOltDeviceName();
     }
 
     @Test

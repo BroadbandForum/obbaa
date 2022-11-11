@@ -131,6 +131,7 @@ public interface ONUConstants {
     String ONU_GET_OPERATION = "get";
     String ONU_COPY_OPERATION = "copy-config";
     String ONU_EDIT_OPERATION = "edit-config";
+    String ONU_GET_ALL_ALARMS_OPERATION = "get-all-alarms";
 
     //Status constants
     String OK_RESPONSE = "OK";
@@ -207,6 +208,8 @@ public interface ONUConstants {
     String GET_IT_FROM_OLT_DEVICE = "get-from-olt";
 
     //IETF Alarms for ONU
+    String VOMCI_FUNC_ALARM_MISALIGNMENT_JSON_KEY = "bbf-vomci-function:onu-alarm-misalignment";
+    String VOMCI_FUNC_ALARM_MISALIGNMENT_ONU_NAME = "onu-name";
     String IETF_ALARMS_ALARM_NOTIFICATION_JSON_KEY = "ietf-alarms:alarm-notification";
     String RESOURCE_JSON_KEY = "resource";
     String ALARM_TYPE_ID_JSON_KEY = "alarm-type-id";
@@ -218,6 +221,11 @@ public interface ONUConstants {
     String DEVICE_INSTANCE_IDENTIFIER_FORMAT = "baa-network-manager:network-manager/"
             + "baa-network-manager:managed-devices/baa-network-manager:device[baa-network-manager:name='%s']/"
             + "baa-network-manager:root";
+    String IETF_ALARMS_ALARM = "alarm";
+    String IETF_ALARMS_ALARM_LIST = "alarm-list";
+    String IETF_ALARMS_ALARMS = "alarms";
+    String IETF_ALARMS_MODULE_NAME = "ietf-alarms";
+    String IETF_ALARMS_STATUS_CHANGE = "status-change";
 
     //onu alarm-notification raised from vOMCI
     String IETF_ALARM_NS = "urn:ietf:params:xml:ns:yang:ietf-alarms";
@@ -272,7 +280,12 @@ public interface ONUConstants {
     String VOMCI_EXPECTED_BY_OLT_BUT_MISSING_ONU_CONFIG = "vomci-expected-by-olt-but-pmaa-missing-onu-configuration";
     String ONU_GOING_VOMCI = "onu-going-vomci";
     String ONU_GOING_EOMCI = "onu-going-eomci";
+    String ONU_NOT_AUTHENTICATED_NOT_PRESENT = "onu-not-authenticated-not-present";
     String ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED = "onu-authenticated-and-mgt-mode-determined";
+    String EOMCI_PER_OLT_VOMCI_PER_PMAA = "eomci-per-olt-vomci-per-pmaa";
+    String VOMCI_PER_OLT_EOMCI_PER_PMAA = "vomci-per-olt-eomci-per-pmaa";
+    String ONU_NAME_MISMATCH_OLT_PMAA = "onu-name-mismatch-olt-pmaa";
+    String ONU_MGT_UNDETERMINED_ERROR = "onu-mgt-undetermined-error";
     //error-app-tag values
     String ONU_NOT_PRESENT = "baa-xpon-onu-types:onu-not-present";
     String ONU_MGMT_MODE_MISMATCH_WITH_VANI = "baa-xpon-onu-types:onu-management-mode-mismatch-with-v-ani";

@@ -21,7 +21,7 @@
     <parent>
         <artifactId>baa-root-pom</artifactId>
         <groupId>org.broadband-forum.obbaa</groupId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -33,10 +33,12 @@
         <dependency>
             <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.broadband-forum.obbaa.netconf</groupId>
@@ -57,4 +59,23 @@
             <artifactId>mockito-all</artifactId>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
+                <extensions>true</extensions>
+                <inherited>true</inherited>
+                <configuration>
+                    <instructions combine.children="append">
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
+                        <Import-Package>org.broadband_forum.obbaa.aggregator.api,*</Import-Package>
+                        <_removeheaders>Import-Service,Export-Service</_removeheaders>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

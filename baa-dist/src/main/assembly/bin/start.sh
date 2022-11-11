@@ -19,6 +19,7 @@ setScriptPath () {
 }
 export IS_DOCKER="true"
 #export EXTRA_JAVA_OPTS="$EXTRA_JAVA_OPTS $JAVA_OPTS "
+#export DEFAULT_JAVA_DEBUG_OPTS='-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
 
 #find out where the script is located
 setScriptPath

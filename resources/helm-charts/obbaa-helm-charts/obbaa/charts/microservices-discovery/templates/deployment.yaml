@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservices-discovery
+  namespace: obbaa
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microservices-discovery
+  template:
+    metadata:
+      labels:
+        app: microservices-discovery
+    spec:
+      hostAliases:
+        - ip: {{ .Values.hostAliases.ip }}
+          hostnames:
+            - "control-plane.minikube.internal"
+      volumes:
+        - name: msd-kube-volume
+          persistentVolumeClaim:
+            claimName: msd-kube-pvclaim
+        - name: msd-minikube-volume
+          persistentVolumeClaim:
+            claimName: msd-minikube-pvclaim
+      hostname: microservices-discovery
+      containers:
+        - name: microservices-discovery
+          image: broadbandforum/microservices-discovery:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8093
+              protocol: TCP
+          stdin: true
+          tty: true
+          volumeMounts:
+            - name: msd-kube-volume
+              mountPath: /kube
+            - name: msd-minikube-volume
+              mountPath: /home/$USER/.minikube

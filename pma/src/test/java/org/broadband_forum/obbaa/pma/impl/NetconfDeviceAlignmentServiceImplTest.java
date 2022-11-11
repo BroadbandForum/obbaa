@@ -57,6 +57,7 @@ import org.broadband_forum.obbaa.netconf.persistence.PersistenceManagerUtil;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -330,16 +331,15 @@ public class NetconfDeviceAlignmentServiceImplTest {
                     "    </config>\n" +
                     "  </edit-config>\n" +
                     "</rpc>,\n" +
-                    "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                    "  <rpc-error>\n" +
-                    "    <error-type>application</error-type>\n" +
-                    "    <error-tag>operation-failed</error-tag>\n" +
-                    "    <error-severity>error</error-severity>\n" +
-                    "    <error-message>Something went wrong</error-message>\n" +
-                    "  </rpc-error>\n" +
+                    "response received : <rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                    "   <rpc-error>\n" +
+                    "      <error-type>application</error-type>\n" +
+                    "      <error-tag>operation-failed</error-tag>\n" +
+                    "      <error-severity>error</error-severity>\n" +
+                    "      <error-message>Something went wrong</error-message>\n" +
+                    "   </rpc-error>\n" +
                     "</rpc-reply>\n";
         }
-
         verify(m_dm).updateConfigAlignmentState(m_device1.getDeviceName(),expected);
     }
 
@@ -438,13 +438,13 @@ public class NetconfDeviceAlignmentServiceImplTest {
                     "    </config>\n" +
                     "  </copy-config>\n" +
                     "</rpc>,\n" +
-                    "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                    "  <rpc-error>\n" +
-                    "    <error-type>application</error-type>\n" +
-                    "    <error-tag>operation-failed</error-tag>\n" +
-                    "    <error-severity>error</error-severity>\n" +
-                    "    <error-message>Something went wrong</error-message>\n" +
-                    "  </rpc-error>\n" +
+                    "response received : <rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                    "   <rpc-error>\n" +
+                    "      <error-type>application</error-type>\n" +
+                    "      <error-tag>operation-failed</error-tag>\n" +
+                    "      <error-severity>error</error-severity>\n" +
+                    "      <error-message>Something went wrong</error-message>\n" +
+                    "   </rpc-error>\n" +
                     "</rpc-reply>\n";
         }
 

@@ -467,7 +467,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
                     LOGGER.info(String.format("An un-managed device with duid : %s is calling home from ip : %s port : %s",
                             duid, ipAddr, port));
                     m_newDeviceInfos.put(duid, new NewDeviceInfo(duid, deviceSession));
-                    deviceSession.addSessionListener(sessionId -> {
+                    deviceSession.addSessionListener((sessionId, closureReason) -> {
                         m_newDeviceInfos.remove(duid);
                     });
                     return null;
@@ -491,7 +491,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     private void addCallHomeSession(String callHomeDeviceName, NetconfClientSession deviceSession) {
         m_callHomeSessions.put(callHomeDeviceName, deviceSession);
         notifyDeviceConnected(callHomeDeviceName, deviceSession);
-        deviceSession.addSessionListener(i -> {
+        deviceSession.addSessionListener((sessionId, closureReason) -> {
             m_connPool.clear(callHomeDeviceName);
             notifyDeviceDisconnected(callHomeDeviceName, deviceSession);
         });
@@ -501,7 +501,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
     public void addMediatedDeviceNetconfSession(String deviceName, NetconfClientSession deviceSession) {
         m_mediatedSessions.put(deviceName, deviceSession);
         notifyDeviceConnected(deviceName, deviceSession);
-        deviceSession.addSessionListener(i -> {
+        deviceSession.addSessionListener((sessionId, closureReason) -> {
             m_connPool.clear(deviceName);
             notifyDeviceDisconnected(deviceName, deviceSession);
         });
@@ -522,7 +522,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
                                                          NetconfClientSession networkFunctionSession) {
         m_nfMediatedSessions.put(networkFunctionName,networkFunctionSession);
         notifyNetworkFunctionConnected(networkFunctionName,networkFunctionSession);
-        networkFunctionSession.addSessionListener(i -> {
+        networkFunctionSession.addSessionListener((sessionId, closureReason) -> {
             m_nfConnPool.clear(networkFunctionName);
             notifyNetworkFunctionDisconnected(networkFunctionName,networkFunctionSession);
         });
@@ -604,7 +604,7 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
             }
             NetconfClientSession sessionToDevice = createSessionToDevice(key);
             if (sessionToDevice != null) {
-                sessionToDevice.addSessionListener(i -> {
+                sessionToDevice.addSessionListener((sessionId, closureReason) -> {
                     m_connPool.clear(key);
                     notifyDeviceDisconnected(key, sessionToDevice);
                 });
@@ -656,8 +656,8 @@ public class NetconfConnectionManagerImpl implements NetconfConnectionManager, C
             }
             NetconfClientSession sessionToNetworkFunction = createSessionToNetworkFunction(key);
             if (sessionToNetworkFunction != null) {
-                sessionToNetworkFunction.addSessionListener(i -> {
-                    m_nfConnPool.clear();
+                sessionToNetworkFunction.addSessionListener((sessionId, closureReason) -> {
+                    m_nfConnPool.clear(key);
                     notifyNetworkFunctionConnected(key,sessionToNetworkFunction);
                 });
             }

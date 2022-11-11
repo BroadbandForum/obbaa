@@ -23,7 +23,7 @@ spec:
       containers:
         - name: baa
           image: broadbandforum/baa:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
@@ -51,6 +51,13 @@ spec:
               value: REGULAR
             - name: VOLTMF_NAME
               value: vOLTMF
+            - name: BAA_MICRO_SERVICE_DISCOVERY_API_ADDRESS
+              value: "microservices-discovery:8093"
+            - name: BAA_KUBERNETES_NAMESPACE
+              value: obbaa
+            # Below tag shall be set as false if the BAA is going to be tested for Scalability/Performance
+            - name: NC_ENABLE_POST_EDIT_DS_VALIDATION_SUPPORT
+              value: True
 #          livenessProbe:
 #            httpGet:
 #              path: /

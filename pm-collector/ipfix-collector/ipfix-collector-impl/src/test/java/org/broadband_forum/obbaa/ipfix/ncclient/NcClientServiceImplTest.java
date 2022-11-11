@@ -32,6 +32,7 @@ import org.broadband_forum.obbaa.netconf.api.NetconfConfigurationBuilderExceptio
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientConfiguration;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientDispatcher;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfResponseFuture;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
@@ -70,12 +71,12 @@ public class NcClientServiceImplTest {
             "</rpc>";
 
     private static final String getRpcOutput = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-            "<baa-network-manager:network-manager xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+            "   <baa-network-manager:network-manager xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\">\n" +
             "      <baa-network-manager:managed-devices>\n" +
-            "        <baa-network-manager:device>\n" +
+            "         <baa-network-manager:device>\n" +
             "        </baa-network-manager:device>\n" +
             "      </baa-network-manager:managed-devices>\n" +
-            "    </baa-network-manager:network-manager>\n" +
+            "   </baa-network-manager:network-manager>\n" +
             "</rpc-reply>\n";
 
     private static final String getConfigRpcInput = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"12\">\n" +
@@ -146,7 +147,7 @@ public class NcClientServiceImplTest {
     @Test
     public void testPerformNcRequest_Get() throws Exception{
         m_response.setData(DocumentUtils.stringToDocument(getRpc).getDocumentElement());
-        CompletableFuture<NetConfResponse> futureResponse = mock(CompletableFuture.class);
+        NetconfResponseFuture futureResponse = mock(NetconfResponseFuture.class);
         when(futureResponse.get()).thenReturn(m_response);
         when(m_session.sendRpc(any())).thenReturn(futureResponse);
         NetconfFilter requestFilter = new NetconfFilter();
@@ -173,7 +174,7 @@ public class NcClientServiceImplTest {
     public void testPerformNcRequest_ExecutionException() throws Exception {
         try {
             m_response = null;
-            CompletableFuture<NetConfResponse> futureResponse = mock(CompletableFuture.class);
+            NetconfResponseFuture futureResponse = mock(NetconfResponseFuture.class);
             when(futureResponse.get()).thenReturn(m_response);
             when(m_session.sendRpc(any())).thenReturn(futureResponse);
             NetconfFilter requestFilter = new NetconfFilter();

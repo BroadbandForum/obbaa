@@ -90,21 +90,21 @@ public class NcCompliantAdapterDeviceInterfaceTest {
                 "    </if:interface>\n" +
                 "</if:interfaces>").getDocumentElement());
         String expected = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                "  <copy-config>\n" +
-                "    <target>\n" +
-                "      <running/>\n" +
-                "    </target>\n" +
-                "    <source>\n" +
-                "      <config>\n" +
-                "        <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\n" +
-                "    <if:interface>\n" +
-                "        <if:name>xdsl-line:1/1/1/new</if:name>\n" +
-                "        <if:type xmlns:bbfift=\"urn:broadband-forum-org:yang:bbf-if-type\">bbfift:xdsl</if:type>\n" +
-                "    </if:interface>\n" +
-                "</if:interfaces>\n" +
-                "      </config>\n" +
-                "    </source>\n" +
-                "  </copy-config>\n" +
+                "   <copy-config>\n" +
+                "      <target>\n" +
+                "         <running/>\n" +
+                "      </target>\n" +
+                "      <source>\n" +
+                "         <config>\n" +
+                "            <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\n" +
+                "               <if:interface>\n" +
+                "                  <if:name>xdsl-line:1/1/1/new</if:name>\n" +
+                "                  <if:type xmlns:bbfift=\"urn:broadband-forum-org:yang:bbf-if-type\">bbfift:xdsl</if:type>\n" +
+                "               </if:interface>\n" +
+                "            </if:interfaces>\n" +
+                "         </config>\n" +
+                "      </source>\n" +
+                "   </copy-config>\n" +
                 "</rpc>";
 
         if (System.getProperty("os.name").startsWith("Windows")) {

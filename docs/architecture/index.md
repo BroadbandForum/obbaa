@@ -355,6 +355,12 @@ and SDN M&C application endpoint is configurable through the M<sub>fc-conf</sub>
 
 [For more information on the Control Relay Service](control_relay/index.md#control_relay)
 
+### Service Discovery
+
+The Service discovery is used to retrieve VNF details from Container management tool. In this release Kubernetes is the supported container orchestrator. This service allows OBBAA user to query the list of VNFs, their status & details. The Module uses the orchestrator API (for Kubernetes its REST API) to retrieve the requested details.
+
+[For more information on Discovering micro-services](/using/micro_discovery/index.md#micro_discovery)
+
 
 [<--Overview](../overview/index.md#overview)
 

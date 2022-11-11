@@ -30,12 +30,22 @@ services:
             - IPFIX_COLLECTOR_PORT=4494
             - IPFIX_IE_MAPPING_DIR=/ipfix/ie-mapping/
             - IPFIX_COLLECTOR_MAX_CONNECTION=10000
-            - OBBAA_HOST=10.1.1.1
-            - OBBAA_SSH_PORT=9292
-            - OBBAA_USERNAME=admin
-            - OBBAA_PASSWORD=password
+            - BAA_HOST=baa
+            - BAA_SSH_PORT=9292
+            - BAA_USERNAME=admin
+            - BAA_PASSWORD=password
             - DEBUG=true
+            - INFLUXDB_ORGANISATION=broadband_forum
+            - INFLUXDB_BUCKETID=pm-collection
+            - INFLUXDB_API_URL=http://obbaa-influxdb:9999
+            - INFLUXDB_TOKEN=_6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
+            - PMD_MAX_BUFFERED_POINTS=5000
+            - PMD_MAX_BUFFERED_MEASUREMENTS=100
+            - PMD_TIMEOUT_BUFFERED_POINTS=60
+            - PMD_NBI_PORT=5051
         volumes:
             - /baa/stores/ipfix:/ipfix/ie-mapping/
         networks:
             - ipfix_default
+        tty: true
+        stdin_open: true

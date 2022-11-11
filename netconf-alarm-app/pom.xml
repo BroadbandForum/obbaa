@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -92,13 +92,15 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
-                        <Dynamic-Import-Package>*, org.hibernate.proxy, javassist.util.proxy</Dynamic-Import-Package>
-                        <Import-Package>*, org.hibernate.proxy, javassist.util.proxy, org.hibernate.jpa</Import-Package>
+                        <Dynamic-Import-Package>*,  javassist.util.proxy</Dynamic-Import-Package>
+                        <Import-Package>*,  javassist.util.proxy, org.hibernate.jpa, org.hibernate.proxy</Import-Package>
+                        <_removeheaders>Import-Service,Export-Service</_removeheaders>
                     </instructions>
                 </configuration>
             </plugin>

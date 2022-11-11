@@ -16,6 +16,8 @@
 
 package org.broadband_forum.obbaa.aggregator.jaxb.aggregatorimpl;
 
+import static org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants.NETWORK_FUNCTION_STATE_NAMESPACE;
+
 import org.broadband_forum.obbaa.aggregator.api.DispatchException;
 import org.broadband_forum.obbaa.aggregator.jaxb.netconf.api.NetconfRpcMessage;
 import org.broadband_forum.obbaa.aggregator.jaxb.networkmanager.api.NetworkManagerRpc;
@@ -77,6 +79,19 @@ public class AggregatorRpcMessage extends NetconfRpcMessage {
         }
     }
 
+    public String getSecondTopXmlns() throws DispatchException {
+        try {
+            if (getTopPayloads().get(0).getFirstChild().getFirstChild() != null) {
+                return getTopPayloads().get(0).getFirstChild().getFirstChild().getNamespaceURI();
+            }
+        }
+        catch (NoSuchElementException | IndexOutOfBoundsException ex) {
+            LOGGER.error("getSecondTopXmlns : {}", ex);
+            throw new DispatchException("Error namespace of the message.");
+        }
+        return null;
+    }
+
     /**
      * Just get one top payload.
      *
@@ -101,6 +116,21 @@ public class AggregatorRpcMessage extends NetconfRpcMessage {
     public boolean isNetworkManagerMessage() {
         try {
             return getOnlyOneTopXmlns().equals(NetworkManagerRpc.NAMESPACE);
+        }
+        catch (DispatchException ex) {
+            //Not the network-manager message
+            return false;
+        }
+    }
+
+    public boolean isNetworkFunctionStateMessage() {
+        try {
+            if (getOnlyOneTopXmlns() != null && getSecondTopXmlns() != null) {
+                return (getOnlyOneTopXmlns().equals(NETWORK_FUNCTION_STATE_NAMESPACE)
+                        || getSecondTopXmlns().equals(NETWORK_FUNCTION_STATE_NAMESPACE));
+            } else {
+                return false;
+            }
         }
         catch (DispatchException ex) {
             //Not the network-manager message

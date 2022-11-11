@@ -55,7 +55,7 @@ public class TransparentPmaSessionTest {
             "</rpc-reply>\n";
     public static final String REQ_STR = "<rpc message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
             "  <get>\n" +
-            "    <filter>\n" +
+            "    <filter type=\"subtree\">\n" +
             "      <network-manager xmlns=\"http://www.test.com/management-solutions\" " +
             "xmlns:xc=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
             "      </network-manager>\n" +

@@ -847,7 +847,7 @@ module ietf-ipfix-psamp {
             http://www.iana.org/assignments/ipfix.";
         }
         leaf isFlowKey {
-          when "(name(../../..) != 'immediateCache')
+          when "(local-name(../../..) != 'immediateCache')
             and
             ((count(../ieEnterpriseNumber) = 0)
             or
@@ -882,8 +882,8 @@ module ietf-ipfix-psamp {
         continue to be measured.";
     }
     leaf activeTimeout {
-      when "(name(..) = 'timeoutCache') or
-        (name(..) = 'naturalCache')" {
+      when "(local-name(..) = 'timeoutCache') or
+        (local-name(..) = 'naturalCache')" {
         description "This parameter is only available for
           timeoutCache and naturalCache.";
       }
@@ -903,8 +903,8 @@ module ietf-ipfix-psamp {
         (ipfixMeteringProcessCacheActiveTimeout).";
     }
     leaf idleTimeout {
-      when "(name(..) = 'timeoutCache') or
-        (name(..) = 'naturalCache')" {
+      when "(local-name(..) = 'timeoutCache') or
+        (local-name(..) = 'naturalCache')" {
         description "This parameter is only available for
           timeoutCache and naturalCache.";
       }
@@ -924,7 +924,7 @@ module ietf-ipfix-psamp {
         (ipfixMeteringProcessCacheIdleTimeout).";
     }
     leaf exportInterval {
-      when "name(..) = 'permanentCache'" {
+      when "local-name(..) = 'permanentCache'" {
         description "This parameter is only available for
           permanentCache.";
       }

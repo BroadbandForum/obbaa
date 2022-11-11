@@ -103,8 +103,8 @@ public class AlarmsDocumentTransformerTest extends AbstractAlarmSetup {
         when(smr.getProvider(mountPath)).thenReturn(provider);
         when(smr.getProvider(mountPath1)).thenReturn(provider);
         ModelNode modelNode = mock(ModelNode.class);
-        when(m_dsm.findNode(mountPath, ModelNodeKey.EMPTY_KEY, MOUNT_MODEL_NODE_ID)).thenReturn(modelNode);
-        when(provider.getSchemaRegistry(modelNode)).thenReturn(m_mountRegistry);
+        when(m_dsm.findNode(mountPath, ModelNodeKey.EMPTY_KEY, MOUNT_MODEL_NODE_ID,m_schemaRegistry)).thenReturn(modelNode);
+        when(provider.getSchemaRegistry(modelNode.getModelNodeId())).thenReturn(m_mountRegistry);
         when(provider.getSchemaRegistry(MOUNT_KEY)).thenReturn(m_mountRegistry);
         when(m_schemaRegistry.getMountRegistry()).thenReturn(smr);
     }

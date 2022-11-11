@@ -51,7 +51,14 @@
     <bean id="threadLocalSchemaRegistry" class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalSchemaRegistry">
     </bean>
 
+    <bean id="globalCompositeSubSystem" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.CompositeSubSystemImpl"/>
+
+    <bean id="subsystemRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistryImpl">
+        <property name="compositeSubSystem" ref="globalCompositeSubSystem" />
+    </bean>
+
     <bean id="threadLocalSubsystemRegistry" class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalSubsystemRegistry"/>
+
     <bean id="rpcReqHandlerRegistry"
           class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.RpcRequestHandlerRegistryImpl"/>
 
@@ -59,7 +66,20 @@
           class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalModelNodeHelperRegistry">
     </bean>
 
-    <bean id="threadLocalRootMNAggregator" class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalRootModelNodeAggregator"/>
+    <bean id="modelNodeHelperRegistry" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistryImpl">
+        <argument ref="schemaRegistry"/>
+    </bean>
+
+    <bean id="rootModelNodeAggregator" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.RootModelNodeAggregatorImpl">
+        <argument ref="schemaRegistry"/>
+        <argument ref="modelNodeHelperRegistry"/>
+        <argument ref="aggregatedDSM"/>
+        <argument ref="subsystemRegistry"/>
+    </bean>
+
+    <bean id="threadLocalRootMNAggregator" class="org.broadband_forum.obbaa.adapter.threadlocals.ThreadLocalRootModelNodeAggregator">
+        <argument ref="rootModelNodeAggregator"/>
+    </bean>
 
     <bean id="deviceAlignmentService" class="org.broadband_forum.obbaa.pma.impl.NetconfDeviceAlignmentServiceImpl"
           init-method="init"
@@ -159,6 +179,10 @@
         <argument ref="threadLocalSchemaRegistry"/>
         <property name="runningDataStore" ref="runningDataStore"/>
     </bean>
+
+    <bean id="netconfLogger" class="org.broadband_forum.obbaa.netconf.api.logger.DefaultNetconfLogger"/>
+
+    <bean id="transactionService" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService"/>
 
     <bean id="runningDataStore" class="org.broadband_forum.obbaa.netconf.mn.fwk.server.model.DataStore">
         <argument value="RUNNING"/>

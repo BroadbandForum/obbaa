@@ -74,21 +74,21 @@ public class IEMappingCacheServiceImplTest {
 
         m_ieIdIdMappingCacheService.syncIEMappingCache(m_family);
         verify(m_informationElementService).isIECacheAvailable();
-        String requestInString = "<rpc message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                "  <get>\n" +
-                "    <filter type=\"subtree\">\n" +
-                "      <baa-network-manager:network-manager xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-                "        <device-adapters xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
-                "          <device-adapter>\n" +
-                "            <type/>\n" +
-                "            <model/>\n" +
-                "            <vendor/>\n" +
-                "            <interface-version/>\n" +
-                "          </device-adapter>\n" +
-                "        </device-adapters>\n" +
-                "      </baa-network-manager:network-manager>\n" +
-                "    </filter>\n" +
-                "  </get>\n" +
+        String requestInString = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                "   <get>\n" +
+                "      <filter type=\"subtree\">\n" +
+                "         <baa-network-manager:network-manager xmlns:baa-network-manager=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+                "            <device-adapters xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+                "               <device-adapter>\n" +
+                "                  <type/>\n" +
+                "                  <model/>\n" +
+                "                  <vendor/>\n" +
+                "                  <interface-version/>\n" +
+                "               </device-adapter>\n" +
+                "            </device-adapters>\n" +
+                "         </baa-network-manager:network-manager>\n" +
+                "      </filter>\n" +
+                "   </get>\n" +
                 "</rpc>\n";
         ArgumentCaptor<AbstractNetconfRequest> captor = new ArgumentCaptor<>();
         verify(m_deviceFamilyCacheService).getNetConfResponse(captor.capture());

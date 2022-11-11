@@ -16,26 +16,29 @@
 
 package org.broadband_forum.obbaa.onu;
 
-import java.util.concurrent.CompletableFuture;
+import static org.broadband_forum.obbaa.netconf.api.client.AbstractNetconfClientSession.DEFAULT_MESSAGE_TIMEOUT;
 
-import org.broadband_forum.obbaa.netconf.api.client.AbstractNetconfClientSession;
-import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import java.util.concurrent.TimeUnit;
+
+import org.broadband_forum.obbaa.netconf.api.client.NetconfResponseFuture;
 
 /**
  * <p>
- * CompletableFuture response along with timestamp
+ * NetconfResponseFuture response along with timestamp
  * </p>
  * Created by Ranjitha.B.R (Nokia) on 22/07/2020.
  */
-public class TimestampFutureResponse extends CompletableFuture<NetConfResponse> {
+public class TimestampFutureResponse extends NetconfResponseFuture {
     private final long m_timeStamp;
 
-    public TimestampFutureResponse() {
+    public TimestampFutureResponse(long messageTimeOut, TimeUnit timeUnit) {
+        super(messageTimeOut, timeUnit);
         m_timeStamp = System.currentTimeMillis();
     }
 
     // This constructor must only be used for testing timed out responses
     public TimestampFutureResponse(long timeStamp) {
+        super();
         m_timeStamp = timeStamp;
     }
 
@@ -44,7 +47,7 @@ public class TimestampFutureResponse extends CompletableFuture<NetConfResponse> 
     }
 
     public boolean isResponseExpired() {
-        if (Math.abs(System.currentTimeMillis() - m_timeStamp) >= AbstractNetconfClientSession.DEFAULT_MESSAGE_TIMEOUT) {
+        if (Math.abs(System.currentTimeMillis() - m_timeStamp) >= DEFAULT_MESSAGE_TIMEOUT) {
             return true;
         }
         return false;

@@ -139,6 +139,25 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
+  name: vomci-function-volume
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /baa/stores/vomci-function-db
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: vomci-function-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
   name: vomci-vproxy-volume
   namespace: obbaa
 spec:
@@ -158,6 +177,20 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: vomci-function-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
   name: vomci-vproxy-pvclaim
   namespace: obbaa
 spec:
@@ -168,3 +201,67 @@ spec:
     requests:
       storage: 1Gi
 
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: msd-kube-volume
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /home/$USER/.kube
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: msd-kube-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: msd-kube-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: msd-minikube-volume
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /home/$USER/.minikube
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: msd-minikube-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: msd-minikube-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

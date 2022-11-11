@@ -34,6 +34,7 @@ import org.broadband_forum.obbaa.netconf.alarm.api.AlarmWithCondition;
 import org.broadband_forum.obbaa.netconf.alarm.api.DefaultAlarmStateChangeNotification;
 import org.broadband_forum.obbaa.netconf.alarm.api.LogAppNames;
 import org.broadband_forum.obbaa.netconf.alarm.entity.Alarm;
+import org.broadband_forum.obbaa.netconf.alarm.entity.AlarmSeverity;
 import org.broadband_forum.obbaa.netconf.alarm.util.AlarmConstants;
 import org.broadband_forum.obbaa.netconf.alarm.util.AlarmUtil;
 import org.broadband_forum.obbaa.netconf.api.server.notification.NotificationService;
@@ -199,6 +200,7 @@ public class DefaultInternalAlarmServiceImpl implements InternalAlarmService {
         Timestamp clearTime = new Timestamp(System.currentTimeMillis());
         for (Alarm alarm : alarms) {
             manager.delete(alarm);
+            alarm.setSeverity(AlarmSeverity.CLEAR); //we are clearing the alarm
             notificationList.add(new AlarmWithCondition(alarm, AlarmCondition.ALARM_OFF, clearTime, alarmChange.getMountKey()));
             m_clearedAlarms.incrementAndGet();
         }

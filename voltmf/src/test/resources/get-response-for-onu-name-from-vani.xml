@@ -1,0 +1,34 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1001">
+    <data>
+        <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <managed-devices>
+                <device>
+                    <name>OLT1</name>
+                    <root>
+                        <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                            <if:interface>
+                                <if:name>vomci-use</if:name>
+                                <if:enabled>true</if:enabled>
+                                <if:type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:v-ani</if:type>
+                                <bbf-if-pm:performance xmlns:bbf-if-pm="urn:bbf:yang:bbf-interfaces-performance-management">
+                                    <bbf-if-pm:enable>false</bbf-if-pm:enable>
+                                </bbf-if-pm:performance>
+                                <bbf-subprof:subscriber-profile xmlns:bbf-subprof="urn:bbf:yang:bbf-subscriber-profiles"/>
+                                <bbf-qos-tm:tm-root xmlns:bbf-qos-tm="urn:bbf:yang:bbf-qos-traffic-mngt"/>
+                                <bbf-xponvani:v-ani xmlns:bbf-xponvani="urn:bbf:yang:bbf-xponvani">
+                                    <bbf-xponvani:expected-registration-id/>
+                                    <bbf-xponvani:expected-serial-number>ABCD12345678</bbf-xponvani:expected-serial-number>
+                                    <bbf-xponvani:management-gemport-aes-indicator>false</bbf-xponvani:management-gemport-aes-indicator>
+                                    <onu-name xmlns:baa-xponvani-onu-auth="urn:bbf:yang:obbaa:xponvani-onu-authentication">ont1</onu-name>
+                                    <baa-xponvani-onu-auth:planned-onu-management-mode xmlns:baa-xpon-onu-types="urn:bbf:yang:obbaa:xpon-onu-types" xmlns:baa-xponvani-onu-auth="urn:bbf:yang:obbaa:xponvani-onu-authentication">baa-xpon-onu-types:use-vomci</baa-xponvani-onu-auth:planned-onu-management-mode>
+                                    <bbf-xponvani:upstream-fec>false</bbf-xponvani:upstream-fec>
+                                    <bbf-olt-vomci:vomci-onu xmlns:bbf-olt-vomci="urn:bbf:yang:bbf-olt-vomci"/>
+                                </bbf-xponvani:v-ani>
+                            </if:interface>
+                        </if:interfaces>
+                    </root>
+                </device>
+            </managed-devices>
+        </network-manager>
+    </data>
+</rpc-reply>

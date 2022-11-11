@@ -44,6 +44,18 @@ spec:
               value: "bbf-vproxy"
             - name: VOMCI_KAFKA_VOLTMF_NAME
               value: "vOLTMF"
+            - name: BBF_OBBAA_VNF_NAME
+              value: "BBF-VPROXY"
+            - name: BBF_OBBAA_VNF_TYPE
+              value: "VPROXY"
+            - name: BBF_OBBAA_VNF_VERSION
+              value: "1.0.0"
+            - name: BBF_OBBAA_VNF_VENDOR
+              value: "BBF"
+            - name: BBF_OBBAA_VNF_INSTANCE_NAME
+              value: "BBF-vproxy-instance1"
+            - name: BBF_OBBBA_VNF_ADMIN_STATE
+              value: "unlocked"
           ports:
             - containerPort: 8433
               name: port8433

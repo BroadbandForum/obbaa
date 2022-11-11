@@ -1,0 +1,46 @@
+{
+  "ietf-alarms:alarms": {
+    "alarm-list": {
+      "number-of-alarms": 3,
+      "last-changed": "2022-01-09T14:00:00+00:00",
+      "alarm": [
+        {
+          "resource": "/ietf-interfaces:interfaces/interface[name='enet_uni_ont1_1_1']",
+          "alarm-type-id": "bbf-obbaa-ethernet-alarm-types:loss-of-signal",
+          "alarm-type-qualifier": "",
+          "status-change": [
+            {
+              "time": "2022-01-09T13:00:00+00:00",
+              "perceived-severity": "major",
+              "alarm-text": "Loss of signal detected."
+            }
+          ]
+        },
+        {
+          "resource": "/ietf-interfaces:interfaces/interface[name='enet_uni_ont1_1_2']",
+          "alarm-type-id": "bbf-obbaa-ethernet-alarm-types:loss-of-signal",
+          "alarm-type-qualifier": "",
+          "status-change": [
+            {
+              "time": "2022-01-09T13:00:00+00:00",
+              "perceived-severity": "major",
+              "alarm-text": "Loss of signal detected."
+            }
+          ]
+        },
+        {
+          "resource": "/ietf-hardware:hardware/component[name='ontAniPort_ont1']",
+          "alarm-type-id": "bbf-hardware-transceiver-alarm-types:rx-power-low",
+          "alarm-type-qualifier": "",
+          "status-change": [
+            {
+              "time": "2022-01-09T14:00:00+00:00",
+              "perceived-severity": "major",
+              "alarm-text": "Low receive (RX) input power detected."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

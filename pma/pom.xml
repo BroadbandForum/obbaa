@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
@@ -41,6 +41,12 @@
         <dependency>
             <groupId>org.broadband-forum.obbaa.netconf</groupId>
             <artifactId>netconf-server-modelnode-fwk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.broadband-forum.obbaa.netconf</groupId>
+            <artifactId>netconf-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -78,7 +84,7 @@
         <dependency>
             <groupId>org.apache.karaf.kar</groupId>
             <artifactId>org.apache.karaf.kar.core</artifactId>
-            <version>4.0.4</version>
+            <version>${apache.karaf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -124,6 +130,21 @@
             </execution>
         </executions>
     </plugin>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>${bundle.plugin.version}</version>
+            <extensions>true</extensions>
+            <inherited>true</inherited>
+            <configuration>
+                <instructions combine.children="append">
+                    <Bundle-Version>${project.version}</Bundle-Version>
+                    <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
+                    <Import-Package>org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore, *</Import-Package>
+                    <_removeheaders>Import-Service,Export-Service</_removeheaders>
+                </instructions>
+            </configuration>
+        </plugin>
     </plugins>
     </build>
 </project>

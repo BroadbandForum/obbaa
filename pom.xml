@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>baa-root-pom</artifactId>
-    <version>5.0.0</version>
+    <version>5.1.0</version>
     <packaging>pom</packaging>
     <name>Broadband Access Abstraction</name>
 
@@ -41,10 +41,11 @@
         <module>library-consult</module>
         <module>baa-maven-plugin</module>
         <module>pm-collector</module>
+        <module>microservices-discovery</module>
     </modules>
 
     <properties>
-        <obbaa-release.version>5.0.0</obbaa-release.version>
+        <obbaa-release.version>5.1.0</obbaa-release.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <java.source.version>1.8</java.source.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
@@ -55,36 +56,37 @@
         <maven-dependency-plugin.version>3.0.0</maven-dependency-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
-        <apache.karaf.version>4.0.4</apache.karaf.version>
-        <karaf.maven.plugin.version>4.0.2</karaf.maven.plugin.version>
+        <apache.karaf.version>4.2.7</apache.karaf.version>
+        <karaf.maven.plugin.version>4.2.7</karaf.maven.plugin.version>
         <codehaus.build_helper.plugin.version>1.9</codehaus.build_helper.plugin.version>
-        <bundle.plugin.version>3.0.1</bundle.plugin.version>
+        <bundle.plugin.version>4.2.1</bundle.plugin.version>
         <mapdb.version>3.0.3</mapdb.version>
         <springfox-swagger-ui.version>2.7.0</springfox-swagger-ui.version>
-        <commons-io.version>2.5</commons-io.version>
+        <commons-io.version>2.7</commons-io.version>
         <commons.lang.version>2.6</commons.lang.version>
-        <spring-boot.version>1.2.5.RELEASE</spring-boot.version>
+        <spring-boot.version>2.5.12</spring-boot.version>
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
         <jackson-jaxrs.version>1.9.13</jackson-jaxrs.version>
         <commons-pool2.version>2.4.2</commons-pool2.version>
         <log4j.version>1.2.16</log4j.version>
-        <gson.version>2.8.2</gson.version>
-        <guava.version>23.6.1-jre</guava.version>
-        <junit.version>4.12</junit.version>
+        <gson.version>2.8.9</gson.version>
+        <guava.version>27.1-jre</guava.version>
+        <junit.version>4.13.1</junit.version>
         <powermock.version>1.6.2</powermock.version>
         <xmlunit.version>1.5</xmlunit.version>
         <mockito-all.version>1.10.19</mockito-all.version>
-        <netty.version>4.1.16.Final</netty.version>
-        <pax-jdbc.version>1.1.0</pax-jdbc.version>
-        <opendaylight-yangtools.version>2.0.11</opendaylight-yangtools.version>
-        <transaction.version>1.3.0</transaction.version>
+        <netty.version>4.1.68.Final</netty.version>
+        <pax-jdbc.version>1.4.0</pax-jdbc.version>
+        <opendaylight-yangtools.version>3.0.16</opendaylight-yangtools.version>
+        <transaction.version>2.0</transaction.version>
         <transaction-api.version>1.2</transaction-api.version>
-        <jpa.version>2.3.0</jpa.version>
-        <hibernate.version>4.3.6.Final</hibernate.version>
-        <pax-http-whiteboard.version>4.2.4</pax-http-whiteboard.version>
+        <jpa.version>2.7.2</jpa.version>
+        <hibernate.version>5.4.2.Final</hibernate.version>
+        <pax-http-whiteboard.version>7.2.11</pax-http-whiteboard.version>
+        <pax.version>7.2.11</pax.version>
         <kotlin.version>1.0.6</kotlin.version>
         <eclipse-collection.version>7.1.2</eclipse-collection.version>
-        <mina.version>1.3.0</mina.version>
+        <mina.version>2.4.0</mina.version>
         <hsql.version>2.3.3</hsql.version>
         <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
         <spring-boot-auto-configure.version>1.2.5.RELEASE</spring-boot-auto-configure.version>
@@ -93,7 +95,7 @@
         <aries.blueprint-parser.version>1.2.1</aries.blueprint-parser.version>
         <hibernate.jpa.2.1.api.version>1.0.0.Final</hibernate.jpa.2.1.api.version>
         <transaction.api.version>1.2</transaction.api.version>
-        <ehcache-core.version>2.4.3</ehcache-core.version>
+        <ehcache-core.version>2.6.11</ehcache-core.version>
         <errorprone.version>2.0.18</errorprone.version>
         <j2objc-annotations.version>1.1</j2objc-annotations.version>
         <animal-sniffer-annotation.version>1.14</animal-sniffer-annotation.version>
@@ -102,9 +104,11 @@
         <commons-io.version>2.4</commons-io.version>
         <commons-collection.version>3.2.1</commons-collection.version>
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
-        <commons-lang3.version>3.5</commons-lang3.version>
+        <commons-lang3.version>3.9</commons-lang3.version>
         <commons-collections4.version>4.1</commons-collections4.version>
         <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
+        <http-client.version>4.5.10</http-client.version>
+        <http-core.version>4.4.12</http-core.version>
         <jdom.version>1.1.3</jdom.version>
         <commons-jxpath.version>1.3</commons-jxpath.version>
         <apache.servicemix.bundles.aopalliance.version>1.0_6</apache.servicemix.bundles.aopalliance.version>
@@ -137,7 +141,7 @@
         <selenium-java.version>2.44.0</selenium-java.version>
         <operadriver.version>1.5</operadriver.version>
         <system-rules.version>1.19.0</system-rules.version>
-        <protobuf.version>3.11.1</protobuf.version>
+        <protobuf.version>3.16.1</protobuf.version>
         <grpc.version>1.26.0</grpc.version>
         <okio.version>1.17.3</okio.version>
         <influxdb-client.version>1.3.0</influxdb-client.version>
@@ -146,6 +150,7 @@
         <snmp4j.version>2.7.0</snmp4j.version>
         <kafka.client.version>2.5.0</kafka.client.version>
         <kafka-json-serializer.version>5.5.1</kafka-json-serializer.version>
+        <bouncy.castle.version>1.67</bouncy.castle.version>
     </properties>
 
     <dependencyManagement>
@@ -154,32 +159,32 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>2.2.0</version>
-                </dependency>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.2.0</version>
-                </dependency>
+                <version>2.13.4.1</version>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>2.2.0</version>
-                </dependency>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-guava</artifactId>
                 <version>2.2.0</version>
-                </dependency>
+            </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
                 <version>${protobuf.version}</version>
-                </dependency>
+            </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>protoc-gen-grpc-java</artifactId>
                 <version>${grpc.version}</version>
-                </dependency>
+            </dependency>
             <dependency>
                 <groupId>com.influxdb</groupId>
                 <artifactId>influxdb-client-java</artifactId>
@@ -520,7 +525,10 @@
                 <configuration>
                     <instructions>
                         <!-- 15mins timeout for bundle -->
-                        <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=true;blueprint.timeout:=900000</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>
+                            ${project.artifactId};blueprint.graceperiod:=true;blueprint.timeout:=900000
+                        </Bundle-SymbolicName>
+                        <_removeheaders>Import-Service,Export-Service</_removeheaders>
                     </instructions>
                     <supportedProjectTypes>
                         <supportedProjectType>jar</supportedProjectType>
@@ -529,50 +537,51 @@
                     </supportedProjectTypes>
                 </configuration>
             </plugin>
-        <plugin>
-            <artifactId>maven-plugin-plugin</artifactId>
-            <version>${maven-plugin-plugin.version}</version>
-        </plugin>
+            <plugin>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>${maven-plugin-plugin.version}</version>
+            </plugin>
         </plugins>
     </build>
     <profiles>
-    <profile>
-        <id>jacoco</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.maven.plugin}</version>
-                    <configuration>
-                        <includes>
-                            <include>org.broadband-forum.obbaa.*</include>
-                        </includes>
-                        <destFile>${sonar.jacoco.reportPath}</destFile>
-                        <propertyName>jacoco.agent.argLine</propertyName>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <configuration>
-                        <argLine>-Xms512m -Xmx3072m
-                            -XX:MaxPermSize=512m
-                            -XX:PermSize=256m
-                            -XX:-UseSplitVerifier
-                            ${jacoco.agent.argLine}</argLine>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
-    </profile>
+        <profile>
+            <id>jacoco</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.maven.plugin}</version>
+                        <configuration>
+                            <includes>
+                                <include>org.broadband-forum.obbaa.*</include>
+                            </includes>
+                            <destFile>${sonar.jacoco.reportPath}</destFile>
+                            <propertyName>jacoco.agent.argLine</propertyName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>-Xms512m -Xmx3072m
+                                -XX:MaxPermSize=512m
+                                -XX:PermSize=256m
+                                -XX:-UseSplitVerifier
+                                ${jacoco.agent.argLine}
+                            </argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
     <repositories>
         <repository>

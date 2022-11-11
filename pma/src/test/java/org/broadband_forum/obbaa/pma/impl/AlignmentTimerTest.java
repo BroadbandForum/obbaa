@@ -65,6 +65,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.w3c.dom.Element;
 
 public class AlignmentTimerTest {
 
@@ -76,6 +77,7 @@ public class AlignmentTimerTest {
     private static String SAMPLE_NON_EMPTY_NC_RES = "<rpc-reply " +
         "xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" " +
         "message-id=\"101012\">\n" +
+        "<transaction-id xmlns=\"http://tail-f.com/ns/netconf/with-transaction-id\">1572-676313-833357</transaction-id>\n" +
         "  <data>\n" +
         "    <root-config xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
         "      <config1>\n" +
@@ -83,6 +85,13 @@ public class AlignmentTimerTest {
         "    </root-config>\n" +
         "  </data>\n" +
         "</rpc-reply>";
+
+    private static String DATA = "<data>\n" +
+            "    <root-config xmlns=\"urn:bbf:yang:obbaa:network-manager\">\n" +
+            "      <config1>\n" +
+            "      </config1>\n" +
+            "    </root-config>\n" +
+            "  </data>\n" ;
 
     private static String EDIT_CONFIG_REQ = "<rpc message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
         "  <edit-config>\n" +
@@ -275,6 +284,7 @@ public class AlignmentTimerTest {
 
     @Test
     public void testUploadConfigError() throws ExecutionException, InterruptedException, NetconfMessageBuilderException {
+        Element m_dataElement = DocumentUtils.stringToDocument(DATA).getDocumentElement();
         m_newDevice.getDeviceManagement().setPushPmaConfigurationToDevice("false");
         Future<NetConfResponse> responseFuture = mock(Future.class);
         NetConfResponse netConfResponse = null;
@@ -283,7 +293,7 @@ public class AlignmentTimerTest {
         } catch (NetconfMessageBuilderException e) {
             throw new RuntimeException(e);
         }
-        when(responseFuture.get()).thenReturn(netConfResponse);
+        when(responseFuture.get()).thenReturn(netConfResponse.addDataContent(m_dataElement));
         when(m_devInterface.getConfig(eq(m_newDevice), anyObject())).thenReturn(responseFuture);
         Map<NetConfResponse, List<Notification>> map = new HashMap<>();
         NetConfResponse netConfRespons = DocumentToPojoTransformer.getNetconfResponse(DocumentUtils.stringToDocument(ERROR_RESPONSE));

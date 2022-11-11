@@ -268,7 +268,9 @@ public class ONUNotification extends NetconfNotification {
 
     public String getDeterminedOnuManagementMode() {
         try {
-            return c_xPathDeterminedOnuManagementMode.evaluate(m_document);
+            if (c_xPathDeterminedOnuManagementMode != null) {
+                return c_xPathDeterminedOnuManagementMode.evaluate(m_document);
+            }
         } catch (XPathExpressionException e) {
             LOGGER.error("Error while evaluating Determined Onu Management Mode", e);
         }
@@ -277,7 +279,9 @@ public class ONUNotification extends NetconfNotification {
 
     public String getDetectedLoId() {
         try {
-            return c_xPathDetectedLoId.evaluate(m_document);
+            if (c_xPathDetectedLoId != null) {
+                return c_xPathDetectedLoId.evaluate(m_document);
+            }
         } catch (XPathExpressionException e) {
             LOGGER.error("Error while evaluating DDetected location Id", e);
         }

@@ -52,4 +52,9 @@ public class DefaultDataStoreMetaProvider implements DataStoreMetaProvider {
             version.setVersion(newVersion);
         }
     }
+
+    @Override
+    public String getAllDataStoreVersions() {
+        return null;
+    }
 }

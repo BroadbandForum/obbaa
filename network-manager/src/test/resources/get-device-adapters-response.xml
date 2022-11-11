@@ -109,12 +109,16 @@
                 <revision>2018-06-15</revision>
             </module>
             <module>
+                <name>bbf-obbaa-pmaa-onu-types</name>
+                <revision>2022-05-24</revision>
+            </module>
+            <module>
                 <name>bbf-obbaa-xpon-onu-alarm-types</name>
                 <revision>2022-01-31</revision>
             </module>
             <module>
                 <name>bbf-obbaa-xpon-onu-types</name>
-                <revision>2021-11-10</revision>
+                <revision>2022-05-24</revision>
             </module>
             <module>
                 <name>bbf-omci-message-retransmission</name>
@@ -142,7 +146,7 @@
             </module>
             <module>
                 <name>bbf-vomci-proxy</name>
-                <revision>2021-08-19</revision>
+                <revision>2020-08-19</revision>
             </module>
             <module>
                 <name>bbf-vomci-types</name>
@@ -316,12 +320,16 @@
                 <revision>2018-06-15</revision>
             </module>
             <module>
+                <name>bbf-obbaa-pmaa-onu-types</name>
+                <revision>2022-05-24</revision>
+            </module>
+            <module>
                 <name>bbf-obbaa-xpon-onu-alarm-types</name>
                 <revision>2022-01-31</revision>
             </module>
             <module>
                 <name>bbf-obbaa-xpon-onu-types</name>
-                <revision>2021-11-10</revision>
+                <revision>2022-05-24</revision>
             </module>
             <module>
                 <name>bbf-omci-message-retransmission</name>
@@ -349,7 +357,7 @@
             </module>
             <module>
                 <name>bbf-vomci-proxy</name>
-                <revision>2021-08-19</revision>
+                <revision>2020-08-19</revision>
             </module>
             <module>
                 <name>bbf-vomci-types</name>

@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class NetworkFunctionSubsystemTest {
+public class NetworkFunctionManagementSubsystemTest {
 
     @Mock
     NetworkFunctionManager m_networkFunctionManager;
@@ -53,13 +53,13 @@ public class NetworkFunctionSubsystemTest {
     @Mock
     EditMatchNode m_editMatchNode;
 
-    NetworkFunctionSubsystem m_networkFunctionSubsystem;
+    NetworkFunctionManagementSubsystem m_networkFunctionManagementSubsystem;
     List<ChangeNotification> m_changeNotificationList;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        m_networkFunctionSubsystem = new NetworkFunctionSubsystem(m_networkFunctionManager);
+        m_networkFunctionManagementSubsystem = new NetworkFunctionManagementSubsystem(m_networkFunctionManager);
         m_changeNotificationList = new ArrayList<ChangeNotification>();
         m_changeNotificationList.add(m_editConfigChangeNotification);
     }
@@ -74,7 +74,7 @@ public class NetworkFunctionSubsystemTest {
         when(m_editContainmentNode.getMatchNodes()).thenReturn(m_editMatchNodesList);
         when(m_editMatchNodesList.get(0)).thenReturn(m_editMatchNode);
         when(m_editMatchNode.getValue()).thenReturn("vomci");
-        m_networkFunctionSubsystem.notifyChanged(m_changeNotificationList);
+        m_networkFunctionManagementSubsystem.notifyChanged(m_changeNotificationList);
         verify(m_editConfigChangeNotification, times(1)).getModelNodeId();
         verify(m_editConfigChangeNotification, times(3)).getChange();
         verify(m_modelNodeChange, times(2)).getChangeData();
@@ -97,7 +97,7 @@ public class NetworkFunctionSubsystemTest {
         when(m_editContainmentNode.getMatchNodes()).thenReturn(m_editMatchNodesList);
         when(m_editMatchNodesList.get(0)).thenReturn(m_editMatchNode);
         when(m_editMatchNode.getValue()).thenReturn("vomci");
-        m_networkFunctionSubsystem.notifyChanged(m_changeNotificationList);
+        m_networkFunctionManagementSubsystem.notifyChanged(m_changeNotificationList);
         verify(m_editConfigChangeNotification, times(1)).getModelNodeId();
         verify(m_editConfigChangeNotification, times(4)).getChange();
         verify(m_modelNodeChange, times(2)).getChangeData();
@@ -113,7 +113,7 @@ public class NetworkFunctionSubsystemTest {
     @Test
     public void testNotifYChangedWithWrongModelNodeId() {
         when(m_editConfigChangeNotification.getModelNodeId()).thenReturn(m_modelNodeId);
-        m_networkFunctionSubsystem.notifyChanged(m_changeNotificationList);
+        m_networkFunctionManagementSubsystem.notifyChanged(m_changeNotificationList);
         verify(m_editConfigChangeNotification, times(1)).getModelNodeId();
         verify(m_editConfigChangeNotification, never()).getChange();
         verify(m_networkFunctionManager, never()).networkFunctionAdded("vomci");

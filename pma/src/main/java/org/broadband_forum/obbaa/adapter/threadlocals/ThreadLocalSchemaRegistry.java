@@ -23,15 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.jxpath.ri.compiler.Expression;
+import org.apache.commons.jxpath.ri.compiler.LocationPath;
+import org.broadband_forum.obbaa.netconf.api.util.DataPath;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ImpactNode;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ModuleIdentifier;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ReferringNode;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.ReferringNodes;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaBuildException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaMountRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistryImpl;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.TreeImpactNode;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.constraints.payloadparsing.SchemaNodeConstraintParser;
 import org.broadband_forum.obbaa.netconf.mn.fwk.schema.constraints.payloadparsing.typevalidators.TypeValidator;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.dom.YinAnnotationService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.notification.listener.YangLibraryChangeNotificationListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.Revision;
@@ -125,6 +133,14 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
+    public void loadSchemaContext(String componentId, List<YangTextSchemaSource> yangModelFiles, Set<QName> supportedFeatures, Map<QName,
+            Set<QName>> supportedDeviations, boolean isYangLibNotificationSupported,
+                                  boolean isYangLibraryIgnored) throws SchemaBuildException {
+        getRegistry().loadSchemaContext(componentId, yangModelFiles, supportedFeatures, supportedDeviations,
+                isYangLibNotificationSupported, isYangLibraryIgnored);
+    }
+
+    @Override
     public void unloadSchemaContext(String componentId, Set<QName> supportedFeatures, Map<QName, Set<QName>> supportedDeviations)
             throws SchemaBuildException {
         getRegistry().unloadSchemaContext(componentId, supportedFeatures, supportedDeviations);
@@ -137,9 +153,28 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
+    public void unloadSchemaContext(String componentId, Set<QName> supportedFeatures, Map<QName, Set<QName>> supportedDeviations,
+                                    boolean isYangLibNotificationSupported, boolean isYangLibraryIgnored) throws SchemaBuildException {
+        getRegistry().unloadSchemaContext(componentId, supportedFeatures,  supportedDeviations, isYangLibNotificationSupported,
+                isYangLibraryIgnored);
+
+    }
+
+    @Override
+    public Map<SchemaPath, DataSchemaNode> getSchemaNodes() {
+        return getRegistry().getSchemaNodes();
+    }
+
+    @Override
+    public ConcurrentHashMap<SchemaPath, TreeImpactNode<ImpactNode>> getImpactNodeMap() {
+        return getRegistry().getImpactNodeMap();
+    }
+
+    @Override
     public DataSchemaNode getDataSchemaNode(SchemaPath dataNodeSchemaPath) {
         return getRegistry().getDataSchemaNode(dataNodeSchemaPath);
     }
+
 
     @Override
     public DataSchemaNode getDataSchemaNode(List<QName> paths) {
@@ -147,8 +182,8 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
-    public ActionDefinition getActionDefinitionNode(List<QName> path) {
-        return getRegistry().getActionDefinitionNode(path);
+    public ActionDefinition getActionDefinitionNode(DataPath actionDataPath) {
+        return getRegistry().getActionDefinitionNode(actionDataPath);
     }
 
     @Override
@@ -212,6 +247,11 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
+    public String getComponentIdByNamespace(String namespace) {
+        return getRegistry().getComponentIdByNamespace(namespace);
+    }
+
+    @Override
     public String getNamespaceOfModule(String moduleName) {
         return getRegistry().getNamespaceOfModule(moduleName);
     }
@@ -227,9 +267,8 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
-    public void registerNodesReferencedInConstraints(String componentId, SchemaPath constraintSchemaPath,
-                                                     SchemaPath nodeSchemaPath, String accessPath) {
-        getRegistry().registerNodesReferencedInConstraints(componentId, constraintSchemaPath, nodeSchemaPath, accessPath);
+    public void registerNodesReferredInConstraints(String componentId, ReferringNode referringNode) {
+        getRegistry().registerNodesReferredInConstraints(componentId, referringNode);
     }
 
     @Override
@@ -243,8 +282,8 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
-    public Map<SchemaPath, Expression> getReferencedNodesForSchemaPaths(SchemaPath schemaPath) {
-        return getRegistry().getReferencedNodesForSchemaPaths(schemaPath);
+    public ReferringNodes getReferringNodesForSchemaPath(SchemaPath schemaPath) {
+        return getRegistry().getReferringNodesForSchemaPath(schemaPath);
     }
 
     @Override
@@ -273,6 +312,16 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
+    public void addToChildBigList(SchemaPath schemaPath) {
+        getRegistry().addToChildBigList(schemaPath);
+    }
+
+    @Override
+    public boolean isChildBigList(SchemaPath schemaPath) {
+        return getRegistry().isChildBigList(schemaPath);
+    }
+
+    @Override
     public void registerRelativePath(String augmentedPath, String relativePath, DataSchemaNode schemaNode) {
         getRegistry().registerRelativePath(augmentedPath, relativePath, schemaNode);
     }
@@ -290,6 +339,37 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     @Override
     public Set<String> getModuleCapabilities(boolean forHello) {
         return getRegistry().getModuleCapabilities(forHello);
+    }
+
+    @Override
+    public Expression getExpressionWithModuleNameInPrefix(SchemaPath schemaPath, Expression expression) {
+        return getRegistry().getExpressionWithModuleNameInPrefix(schemaPath, expression);
+    }
+
+    @Override
+    public Expression getExpressionWithModuleNameInPrefix(SchemaPath schemaPath, String expression) {
+        return getRegistry().getExpressionWithModuleNameInPrefix(schemaPath, expression);
+    }
+
+    @Override
+    public void registerExpressionWithModuleNameInPrefix(SchemaPath schemaPath, String expression, String expressionWithPrefix) {
+        getRegistry().registerExpressionWithModuleNameInPrefix(schemaPath, expression, expressionWithPrefix);
+    }
+
+    @Override
+    public void registerExpressionWithModuleNameInPrefix(SchemaPath schemaPath, Expression expression, String expressionWithPrefix) {
+        getRegistry().registerExpressionWithModuleNameInPrefix(schemaPath, expression, expressionWithPrefix);
+    }
+
+    @Override
+    public Set<String> getAttributesWithSameLocalNameDifferentNameSpace(SchemaPath schemaPath) {
+        return getRegistry().getAttributesWithSameLocalNameDifferentNameSpace(schemaPath);
+    }
+
+    @Override
+    public void registerAttributesWithSameLocalNameDifferentNameSpace(SchemaPath schemaPath,
+                                                                      Set<String> attributesWithSameLocalNameDifferentNameSpace) {
+        getRegistry().registerAttributesWithSameLocalNameDifferentNameSpace(schemaPath,attributesWithSameLocalNameDifferentNameSpace);
     }
 
     @Override
@@ -438,8 +518,126 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     }
 
     @Override
-    public Map<SchemaPath, Expression> addChildImpactPaths(SchemaPath schemaPath) {
-        return getRegistry().addChildImpactPaths(schemaPath);
+    public String getName() {
+        return getRegistry().getName();
+    }
+
+    @Override
+    public ReferringNodes addChildImpactPaths(SchemaPath schemaPath, Set<QName> skipImmediateChildQNames) {
+        return getRegistry().addChildImpactPaths(schemaPath, skipImmediateChildQNames);
+    }
+
+    @Override
+    public void registerWhenReferringNodes(String componentId, SchemaPath referencedSchemaPath, SchemaPath nodeSchemaPath,
+                                           String accessPath) {
+        getRegistry().registerWhenReferringNodes(componentId, referencedSchemaPath, nodeSchemaPath, accessPath);
+    }
+
+    @Override
+    public Map<SchemaPath, Expression> getWhenReferringNodes(SchemaPath nodeSchemaPath) {
+        return getRegistry().getWhenReferringNodes(nodeSchemaPath);
+    }
+
+    @Override
+    public Map<SchemaPath, Expression> getWhenReferringNodes(String componentId, SchemaPath nodeSchemaPath) {
+        return getRegistry().getWhenReferringNodes(componentId, nodeSchemaPath);
+    }
+
+    @Override
+    public void registerWhenReferringNodesForAllSchemaNodes(String componentId, SchemaPath referencedSchemaPath,
+                                                            SchemaPath nodeSchemaPath, String accessPath) {
+        getRegistry().registerWhenReferringNodesForAllSchemaNodes(componentId, referencedSchemaPath, nodeSchemaPath, accessPath);
+    }
+
+    @Override
+    public Map<SchemaPath, Expression> getWhenReferringNodesForAllSchemaNodes(String componentId, SchemaPath nodeSchemaPath) {
+        return getRegistry().getWhenReferringNodesForAllSchemaNodes(componentId, nodeSchemaPath);
+    }
+
+    @Override
+    public void registerMustReferringNodesForAllSchemaNodes(String componentId, SchemaPath referencedSchemaPath,
+                                                            SchemaPath nodeSchemaPath, String accessPath) {
+        getRegistry().registerMustReferringNodesForAllSchemaNodes(componentId, referencedSchemaPath, nodeSchemaPath, accessPath);
+    }
+
+    @Override
+    public Map<SchemaPath, Expression> getMustReferringNodesForAllSchemaNodes(String componentId, SchemaPath nodeSchemaPath) {
+        return getRegistry().getMustReferringNodesForAllSchemaNodes(componentId, nodeSchemaPath);
+    }
+
+    @Override
+    public String getShortPath(SchemaPath path) {
+        return getRegistry().getShortPath(path);
+    }
+
+    @Override
+    public void addToSkipValidationPaths(SchemaPath schemaPath, String constraintXpath) {
+        getRegistry().addToSkipValidationPaths(schemaPath, constraintXpath);
+    }
+
+    @Override
+    public boolean isSkipValidationBySchemaPathWithConstraintXpath(SchemaPath schemaPath, String constraintXpath) {
+        return getRegistry().isSkipValidationBySchemaPathWithConstraintXpath(schemaPath, constraintXpath);
+    }
+
+    @Override
+    public boolean isSkipValidationPath(SchemaPath schemaPath) {
+        return getRegistry().isSkipValidationPath(schemaPath);
+    }
+
+    @Override
+    public void addExpressionsWithoutKeysInList(String fullExpression, LocationPath expressionWithListAtLowerLevel) {
+        getRegistry().addExpressionsWithoutKeysInList(fullExpression, expressionWithListAtLowerLevel);
+    }
+
+    @Override
+    public Set<LocationPath> getExpressionsWithoutKeysInList(String fullExpression) {
+        return getRegistry().getExpressionsWithoutKeysInList(fullExpression);
+    }
+
+    @Override
+    public void printReferringNodes() {
+        getRegistry().printReferringNodes();
+    }
+
+    @Override
+    public void addImpactNodeForChild(SchemaPath schemaPath, ReferringNodes impactedPaths, Set<QName> skipImmediateChildQNames) {
+        getRegistry().addImpactNodeForChild(schemaPath, impactedPaths, skipImmediateChildQNames);
+    }
+
+    @Override
+    public Map<SchemaPath, TreeImpactNode<ImpactNode>> getReferringNodes() {
+        return getRegistry().getReferringNodes();
+    }
+
+    @Override
+    public void registerNodeConstraintDefinedModule(DataSchemaNode schemaNode, String constraint, Module module) {
+        getRegistry().registerNodeConstraintDefinedModule(schemaNode, constraint, module);
+    }
+
+    @Override
+    public Map<Expression, Module> getNodeConstraintDefinedModule(DataSchemaNode schemaNode) {
+        return getRegistry().getNodeConstraintDefinedModule(schemaNode);
+    }
+
+    @Override
+    public YinAnnotationService getYinAnnotationService() {
+        return getRegistry().getYinAnnotationService();
+    }
+
+    @Override
+    public DataSchemaNode findChild(DataSchemaNode currentNode, QName qname) {
+        return getRegistry().findChild(currentNode, qname);
+    }
+
+    @Override
+    public void clear() {
+        getRegistry().clear();
+    }
+
+    @Override
+    public Set<ActionDefinition> getActionDefinitionNodesWithListAndLeafRef() {
+        return getRegistry().getActionDefinitionNodesWithListAndLeafRef();
     }
 
     @Override
@@ -455,5 +653,10 @@ public class ThreadLocalSchemaRegistry implements SchemaRegistry {
     @Override
     public Iterator getPrefixes(String string) {
         return getRegistry().getPrefixes(string);
+    }
+
+    @Override
+    public SchemaRegistry unwrap() {
+        return getRegistry().unwrap();
     }
 }

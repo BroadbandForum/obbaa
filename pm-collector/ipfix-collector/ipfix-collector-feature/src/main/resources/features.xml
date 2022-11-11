@@ -61,7 +61,7 @@
         <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
         <bundle>mvn:org.bouncycastle/bcprov-jdk16/${bouncy-castle.version}</bundle>
         <bundle>mvn:joda-time/joda-time/${joda-time.version}</bundle>
-        <bundle>mvn:org.apache.sshd/sshd-core/${mina.version}</bundle>
+        <bundle>mvn:org.apache.sshd/sshd-osgi/${mina.version}</bundle>
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
         <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
         <bundle>mvn:commons-collections/commons-collections/${commons-collection.version}</bundle>

@@ -25,11 +25,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
 import org.broadband_forum.obbaa.netconf.api.client.AbstractNetconfClientSession;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfResponseFuture;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
@@ -104,11 +106,11 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
     }
 
     @Override
-    protected CompletableFuture<NetConfResponse> sendRpcMessage(String currentMessageId, Document requestDocument, long timeoutMillis) {
+    protected NetconfResponseFuture sendRpcMessage(String currentMessageId, Document requestDocument, long timeoutMillis) {
         String requestType = DocumentToPojoTransformer.getTypeOfNetconfRequest(requestDocument);
         AbstractNetconfRequest netconfRequest = null;
         NetConfResponse response = new NetConfResponse();
-        CompletableFuture<NetConfResponse> future = null;
+        NetconfResponseFuture future = null;
         try {
             switch (requestType) {
                 case NetconfResources.COPY_CONFIG:
@@ -124,7 +126,8 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
                     future = onGet((GetRequest) netconfRequest);
                     break;
                 default:
-                    return CompletableFuture.completedFuture(new NetconfRpcResponse().setMessageId(currentMessageId));
+                    return (NetconfResponseFuture) CompletableFuture.completedFuture(new NetconfRpcResponse()
+                            .setMessageId(currentMessageId));
             }
         } catch (NetconfMessageBuilderException e) {
             if (requestDocument != null) {
@@ -239,13 +242,13 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
         }
     }
 
-    private void internalOkResponse(AbstractNetconfRequest request, TimestampFutureResponse future) {
+    private void internalOkResponse(AbstractNetconfRequest request, NetconfResponseFuture future) {
         NetConfResponse response = new NetConfResponse().setMessageId(request.getMessageId());
         response.setOk(true);
         future.complete(response);
     }
 
-    private void internalNokResponse(AbstractNetconfRequest request, TimestampFutureResponse future, String errorMessage) {
+    private void internalNokResponse(AbstractNetconfRequest request, NetconfResponseFuture future, String errorMessage) {
         NetConfResponse response = new NetConfResponse().setMessageId(request.getMessageId());
         NetconfRpcError netconfRpcError = NetconfRpcError.getApplicationError("Internal error detected: " + errorMessage);
         response = response.addError(netconfRpcError);
@@ -296,17 +299,17 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
         }
     }
 
-    public CompletableFuture<NetConfResponse> onCopyConfig(AbstractNetconfRequest request) {
+    public NetconfResponseFuture onCopyConfig(AbstractNetconfRequest request) {
         LOGGER.info(String.format("Sending copy config request for NF %s: %s", m_networkFunction.getNetworkFunctionName(),
                 request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
                 LOGGER.debug("Mediated Device Netconf Session is closed. "
                         + "Unable to process copy-config request for NF " + m_networkFunction);
-                return CompletableFuture.completedFuture(null);
+                return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
         }
-        TimestampFutureResponse future = new TimestampFutureResponse();
+        TimestampFutureResponse future = new TimestampFutureResponse(request.getReplyTimeout(), TimeUnit.MILLISECONDS);
         m_kafkaCommunicationPool.execute(() -> {
             try {
                 setMessageId(request);
@@ -324,29 +327,29 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
         return future;
     }
 
-    public CompletableFuture<NetConfResponse> onGet(GetRequest request) {
+    public NetconfResponseFuture onGet(GetRequest request) {
         LOGGER.info(String.format("Sending get request for NF %s: %s", m_networkFunctionName, request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
                 LOGGER.debug("Mediated Device Netconf Session is closed. Unable to process GET request");
-                return CompletableFuture.completedFuture(null);
+                return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
         }
         LOGGER.error("GET not implemented for NF");
-        return CompletableFuture.completedFuture(null);
+        return NetconfResponseFuture.completedNetconfResponseFuture(null);
     }
 
-    public CompletableFuture<NetConfResponse> onEditConfig(EditConfigRequest request) {
+    public NetconfResponseFuture  onEditConfig(EditConfigRequest request) {
         LOGGER.info(String.format("Sending edit config request for NF %s: >%s<", m_networkFunctionName,
                 request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
                 LOGGER.warn("Mediated Device Netconf Session is closed\n"
                         + "Unable to process edit-config request for " + m_networkFunctionName);
-                return CompletableFuture.completedFuture(null);
+                return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
         }
-        TimestampFutureResponse future = new TimestampFutureResponse();
+        TimestampFutureResponse future = new TimestampFutureResponse(request.getReplyTimeout(), TimeUnit.MILLISECONDS);
         m_kafkaCommunicationPool.execute(() -> {
             setMessageId(request);
             if (request.getMessageId() == null || request.getMessageId().isEmpty()) {

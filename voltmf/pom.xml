@@ -23,11 +23,11 @@
     <parent>
         <groupId>org.broadband-forum.obbaa</groupId>
         <artifactId>baa-root-pom</artifactId>
-        <version>5.0.0</version>
+        <version>5.1.0</version>
     </parent>
 
     <groupId>org.broadband-forum.obbaa</groupId>
-    <name>OB-BAA/vOLTMF</name>
+    <name>Broadband Access Abstraction/vOLTMF</name>
     <artifactId>voltmf</artifactId>
     <packaging>bundle</packaging>
 
@@ -62,6 +62,12 @@
             <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>netconf-alarm-app</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.broadband-forum.obbaa</groupId>
+            <artifactId>pma</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -108,12 +114,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.broadband-forum.obbaa</groupId>
-            <artifactId>pma</artifactId>
-            <version>5.0.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -205,6 +205,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
                 <extensions>true</extensions>
                 <inherited>true</inherited>
                 <configuration>
@@ -212,12 +213,12 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
                         <Import-Package>*, org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support,
-                            org.broadband_forum.obbaa.netconf.api.server, org.hibernate.proxy, javassist.util.proxy,
+                            org.broadband_forum.obbaa.netconf.api.server,
                             org.hibernate.jpa,
                             org.broadband_forum.obbaa.nf.*,
                             org.broadband_forum.obbaa.nm.nwfunctionmgr.*</Import-Package>
                         <_removeheaders>Import-Service,Export-Service,Provide-Capability,Require-Capability</_removeheaders>
-                        <Dynamic-Import-Package>*, org.hibernate.proxy, javassist.util.proxy</Dynamic-Import-Package>
+                        <Dynamic-Import-Package>*</Dynamic-Import-Package>
                         <Meta-Persistence>META-INF/persistence.xml</Meta-Persistence>
                     </instructions>
                 </configuration>

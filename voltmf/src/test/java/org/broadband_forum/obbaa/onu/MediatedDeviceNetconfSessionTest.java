@@ -63,6 +63,7 @@ import org.broadband_forum.obbaa.onu.util.VoltMFTestConstants;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -231,45 +232,6 @@ public class MediatedDeviceNetconfSessionTest {
         verify(m_getRequestOne, times(3)).getFilter();
         verify(m_jsonObject, never()).getJSONObject(VoltMFTestConstants.OBBAA_NETWORK_MANAGER);
         verify(m_kafkaProducer, times(1)).sendNotification(VoltMFTestConstants.ONU_REQUEST_KAFKA_TOPIC, VoltMFTestConstants.RESPONSE_DEFAULT_MSG_ID);
-    }
-
-    @Test
-    public void testOnGetNotDefaultMsgId() throws NetconfMessageBuilderException, MessageFormatterException {
-        Document filter = DocumentUtils.stringToDocument(VoltMFTestConstants.FILTER_GET_REQUEST);
-        ArrayList filterList = new ArrayList();
-        AdapterUtils adapterUtils = PowerMockito.mock(AdapterUtils.class);
-        AdapterContext adapterContext = Mockito.mock(AdapterContext.class);
-        SchemaRegistryImpl schemaRegistryImpl = Mockito.mock(SchemaRegistryImpl.class);
-        Module module = Mockito.mock(Module.class);
-        QNameModule qNameModule = PowerMockito.mock(QNameModule.class);
-        Optional<Revision> revision = PowerMockito.mock(Optional.class);
-        SchemaPathBuilder schemaPathBuilder = Mockito.mock(SchemaPathBuilder.class);
-        SchemaPath schemaPath = Mockito.mock(SchemaPath.class);
-        filterList.add(filter.getDocumentElement());
-        when(m_getRequestOne.getFilter()).thenReturn(m_filter);
-        when(m_getRequestOne.getFilter().getXmlFilterElements()).thenReturn(filterList);
-        when(m_getRequestOne.getMessageId()).thenReturn("1");
-        when(m_getRequestOne.getRequestDocument()).thenReturn(DocumentUtils.stringToDocument(VoltMFTestConstants.INTERNAL_GET_REQUEST_WITH_DEFAULT_MESSAGE_ID));
-        when(adapterUtils.getAdapterContext(m_onuDevice, m_adapterManager)).thenReturn(adapterContext);
-        when(adapterContext.getSchemaRegistry()).thenReturn(schemaRegistryImpl);
-        when(schemaRegistryImpl.getModuleByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(module);
-        when(schemaRegistryImpl.getModuleNameByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(VoltMFTestConstants.NETWORK_MANAGER);
-        when(module.getQNameModule()).thenReturn(qNameModule);
-        when(qNameModule.getRevision()).thenReturn(revision);
-        when(schemaPathBuilder.build()).thenReturn(schemaPath);
-        DataSchemaNode dataSchemaNode = getDataSchemaNode();
-        when(schemaRegistryImpl.getDataSchemaNode(any(SchemaPath.class))).thenReturn(dataSchemaNode);
-        PowerMockito.when(JsonUtil.convertFromXmlToJsonIgnoreEmptyLeaves(any(), any(), any(), any())).thenReturn(VoltMFTestConstants.FILTER_JSON_STRING);
-        MediatedDeviceNetconfSession session = getNewMDNSessionForNewDevice();
-        session.onGet(m_getRequestOne);
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        verify(m_getRequestOne, times(3)).getFilter();
-        verify(m_jsonObject, never()).getJSONObject(VoltMFTestConstants.OBBAA_NETWORK_MANAGER);
-        verify(m_kafkaProducer, times(1)).sendNotification(VoltMFTestConstants.ONU_REQUEST_KAFKA_TOPIC, VoltMFTestConstants.RESPONSE_NOT_DEFAULT_MSG_ID);
     }
 
     @Test

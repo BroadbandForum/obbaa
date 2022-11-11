@@ -14,9 +14,9 @@ spec:
         app: vomci
     spec:
       volumes:
-        - name: vomci-vproxy-volume
+        - name: vomci-function-volume
           persistentVolumeClaim:
-            claimName: vomci-vproxy-pvclaim
+            claimName: vomci-function-pvclaim
       containers:
         - name: vomci
           image: broadbandforum/obbaa-vomci:latest
@@ -38,10 +38,22 @@ spec:
               value: "bbf-vomci"
             - name: VOMCI_KAFKA_VOLTMF_NAME
               value: "vOLTMF"
+            - name: BBF_OBBAA_VNF_NAME
+              value: "BBF-VOMCI"
+            - name: BBF_OBBAA_VNF_TYPE
+              value: "VOMCI"
+            - name: BBF_OBBAA_VNF_VERSION
+              value: "1.0.0"
+            - name: BBF_OBBAA_VNF_VENDOR
+              value: "BBF"
+            - name: BBF_OBBAA_VNF_INSTANCE_NAME
+              value: "BBF-vomci-instance1"
+            - name: BBF_OBBBA_VNF_ADMIN_STATE
+              value: "unlocked"
           ports:
             - containerPort: 8081
               name: port8081
           volumeMounts:
-            - name: vomci-vproxy-volume
+            - name: vomci-function-volume
               mountPath: /db
       restartPolicy: Always

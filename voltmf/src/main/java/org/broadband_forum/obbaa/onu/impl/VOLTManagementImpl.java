@@ -16,11 +16,14 @@
 
 package org.broadband_forum.obbaa.onu.impl;
 
-import static org.broadband_forum.obbaa.onu.ONUConstants.EOMCI_USED_BY_OLT_CONFLICTING_WITH_PMAA_MGMT_FOR_OLT;
+import static org.broadband_forum.obbaa.onu.ONUConstants.EOMCI_PER_OLT_VOMCI_PER_PMAA;
 import static org.broadband_forum.obbaa.onu.ONUConstants.IETF_ALARM_NS;
-import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED;
-import static org.broadband_forum.obbaa.onu.ONUConstants.UNABLE_TO_AUTHENTICATE_ONU;
-import static org.broadband_forum.obbaa.onu.ONUConstants.VOMCI_EXPECTED_BY_OLT_BUT_INCONSISTENT_PMAA_MGMT_MODE;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_GOING_EOMCI;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_GOING_VOMCI;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_MGT_UNDETERMINED_ERROR;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_NAME_MISMATCH_OLT_PMAA;
+import static org.broadband_forum.obbaa.onu.ONUConstants.ONU_NOT_AUTHENTICATED_NOT_PRESENT;
+import static org.broadband_forum.obbaa.onu.ONUConstants.VOMCI_PER_OLT_EOMCI_PER_PMAA;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -84,6 +87,9 @@ import org.broadband_forum.obbaa.onu.notification.ONUNotification;
 import org.broadband_forum.obbaa.onu.util.VOLTManagementUtil;
 import org.broadband_forum.obbaa.onu.util.VOLTMgmtRequestCreationUtil;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Element;
 
 /**
@@ -406,28 +412,30 @@ public class VOLTManagementImpl implements VOLTManagement {
             String onuAuthStatus = null;
             if (response.equals(ONUConstants.OK_RESPONSE)) {
                 if (requestedMgmtMode.contains(ONUConstants.USE_VOMCI)) {
-                    onuAuthStatus = ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED;
+                    onuAuthStatus = ONU_GOING_VOMCI;
                     sendSetOnuCommunication(onuDevice.getDeviceName(), true, onuNotification.getOltDeviceName(),
                             onuNotification.getChannelTermRef(), onuNotification.getOnuId());
                 } else if (requestedMgmtMode.contains(ONUConstants.USE_EOMCI)) {
-                    onuAuthStatus = ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED;
+                    onuAuthStatus = ONU_GOING_EOMCI;
                     LOGGER.info(String.format("OLT & PMAA wants the ONU %s to be managed by eOMCI", onuDevice.getDeviceName()));
                 }
             } else if (response.contains(ONUConstants.ONU_NOT_PRESENT)) {
-                onuAuthStatus = UNABLE_TO_AUTHENTICATE_ONU;
+                onuAuthStatus = ONU_NOT_AUTHENTICATED_NOT_PRESENT;
             } else if (response.contains(ONUConstants.ONU_MGMT_MODE_MISMATCH_WITH_VANI)) {
                 if (requestedMgmtMode.equals(ONUConstants.USE_VOMCI)) {
-                    onuAuthStatus = EOMCI_USED_BY_OLT_CONFLICTING_WITH_PMAA_MGMT_FOR_OLT;
+                    onuAuthStatus = EOMCI_PER_OLT_VOMCI_PER_PMAA;
                 } else if (requestedMgmtMode.equals(ONUConstants.USE_EOMCI)) {
-                    onuAuthStatus = VOMCI_EXPECTED_BY_OLT_BUT_INCONSISTENT_PMAA_MGMT_MODE;
+                    onuAuthStatus = VOMCI_PER_OLT_EOMCI_PER_PMAA;
                 }
             } else if (response.contains(ONUConstants.BAA_XPON_ONU_NAME_MISMATCH_WITH_VANI)) {
-                onuAuthStatus = UNABLE_TO_AUTHENTICATE_ONU;
+                onuAuthStatus = ONU_NAME_MISMATCH_OLT_PMAA;
             } else if (response.contains(ONUConstants.UNDETERMINED_ERROR)) {
-                onuAuthStatus = UNABLE_TO_AUTHENTICATE_ONU;
+                onuAuthStatus = ONU_MGT_UNDETERMINED_ERROR;
+            } else {
+                onuAuthStatus = ONU_MGT_UNDETERMINED_ERROR;
             }
 
-            if (onuAuthStatus != null && !onuAuthStatus.equals(ONU_AUTHENTICATED_AND_MGT_MODE_DETERMINED)) {
+            if (onuAuthStatus != null) {
                 VOLTManagementUtil.sendOnuAuthenticationResultNotification(onuDevice, onuNotification, m_connectionManager,
                         m_notificationService, onuAuthStatus, m_deviceManager, m_txService);
             }
@@ -747,7 +755,9 @@ public class VOLTManagementImpl implements VOLTManagement {
                 }
             }
         } catch (MessageFormatterException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Invalid Message: " + e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Error processing message" + e.getMessage());
         }
     }
 
@@ -840,6 +850,37 @@ public class VOLTManagementImpl implements VOLTManagement {
         }
     }
 
+    protected void processGetAllAlarmsResponse(ResponseData responseData) {
+        try {
+            JSONObject getResponseDataJson = new JSONObject(responseData.getResponsePayload());
+            JSONArray alarmList = null;
+
+            if (getResponseDataJson != null) {
+                alarmList = getResponseDataJson
+                        .getJSONObject(ONUConstants.IETF_ALARMS_MODULE_NAME + ":" + ONUConstants.IETF_ALARMS_ALARMS)
+                        .getJSONObject(ONUConstants.IETF_ALARMS_ALARM_LIST)
+                        .getJSONArray(ONUConstants.IETF_ALARMS_ALARM);
+            }
+            //Clear the alarms because some may have been closed and will not be present in the response.
+            //The alarms that are currently active will be reopened.
+            //In the future, a differential approach could be done at the Alarm Service level.
+            m_alarmService.clearAlarmsOnDevice(responseData.getOnuName());
+            if (alarmList != null) {
+                for (int arrayIndex = 0; arrayIndex < alarmList.length(); arrayIndex++) {
+                    try {
+                        processVomciAlarmData(alarmList.getJSONObject(arrayIndex).toString(), responseData.getOnuName(), false);
+                    } catch (NetconfMessageBuilderException e) {
+                        LOGGER.debug("Could not parse alarm " + alarmList.getJSONObject(arrayIndex).toString());
+                    }
+                }
+            } else {
+                LOGGER.info("Empty alarm list:" + responseData.getResponsePayload());
+            }
+        } catch (JSONException e) {
+            LOGGER.info("Error parsing GET ALL alarms response:" + e.getMessage());
+        }
+    }
+
     private void sendInternalGetOnMediatedDeviceSession(String onuDeviceName, MediatedDeviceNetconfSession mediatedDeviceNetconfSession) {
         GetRequest getRequest = VOLTMgmtRequestCreationUtil.prepareInternalGetRequest(onuDeviceName);
         getRequest.setMessageId(ONUConstants.DEFAULT_MESSAGE_ID);
@@ -915,6 +956,12 @@ public class VOLTManagementImpl implements VOLTManagement {
                     }
                     VOLTManagementUtil.removeRequestFromMap(identifier);
                     break;
+                case ONUConstants.ONU_GET_ALL_ALARMS_OPERATION:
+                    LOGGER.info("Received response for GET ALL ALARMS operation. id=" + identifier);
+                    processGetAllAlarmsResponse(responseData);
+                    VOLTManagementUtil.removeRequestFromMap(identifier);
+                    break;
+
                 case ONUConstants.ONU_COPY_OPERATION:
                     response = mediatedSession.processResponse(identifier, operationType, responseStatus, failureReason);
                     LOGGER.debug("Processing " + operationType + " response with id "
@@ -927,6 +974,8 @@ public class VOLTManagementImpl implements VOLTManagement {
                             LOGGER.debug(String.format("ONU device %s not found", onuDeviceName));
                         }
                         if (m_connectionManager.getConnectionState(onuDevice).isConnected()) {
+                            mediatedSession.sendGetAllAlarmsToOnu(String.valueOf(m_messageId.addAndGet(1)));
+
                             m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
                                 m_deviceManager.updateConfigAlignmentState(onuDeviceName, DeviceManagerNSConstants.ALIGNED);
                                 return null;
@@ -1119,81 +1168,114 @@ public class VOLTManagementImpl implements VOLTManagement {
                 ResponseData responseData = m_messageFormatter.getResponseData(notificationResponse);
                 String notificationData = responseData.getResponsePayload();
                 String onuName = responseData.getOnuName();
-                String onuAlignmentStatus = null;
-                Device onuDevice = null;
                 if (responseData.getOperationType().equals(NetconfResources.NOTIFICATION) && responseData.getObjectType()
                         .equals(ObjectType.ONU)) {
                     if (notificationData.contains(ONUConstants.VOMCI_FUNC_ONU_ALIGNMENT_STATUS_JSON_KEY)) {
-                        onuAlignmentStatus = VOLTManagementUtil.processNotificationAndRetrieveOnuAlignmentStatus(notificationData);
-                        if (onuAlignmentStatus != null) {
-                            if (onuAlignmentStatus.equals(ONUConstants.ALIGNED)) {
-                                try {
-                                    onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
-                                } catch (IllegalArgumentException e) {
-                                    LOGGER.error(String.format("Device with name %s does not exist: %s", onuName, e));
-                                }
-                                if (onuDevice != null) {
-                                    m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
-                                        m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.ALIGNED);
-                                        return null;
-                                    });
-                                    if (m_connectionManager.getConnectionState(onuDevice).isConnected()) {
-                                        VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
-                                                m_notificationService);
-                                    }
-                                }
-                            } else {
-                                m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
-                                    m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.NEVER_ALIGNED);
-                                    return null;
-                                });
-                            }
-                        } else {
-                            LOGGER.error("ONU Alignment Status received from notification is NULL");
-                        }
+                        processVomciAlignmentStatusNotification(notificationData, onuName);
+                    } else if (notificationData.contains(ONUConstants.VOMCI_FUNC_ALARM_MISALIGNMENT_JSON_KEY)) {
+                        processVomciAlarmMisalignmentNotification(notificationData, onuName);
                     } else {
-                        onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
-
-                        AlarmInfo internalAlarmInfo = VOLTManagementUtil.processVomciNotificationAndPrepareAlarmInfo(
-                                notificationData, onuName);
-
-                        SchemaRegistry onuDeviceSchemaRegistry = VOLTManagementUtil.getDeviceSchemaRegistry(m_adapterManager, onuDevice);
-
-                        Element alarmNotificationElement = VOLTManagementUtil.prepareAlarmNotificationElementFromAlarmInfo(
-                                internalAlarmInfo);
-                        LOGGER.info(String.format("Converted alarm notification: %s", DocumentUtils
-                                .documentToPrettyString(alarmNotificationElement)));
-
-                        List<AlarmInfo> alarmInfoList = AlarmNotificationUtil.extractAndCreateAlarmEntryFromNotification(
-                                alarmNotificationElement, onuDeviceSchemaRegistry, onuDevice, IETF_ALARM_NS);
-
-                        if (alarmInfoList != null && !alarmInfoList.isEmpty()) {
-                            for (AlarmInfo alarmInfo : alarmInfoList) {
-                                AlarmInfo updatedAlarmInfo = VOLTManagementUtil.updateDeviceInstanceIdentifierInAlarmInfo(alarmInfo,
-                                        onuName);
-                                if (alarmInfo != null) {
-                                    if (alarmInfo.getSeverity().toString().equalsIgnoreCase(ONUConstants.CLEARED)) {
-                                        LOGGER.info(String.format("Clearing ONU Alarm : %s", updatedAlarmInfo));
-                                        m_alarmService.clearAlarm(updatedAlarmInfo);
-                                    } else {
-                                        LOGGER.info(String.format("Raising ONU Alarm : %s", updatedAlarmInfo));
-                                        m_alarmService.raiseAlarm(updatedAlarmInfo);
-                                    }
-                                } else {
-                                    LOGGER.info(String.format("Error while converting the received alarm-notification to AlarmInfo. "
-                                            + "Notification received from vOMCI is: %s ", responseData));
-                                }
-                            }
-                        } else {
-                            LOGGER.info(String.format("AlarmInfo List is either empty or null"));
-                        }
+                        processVomciAlarmData(notificationData, onuName, true);
                     }
                 }
             }
         } catch (MessageFormatterException | NetconfMessageBuilderException e) {
             LOGGER.error(e.getMessage());
         }
+    }
 
+    private void processVomciAlignmentStatusNotification(String notificationData, String onuName) {
+        String onuAlignmentStatus = null;
+        Device onuDevice = null;
+
+        onuAlignmentStatus = VOLTManagementUtil.processNotificationAndRetrieveOnuAlignmentStatus(notificationData);
+        if (onuAlignmentStatus != null) {
+            if (onuAlignmentStatus.equals(ONUConstants.ALIGNED)) {
+                try {
+                    onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
+                } catch (IllegalArgumentException e) {
+                    LOGGER.error(String.format("Device with name %s does not exist: %s", onuName, e));
+                }
+                if (onuDevice != null) {
+                    m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                        m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.ALIGNED);
+                        return null;
+                    });
+                    if (m_connectionManager.getConnectionState(onuDevice).isConnected()) {
+                        VOLTManagementUtil.sendOnuDiscoveryResultNotification(onuDevice, ONUConstants.ONLINE,
+                                m_notificationService);
+                    }
+                }
+            } else {
+                m_txService.executeWithTxRequired((TxTemplate<Void>) () -> {
+                    m_deviceManager.updateConfigAlignmentState(onuName, DeviceManagerNSConstants.NEVER_ALIGNED);
+                    return null;
+                });
+            }
+        } else {
+            LOGGER.error("ONU Alignment Status received from notification is NULL");
+        }
+    }
+
+    private void processVomciAlarmMisalignmentNotification(String notificationData, String onuName) {
+        boolean valid = true;
+        Device onuDevice = null;
+
+        LOGGER.info("Received Alarm Misalignment Notification for onu:" + onuName);
+        valid  = VOLTManagementUtil.processAlarmMisaligmentNotification(notificationData, onuName);
+        if (valid) {
+            LOGGER.info("Notification is valid. Sending GET ALL ALARMS Operation to ONU." + onuName);
+            try {
+                onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
+                if (onuDevice != null) {
+                    MediatedDeviceNetconfSession mediatedSession = VOLTManagementUtil.getMediatedDeviceNetconfSession(onuDevice,
+                            m_connectionManager);
+                    mediatedSession.sendGetAllAlarmsToOnu(String.valueOf(m_messageId.addAndGet(1)));
+                }
+            } catch (IllegalArgumentException e) {
+                LOGGER.error(String.format("Device with name %s does not exist: %s", onuName, e));
+            }
+        }
+    }
+
+    private void processVomciAlarmData(String notificationData, String onuName, boolean isNotification)
+            throws NetconfMessageBuilderException {
+        Device onuDevice;
+        onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
+
+        AlarmInfo internalAlarmInfo = VOLTManagementUtil.processVomciNotificationAndPrepareAlarmInfo(
+                notificationData, onuName, isNotification);
+
+        SchemaRegistry onuDeviceSchemaRegistry = VOLTManagementUtil.getDeviceSchemaRegistry(m_adapterManager, onuDevice);
+
+        Element alarmNotificationElement = VOLTManagementUtil.prepareAlarmNotificationElementFromAlarmInfo(
+                internalAlarmInfo);
+        LOGGER.info(String.format("Converted alarm notification: %s", DocumentUtils
+                .documentToPrettyString(alarmNotificationElement)));
+
+        List<AlarmInfo> alarmInfoList = AlarmNotificationUtil.extractAndCreateAlarmEntryFromNotification(
+                alarmNotificationElement, onuDeviceSchemaRegistry, onuDevice, IETF_ALARM_NS);
+
+        if (alarmInfoList != null && !alarmInfoList.isEmpty()) {
+            for (AlarmInfo alarmInfo : alarmInfoList) {
+                AlarmInfo updatedAlarmInfo = VOLTManagementUtil.updateDeviceInstanceIdentifierInAlarmInfo(alarmInfo,
+                        onuName);
+                if (alarmInfo != null) {
+                    if (alarmInfo.getSeverity().toString().equalsIgnoreCase(ONUConstants.CLEARED)) {
+                        LOGGER.info(String.format("Clearing ONU Alarm : %s", updatedAlarmInfo));
+                        m_alarmService.clearAlarm(updatedAlarmInfo);
+                    } else {
+                        LOGGER.info(String.format("Raising ONU Alarm : %s", updatedAlarmInfo));
+                        m_alarmService.raiseAlarm(updatedAlarmInfo);
+                    }
+                } else {
+                    LOGGER.info(String.format("Error while converting the received alarm-notification to AlarmInfo. "
+                            + "Notification received from vOMCI is: %s ", notificationData));
+                }
+            }
+        } else {
+            LOGGER.info(String.format("AlarmInfo List is either empty or null"));
+        }
     }
 
     public void setAndIncrementVoltmfInternalMessageId(AbstractNetconfRequest request) {

@@ -128,8 +128,8 @@ public class AlarmUtilTest {
         SchemaMountRegistryProvider provider = mock(SchemaMountRegistryProvider.class);
         when(smr.getProvider(mountPath)).thenReturn(provider);
         ModelNode modelNode = mock(ModelNode.class);
-        when(m_dsm.findNode(mountPath, ModelNodeKey.EMPTY_KEY, MOUNT_MODEL_NODE_ID)).thenReturn(modelNode);
-        when(provider.getSchemaRegistry(any(ModelNode.class))).thenReturn(m_mountRegistry);
+        when(m_dsm.findNode(mountPath, ModelNodeKey.EMPTY_KEY, MOUNT_MODEL_NODE_ID,m_schemaRegistry)).thenReturn(modelNode);
+        when(provider.getSchemaRegistry(any(ModelNodeId.class))).thenReturn(m_mountRegistry);
         when(m_schemaRegistry.getMountRegistry()).thenReturn(smr);
         RequestScope.resetScope();
     }

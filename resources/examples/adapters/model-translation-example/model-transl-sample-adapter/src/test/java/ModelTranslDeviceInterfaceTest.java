@@ -265,14 +265,15 @@ public class ModelTranslDeviceInterfaceTest {
                 "\t\t<alarms:alarm-text>raisealarm</alarms:alarm-text>\n" +
                 "\t</alarms:alarm-notification>\n" +
                 "</notification>\n";
-        String expectedAlarm = "<alarms:alarm-notification xmlns:alarms=\"urn:ietf:params:xml:ns:yang:ietf-alarms\">\n" +
-                "\t\t<alarms:resource xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">/if:interfaces/if:interface[if:name='int1']</alarms:resource>\n" +
-                "\t\t<alarms:alarm-type-id xmlns:samp-al=\"urn:broadband-forum-org:yang:sample-types\">samp-al:alarm-type1</alarms:alarm-type-id>\n" +
-                "\t\t<alarms:alarm-type-qualifier/>\n" +
-                "\t\t<alarms:time>2019-07-08T09:22:11.230Z</alarms:time>\n" +
-                "\t\t<alarms:perceived-severity>warning</alarms:perceived-severity>\n" +
-                "\t\t<alarms:alarm-text>raiseAlarm :: Normalized Vendor alarm</alarms:alarm-text>\n" +
-                "\t</alarms:alarm-notification>";
+        String expectedAlarm = "<alarms:alarm-notification xmlns:alarms=\"urn:ietf:params:xml:ns:yang:ietf-alarms\"\n" +
+                "                           xmlns=\"urn:ietf:params:xml:ns:netconf:notification:1.0\">\n" +
+                "   <alarms:resource xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">/if:interfaces/if:interface[if:name='int1']</alarms:resource>\n" +
+                "   <alarms:alarm-type-id xmlns:samp-al=\"urn:broadband-forum-org:yang:sample-types\">samp-al:alarm-type1</alarms:alarm-type-id>\n" +
+                "   <alarms:alarm-type-qualifier/>\n" +
+                "   <alarms:time>2019-07-08T09:22:11.230Z</alarms:time>\n" +
+                "   <alarms:perceived-severity>warning</alarms:perceived-severity>\n" +
+                "   <alarms:alarm-text>raiseAlarm :: Normalized Vendor alarm</alarms:alarm-text>\n" +
+                "</alarms:alarm-notification>";
         NetconfNotification notification = new NetconfNotification(DocumentUtils.stringToDocument(notifStr));
         assertEquals(expectedAlarm, DocumentUtils.documentToPrettyString(m_deviceInterface.normalizeNotification(notification).getNotificationElement()).trim());
         assertNotNull(notification.getEventTime());

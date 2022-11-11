@@ -36,10 +36,14 @@ services:
             - PMA_SESSION_FACTORY_TYPE=REGULAR
             - MAXIMUM_ALLOWED_ADAPTER_VERSIONS=3
             - VOLTMF_NAME=vOLTMF
+            # Below tag shall be set as false if the BAA is going to be tested for Scalability/Performance
+            - NC_ENABLE_POST_EDIT_DS_VALIDATION_SUPPORT=True
         volumes:
             - /baa/stores:/baa/stores
         networks:
             - baadist_default
+        tty: true
+        stdin_open: true
         depends_on:
             - kafka
             - zookeeper
@@ -75,6 +79,8 @@ services:
             - baa
         networks:
             - baadist_default
+        tty: true
+        stdin_open: true
 
     influxdb:
         image: broadbandforum/influxdb:2.0.0-beta.2-3
@@ -148,7 +154,7 @@ services:
         networks:
             - baadist_default
         volumes:
-            - /baa/stores/vomci-vproxy-db:/db
+            - /baa/stores/vomci-function-db:/db
         depends_on:
             - zookeeper
             - kafka

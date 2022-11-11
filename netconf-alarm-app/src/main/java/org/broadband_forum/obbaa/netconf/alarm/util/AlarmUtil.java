@@ -121,9 +121,9 @@ public final class AlarmUtil {
         SchemaMountRegistry mountRegistry = schemaRegistry.getMountRegistry();
         if (mountRegistry != null && dsm != null) {
             SchemaMountRegistryProvider provider = mountRegistry.getProvider(schemaPath);
-            ModelNode modelNode = dsm.findNode(schemaPath, ModelNodeKey.EMPTY_KEY, modelNodeId);
+            ModelNode modelNode = dsm.findNode(schemaPath, ModelNodeKey.EMPTY_KEY, modelNodeId, schemaRegistry);
             if (modelNode != null) {
-                return provider.getSchemaRegistry(modelNode, (Object) null);
+                return provider.getSchemaRegistry(modelNode.getModelNodeId());
             } else {
                 return provider.getSchemaRegistry(mountKey);
             }

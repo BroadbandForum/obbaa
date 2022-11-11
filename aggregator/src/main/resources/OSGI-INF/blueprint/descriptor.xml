@@ -61,6 +61,13 @@
         <argument ref="aggregator"/>
     </bean>
 
+    <bean id="microserviceDiscoveryAdapter" class="org.broadband_forum.obbaa.aggregator.processor.MicroserviceDiscoveryAdapter"
+          init-method="init"
+          destroy-method="destroy">
+        <argument ref="aggregator"/>
+        <argument ref="dmNetconfServer"/>
+    </bean>
+
     <bean id="notificationAdapter" class="org.broadband_forum.obbaa.aggregator.processor.NotificationAdapter"
           init-method="init"
           destroy-method="destroy">

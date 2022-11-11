@@ -272,7 +272,7 @@ public class AdapterManagerImpl implements AdapterManager {
                 request.setMessageId("internal");
                 request.setConfigElement(new EditConfigElement().setConfigElementContents(childElements));
                 SchemaRegistryImpl stdAdapterSchemaRegistry = getStandardAdapterContext(this, adapter).getSchemaRegistry();
-                RpcRequestConstraintParser parser = new RpcRequestConstraintParser(stdAdapterSchemaRegistry, null, null);
+                RpcRequestConstraintParser parser = new RpcRequestConstraintParser(stdAdapterSchemaRegistry, null, null, null);
                 parser.validate(request, RequestType.EDIT_CONFIG);
                 //since there is no datastore for adapter, use the defaultXml itself as updated datastore and for old ds, dummy document
                 adapterContext.getDeviceInterface().veto(null, request, createDocument(), defaultXml);

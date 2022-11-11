@@ -72,7 +72,7 @@ public class AggregatorImpl implements Aggregator {
         AggregatorRpcMessage aggregatorRpcMessage = buildAggregatorRpcMessage(netconfRequest);
 
         String response;
-        if (aggregatorRpcMessage.isNetworkManagerMessage()) {
+        if (aggregatorRpcMessage.isNetworkManagerMessage() && !aggregatorRpcMessage.isNetworkFunctionStateMessage()) {
             response = dispatchNetworkManageRequest(clientInfo, aggregatorRpcMessage);
             LOGGER.debug("Network manager request response:\n {}", response);
         } else {

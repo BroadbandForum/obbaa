@@ -23,8 +23,6 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ChildLeafLi
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ChildListHelper;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ConfigAttributeHelper;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.DefaultCapabilityCommandInterceptor;
-import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeFactory;
-import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeFactoryException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ModelNodeHelperRegistryImpl;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -116,16 +114,6 @@ public class ThreadLocalModelNodeHelperRegistry implements ModelNodeHelperRegist
     }
 
     @Override
-    public void registerModelNodeFactory(String factoryName, ModelNodeFactory modelNodeFactory) throws ModelNodeFactoryException {
-        getHelperRegistry().registerModelNodeFactory(factoryName, modelNodeFactory);
-    }
-
-    @Override
-    public ModelNodeFactory getCreateFactory(String factoryName) {
-        return getHelperRegistry().getCreateFactory(factoryName);
-    }
-
-    @Override
     public ChildLeafListHelper getConfigLeafListHelper(SchemaPath modelNodeSchemaPath, QName helperName) {
         return getHelperRegistry().getConfigLeafListHelper(modelNodeSchemaPath, helperName);
     }
@@ -161,7 +149,17 @@ public class ThreadLocalModelNodeHelperRegistry implements ModelNodeHelperRegist
         getHelperRegistry().resetDefaultCapabilityCommandInterceptor();
     }
 
+    @Override
+    public void clear() {
+        getHelperRegistry().clear();
+    }
+
     public static void clearRegistry() {
         c_registry.remove();
+    }
+
+    @Override
+    public ModelNodeHelperRegistry unwrap() {
+        return getHelperRegistry().unwrap();
     }
 }

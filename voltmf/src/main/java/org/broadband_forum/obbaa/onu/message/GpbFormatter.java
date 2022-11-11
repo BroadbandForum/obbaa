@@ -125,6 +125,7 @@ public class GpbFormatter implements MessageFormatter<Msg> {
                                                         + networkWideTag.getObjectType().name());
                 }
                 break;
+            case ONUConstants.ONU_GET_ALL_ALARMS_OPERATION:
             case NetconfResources.GET:
                 msg = getFormattedMessageForGet((GetRequest) request, schemaRegistry, onuDevice,
                         adapterManager, modelNodeDsm, networkWideTag);

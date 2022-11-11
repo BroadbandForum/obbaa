@@ -99,7 +99,7 @@ public class VOLTMgmtRequestCreationUtilTest {
     }
 
     @Test
-    public void testOnuAuthReportActionRequest() throws NetconfMessageBuilderException {
+    public void testOnuAuthReportActionRequest() throws NetconfMessageBuilderException, IOException, SAXException {
         String serialNumber = "ABCD12345678";
         String onuManagementMode = "baa-xpon-onu-types:use-vomci";
         String vaniName = "test";
@@ -109,7 +109,7 @@ public class VOLTMgmtRequestCreationUtilTest {
                 authSuccess, vaniName, onuManagementMode, serialNumber, channelTermination);
         String onuAuthenicationReportActionRequestString = DocumentUtils.documentToPrettyString(onuAuthenicationReportActionRequest.getRequestDocument());
         assertNotNull(onuAuthenicationReportActionRequest);
-        assertEquals(TestUtil.loadAsString(onuAuthReportActionRequestFile), onuAuthenicationReportActionRequestString);
+        TestUtil.assertXMLStringEquals(TestUtil.loadAsString(onuAuthReportActionRequestFile), onuAuthenicationReportActionRequestString);
     }
 
     @Test

@@ -26,6 +26,14 @@ env:
     KAFKA_REQUEST_TOPICS: "vomci1-request" # if message formatter is JSON "OBBAA_ONU_REQUEST"
     KAFKA_RESPONSE_TOPICS: 'vomci1-response' # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
     KAFKA_NOTIFICATION_TOPICS: "vomci1-notification" # if message formatter is JSON "OBBAA_ONU_NOTIFICATION"
+    VOMCI_KAFKA_SENDER_NAME: "bbf-vomci"
+    VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
+    BBF_OBBAA_VNF_NAME: "BBF-VOMCI"
+    BBF_OBBAA_VNF_TYPE: "VOMCI"
+    BBF_OBBAA_VNF_VERSION: "1.0.0"
+    BBF_OBBAA_VNF_VENDOR: "BBF"
+    BBF_OBBAA_VNF_INSTANCE_NAME: "BBF-vomci-instance1"
+    BBF_OBBBA_VNF_ADMIN_STATE: "unlocked"
 
 ingress:
   enabled: false

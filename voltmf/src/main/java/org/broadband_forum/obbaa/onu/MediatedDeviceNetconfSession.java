@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
@@ -36,6 +37,7 @@ import org.broadband_forum.obbaa.dmyang.dao.DeviceDao;
 import org.broadband_forum.obbaa.dmyang.entities.Device;
 import org.broadband_forum.obbaa.nbiadapter.netconf.NbiNetconfServerMessageListener;
 import org.broadband_forum.obbaa.netconf.api.client.AbstractNetconfClientSession;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfResponseFuture;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
@@ -65,6 +67,8 @@ import org.broadband_forum.obbaa.onu.message.MessageFormatter;
 import org.broadband_forum.obbaa.onu.message.NetworkWideTag;
 import org.broadband_forum.obbaa.onu.message.ObjectType;
 import org.broadband_forum.obbaa.onu.util.DeviceJsonUtils;
+import org.broadband_forum.obbaa.onu.util.VOLTManagementUtil;
+import org.broadband_forum.obbaa.onu.util.VOLTMgmtRequestCreationUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.DOMException;
@@ -130,11 +134,11 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
     }
 
     @Override
-    protected CompletableFuture<NetConfResponse> sendRpcMessage(String currentMessageId, Document requestDocument, long timeoutMillis) {
+    protected NetconfResponseFuture sendRpcMessage(String currentMessageId, Document requestDocument, long timeoutMillis) {
         String requestType = DocumentToPojoTransformer.getTypeOfNetconfRequest(requestDocument);
         AbstractNetconfRequest netconfRequest = null;
         NetConfResponse response = new NetConfResponse();
-        CompletableFuture<NetConfResponse> future = null;
+        NetconfResponseFuture future = null;
         try {
             switch (requestType) {
                 case NetconfResources.COPY_CONFIG:
@@ -151,7 +155,8 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
                     future = onGet((GetRequest) netconfRequest);
                     break;
                 default:
-                    return CompletableFuture.completedFuture(new NetconfRpcResponse().setMessageId(currentMessageId));
+                    return (NetconfResponseFuture) CompletableFuture.completedFuture(new NetconfRpcResponse()
+                            .setMessageId(currentMessageId));
             }
         } catch (NetconfMessageBuilderException e) {
             if (requestDocument != null) {
@@ -242,6 +247,7 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
                         }
                     }
                     break;
+                case ONUConstants.ONU_GET_ALL_ALARMS_OPERATION:
                 case ONUConstants.ONU_GET_OPERATION:
                 case ONUConstants.ONU_COPY_OPERATION:
                 case ONUConstants.ONU_EDIT_OPERATION:
@@ -315,13 +321,13 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         }
     }
 
-    private void internalOkResponse(AbstractNetconfRequest request, TimestampFutureResponse future) {
+    private void internalOkResponse(AbstractNetconfRequest request, NetconfResponseFuture future) {
         NetConfResponse response = new NetConfResponse().setMessageId(request.getMessageId());
         response.setOk(true);
         future.complete(response);
     }
 
-    private void internalNokResponse(AbstractNetconfRequest request, TimestampFutureResponse future, String errorMessage) {
+    private void internalNokResponse(AbstractNetconfRequest request, NetconfResponseFuture future, String errorMessage) {
         NetConfResponse response = new NetConfResponse().setMessageId(request.getMessageId());
         NetconfRpcError netconfRpcError = NetconfRpcError.getApplicationError("Internal error detected: " + errorMessage);
         response = response.addError(netconfRpcError);
@@ -372,15 +378,15 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         }
     }
 
-    public CompletableFuture<NetConfResponse> onCopyConfig(AbstractNetconfRequest request) {
+    public NetconfResponseFuture onCopyConfig(AbstractNetconfRequest request) {
         LOGGER.info(String.format("Sending copy config request for device %s: %s", m_onuDeviceName, request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
                 LOGGER.debug("Mediated Device Netconf Session is closed. Unable to process copy-config request for " + m_onuDeviceName);
-                return CompletableFuture.completedFuture(null);
+                return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
         }
-        TimestampFutureResponse future = new TimestampFutureResponse();
+        TimestampFutureResponse future = new TimestampFutureResponse(request.getReplyTimeout(), TimeUnit.MILLISECONDS);
         m_kafkaCommunicationPool.execute(() -> {
             try {
                 setMessageId(request);
@@ -403,15 +409,15 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         return future;
     }
 
-    public CompletableFuture<NetConfResponse> onGet(GetRequest request) {
+    public NetconfResponseFuture onGet(GetRequest request) {
         LOGGER.info(String.format("Sending get request for device %s: %s", m_onuDeviceName, request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
                 LOGGER.debug("Mediated Device Netconf Session is closed. Unable to process GET request");
-                return CompletableFuture.completedFuture(null);
+                return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
         }
-        TimestampFutureResponse future = new TimestampFutureResponse();
+        TimestampFutureResponse future = new TimestampFutureResponse(request.getReplyTimeout(), TimeUnit.MILLISECONDS);
         m_kafkaCommunicationPool.execute(() -> {
             try {
                 if (request.getMessageId() == null || request.getMessageId().isEmpty()) {
@@ -442,17 +448,17 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         return future;
     }
 
-    private CompletableFuture<NetConfResponse> onEditConfig(EditConfigRequest request) {
+    private NetconfResponseFuture onEditConfig(EditConfigRequest request) {
         LOGGER.info(String.format("Sending edit config request for device %s: >%s<", m_onuDeviceName,
                 request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
                 LOGGER.warn("Mediated Device Netconf Session is closed\n"
                         + "Unable to process edit-config request for " + m_onuDeviceName);
-                return CompletableFuture.completedFuture(null);
+                return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
         }
-        TimestampFutureResponse future = new TimestampFutureResponse();
+        TimestampFutureResponse future = new TimestampFutureResponse(request.getReplyTimeout(), TimeUnit.MILLISECONDS);
         m_kafkaCommunicationPool.execute(() -> {
             setMessageId(request);
             if (request.getMessageId() == null || request.getMessageId().isEmpty()) {
@@ -630,4 +636,35 @@ public class MediatedDeviceNetconfSession extends AbstractNetconfClientSession {
         });
         return networkFunctionName.get();
     }
+
+    /**
+     * Send the GET All Alarms message asynchronously. The main purpose of this method is to be called
+     * after a successful copy-config/Replace Config to the ONU (TR-451 section V.1)
+     *
+     * @param messageId The message ID to use for the message.
+     */
+    public void sendGetAllAlarmsToOnu(String messageId) {
+
+        try {
+            GetRequest getRequest = VOLTMgmtRequestCreationUtil.prepareGetRequestForGetAllAlarms();
+            getRequest.setMessageId(messageId);
+            LOGGER.info("Sending Get All Alarms request to " + m_onuDeviceName);
+
+            String vomciFunctionName = getNwFunctionName(m_onuDeviceName);
+            NetworkWideTag networkWideTag = new NetworkWideTag(m_onuDeviceName, vomciFunctionName, m_onuDeviceName, ObjectType.ONU);
+
+            Object formattedMessage = m_messageFormatter.getFormattedRequest(getRequest, ONUConstants.ONU_GET_ALL_ALARMS_OPERATION,
+                    m_onuDevice, m_adapterManager, m_modelNodeDSM, m_schemaRegistry, networkWideTag);
+
+            //register the message id for correlating later with the response
+            VOLTManagementUtil.registerInRequestMap(getRequest, m_onuDeviceName, ONUConstants.ONU_GET_ALL_ALARMS_OPERATION);
+
+            sendRequest(ONUConstants.ONU_GET_ALL_ALARMS_OPERATION, formattedMessage, getRequest, null);
+
+
+        } catch (NetconfMessageBuilderException | MessageFormatterException e) {
+            LOGGER.error("Error while processing get All Alarms request for device " + m_onuDeviceName, e);
+        }
+    }
+
 }

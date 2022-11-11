@@ -141,8 +141,8 @@ public class AlarmServiceImplTest extends AbstractAlarmSetup {
         m_mountRegistry = mock(SchemaRegistry.class);
         when(m_schemaRegistry.getMountRegistry()).thenReturn(m_schemaMountRegistry);
         when(m_schemaMountRegistry.getProvider(DEVICE_SPECIFIC_DATA_PATH)).thenReturn(m_schemaMountRegProvider);
-        when(m_dsm.findNode(DEVICE_SPECIFIC_DATA_PATH, ModelNodeKey.EMPTY_KEY, DEVICE_MODEL_NODE_ID)).thenReturn(m_modelNode);
-        when(m_schemaMountRegProvider.getSchemaRegistry(m_modelNode)).thenReturn(m_mountRegistry);
+        when(m_dsm.findNode(DEVICE_SPECIFIC_DATA_PATH, ModelNodeKey.EMPTY_KEY, DEVICE_MODEL_NODE_ID,m_schemaRegistry)).thenReturn(m_modelNode);
+        when(m_schemaMountRegProvider.getSchemaRegistry(m_modelNode.getModelNodeId())).thenReturn(m_mountRegistry);
         Module ifModule = mock(Module.class);
         when(m_mountRegistry.getModuleByNamespace(IETF_INTERFACE)).thenReturn(ifModule);
         when(ifModule.getPrefix()).thenReturn("if");

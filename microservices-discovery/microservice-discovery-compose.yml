@@ -1,0 +1,15 @@
+version: '3.5'
+services:
+  microservice-discovery:
+    image: microservice-discovery
+    container_name: microservice-discovery
+    network_mode: "host"
+    build: .
+    ports:
+      - 8093:8093
+    environment:
+      JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=7005
+    volumes:
+      - ~/.kube:/kube
+      - ~/.minikube:/home/$USER/.minikube
+    restart: always

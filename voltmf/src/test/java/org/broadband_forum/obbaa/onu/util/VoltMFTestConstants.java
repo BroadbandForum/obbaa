@@ -39,6 +39,7 @@ public interface VoltMFTestConstants {
     static final String SERIAL_NUMBER = "BRCM00000001";
     static final String REGISTER_NUMBER = "12345678";
     static final String ONU = "onu";
+    static final String VOMCI_FUNCTION_NAMESPACE = "urn:bbf:yang:bbf-vomci-function";
 
             //Status constants
     static final String OK_RESPONSE = "OK";

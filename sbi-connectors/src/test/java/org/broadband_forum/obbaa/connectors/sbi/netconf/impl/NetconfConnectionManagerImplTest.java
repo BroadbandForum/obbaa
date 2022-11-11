@@ -17,10 +17,7 @@
 package org.broadband_forum.obbaa.connectors.sbi.netconf.impl;
 
 import static junit.framework.TestCase.fail;
-import static org.broadband_forum.obbaa.netconf.api.x509certificates.CertificateUtil.certificateStringsFromFile;
-import static org.broadband_forum.obbaa.netconf.api.x509certificates.CertificateUtil.getByteArrayCertificates;
 import static org.broadband_forum.obbaa.netconf.api.x509certificates.CertificateUtil.getX509Certificates;
-import static org.broadband_forum.obbaa.netconf.api.x509certificates.CertificateUtil.stripDelimiters;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
@@ -35,6 +32,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.InetSocketAddress;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -72,6 +71,7 @@ import org.broadband_forum.obbaa.netconf.api.client.NetconfClientDispatcherExcep
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSession;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfClientSessionListener;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfLoginProvider;
+import org.broadband_forum.obbaa.netconf.api.client.NetconfResponseFuture;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
 import org.broadband_forum.obbaa.netconf.api.transport.SshNetconfTransport;
@@ -121,7 +121,7 @@ public class NetconfConnectionManagerImplTest {
     private ConnectionListener m_connectionListener;
 
     @Before
-    public void setUp() throws NetconfClientDispatcherException, CertificateException {
+    public void setUp() throws NetconfClientDispatcherException, CertificateException, FileNotFoundException {
         MockitoAnnotations.initMocks(this);
         m_txService = new TxService();
         when(m_persistenceMgrUtil.getEntityDataStoreManager()).thenReturn(entityDSM);
@@ -129,9 +129,8 @@ public class NetconfConnectionManagerImplTest {
         when(entityMgr.getTransaction()).thenReturn(entityTx);
         when(entityTx.isActive()).thenReturn(true);
         m_devices = new ArrayList<>();
-        m_deviceCert = getX509Certificates(getByteArrayCertificates(stripDelimiters(certificateStringsFromFile(
-                new File(getClass().getResource("/netconfconnectionmanagerimpltest/deviceCert.crt").getPath())))))
-                .get(0);
+        File certFile = new File(getClass().getResource("/netconfconnectionmanagerimpltest/deviceCert.crt").getFile());
+        m_deviceCert = getX509Certificates(new FileInputStream(certFile)).get(0);
         m_remoteAddress = new InetSocketAddress("0.0.0.0", 1234);
         when(m_callhomeSession.getRemoteAddress()).thenReturn(m_remoteAddress);
         when(m_callhomeSession.isOpen()).thenReturn(true);
@@ -262,7 +261,7 @@ public class NetconfConnectionManagerImplTest {
                 .class);
         verify(m_sessions.get(getIp("2"))).addSessionListener(captor.capture());
         //fire session closed
-        captor.getValue().sessionClosed(2);
+        captor.getValue().sessionClosed(2, null);
         assertEquals(2, m_cm.getAllSessions().entrySet().size());
         verify(m_connectionListener).deviceDisConnected(getDevice("2"), m_sessions.get(getIp("2")));
 
@@ -278,7 +277,7 @@ public class NetconfConnectionManagerImplTest {
         //make all devices connected,
         m_cm.auditConnections();
         AbstractNetconfRequest request = mock(AbstractNetconfRequest.class);
-        CompletableFuture<NetConfResponse> future = mock(CompletableFuture.class);
+        NetconfResponseFuture future = mock(NetconfResponseFuture.class);
         NetconfClientSession session1 = m_sessions.get(getIp("1"));
         when(session1.sendRpc(request)).thenReturn(future);
         Device device = getDevice("1");
@@ -296,9 +295,9 @@ public class NetconfConnectionManagerImplTest {
         //make all devices connected,
         m_cm.auditConnections();
         AbstractNetconfRequest request = mock(AbstractNetconfRequest.class);
-        CompletableFuture<NetConfResponse> future = mock(CompletableFuture.class);
+        NetconfResponseFuture future = mock(NetconfResponseFuture.class);
         NetconfClientSession session1 = m_sessions.get(getIp("1"));
-        when(session1.sendRpc(request)).thenReturn(future);
+        when(session1.sendRpc(request)).thenReturn((NetconfResponseFuture) future);
         Future<NetConfResponse> responseFuture = m_cm.executeWithSession(getDevice("1"), new
                 NetconfTemplate<Future<NetConfResponse>>() {
                     @Override
@@ -395,7 +394,7 @@ public class NetconfConnectionManagerImplTest {
         assertEquals(getConnectedState(), m_cm.getConnectionState(callHomeDevice1));
         verify(m_callhomeSession).addSessionListener(captor.capture());
 
-        captor.getValue().sessionClosed(m_callhomeSession.getSessionId());
+        captor.getValue().sessionClosed(m_callhomeSession.getSessionId(), null);
         assertEquals(getDefaultConnectionState(), m_cm.getConnectionState(callHomeDevice1));
         verify(m_connectionListener).deviceDisConnected(callHomeDevice1, m_callhomeSession);
     }

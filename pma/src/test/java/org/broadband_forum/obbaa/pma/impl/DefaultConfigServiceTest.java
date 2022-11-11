@@ -94,24 +94,25 @@ public class DefaultConfigServiceTest {
     @Test
     public void testDeviceAddedWithCorrectDefaultXml() throws ExecutionException, IOException, NetconfMessageBuilderException {
         PmaResourceId resourceId = new PmaResourceId(PmaResourceId.Type.DEVICE,m_device.getDeviceName());
-        String editConfigRequestString = "<rpc message-id=\"e1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">" + System.lineSeparator() +
-                "  <edit-config>" + System.lineSeparator() +
-                "    <target>" + System.lineSeparator() +
-                "      <running/>" + System.lineSeparator() +
-                "    </target>" + System.lineSeparator() +
-                "    <default-operation>merge</default-operation>" + System.lineSeparator() +
-                "    <test-option>set</test-option>" + System.lineSeparator() +
-                "    <error-option>stop-on-error</error-option>" + System.lineSeparator() +
-                "    <config>" + System.lineSeparator() +
-                "      <if:interfaces xmlns=\"urn:bbf:yang:obbaa:network-manager\" xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">" + System.lineSeparator() +
-                "                <if:interface xmlns:xc=\"urn:ietf:params:xml:ns:netconf:base:1.0\" xc:operation=\"create\">" + System.lineSeparator() +
-                "                    <if:name>Interface</if:name>" + System.lineSeparator() +
-                "                    <if:type xmlns:ianaift=\"urn:ietf:params:xml:ns:yang:iana-if-type\">ianaift:fastdsl</if:type>" + System.lineSeparator() +
-                "                    <if:description>InterfaceDescription</if:description>" + System.lineSeparator() +
-                "                </if:interface>" + System.lineSeparator() +
-                "            </if:interfaces>" + System.lineSeparator() +
-                "    </config>" + System.lineSeparator() +
-                "  </edit-config>" + System.lineSeparator() +
+        String editConfigRequestString = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"e1\">" + System.lineSeparator() +
+                "   <edit-config>" + System.lineSeparator() +
+                "      <target>" + System.lineSeparator() +
+                "         <running/>" + System.lineSeparator() +
+                "      </target>" + System.lineSeparator() +
+                "      <default-operation>merge</default-operation>" + System.lineSeparator() +
+                "      <test-option>set</test-option>" + System.lineSeparator() +
+                "      <error-option>stop-on-error</error-option>" + System.lineSeparator() +
+                "      <config>" + System.lineSeparator() +
+                "         <if:interfaces xmlns:if=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\"" + System.lineSeparator() +
+                "                        xmlns=\"urn:bbf:yang:obbaa:network-manager\">" + System.lineSeparator() +
+                "            <if:interface xmlns:xc=\"urn:ietf:params:xml:ns:netconf:base:1.0\" xc:operation=\"create\">" + System.lineSeparator() +
+                "               <if:name>Interface</if:name>" + System.lineSeparator() +
+                "               <if:type xmlns:ianaift=\"urn:ietf:params:xml:ns:yang:iana-if-type\">ianaift:fastdsl</if:type>" + System.lineSeparator() +
+                "               <if:description>InterfaceDescription</if:description>" + System.lineSeparator() +
+                "            </if:interface>" + System.lineSeparator() +
+                "         </if:interfaces>" + System.lineSeparator() +
+                "      </config>" + System.lineSeparator() +
+                "   </edit-config>" + System.lineSeparator() +
                 "</rpc>" + System.lineSeparator();
         EditConfigRequest request = DocumentToPojoTransformer.getEditConfig(DocumentUtils.stringToDocument(editConfigRequestString));
         when(m_adapterManager.getEditRequestForAdapter(any())).thenReturn(request);

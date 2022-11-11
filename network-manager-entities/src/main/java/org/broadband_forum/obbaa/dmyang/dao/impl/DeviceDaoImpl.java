@@ -159,14 +159,22 @@ public class DeviceDaoImpl extends AbstractDao<Device, DevicePK> implements Devi
 
     @Override
     public OnuManagementChain[] getOnuManagementChains(String deviceName) {
+        Integer minInsertOrderVal = -1;
         Device device = getDeviceByName(deviceName);
         Set<OnuManagementChain> onuManagementChainSet = new LinkedHashSet<>();
         if (device != null && device.getDeviceManagement().getDeviceType().equals(DeviceManagerNSConstants.DEVICE_TYPE_ONU)) {
             onuManagementChainSet = device.getDeviceManagement().getOnuConfigInfo().getVomciOnuManagement().getOnuManagementChains();
         }
+
         OnuManagementChain[] onuManagementChainArray = new OnuManagementChain[onuManagementChainSet.size()];
+        //insert order is being incremented globally for all ONUs
         for (OnuManagementChain managementChain : onuManagementChainSet) {
-            onuManagementChainArray[managementChain.getInsertOrder()] = managementChain;
+            if ((minInsertOrderVal < 0) || (managementChain.getInsertOrder() < minInsertOrderVal)) {
+                minInsertOrderVal = managementChain.getInsertOrder();
+            }
+        }
+        for (OnuManagementChain managementChain : onuManagementChainSet) {
+            onuManagementChainArray[managementChain.getInsertOrder() - minInsertOrderVal] = managementChain;
         }
         return onuManagementChainArray;
     }

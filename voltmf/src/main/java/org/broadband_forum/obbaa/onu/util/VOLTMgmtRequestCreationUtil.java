@@ -21,6 +21,8 @@ import static org.broadband_forum.obbaa.onu.ONUConstants.BAA_XPON_ONU_AUTH;
 import static org.broadband_forum.obbaa.onu.ONUConstants.BAA_XPON_ONU_TYPES_WITH_XMLNS;
 import static org.broadband_forum.obbaa.onu.ONUConstants.CHANNEL_TERMINATION;
 import static org.broadband_forum.obbaa.onu.ONUConstants.CHANNEL_TERMINATION_NS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.IETF_ALARMS_ALARM_LIST;
+import static org.broadband_forum.obbaa.onu.ONUConstants.IETF_ALARM_PREFIX;
 import static org.broadband_forum.obbaa.onu.ONUConstants.IETF_INTERFACES_NS;
 import static org.broadband_forum.obbaa.onu.ONUConstants.IF_PREFIX;
 import static org.broadband_forum.obbaa.onu.ONUConstants.INTERFACE;
@@ -261,7 +263,25 @@ public final class VOLTMgmtRequestCreationUtil {
         interfaceElement.appendChild(nameElement);
 
         document.appendChild(interfaces);
+        return getGetRequest(document);
+    }
 
+    public static GetRequest prepareGetRequestForGetAllAlarms() {
+
+        Document document = DocumentUtils.createDocument();
+
+        Element alarms = document.createElementNS(ONUConstants.IETF_ALARM_NS, ONUConstants.IETF_ALARMS_ALARMS);
+        alarms.setPrefix(IETF_ALARM_PREFIX);
+
+        Element alarmList = document.createElementNS(ONUConstants.IETF_ALARM_NS, IETF_ALARMS_ALARM_LIST);
+        alarmList.setPrefix(IETF_ALARM_PREFIX);
+        alarms.appendChild(alarmList);
+
+        document.appendChild(alarms);
+        return getGetRequest(document);
+    }
+
+    private static GetRequest getGetRequest(Document document) {
         GetRequest getRequest = new GetRequest();
         NetconfFilter netconfFilter = new NetconfFilter();
         netconfFilter.setType(ONUConstants.SUBTREE_FILTER);

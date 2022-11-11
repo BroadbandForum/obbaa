@@ -17,11 +17,13 @@
 package org.broadband_forum.obbaa.adapter.threadlocals;
 
 import java.util.List;
+import java.util.Set;
 
+import org.broadband_forum.obbaa.netconf.api.client.NetconfClientInfo;
 import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.server.NetconfQueryParams;
-import org.broadband_forum.obbaa.netconf.api.util.Pair;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ActionException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.CopyConfigException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.EditConfigException;
@@ -31,6 +33,7 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.GetContext;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.GetException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ModelNode;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.NotificationContext;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.SubSystemRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ChildContainerHelper;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.ChildListHelper;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.RootModelNodeAggregator;
@@ -41,6 +44,13 @@ import org.w3c.dom.Element;
 public class ThreadLocalRootModelNodeAggregator implements RootModelNodeAggregator {
 
     private static ThreadLocal<RootModelNodeAggregatorImpl> c_rootAggregator = new ThreadLocal<>();
+
+    public ThreadLocalRootModelNodeAggregator() {
+    }
+
+    public ThreadLocalRootModelNodeAggregator(RootModelNodeAggregatorImpl rootAggregator) {
+        c_rootAggregator.set(rootAggregator);
+    }
 
     public static void setRootAggregator(RootModelNodeAggregatorImpl registry) {
         c_rootAggregator.set(registry);
@@ -53,6 +63,11 @@ public class ThreadLocalRootModelNodeAggregator implements RootModelNodeAggregat
     @Override
     public RootModelNodeAggregator addModelServiceRoot(String componentId, ModelNode modelNode) {
         return getRootAggregator().addModelServiceRoot(componentId, modelNode);
+    }
+
+    @Override
+    public SubSystemRegistry getSubsystemRegistry() {
+        return getRootAggregator().getSubsystemRegistry();
     }
 
     @Override
@@ -76,13 +91,18 @@ public class ThreadLocalRootModelNodeAggregator implements RootModelNodeAggregat
     }
 
     @Override
+    public List<ModelNode> getModuleRootFromHelpers(String requiredElementNamespace, String requiredElementLocalName, ModelNode modelNode) {
+        return getRootAggregator().getModuleRootFromHelpers(requiredElementNamespace,requiredElementLocalName);
+    }
+
+    @Override
     public List<Element> get(GetContext getContext, NetconfQueryParams params) throws GetException {
         return getRootAggregator().get(getContext, params);
     }
 
     @Override
-    public List<Element> action(ActionRequest actionRequest) throws ActionException {
-        return getRootAggregator().action(actionRequest);
+    public List<Element> action(ActionRequest actionRequest, NetconfClientInfo clientInfo, SchemaRegistry registry) throws ActionException {
+        return getRootAggregator().action(actionRequest, clientInfo, registry);
     }
 
     @Override
@@ -122,8 +142,8 @@ public class ThreadLocalRootModelNodeAggregator implements RootModelNodeAggregat
     }
 
     @Override
-    public List<Pair<String, String>> getRootNodeNsLocalNamePairs() {
-        return getRootAggregator().getRootNodeNsLocalNamePairs();
+    public Set<SchemaPath> getRootNodeSchemaPaths() {
+        return getRootAggregator().getRootNodeSchemaPaths();
     }
 
     public static void clearRootAggregator() {

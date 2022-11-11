@@ -1,23 +1,23 @@
 <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <copy-config>
-    <target>
-      <running/>
-    </target>
-    <source>
-      <config>
-        <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-        <if:interface>
-            <if:name>Int_1</if:name>
-            <if:enabled>true</if:enabled>
-            <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
-        </if:interface>
-        <if:interface>
-            <if:name>Int_2</if:name>
-            <if:enabled>true</if:enabled>
-            <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
-        </if:interface>
-    </if:interfaces>
-      </config>
-    </source>
-  </copy-config>
+   <copy-config>
+      <target>
+         <running/>
+      </target>
+      <source>
+         <config>
+            <if:interfaces xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+               <if:interface>
+                  <if:name>Int_1</if:name>
+                  <if:enabled>true</if:enabled>
+                  <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
+               </if:interface>
+               <if:interface>
+                  <if:name>Int_2</if:name>
+                  <if:enabled>true</if:enabled>
+                  <if:type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:fastdsl</if:type>
+               </if:interface>
+            </if:interfaces>
+         </config>
+      </source>
+   </copy-config>
 </rpc>

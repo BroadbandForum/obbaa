@@ -91,6 +91,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -466,7 +467,8 @@ public class DeviceManagementSubsystemTest {
     public void testNotifyChangedDeviceCreate() {
         List<ChangeNotification> notifs = new ArrayList<>();
         ModelNodeId nodeId = new ModelNodeId("/container=network-manager/container=" + MANAGED_DEVICES, NS);
-        EditContainmentNode editContainmentNode = new EditContainmentNode(QName.create(NS, DEVICE), EditConfigOperations.CREATE);
+        EditContainmentNode editContainmentNode = new EditContainmentNode();
+        editContainmentNode.setQName(QName.create(NS, DEVICE));
         editContainmentNode.addMatchNode(QName.create(NS, DEVICE), new GenericConfigAttribute("device", NS, DEVICE_A));
         ModelNodeChange change = new ModelNodeChange(ModelNodeChangeType.create, editContainmentNode);
         notifs.add(new EditConfigChangeNotification(nodeId, change, StandardDataStores.RUNNING, mock(ModelNode.class)));
@@ -480,7 +482,8 @@ public class DeviceManagementSubsystemTest {
     public void testNotifyChangedDeviceDelete() {
         List<ChangeNotification> notifs = new ArrayList<>();
         ModelNodeId nodeId = new ModelNodeId("/container=network-manager/container=" + MANAGED_DEVICES, NS);
-        EditContainmentNode editContainmentNode = new EditContainmentNode(QName.create(NS, DEVICE), EditConfigOperations.DELETE);
+        EditContainmentNode editContainmentNode = new EditContainmentNode();
+        editContainmentNode.setQName(QName.create(NS, DEVICE));
         editContainmentNode.addMatchNode(QName.create(NS, DEVICE), new GenericConfigAttribute("device", NS, DEVICE_A));
         ModelNodeChange change = new ModelNodeChange(ModelNodeChangeType.delete, editContainmentNode);
         notifs.add(new EditConfigChangeNotification(nodeId, change, StandardDataStores.RUNNING, mock(ModelNode.class)));
@@ -497,7 +500,7 @@ public class DeviceManagementSubsystemTest {
                 + "/container=device/name=" + DEVICE_A
                 + "/container=device-management/container=device-connection"
                 + "/container=password-auth/container=authentication", NS);
-        EditContainmentNode editContainmentNode = new EditContainmentNode(QName.create(NS, AUTHENTICATION), EditConfigOperations.MERGE);
+        EditContainmentNode editContainmentNode = new EditContainmentNode();
         editContainmentNode.addLeafChangeNode(QName.create(NS, MANAGEMENT_PORT), new GenericConfigAttribute(MANAGEMENT_PORT, NS, String.valueOf(30)));
         ModelNodeChange change = new ModelNodeChange(ModelNodeChangeType.merge, editContainmentNode);
         notifs.add(new EditConfigChangeNotification(nodeId, change, StandardDataStores.RUNNING, mock(ModelNode.class)));

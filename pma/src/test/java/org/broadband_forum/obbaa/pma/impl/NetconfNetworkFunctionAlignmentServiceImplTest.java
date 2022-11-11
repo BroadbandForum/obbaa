@@ -337,13 +337,13 @@ public class NetconfNetworkFunctionAlignmentServiceImplTest {
                     "    </config>\n" +
                     "  </edit-config>\n" +
                     "</rpc>,\n" +
-                    "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                    "  <rpc-error>\n" +
-                    "    <error-type>application</error-type>\n" +
-                    "    <error-tag>operation-failed</error-tag>\n" +
-                    "    <error-severity>error</error-severity>\n" +
-                    "    <error-message>Something went wrong</error-message>\n" +
-                    "  </rpc-error>\n" +
+                    "response received : <rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                    "   <rpc-error>\n" +
+                    "      <error-type>application</error-type>\n" +
+                    "      <error-tag>operation-failed</error-tag>\n" +
+                    "      <error-severity>error</error-severity>\n" +
+                    "      <error-message>Something went wrong</error-message>\n" +
+                    "   </rpc-error>\n" +
                     "</rpc-reply>\n";
         }
 
@@ -434,22 +434,23 @@ public class NetconfNetworkFunctionAlignmentServiceImplTest {
         }
         else {
             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                    "  <copy-config>\n" +
-                    "    <target>\n" +
-                    "      <running/>\n" +
-                    "    </target>\n" +
-                    "    <source>\n" +
-                    "      <config/>\n" +
-                    "    </source>\n" +
-                    "  </copy-config>\n" +
-                    "</rpc>\n,\n" +
-                    "response received : <rpc-reply message-id=\"1\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                    "  <rpc-error>\n" +
-                    "    <error-type>application</error-type>\n" +
-                    "    <error-tag>operation-failed</error-tag>\n" +
-                    "    <error-severity>error</error-severity>\n" +
-                    "    <error-message>Something went wrong</error-message>\n" +
-                    "  </rpc-error>\n" +
+                    "   <copy-config>\n" +
+                    "      <target>\n" +
+                    "         <running/>\n" +
+                    "      </target>\n" +
+                    "      <source>\n" +
+                    "         <config/>\n" +
+                    "      </source>\n" +
+                    "   </copy-config>\n" +
+                    "</rpc>\n" +
+                    ",\n" +
+                    "response received : <rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\">\n" +
+                    "   <rpc-error>\n" +
+                    "      <error-type>application</error-type>\n" +
+                    "      <error-tag>operation-failed</error-tag>\n" +
+                    "      <error-severity>error</error-severity>\n" +
+                    "      <error-message>Something went wrong</error-message>\n" +
+                    "   </rpc-error>\n" +
                     "</rpc-reply>\n";
         }
 
@@ -479,14 +480,14 @@ public class NetconfNetworkFunctionAlignmentServiceImplTest {
         }
         else {
             expected = "In Error, request sent : <rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                    "  <copy-config>\n" +
-                    "    <target>\n" +
-                    "      <running/>\n" +
-                    "    </target>\n" +
-                    "    <source>\n" +
-                    "      <config/>\n" +
-                    "    </source>\n" +
-                    "  </copy-config>\n" +
+                    "   <copy-config>\n" +
+                    "      <target>\n" +
+                    "         <running/>\n" +
+                    "      </target>\n" +
+                    "      <source>\n" +
+                    "         <config/>\n" +
+                    "      </source>\n" +
+                    "   </copy-config>\n" +
                     "</rpc>\n" +
                     ",\n" +
                     "response received : request timed out";

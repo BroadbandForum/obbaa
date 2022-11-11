@@ -163,6 +163,10 @@ public interface DeviceManagerNSConstants {
     String NETWORK_FUNCTION_LINK = "network-function-link";
     String NETWORK_FUNCTION_NAME = "nf-name";
     String NETWORK_FUNCTION_TYPE = "nf-type";
+    String NETWORK_FUNCTION_STATE_NAMESPACE = "urn:bbf:yang:obbaa:network-function-state";
+
+    //microservice-discovery-adapter
+    String MODULE_NAME = "bbf-obbaa-network-manager";
 
     SchemaPath ONU_CONFIG_INFO_SP = SchemaPath.create(true, QName.create(ONU_MANAGEMENT_NS,ONU_MANAGEMENT_REVISION , ONU_CONFIG_INFO));
 

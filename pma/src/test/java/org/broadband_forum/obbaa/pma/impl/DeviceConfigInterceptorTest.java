@@ -42,6 +42,7 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.EditContext;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.GenericConfigAttribute;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.HelperDrivenModelNode;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -78,37 +79,40 @@ public class DeviceConfigInterceptorTest {
     @Test
     public void testCreationOfDeviceWithAvailableAdapter() {
         ArgumentCaptor<DeviceAdapterId> adapter = ArgumentCaptor.forClass(DeviceAdapterId.class);
-        EditContainmentNode deviceEditNode = new EditContainmentNode(DEVICE_MANAGEMENT_QNAME, EditConfigOperations.MERGE);
+        EditContainmentNode deviceEditNode = new EditContainmentNode();
+        deviceEditNode.setQName(DEVICE_MANAGEMENT_QNAME);
         deviceEditNode.addLeafChangeNode(TYPE_QNAME, new GenericConfigAttribute(TYPE, NS, "TYPE1"));
         deviceEditNode.addLeafChangeNode(INTERFACE_VERSION_QNAME, new GenericConfigAttribute(INTERFACE_VERSION, NS, "1.0"));
         deviceEditNode.addLeafChangeNode(VENDOR_QNAME, new GenericConfigAttribute(VENDOR, NS, "VENDOR1"));
         deviceEditNode.addLeafChangeNode(MODEL_QNAME, new GenericConfigAttribute(MODEL, NS, "MODEL1"));
         EditContext editContext = new EditContext(deviceEditNode, null, ERROR_ON_ROLLBACK, null);
-        m_deviceConfigInterceptor.interceptEditConfig(m_modelNode, editContext);
+        m_deviceConfigInterceptor.interceptEditConfig(m_modelNode, editContext, null);
         verify(m_adapterManager).getDeviceAdapter(adapter.capture());
     }
 
     @Test
     public void testWhenJustModificationOfProperties() {
-        EditContainmentNode deviceEditNode = new EditContainmentNode(DEVICE_MANAGEMENT_QNAME, EditConfigOperations.MERGE);
+        EditContainmentNode deviceEditNode = new EditContainmentNode();
+        deviceEditNode.setQName(DEVICE_MANAGEMENT_QNAME);
         deviceEditNode.addLeafChangeNode(TYPE_QNAME, new GenericConfigAttribute(TYPE, NS, "TYPE1"));
         deviceEditNode.addLeafChangeNode(INTERFACE_VERSION_QNAME, new GenericConfigAttribute(INTERFACE_VERSION, NS, "1.0"));
         EditContext editContext = new EditContext(deviceEditNode, null, ERROR_ON_ROLLBACK, null);
-        m_deviceConfigInterceptor.interceptEditConfig(m_modelNode, editContext);
+        m_deviceConfigInterceptor.interceptEditConfig(m_modelNode, editContext, null);
         verifyZeroInteractions(m_adapterManager);
     }
 
     @Test
     public void testCreationOfDeviceWithNoAvailableAdapter() {
         ArgumentCaptor<DeviceAdapterId> adapter = ArgumentCaptor.forClass(DeviceAdapterId.class);
-        EditContainmentNode deviceEditNode = new EditContainmentNode(DEVICE_MANAGEMENT_QNAME, EditConfigOperations.MERGE);
+        EditContainmentNode deviceEditNode = new EditContainmentNode();
+        deviceEditNode.setQName(DEVICE_MANAGEMENT_QNAME);
         deviceEditNode.addLeafChangeNode(TYPE_QNAME, new GenericConfigAttribute(TYPE, NS, "TYPE2"));
         deviceEditNode.addLeafChangeNode(INTERFACE_VERSION_QNAME, new GenericConfigAttribute(INTERFACE_VERSION, NS, "2.0"));
         deviceEditNode.addLeafChangeNode(VENDOR_QNAME, new GenericConfigAttribute(VENDOR, NS, "VENDOR2"));
         deviceEditNode.addLeafChangeNode(MODEL_QNAME, new GenericConfigAttribute(MODEL, NS, "MODEL2"));
         EditContext editContext = new EditContext(deviceEditNode, null, ERROR_ON_ROLLBACK, null);
         try {
-            m_deviceConfigInterceptor.interceptEditConfig(m_modelNode, editContext);
+            m_deviceConfigInterceptor.interceptEditConfig(m_modelNode, editContext, null);
         }
         catch (EditConfigException e) {
             NetconfRpcError error = e.getRpcError();
