@@ -8,6 +8,12 @@ public interface DataHandlerService {
 
     void unregisterIpfixDataHandler(IpfixDataHandler dataHandler);
 
-    List<IpfixDataHandler> getDataHandlers();
+    void registerOnuPmDataHandler(OnuPMDataHandler onuPMDataHandler);
+
+    void unregisterOnuPmDataHandler(OnuPMDataHandler onuPMDataHandler);
+
+    List<IpfixDataHandler> getIpfixDataHandlers();
+
+    List<OnuPMDataHandler> getOnuPmDataHandlers();
 
 }

@@ -310,6 +310,7 @@ public class ONUNotification extends NetconfNotification {
         String mappedEvent = null;
         String onuState = getOnuState();
         switch (onuState) {
+            case "onu-present-and-unexpected": //1.0 adapter notification
             case "onu-present":
             case "onu-present-and-on-intended-channel-termination":
             case "onu-present-and-in-wavelength-discovery":
@@ -346,6 +347,18 @@ public class ONUNotification extends NetconfNotification {
                 mappedEvent = ONUConstants.NOT_APPLICABLE;
         }
         return mappedEvent;
+    }
+
+    public static Boolean isOnuManageableState(String onuState) {
+        if (onuState != null) {
+            switch (onuState) {
+                case "onu-present-and-on-intended-channel-termination":
+                    return true;
+                default:
+                    break;
+            }
+        }
+        return false;
     }
 }
 

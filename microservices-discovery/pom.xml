@@ -13,7 +13,7 @@
 	<groupId>org.broadband-forum.obbaa.microservice</groupId>
 	<name>Broadband Access Abstraction/Micro Services Discovery</name>
 	<artifactId>micro-services-discovery</artifactId>
-	<version>5.1.0</version>
+	<version>6.0.0</version>
 	<packaging>jar</packaging>
 
 	<dependencies>

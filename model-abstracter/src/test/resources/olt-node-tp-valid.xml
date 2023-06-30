@@ -1,0 +1,10 @@
+<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+   <interface>
+      <name>ethernetCsmacd.nni1</name>
+      <type xmlns:identityPrefix="urn:ietf:params:xml:ns:yang:iana-if-type">identityPrefix:ethernetCsmacd</type>
+   </interface>
+   <interface>
+      <name>gpon.uni1</name>
+      <type xmlns:identityPrefix="urn:ietf:params:xml:ns:yang:iana-if-type">identityPrefix:gpon</type>
+   </interface>
+</interfaces>

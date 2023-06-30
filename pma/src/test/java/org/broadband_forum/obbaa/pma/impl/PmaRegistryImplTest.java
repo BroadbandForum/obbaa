@@ -52,7 +52,6 @@ import org.broadband_forum.obbaa.pma.NetconfNetworkFunctionAlignmentService;
 import org.broadband_forum.obbaa.dmyang.entities.PmaResourceId;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -147,15 +146,14 @@ public class PmaRegistryImplTest {
         }
     }
 
-    @Ignore("This is applicable only in transparent mode")
     @Test
     public void testExceptionIsThrownWhenNoConnectionToDevice() throws ExecutionException {
         when(m_cm.isConnected(m_device1Meta)).thenReturn(false);
         try {
             m_pmaRegistry.executeNC(new PmaResourceId(PmaResourceId.Type.DEVICE,"device1"), "");
             fail("Expected an exception here");
-        } catch (IllegalStateException e) {
-            assertEquals("Device not connected : device1", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            assertEquals("Invalid netconf request received :  for device m_device1Meta", e.getMessage());
         }
     }
 

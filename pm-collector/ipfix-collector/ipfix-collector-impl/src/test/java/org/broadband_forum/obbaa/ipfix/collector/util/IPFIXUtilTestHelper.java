@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.Crypt;
-import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixMessageHeader;
-import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixOptionTemplateRecordHeader;
+import org.broadband_forum.obbaa.ipfix.entities.header.IpfixOptionTemplateRecordHeader;
+import org.broadband_forum.obbaa.ipfix.entities.message.header.IpfixMessageHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

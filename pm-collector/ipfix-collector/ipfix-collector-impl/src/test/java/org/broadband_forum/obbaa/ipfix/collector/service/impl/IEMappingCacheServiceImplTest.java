@@ -93,5 +93,7 @@ public class IEMappingCacheServiceImplTest {
         ArgumentCaptor<AbstractNetconfRequest> captor = new ArgumentCaptor<>();
         verify(m_deviceFamilyCacheService).getNetConfResponse(captor.capture());
         assertEquals(requestInString, captor.getValue().requestToString());
-    };
+    }
+
+    ;
 }

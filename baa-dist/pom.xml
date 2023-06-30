@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2018 Broadband Forum
+  ~ Copyright 2018-2022 Broadband Forum
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
     <parent>
         <artifactId>baa-root-pom</artifactId>
         <groupId>org.broadband-forum.obbaa</groupId>
-        <version>5.1.0</version>
+        <version>6.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>baa-dist</artifactId>
@@ -166,6 +166,12 @@
         <dependency>
             <groupId>org.broadband-forum.obbaa</groupId>
             <artifactId>aggregator</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.broadband-forum.obbaa</groupId>
+            <artifactId>model-abstracter</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

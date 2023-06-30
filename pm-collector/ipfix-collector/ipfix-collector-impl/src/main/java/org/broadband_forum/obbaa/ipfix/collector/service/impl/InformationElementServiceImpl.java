@@ -24,12 +24,12 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElement;
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElementType;
-import org.broadband_forum.obbaa.ipfix.collector.exception.MissingAbstractDataTypeException;
 import org.broadband_forum.obbaa.ipfix.collector.service.IEMappingCacheService;
 import org.broadband_forum.obbaa.ipfix.collector.service.InformationElementService;
-import org.broadband_forum.obbaa.ipfix.collector.service.ie.InformationElementCache;
+import org.broadband_forum.obbaa.ipfix.entities.exception.MissingAbstractDataTypeException;
+import org.broadband_forum.obbaa.ipfix.entities.ie.InformationElement;
+import org.broadband_forum.obbaa.ipfix.entities.ie.InformationElementType;
+import org.broadband_forum.obbaa.ipfix.entities.service.ie.InformationElementCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

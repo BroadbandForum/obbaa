@@ -28,7 +28,6 @@ import static org.broadband_forum.obbaa.onu.ONUConstants.VOMCI_PER_OLT_EOMCI_PER
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,20 +110,20 @@ public class VOLTManagementImpl implements VOLTManagement {
     private final AdapterManager m_adapterManager;
     private final PmaRegistry m_pmaRegistry;
     private final SchemaRegistry m_schemaRegistry;
+    private final MessageFormatter m_messageFormatter;
+    private final NetworkFunctionDao m_networkFunctionDao;
+    private final DeviceDao m_deviceDao;
     private ThreadPoolExecutor m_processNotificationResponsePool;
     private ThreadPoolExecutor m_processRequestResponsePool;
     private ThreadPoolExecutor m_processNotificationRequestPool;
     private ThreadPoolExecutor m_kafkaCommunicationPool;
-    private final MessageFormatter m_messageFormatter;
-    private final NetworkFunctionDao m_networkFunctionDao;
-    private final DeviceDao m_deviceDao;
     private OnuKafkaConsumer m_onuKafkaconsumer;
-    private Map<String, Set<String>> m_kafkaConsumerTopicMap;
-    private Map<String, ArrayList<Boolean>> m_networkFunctionResponse;
-    private Map<String, HelloResponseData> m_helloResponseMessages;
-    private AtomicLong m_messageId = new AtomicLong(0);
-    private Set<String> m_onuDevicesCreated;
-    private NbiNetconfServerMessageListener m_nbiNetconfServerMessageListener;
+    private final Map<String, Set<String>> m_kafkaConsumerTopicMap;
+    private final Map<String, ArrayList<Boolean>> m_networkFunctionResponse;
+    private final Map<String, HelloResponseData> m_helloResponseMessages;
+    private final AtomicLong m_messageId = new AtomicLong(0);
+    private final Map<String, String> m_onuDevicesCreated;
+    private final NbiNetconfServerMessageListener m_nbiNetconfServerMessageListener;
 
     public VOLTManagementImpl(TxService txService, DeviceManager deviceManager, AlarmService alarmService,
                               OnuKafkaProducer kafkaProducer, UnknownONUHandler unknownONUHandler,
@@ -149,7 +148,7 @@ public class VOLTManagementImpl implements VOLTManagement {
         m_deviceDao = deviceDao;
         m_kafkaConsumerTopicMap = new HashMap<>();
         m_networkFunctionResponse = new HashMap<>();
-        m_onuDevicesCreated = new HashSet<>();
+        m_onuDevicesCreated = new HashMap<>();
         m_helloResponseMessages = new HashMap<>();
         m_nbiNetconfServerMessageListener = nbiNetconfServerMessageListener;
     }
@@ -179,8 +178,8 @@ public class VOLTManagementImpl implements VOLTManagement {
                         VOLTManagementUtil.getMediatedNetworkFunctionNetconfSession(networkFunction.getNetworkFunctionName(),
                                 m_connectionManager);
                 if (mediatedSession == null) {
-                    mediatedSession = new MediatedNetworkFunctionNetconfSession(networkFunction,m_kafkaProducer,
-                            m_modelNodeDSM,m_adapterManager,m_kafkaCommunicationPool,m_messageFormatter,m_txService,
+                    mediatedSession = new MediatedNetworkFunctionNetconfSession(networkFunction, m_kafkaProducer,
+                            m_modelNodeDSM, m_adapterManager, m_kafkaCommunicationPool, m_messageFormatter, m_txService,
                             m_networkFunctionDao, this);
                     m_connectionManager.addMediatedNetworkFunctionNetconfSession(networkFunctionName, mediatedSession);
                 }
@@ -188,8 +187,8 @@ public class VOLTManagementImpl implements VOLTManagement {
                 ObjectType objectType = ObjectType.getObjectTypeFromYangString(networkFunction.getType());
                 if (objectType != null) {
                     message = m_messageFormatter.getFormattedHelloRequest(String.valueOf(m_messageId.addAndGet(1)),
-                            networkFunctionName,objectType,localEndpointName);
-                    VOLTManagementUtil.sendKafkaMessage(message,networkFunctionName,m_txService, m_networkFunctionDao, m_kafkaProducer);
+                            networkFunctionName, objectType, localEndpointName);
+                    VOLTManagementUtil.sendKafkaMessage(message, networkFunctionName, m_txService, m_networkFunctionDao, m_kafkaProducer);
                 } else {
                     LOGGER.info("The Object Type of the given Network Function yang is null.");
                 }
@@ -303,8 +302,14 @@ public class VOLTManagementImpl implements VOLTManagement {
                             return null;
                         });
                         if (legacyOLT) {
-                            sendSetOnuCommunication(onuDevice.getDeviceName(), true, onuNotification.getOltDeviceName(),
-                                    onuNotification.getChannelTermRef(), onuNotification.getOnuId());
+                            if (ONUNotification.isOnuManageableState(onuNotification.getOnuState())) {
+                                LOGGER.info("OLT didn't send d-489 auth parameters. Sending set-onu-communication.");
+                                String onuType = onuDevice.getDeviceManagement().getOnuConfigInfo().getXponTechnology().split(":")[1];
+                                sendSetOnuCommunication(onuDevice.getDeviceName(), onuType, true, onuNotification.getOltDeviceName(),
+                                        onuNotification.getChannelTermRef(), onuNotification.getOnuId());
+                            } else {
+                                LOGGER.info("Ignoring notification. The ONU is not in a manageable state:" + onuNotification.getOnuState());
+                            }
                         } else {
                             Boolean finalOltNotifiesVomciToBeUsed = oltNotifiesVomciToBeUsed;
                             Boolean finalOnuAuthenticatedByOLT = onuAuthenticatedByOLT;
@@ -389,7 +394,8 @@ public class VOLTManagementImpl implements VOLTManagement {
                     VOLTManagementUtil.sendKafkaNotification(request, m_messageFormatter, m_kafkaProducer);
                 } else {
                     LOGGER.info("Set ONU comunication triggered");
-                    sendSetOnuCommunication(onuDevice.getDeviceName(), true, onuNotification.getOltDeviceName(),
+                    String onuType = onuDevice.getDeviceManagement().getOnuConfigInfo().getXponTechnology().split(":")[1];
+                    sendSetOnuCommunication(onuDevice.getDeviceName(), onuType, true, onuNotification.getOltDeviceName(),
                             onuNotification.getChannelTermRef(), onuNotification.getOnuId());
 
                 }
@@ -413,7 +419,8 @@ public class VOLTManagementImpl implements VOLTManagement {
             if (response.equals(ONUConstants.OK_RESPONSE)) {
                 if (requestedMgmtMode.contains(ONUConstants.USE_VOMCI)) {
                     onuAuthStatus = ONU_GOING_VOMCI;
-                    sendSetOnuCommunication(onuDevice.getDeviceName(), true, onuNotification.getOltDeviceName(),
+                    String onuType = onuDevice.getDeviceManagement().getOnuConfigInfo().getXponTechnology().split(":")[1];
+                    sendSetOnuCommunication(onuDevice.getDeviceName(), onuType, true, onuNotification.getOltDeviceName(),
                             onuNotification.getChannelTermRef(), onuNotification.getOnuId());
                 } else if (requestedMgmtMode.contains(ONUConstants.USE_EOMCI)) {
                     onuAuthStatus = ONU_GOING_EOMCI;
@@ -443,7 +450,7 @@ public class VOLTManagementImpl implements VOLTManagement {
     }
 
     private void processActionRequestResponse(String oltNAme, Device onuDevice, String requestedMgmtMode,
-                                                String vaniName, ONUNotification onuNotification) {
+                                              String vaniName, ONUNotification onuNotification) {
         String channelTerminationName = onuDevice.getDeviceManagement().getDeviceState().getOnuStateInfo()
                 .getActualAttachmentPoint().getChannelTerminationRef();
         ActionRequest actionRequest = VOLTMgmtRequestCreationUtil.prepareOnuAuthenicationReportActionRequest(onuDevice.getDeviceName(),
@@ -495,29 +502,38 @@ public class VOLTManagementImpl implements VOLTManagement {
                     && device.isMediatedSession()) {
                 // TO DO :: ONU Authentication
                 String serialNumber = device.getDeviceManagement().getOnuConfigInfo().getExpectedSerialNumber();
+                String onuType = device.getDeviceManagement().getOnuConfigInfo().getXponTechnology().split(":")[1];
                 if (m_messageFormatter instanceof GpbFormatter) {
-                    sendCreateOnu(deviceName);
-                    m_onuDevicesCreated.add(deviceName);
+                    sendCreateOnu(deviceName, onuType);
+                    m_onuDevicesCreated.put(deviceName, onuType);
                 }
                 m_txService.executeWithTxRequiresNew((TxTemplate<Void>) () -> {
                     UnknownONU unknownONU = m_unknownOnuHandler.findUnknownOnuEntity(serialNumber, null);
                     if (unknownONU != null) {
-                        if (VOLTManagementUtil.isInPermittedAttachmentPoint(device, unknownONU, m_pmaRegistry)) {
-                            LOGGER.info("Found unknown onu with matching identification: " + unknownONU);
-                            HashMap<String, String> labels = VOLTMgmtRequestCreationUtil.getLabels(device);
-                            if (m_messageFormatter instanceof JsonFormatter) {
-                                NotificationRequest request = VOLTMgmtRequestCreationUtil.prepareDetectForPreconfiguredDevice(deviceName,
-                                        unknownONU, labels);
-                                VOLTManagementUtil.sendKafkaNotification(request, m_messageFormatter, m_kafkaProducer);
-                            } else {
-                                if (VOLTManagementUtil.isVomciToBeUsed(device)) {
-                                    sendSetOnuCommunication(deviceName, true, unknownONU.getOltDeviceName(),
-                                            unknownONU.getChannelTermRef(), unknownONU.getOnuId());
+                        if (ONUNotification.isOnuManageableState(unknownONU.getOnuState())) {
+                            if (VOLTManagementUtil.isInPermittedAttachmentPoint(device, unknownONU, m_pmaRegistry)) {
+                                LOGGER.info("Found unknown onu with matching identification: " + unknownONU);
+                                HashMap<String, String> labels = VOLTMgmtRequestCreationUtil.getLabels(device);
+                                if (m_messageFormatter instanceof JsonFormatter) {
+                                    NotificationRequest request = VOLTMgmtRequestCreationUtil.prepareDetectForPreconfiguredDevice(
+                                            deviceName, unknownONU, labels);
+                                    VOLTManagementUtil.sendKafkaNotification(request, m_messageFormatter, m_kafkaProducer);
+                                } else {
+                                    if (VOLTManagementUtil.isVomciToBeUsed(device)) {
+                                        sendSetOnuCommunication(deviceName, onuType, true, unknownONU.getOltDeviceName(),
+                                                unknownONU.getChannelTermRef(), unknownONU.getOnuId());
+                                    }
                                 }
-                            }
 
-                            VOLTManagementUtil.updateOnuStateInfoInDevice(device, unknownONU, m_deviceManager, m_txService);
-                            m_unknownOnuHandler.deleteUnknownOnuEntity(unknownONU);
+                                VOLTManagementUtil.updateOnuStateInfoInDevice(device, unknownONU, m_deviceManager, m_txService);
+                                m_unknownOnuHandler.deleteUnknownOnuEntity(unknownONU);
+                            } else {
+                                LOGGER.info("Found unknown onu with matching identification but not in allowed attachment point: "
+                                        + unknownONU);
+                            }
+                        } else {
+                            LOGGER.info("Found unknown onu with matching identification but not in manageable state ("
+                                    + unknownONU.getOnuState() + "): " + unknownONU);
                         }
                     }
                     return null;
@@ -528,11 +544,11 @@ public class VOLTManagementImpl implements VOLTManagement {
         });
     }
 
-    private void sendCreateOnu(String onuDeviceName) {
+    private void sendCreateOnu(String onuDeviceName, String onuType) {
         List<Pair<ObjectType, String>> managementChain = VOLTManagementUtil.getManagementChain(onuDeviceName, m_txService, m_deviceDao);
         if (!managementChain.isEmpty()) {
             for (Pair<ObjectType, String> networkFunction : managementChain) {
-                ActionRequest actionRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(onuDeviceName,
+                ActionRequest actionRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(onuDeviceName, onuType,
                         networkFunction.getFirst().toString().equals(String.valueOf(ObjectType.VOMCI_PROXY)));
                 LOGGER.debug("Prepared Create ONU Action request " + actionRequest.requestToString());
                 Object kafkaMessage = getFormattedKafkaMessage(actionRequest, onuDeviceName, networkFunction.getSecond(),
@@ -547,11 +563,11 @@ public class VOLTManagementImpl implements VOLTManagement {
         }
     }
 
-    private void sendDeleteOnu(String onuDeviceName) {
+    private void sendDeleteOnu(String onuDeviceName, String onuType) {
         List<Pair<ObjectType, String>> managementChain = VOLTManagementUtil.getManagementChain(onuDeviceName, m_txService, m_deviceDao);
         if (!managementChain.isEmpty()) {
             for (Pair<ObjectType, String> networkFunction : managementChain) {
-                ActionRequest request = VOLTMgmtRequestCreationUtil.prepareDeleteOnuRequest(onuDeviceName,
+                ActionRequest request = VOLTMgmtRequestCreationUtil.prepareDeleteOnuRequest(onuDeviceName, onuType,
                         networkFunction.getFirst().toString().equals(String.valueOf(ObjectType.VOMCI_PROXY)));
                 LOGGER.debug("Prepared Delete ONU Action request " + request.requestToString());
                 Object kafkaMessage = getFormattedKafkaMessage(request, onuDeviceName, networkFunction.getSecond(),
@@ -566,17 +582,18 @@ public class VOLTManagementImpl implements VOLTManagement {
         }
     }
 
-    private void sendSetOnuCommunication(String onuDeviceName, boolean isCommAvailable, String oltName,
+    private void sendSetOnuCommunication(String onuDeviceName, String onuType, boolean isCommAvailable, String oltName,
                                          String channelTermName, String onuId) {
         List<Pair<ObjectType, String>> managementChain = VOLTManagementUtil.getManagementChain(onuDeviceName, m_txService, m_deviceDao);
+        int mgmtChainSize = managementChain.size();
         if (!managementChain.isEmpty()) {
-            for (int i = 0; i < managementChain.size(); i++) {
+            for (int i = 0; i < mgmtChainSize; i++) {
                 String voltmfRemoteEpName;
                 String oltRemoteEpName;
                 if (i == 0) {
                     voltmfRemoteEpName = m_txService.executeWithTxRequired(() -> m_networkFunctionDao.getLocalEndpointName(
                             managementChain.get(0).getSecond()));
-                    if (managementChain.size() == 1) {
+                    if (mgmtChainSize == 1) {
                         oltRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
                                 ONUConstants.TERMINATION_POINT_B, oltName));
                     } else {
@@ -584,7 +601,7 @@ public class VOLTManagementImpl implements VOLTManagement {
                         oltRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
                                 ONUConstants.TERMINATION_POINT_B, managementChain.get(index).getSecond()));
                     }
-                } else if (i == (managementChain.size() - 1)) {
+                } else if (i == (mgmtChainSize - 1)) {
                     int index = i - 1;
                     voltmfRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
                             ONUConstants.TERMINATION_POINT_A, managementChain.get(index).getSecond()));
@@ -598,8 +615,16 @@ public class VOLTManagementImpl implements VOLTManagement {
                     oltRemoteEpName = m_txService.executeWithTxRequired(() -> m_deviceManager.getEndpointName(onuDeviceName,
                             ONUConstants.TERMINATION_POINT_B, managementChain.get(nextIndex).getSecond()));
                 }
-                ActionRequest request = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(onuDeviceName,
-                        isCommAvailable, oltName, channelTermName, onuId, voltmfRemoteEpName, oltRemoteEpName, (i != 0) ? true : false);
+                ActionRequest request;
+                if (mgmtChainSize == 1) {
+                    request = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(onuDeviceName, onuType,
+                            isCommAvailable, oltRemoteEpName, channelTermName, onuId, voltmfRemoteEpName, oltRemoteEpName,
+                            (i != 0) ? true : false);
+                } else {
+                    request = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(onuDeviceName, onuType,
+                            isCommAvailable, oltName, channelTermName, onuId, voltmfRemoteEpName, oltRemoteEpName,
+                            (i != 0) ? true : false);
+                }
                 LOGGER.debug("Prepared Set ONU Communincation Action request " + request.requestToString());
                 Object kafkaMessage = getFormattedKafkaMessage(request, onuDeviceName, managementChain.get(i).getSecond(),
                         managementChain.get(i).getSecond(), managementChain.get(i).getFirst(),
@@ -662,9 +687,10 @@ public class VOLTManagementImpl implements VOLTManagement {
                 }
             } catch (IllegalArgumentException e) {
                 LOGGER.info("Device " + deviceName + " is already removed from DB");
-                if (m_onuDevicesCreated.contains(deviceName)) {
+                if (m_onuDevicesCreated.containsKey(deviceName)) {
                     if (m_messageFormatter instanceof GpbFormatter) {
-                        sendDeleteOnu(deviceName);
+                        String onuType = m_onuDevicesCreated.get(deviceName);
+                        sendDeleteOnu(deviceName, onuType);
                     }
                 }
                 m_onuDevicesCreated.remove(deviceName);
@@ -695,7 +721,8 @@ public class VOLTManagementImpl implements VOLTManagement {
                 deviceSession.closeAsync();
             } else {
                 if (VOLTManagementUtil.isVomciToBeUsed(onuDevice)) {
-                    sendSetOnuCommunication(onuDevice.getDeviceName(), false, notification.getOltDeviceName(),
+                    String onuType = onuDevice.getDeviceManagement().getOnuConfigInfo().getXponTechnology().split(":")[1];
+                    sendSetOnuCommunication(onuDevice.getDeviceName(), onuType, false, notification.getOltDeviceName(),
                             notification.getChannelTermRef(), notification.getOnuId());
                 }
             }
@@ -1141,6 +1168,20 @@ public class VOLTManagementImpl implements VOLTManagement {
                     LOGGER.info("Session for sender'" + senderName + "' not found.");
                 }
                 VOLTManagementUtil.removeRequestFromMap(identifier);
+            } else if (operationType.equals(NetconfResources.ACTION)) {
+                NetConfResponse response;
+                MediatedNetworkFunctionNetconfSession mediatedSession =
+                        VOLTManagementUtil.getMediatedNetworkFunctionNetconfSession(senderName, m_connectionManager);
+
+                LOGGER.info(String.format("Processing Action response  :%s", data));
+                response = mediatedSession.processActionResponse(identifier, responseStatus, data, failureReason);
+                if (response != null) {
+                    m_nbiNetconfServerMessageListener.addResponseIntoMap(identifier, response.responseToString());
+                } else {
+                    LOGGER.error("Failed to process Action response, Response is NULL");
+                }
+                LOGGER.debug("Processing " + operationType + " response with id "
+                        + identifier + " is " + (response == null ? "failed" : "successful"));
             } else {
                 LOGGER.warn(String.format("Unknown operation type %s ", operationType));
             }
@@ -1153,11 +1194,11 @@ public class VOLTManagementImpl implements VOLTManagement {
     */
     protected void processHelloRequestResponse(HelloResponseData responseData) {
         // the sender name is the network function name
-        m_helloResponseMessages.put(responseData.getSenderName(),responseData);
+        m_helloResponseMessages.put(responseData.getSenderName(), responseData);
         VOLTManagementUtil.removeRequestFromMap(responseData.getIdentifier());
         LOGGER.info("Processing hello message response from " + responseData.getSenderName() + " with id "
                 + responseData.getIdentifier() + " was successfully processed");
-        LOGGER.info("\nReceived hello message response: " + responseData.toString());
+        LOGGER.info("\nReceived hello message response: " + responseData);
     }
 
     @Override
@@ -1170,7 +1211,7 @@ public class VOLTManagementImpl implements VOLTManagement {
                 String onuName = responseData.getOnuName();
                 if (responseData.getOperationType().equals(NetconfResources.NOTIFICATION) && responseData.getObjectType()
                         .equals(ObjectType.ONU)) {
-                    if (notificationData.contains(ONUConstants.VOMCI_FUNC_ONU_ALIGNMENT_STATUS_JSON_KEY)) {
+                    if (notificationData.contains(ONUConstants.VOMCI_FUNC_ONU_ALIGNMENT_RESULT_JSON_KEY)) {
                         processVomciAlignmentStatusNotification(notificationData, onuName);
                     } else if (notificationData.contains(ONUConstants.VOMCI_FUNC_ALARM_MISALIGNMENT_JSON_KEY)) {
                         processVomciAlarmMisalignmentNotification(notificationData, onuName);
@@ -1185,12 +1226,12 @@ public class VOLTManagementImpl implements VOLTManagement {
     }
 
     private void processVomciAlignmentStatusNotification(String notificationData, String onuName) {
-        String onuAlignmentStatus = null;
+        String onuAlignmentState = null;
         Device onuDevice = null;
 
-        onuAlignmentStatus = VOLTManagementUtil.processNotificationAndRetrieveOnuAlignmentStatus(notificationData);
-        if (onuAlignmentStatus != null) {
-            if (onuAlignmentStatus.equals(ONUConstants.ALIGNED)) {
+        onuAlignmentState = VOLTManagementUtil.processNotificationAndRetrieveOnuAlignmentStatus(notificationData);
+        if (onuAlignmentState != null) {
+            if (onuAlignmentState.equals(ONUConstants.ALIGNED)) {
                 try {
                     onuDevice = m_txService.executeWithTxRequired(() -> m_deviceManager.getDevice(onuName));
                 } catch (IllegalArgumentException e) {
@@ -1222,7 +1263,7 @@ public class VOLTManagementImpl implements VOLTManagement {
         Device onuDevice = null;
 
         LOGGER.info("Received Alarm Misalignment Notification for onu:" + onuName);
-        valid  = VOLTManagementUtil.processAlarmMisaligmentNotification(notificationData, onuName);
+        valid = VOLTManagementUtil.processAlarmMisaligmentNotification(notificationData, onuName);
         if (valid) {
             LOGGER.info("Notification is valid. Sending GET ALL ALARMS Operation to ONU." + onuName);
             try {
@@ -1274,7 +1315,7 @@ public class VOLTManagementImpl implements VOLTManagement {
                 }
             }
         } else {
-            LOGGER.info(String.format("AlarmInfo List is either empty or null"));
+            LOGGER.info("AlarmInfo List is either empty or null");
         }
     }
 

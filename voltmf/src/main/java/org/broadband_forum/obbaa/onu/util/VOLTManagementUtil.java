@@ -342,19 +342,19 @@ public final class VOLTManagementUtil {
     }
 
     public static String processNotificationAndRetrieveOnuAlignmentStatus(String notificationData) {
-        String alignmentStatus = null;
+        String alignmentState = null;
         if (!notificationData.isEmpty()) {
             try {
                 JSONObject getResponseDataJson = new JSONObject(notificationData);
-                alignmentStatus = getResponseDataJson.getJSONObject(ONUConstants.VOMCI_FUNC_ONU_ALIGNMENT_STATUS_JSON_KEY)
-                        .optString(ONUConstants.ALIGNMENT_STATUS_JSON_KEY);
+                alignmentState = getResponseDataJson.getJSONObject(ONUConstants.VOMCI_FUNC_ONU_ALIGNMENT_RESULT_JSON_KEY)
+                        .optString(ONUConstants.ALIGNMENT_STATE_JSON_KEY);
             } catch (JSONException e) {
                 LOGGER.error("Unable to form JSONObject " + e);
             }
         } else {
             LOGGER.info("Received notification without information");
         }
-        return alignmentStatus;
+        return alignmentState;
     }
 
     public static boolean processAlarmMisaligmentNotification(String notificationData, String headerOnuName) {

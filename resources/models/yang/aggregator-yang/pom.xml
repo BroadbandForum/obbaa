@@ -51,6 +51,13 @@
         <resources>
             <resource>
                 <directory>${project.basedir}</directory>
+                <excludes>
+                    <exclude>bbf-dot1q-types.yang</exclude>
+                    <exclude>ieee802-dot1q-types.yang</exclude>
+                    <exclude>ietf-l2-topology.yang</exclude>
+                    <exclude>ietf-network-topology.yang</exclude>
+                    <exclude>ietf-network.yang</exclude>
+                </excludes>
             </resource>
         </resources>
     </build>

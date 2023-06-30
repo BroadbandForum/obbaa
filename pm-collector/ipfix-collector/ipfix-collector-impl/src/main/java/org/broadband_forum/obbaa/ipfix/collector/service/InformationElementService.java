@@ -18,7 +18,7 @@ package org.broadband_forum.obbaa.ipfix.collector.service;
 
 import java.io.File;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElement;
+import org.broadband_forum.obbaa.ipfix.entities.ie.InformationElement;
 
 public interface InformationElementService {
 

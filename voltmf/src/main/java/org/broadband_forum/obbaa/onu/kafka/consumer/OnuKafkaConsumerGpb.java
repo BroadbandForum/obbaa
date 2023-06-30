@@ -42,7 +42,7 @@ import org.osgi.framework.Bundle;
  * <p>
  * Consumes Kafka messages of type Gpb from vOMCI
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public class OnuKafkaConsumerGpb extends AbstractOnuKafkaConsumer<Msg> {
 

@@ -36,7 +36,7 @@ import org.osgi.framework.Bundle;
  * <p>
  * Produces Kafka messages of type Gpb for vOMCI
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public class OnuKafkaProducerGpb extends AbstractOnuKafkaProducer {
 

@@ -21,12 +21,12 @@ networks:
 
 services:
   polt-simulator:
-    image: broadbandforum/obbaa-polt-simulator:R5.0.0-std-2.1
+    image: broadbandforum/obbaa-polt-simulator:latest
     stdin_open: true
     tty: true
     container_name: polt-simulator
 
-    command: ["-dummy_tr385"]
+    command: ["-dummy_tr385", "-d"]
     hostname: polt-simulator
 
     environment:

@@ -22,7 +22,7 @@ import org.broadband_forum.obbaa.onu.exception.MessageFormatterException;
  * <p>
  * Provides APIs to Kafka Producer
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public interface OnuKafkaProducer {
 

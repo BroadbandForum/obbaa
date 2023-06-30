@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: {{ .Chart.Name }}
+  namespace: obbaa
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  replicas: {{ default 1 .Values.replicaCount | int }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      volumes:
+          - name: baa-mongo-store
+            persistentVolumeClaim:
+              claimName: baa-mongo-pvclaim
+      containers:
+      - name: mongo
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        volumeMounts:
+            - name: baa-mongo-store
+              mountPath: /data/db
+        ports:
+        - containerPort: 27017
+          name: mongoport
+        resources:
+{{ toYaml .Values.resources | indent 10 }}

@@ -29,11 +29,14 @@
     <suppress files="DeviceXmlStore.java" checks="MemberName"/>
     <suppress files="org.broadband_forum.obbaa.aggregator.jaxb.*" checks="MemberName"/>
     <suppress files="org.broadband_forum.obbaa.aggregator.*" checks="CustomImportOrder"/>
+    <suppress files="org.broadband_forum.obbaa.modelabstracter.jaxb.*" checks="MemberName"/>
+    <suppress files="org.broadband_forum.obbaa.modelabstracter.*" checks="CustomImportOrder"/>
     <suppress files="CallHomeListenerCompositeImpl.java" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.dmyang.entities.*" checks="MemberName"/>
     <suppress files="org.broadband_forum.obbaa.nf.entities.*" checks="MemberName"/>
     <suppress files="NetworkWideTag.java" checks="MemberName"/>
     <suppress files="ResponseData.java" checks="MemberName"/>
+    <suppress files="ConvertRet.java" checks="MemberName"/>
     <suppress files="DataStoreTransactionInterceptor.java" checks="IllegalCatch"/>
     <suppress files="DeviceManagementSubsystem.java" checks="IllegalCatch"/>
     <suppress files="DeviceDaoImpl.java" checks="IllegalCatch"/>
@@ -56,6 +59,7 @@
     <suppress files="DefaultConfigService.java" checks="IllegalCatch"/>
     <suppress files="org.broadband_forum.obbaa.netconf.alarm.entity.*" checks="MemberName"/>
     <suppress files="AlarmQueue.java" checks="IllegalCatch"/>
+    <suppress files="TemplateUtils.java" checks="IllegalCatch"/>
     <suppress files="AlarmServiceImpl.java" checks="IllegalCatch"/>
     <suppress files="AlarmDefinitionServiceImpl.java" checks="IllegalCatch"/>
     <suppress files="AlarmNotificationUtil.java" checks="IllegalCatch"/>
@@ -85,6 +89,8 @@
     <suppress files="org.broadband_forum.obbaa.onu.util.JsonUtil" checks="VariableDeclarationUsageDistance"/>
     <suppress files="org.broadband_forum.obbaa.onu.message.gpb.message.*" checks=".*"/>
     <suppress files="org.broadband_forum.obbaa.onu.message.gpb.service.*" checks=".*"/>
+    <suppress files="org.broadband_forum.obbaa.onu.pm.message.gpb.message.*" checks=".*"/>
+    <suppress files="org.broadband_forum.obbaa.onu.pm.message.gpb.service.*" checks=".*"/>
     <suppress files="OnuKafkaConsumerJson.java" checks="IllegalCatch"/>
     <suppress files="OnuKafkaConsumerGpb.java" checks="IllegalCatch"/>
 </suppressions>

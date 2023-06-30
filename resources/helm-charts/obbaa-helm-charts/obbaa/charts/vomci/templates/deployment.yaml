@@ -34,6 +34,8 @@ spec:
               value: "vomci1-response" # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
             - name: KAFKA_NOTIFICATION_TOPICS
               value: "vomci1-notification" # if message formatter is JSON "OBBAA_ONU_NOTIFICATION"
+            - name: KAFKA_TELEMETRY_TOPICS
+              value: "vomci1-telemetry"
             - name: VOMCI_KAFKA_SENDER_NAME
               value: "bbf-vomci"
             - name: VOMCI_KAFKA_VOLTMF_NAME

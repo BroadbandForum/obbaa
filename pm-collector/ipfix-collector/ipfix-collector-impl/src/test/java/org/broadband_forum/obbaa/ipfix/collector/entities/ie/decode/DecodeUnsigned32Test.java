@@ -20,10 +20,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
 
-import org.broadband_forum.obbaa.ipfix.collector.exception.DataTypeLengthMismatchException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.MissingAbstractDataTypeException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.UtilityException;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
+import org.broadband_forum.obbaa.ipfix.entities.exception.DataTypeLengthMismatchException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.MissingAbstractDataTypeException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.UtilityException;
+import org.broadband_forum.obbaa.ipfix.entities.ie.IpfixDataRecordDecodeMethod;
+import org.broadband_forum.obbaa.ipfix.entities.ie.decode.DecodeUnsigned32;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.junit.Test;
 
 public class DecodeUnsigned32Test {

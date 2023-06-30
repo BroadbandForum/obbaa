@@ -16,32 +16,36 @@
 
 <device-adapters xmlns="urn:bbf:yang:obbaa:network-manager">
     <device-adapter>
-        <type>dpu</type>
-        <interface-version>interface1</interface-version>
-        <model>model1</model>
-        <vendor>vendor1</vendor>
         <description>This is an adapter for model1.dpu provided by vendor1</description>
-        <is-netconf>false</is-netconf>
+        <devices-related>
+            <device>DeviceA(BasedAdapter1)</device>
+            <device-count>1</device-count>
+        </devices-related>
         <factory-garment-tag>
-            <number-of-modules-present-in-standard-adapter>12</number-of-modules-present-in-standard-adapter>
-            <total-number-of-modules-present>15</total-number-of-modules-present>
-            <percentage-adherence-to-standard-module>83%</percentage-adherence-to-standard-module>
-            <deviated-standard-module>ietf-hardware</deviated-standard-module>
-            <deviated-standard-module>iana-hardware</deviated-standard-module>
-            <percentage-of-standard-modules-having-deviation>20%</percentage-of-standard-modules-having-deviation>
             <augmented-standard-module>ietf-hardware</augmented-standard-module>
             <augmented-standard-module>iana-hardware</augmented-standard-module>
+            <deviated-standard-module>ietf-hardware</deviated-standard-module>
+            <deviated-standard-module>iana-hardware</deviated-standard-module>
+            <number-of-modules-present-in-standard-adapter>12</number-of-modules-present-in-standard-adapter>
+            <percentage-adherence-to-standard-module>83%</percentage-adherence-to-standard-module>
             <percentage-of-standard-modules-having-augments>20%</percentage-of-standard-modules-having-augments>
+            <percentage-of-standard-modules-having-deviation>20%</percentage-of-standard-modules-having-deviation>
+            <total-number-of-modules-present>15</total-number-of-modules-present>
         </factory-garment-tag>
         <in-use>true</in-use>
-        <devices-related>
-            <device-count>1</device-count>
-            <device>DeviceA(BasedAdapter1)</device>
-        </devices-related>
+        <interface-version>interface1</interface-version>
+        <is-netconf>false</is-netconf>
+        <model>model1</model>
+        <type>dpu</type>
+        <vendor>vendor1</vendor>
         <yang-modules>
             <module>
                 <name>bbf-alarm-types</name>
                 <revision>2020-05-11</revision>
+            </module>
+            <module>
+                <name>bbf-d-olt-network-function-types</name>
+                <revision>2022-05-01</revision>
             </module>
             <module>
                 <name>bbf-device-types</name>
@@ -149,7 +153,7 @@
             </module>
             <module>
                 <name>bbf-vomci-proxy</name>
-                <revision>202-08-19</revision>
+                <revision>2020-08-19</revision>
             </module>
             <module>
                 <name>bbf-vomci-types</name>

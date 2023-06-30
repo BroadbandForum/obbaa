@@ -123,6 +123,21 @@ public class NbiNetconfServerMessageListener implements NetconfServerMessageList
                     ((NetconfRpcResponse)response).addRpcOutputElement(element);
                 }
             }
+            if ((response instanceof ActionResponse)) {
+                if (netconfResponse instanceof ActionResponse) {
+                    ((ActionResponse) response).setActionOutputElements(((ActionResponse) netconfResponse).getActionOutputElements());
+                } else if (netconfResponse instanceof NetconfRpcResponse) {
+                    //NetconfRpcResponse is similar to ActionResponse
+                    ((ActionResponse) response).setActionOutputElements(((NetconfRpcResponse) netconfResponse).getRpcOutputElements());
+                } else {
+                    //with a single element, responseString is not detected as ActionResponse or NetconfRpcResponse
+                    if (netconfResponse.getData() != null) {
+                        List<Element> list = new ArrayList<>();
+                        list.add(netconfResponse.getData());
+                        ((ActionResponse) response).setActionOutputElements(list);
+                    }
+                }
+            }
             else {
                 response.setData(netconfResponse.getData());
             }

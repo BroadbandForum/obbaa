@@ -19,9 +19,11 @@ package org.broadband_forum.obbaa.onu;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -30,9 +32,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
 import org.broadband_forum.obbaa.device.adapter.AdapterManager;
+import org.broadband_forum.obbaa.device.adapter.AdapterUtils;
 import org.broadband_forum.obbaa.netconf.api.client.AbstractNetconfClientSession;
 import org.broadband_forum.obbaa.netconf.api.client.NetconfResponseFuture;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.DocumentToPojoTransformer;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
@@ -45,6 +49,7 @@ import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcResponse;
 import org.broadband_forum.obbaa.netconf.api.util.DocumentUtils;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfResources;
+import org.broadband_forum.obbaa.netconf.mn.fwk.schema.SchemaRegistry;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.support.utils.TxTemplate;
@@ -57,8 +62,13 @@ import org.broadband_forum.obbaa.onu.impl.VOLTManagementImpl;
 import org.broadband_forum.obbaa.onu.kafka.producer.OnuKafkaProducer;
 import org.broadband_forum.obbaa.onu.message.JsonFormatter;
 import org.broadband_forum.obbaa.onu.message.MessageFormatter;
+import org.broadband_forum.obbaa.onu.util.DeviceJsonUtils;
 import org.broadband_forum.obbaa.onu.util.VOLTManagementUtil;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * <p>
@@ -125,6 +135,10 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
                     netconfRequest = DocumentToPojoTransformer.getGet(requestDocument);
                     future = onGet((GetRequest) netconfRequest);
                     break;
+                case NetconfResources.ACTION:
+                    netconfRequest = DocumentToPojoTransformer.getAction(requestDocument);
+                    future = onAction((ActionRequest) netconfRequest);
+                    break;
                 default:
                     return (NetconfResponseFuture) CompletableFuture.completedFuture(new NetconfRpcResponse()
                             .setMessageId(currentMessageId));
@@ -140,7 +154,7 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
             response.setMessageId(currentMessageId);
             response.setOk(false);
             NetconfRpcError rpcError = new NetconfRpcError(NetconfRpcErrorTag.OPERATION_FAILED, NetconfRpcErrorType.RPC,
-                    NetconfRpcErrorSeverity.Error, "Got an invalid netconf request to be sent to vOMCI for device: "
+                    NetconfRpcErrorSeverity.Error, "Got an invalid netconf request to be sent to vOMCI for Network Function: "
                     + m_networkFunction.getNetworkFunctionName());
             response.addError(rpcError);
             future.complete(response);
@@ -206,9 +220,9 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
                         registerRequestInMap(request, future);
                     }
                 } else {
-                    LOGGER.debug(String.format("Mediated Device Netconf Session is closed\n"
+                    LOGGER.debug(String.format("Mediated Network Function Netconf Session is closed\n"
                             + "Do not send %s request onto Kafka topic and do not register it in the Map", operation));
-                    internalNokResponse(request, future, "Mediated Device Netconf Session is closed");
+                    internalNokResponse(request, future, "Mediated Network Function Netconf Session is closed");
                 }
             }
         } catch (Exception e) {
@@ -304,7 +318,7 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
                 request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
-                LOGGER.debug("Mediated Device Netconf Session is closed. "
+                LOGGER.debug("Mediated Network Function Netconf Session is closed. "
                         + "Unable to process copy-config request for NF " + m_networkFunction);
                 return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
@@ -331,7 +345,7 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
         LOGGER.info(String.format("Sending get request for NF %s: %s", m_networkFunctionName, request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
-                LOGGER.debug("Mediated Device Netconf Session is closed. Unable to process GET request");
+                LOGGER.debug("Mediated Network Function Netconf Session is closed. Unable to process GET request");
                 return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
         }
@@ -339,12 +353,46 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
         return NetconfResponseFuture.completedNetconfResponseFuture(null);
     }
 
+    private NetconfResponseFuture onAction(ActionRequest request) {
+        LOGGER.info(String.format("Sending action request for NF %s: %s", m_networkFunctionName, request.requestToString()));
+        synchronized (m_lock) {
+            if (!m_open) {
+                LOGGER.debug("Mediated Network Function Netconf Session is closed. Unable to process Action request");
+                return NetconfResponseFuture.completedNetconfResponseFuture(null);
+            }
+        }
+        TimestampFutureResponse future = new TimestampFutureResponse(request.getReplyTimeout(), TimeUnit.MILLISECONDS);
+        m_kafkaCommunicationPool.execute(() -> {
+            setMessageId(request);
+            if (request.getMessageId() == null || request.getMessageId().isEmpty()) {
+                LOGGER.warn("Unable to set action request messageId\n"
+                        + "Terminate processing action request for " + m_networkFunctionName);
+                internalNokResponse(request, future, "Unable to set action request messageId");
+            }
+            try {
+                m_voltManagement.setAndIncrementVoltmfInternalMessageId(request);
+                Object formattedMessage = m_messageFormatter.getFormattedRequestForNF(request,
+                        NetconfResources.ACTION,m_networkFunction,m_modelNodeDSM,m_adapterManager);
+                sendRequest(NetconfResources.ACTION, formattedMessage, request, future);
+                VOLTManagementUtil.registerInRequestMap(request, "", NetconfResources.ACTION);
+            } catch (MessageFormatterSyncException e) {
+                internalOkResponse(request, future);
+            } catch (MessageFormatterException e) {
+                internalNokResponse(request, future, e.getMessage());
+            } catch (Exception e) {
+                LOGGER.error("Error while processing action request for NF" + m_networkFunctionName, e);
+                internalNokResponse(request, future, e.toString());
+            }
+        });
+        return future;
+    }
+
     public NetconfResponseFuture  onEditConfig(EditConfigRequest request) {
         LOGGER.info(String.format("Sending edit config request for NF %s: >%s<", m_networkFunctionName,
                 request.requestToString()));
         synchronized (m_lock) {
             if (!m_open) {
-                LOGGER.warn("Mediated Device Netconf Session is closed\n"
+                LOGGER.warn("Mediated Network Function Netconf Session is closed\n"
                         + "Unable to process edit-config request for " + m_networkFunctionName);
                 return NetconfResponseFuture.completedNetconfResponseFuture(null);
             }
@@ -368,7 +416,7 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
             } catch (MessageFormatterException e) {
                 internalNokResponse(request, future, e.getMessage());
             } catch (Exception e) {
-                LOGGER.error("Error while processing edit-config request for device" + m_networkFunctionName, e);
+                LOGGER.error("Error while processing edit-config request for Network Function " + m_networkFunctionName, e);
                 internalNokResponse(request, future, e.toString());
             }
         });
@@ -378,6 +426,101 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
     public NetConfResponse processGetResponse(String identifier, String responseStatus, String jsonResponse, String failureReason) {
         LOGGER.error("GET not implemented for NF");
         return null;
+    }
+
+    public NetConfResponse processActionResponse(String identifier, String responseStatus, String jsonResponse, String failureReason) {
+        synchronized (m_lock) {
+            if (!m_requestMap.containsKey(identifier)) {
+                LOGGER.debug(String.format("%s request with identifier %s has expired\n"
+                        + "Terminate processing response", "action", identifier));
+                return null;
+            }
+        }
+        NetconfRpcResponse response = new NetconfRpcResponse();
+        response.setMessageId(identifier);
+        if (responseStatus.equals(ONUConstants.OK_RESPONSE)) {
+            LOGGER.debug(String.format("Start processing Action response with identifier: %s and status: %s",
+                    identifier, responseStatus));
+            if (jsonResponse.isEmpty()) {
+                LOGGER.warn(String.format("Unable to process Action response with identifier: %s since data"
+                                + " in the JSON Response object is empty\nCompleting the future with empty Netconf Response",
+                        identifier));
+                removeRequestFromMap(identifier, response);
+                return response;
+            }
+            try {
+                JSONObject jsonObj = new JSONObject(jsonResponse);
+                List<Element> elementsList = new ArrayList<>();
+                for (Object key : jsonObj.keySet()) {
+                    String childKey = (String) key;
+                    Object childValue = jsonObj.get(childKey);
+                    SchemaRegistry schemaRegistry = AdapterUtils.getAdapterContext(m_networkFunction,
+                            m_adapterManager).getSchemaRegistry();
+
+                    try {
+                        DeviceJsonUtils deviceJsonUtils = new DeviceJsonUtils(schemaRegistry, m_modelNodeDSM);
+                        Element element = deviceJsonUtils.convertFromJsonToXmlSBI("{\"" + childKey + "\""
+                                + ONUConstants.COLON + childValue + "}");
+                        elementsList.add(element);
+                    } catch (DOMException e) {
+                        LOGGER.error("Error while converting child of JSON object into the XML element ", e);
+                        String moduleName = childKey.split(ONUConstants.COLON)[0];
+                        String namespace = schemaRegistry.getNamespaceOfModule(moduleName);
+                        String prefix = schemaRegistry.getPrefix(namespace);
+                        String localName = childKey.split(ONUConstants.COLON)[1];
+                        String elementName = prefix + ONUConstants.COLON + childKey.split(ONUConstants.COLON)[1];
+                        NetconfRpcErrorType netconfRpcErrorType = NetconfRpcErrorType.getType("rpc");
+                        NetconfRpcError netconfRpcError = NetconfRpcError.getUnknownNamespaceError(namespace,
+                                "One or more of the following: key=" + childKey + ", moduleName=" + moduleName
+                                        + ", namespace=" + namespace + ", prefix=" + prefix + ", localName=" + localName
+                                        + ", elementName=" + elementName, netconfRpcErrorType);
+                        response.addError(netconfRpcError);
+                        removeRequestFromMap(identifier, response);
+                        return response;
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Error while converting child of JSON object into the XML element ", e);
+                        NetconfRpcErrorType netconfRpcErrorType = NetconfRpcErrorType.getType("rpc");
+                        NetconfRpcError netconfRpcError = NetconfRpcError.getBadElementError(childKey, netconfRpcErrorType);
+                        response.addError(netconfRpcError);
+                        removeRequestFromMap(identifier, response);
+                        return response;
+                    } catch (Exception e) {
+                        LOGGER.error("Error while converting child of JSON object into the XML element ", e);
+                        NetconfRpcError netconfRpcError = NetconfRpcError.getApplicationError(e.getMessage());
+                        response.addError(netconfRpcError);
+                        removeRequestFromMap(identifier, response);
+                        return response;
+                    }
+                }
+                for (Element elem : elementsList) {
+                    response.addRpcOutputElement(elem);
+                }
+            } catch (JSONException e) {
+                LOGGER.error(String.format("Error while generating JSONObject as part of building NetconfResponse"
+                                + " based on the received Action JSON Response with identifier %s and object data: %s\n",
+                        identifier, jsonResponse, e.getMessage()));
+                NetconfRpcErrorType netconfRpcErrorType = NetconfRpcErrorType.getType("rpc");
+                NetconfRpcError netconfRpcError = NetconfRpcError.getBadAttributeError(ONUConstants.DATA_JSON_KEY,
+                        netconfRpcErrorType, e.getMessage());
+                response.addError(netconfRpcError);
+                removeRequestFromMap(identifier, response);
+                return response;
+            } catch (Exception e) {
+                LOGGER.error("Error while processing Action response with identifier:" + identifier, e);
+                NetconfRpcError netconfRpcError = NetconfRpcError.getApplicationError(e.getMessage());
+                response.addError(netconfRpcError);
+                removeRequestFromMap(identifier, response);
+                return response;
+            }
+        } else {
+            LOGGER.debug("Adding the Application Error to the Netconf response upon receiving  "
+                    + "NOK Response Status is due to the following Failure: " + failureReason);
+            NetconfRpcError netconfRpcError = NetconfRpcError.getApplicationError(failureReason);
+            response.addError(netconfRpcError);
+        }
+        removeRequestFromMap(identifier, response);
+        LOGGER.debug("Processed Action response based on response as follows: " + response.responseToString());
+        return response;
     }
 
     public NetConfResponse processResponse(String identifier, String operationType, String responseStatus, String failureReason) {
@@ -396,10 +539,10 @@ public class MediatedNetworkFunctionNetconfSession extends AbstractNetconfClient
             response.setOk(true);
         } else {
             LOGGER.debug(String.format("Adding the Application Error to the Netconf response for %s "
-                            + "request upon receiving NOK Response Status received from VONUMgmt is due to the following Failure: {}",
+                            + "request upon receiving NOK Response Status received from is due to the following Failure: {}",
                     operationType, failureReason));
             NetconfRpcError netconfRpcError = NetconfRpcError.getApplicationError(operationType
-                    + " Request Error upon receiving NOK Response Status received from VONUMgmt is due to the following Failure: "
+                    + " Request Error upon receiving NOK Response Status received from is due to the following Failure: "
                     + failureReason);
             response = response.addError(netconfRpcError);
             response.setOk(false);

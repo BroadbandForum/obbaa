@@ -26,66 +26,62 @@
                         <name>bbf-vomci</name>
                         <root>
                             <bbf-vomci-func:vomci xmlns:bbf-vomci-func="urn:bbf:yang:bbf-vomci-function">
-                                <bbf-vomci-func:remote-network-function>
+                                <bbf-vomci-func:remote-nf>
                                     <bbf-vomci-func:nf-client>
                                         <bbf-vomci-func:enabled>true</bbf-vomci-func:enabled>
-                                        <bbf-vomci-func:nf-initiate>
-                                            <bbf-vomci-func:remote-endpoints>
-                                                <bbf-vomci-func:remote-endpoint>
-                                                    <bbf-vomci-func:name>vOLTMF_Kafka_1</bbf-vomci-func:name>
-                                                    <bbf-vomci-func:nf-type xmlns:bbf-nf-types="urn:bbf:yang:bbf-network-function-types">bbf-nf-types:voltmf-type</bbf-vomci-func:nf-type>
-                                                    <bbf-vomci-func:local-endpoint-name>vOMCI-kfk-1</bbf-vomci-func:local-endpoint-name>
-                                                    <bbf-vomci-func:kafka-agent>
-                                                        <bbf-vomci-func:kafka-agent-parameters>
-                                                            <bbf-vomci-func:client-id>client-id2</bbf-vomci-func:client-id>
-                                                            <bbf-vomci-func:publication-parameters>
-                                                                <bbf-vomci-func:topic>
-                                                                    <bbf-vomci-func:name>vomci1-response</bbf-vomci-func:name>
-                                                                    <bbf-vomci-func:purpose>VOMCI_RESPONSE</bbf-vomci-func:purpose>
-                                                                </bbf-vomci-func:topic>
-                                                                <bbf-vomci-func:topic>
-                                                                    <bbf-vomci-func:name>vomci1-notification</bbf-vomci-func:name>
-                                                                    <bbf-vomci-func:purpose>VOMCI_NOTIFICATION</bbf-vomci-func:purpose>
-                                                                </bbf-vomci-func:topic>
-                                                            </bbf-vomci-func:publication-parameters>
-                                                            <bbf-vomci-func:consumption-parameters>
-                                                                <bbf-vomci-func:topic>
-                                                                    <bbf-vomci-func:name>vomci1-request</bbf-vomci-func:name>
-                                                                    <bbf-vomci-func:purpose>VOMCI_REQUEST</bbf-vomci-func:purpose>
-                                                                </bbf-vomci-func:topic>
-                                                            </bbf-vomci-func:consumption-parameters>
-                                                        </bbf-vomci-func:kafka-agent-parameters>
-                                                    </bbf-vomci-func:kafka-agent>
-                                                    <bbf-vomci-func:access-point>
-                                                        <bbf-vomci-func:name>vOLTMF_Kafka_1</bbf-vomci-func:name>
-                                                        <bbf-vomci-func:kafka-agent>
-                                                            <bbf-vomci-func:kafka-agent-transport-parameters>
-                                                                <bbf-vomci-func:remote-address>kafka</bbf-vomci-func:remote-address>
-                                                            </bbf-vomci-func:kafka-agent-transport-parameters>
-                                                        </bbf-vomci-func:kafka-agent>
-                                                    </bbf-vomci-func:access-point>
-                                                </bbf-vomci-func:remote-endpoint>
-                                            </bbf-vomci-func:remote-endpoints>
-                                        </bbf-vomci-func:nf-initiate>
+                                        <bbf-vomci-func:initiate>
+                                            <bbf-vomci-func:remote-server>
+                                                <bbf-vomci-func:name>vOLTMF_Kafka_1</bbf-vomci-func:name>
+                                                <bbf-vomci-func:nf-type xmlns:bbf-nft="urn:bbf:yang:bbf-network-function-types">bbf-nft:voltmf</bbf-vomci-func:nf-type>
+                                                <bbf-vomci-func:local-service-endpoint>vOMCI-kfk-1</bbf-vomci-func:local-service-endpoint>
+                                                <bbf-vomci-func-ka:kafka-agent xmlns:bbf-vomci-func-ka="urn:bbf:yang:bbf-vomci-function-kafka-agent">
+                                                    <bbf-vomci-func-ka:client-id>client-id2</bbf-vomci-func-ka:client-id>
+                                                    <bbf-vomci-func-ka:publication-parameters>
+                                                        <bbf-vomci-func-ka:topic>
+                                                            <bbf-vomci-func-ka:name>vomci1-response</bbf-vomci-func-ka:name>
+                                                            <bbf-vomci-func-ka:purpose>VOMCI_RESPONSE</bbf-vomci-func-ka:purpose>
+                                                        </bbf-vomci-func-ka:topic>
+                                                        <bbf-vomci-func-ka:topic>
+                                                            <bbf-vomci-func-ka:name>vomci1-notification</bbf-vomci-func-ka:name>
+                                                            <bbf-vomci-func-ka:purpose>VOMCI_NOTIFICATION</bbf-vomci-func-ka:purpose>
+                                                        </bbf-vomci-func-ka:topic>
+                                                    </bbf-vomci-func-ka:publication-parameters>
+                                                    <bbf-vomci-func-ka:consumption-parameters>
+                                                        <bbf-vomci-func-ka:group-id>group2</bbf-vomci-func-ka:group-id>
+                                                        <bbf-vomci-func-ka:topic>
+                                                            <bbf-vomci-func-ka:name>vomci1-request</bbf-vomci-func-ka:name>
+                                                            <bbf-vomci-func-ka:purpose>VOMCI_REQUEST</bbf-vomci-func-ka:purpose>
+                                                        </bbf-vomci-func-ka:topic>
+                                                    </bbf-vomci-func-ka:consumption-parameters>
+                                                    <bbf-vomci-func-ka:access-point>
+                                                        <bbf-vomci-func-ka:name>vOLTMF_Kafka_1</bbf-vomci-func-ka:name>
+                                                        <bbf-vomci-func-ka:kafka-agent-transport-parameters>
+                                                            <bbf-vomci-func-ka-tcp:tcp-client-parameters xmlns:bbf-vomci-func-ka-tcp="urn:bbf:yang:bbf-vomci-function-kafka-agent-tcp">
+                                                                <bbf-vomci-func-ka-tcp:remote-address>kafka-host</bbf-vomci-func-ka-tcp:remote-address>
+                                                                <bbf-vomci-func-ka-tcp:remote-port>9092</bbf-vomci-func-ka-tcp:remote-port>
+                                                            </bbf-vomci-func-ka-tcp:tcp-client-parameters>
+                                                        </bbf-vomci-func-ka:kafka-agent-transport-parameters>
+                                                    </bbf-vomci-func-ka:access-point>
+                                                </bbf-vomci-func-ka:kafka-agent>
+                                            </bbf-vomci-func:remote-server>
+                                        </bbf-vomci-func:initiate>
                                     </bbf-vomci-func:nf-client>
-
                                     <bbf-vomci-func:nf-server>
                                         <bbf-vomci-func:enabled>true</bbf-vomci-func:enabled>
                                         <bbf-vomci-func:listen>
                                             <bbf-vomci-func:listen-endpoint>
-                                                <bbf-vomci-func:name>vOMCI-grpc-1</bbf-vomci-func:name>
-                                                <bbf-vomci-func:grpc>
-                                                    <bbf-vomci-func:grpc-server-parameters>
-                                                        <bbf-vomci-func:local-endpoint-name>vOMCI-grpc-1</bbf-vomci-func:local-endpoint-name>
-                                                        <bbf-vomci-func:local-address>0.0.0.0</bbf-vomci-func:local-address>
-                                                        <bbf-vomci-func:local-port>58433</bbf-vomci-func:local-port>
-                                                    </bbf-vomci-func:grpc-server-parameters>
-                                                </bbf-vomci-func:grpc>
+                                                <bbf-vomci-func:name>proxy-grpc-1</bbf-vomci-func:name>
+                                                <bbf-vomci-func:local-service-endpoint>vOMCI-grpc-1</bbf-vomci-func:local-service-endpoint>
+                                                <bbf-vomci-func-grpcs:grpc-server xmlns:bbf-vomci-func-grpcs="urn:bbf:yang:bbf-vomci-function-grpc-server">
+                                                    <bbf-vomci-func-grpcs-tcp:tcp-server-parameters xmlns:bbf-vomci-func-grpcs-tcp="urn:bbf:yang:bbf-vomci-function-grpc-server-tcp">
+                                                        <bbf-vomci-func-grpcs-tcp:local-address>::</bbf-vomci-func-grpcs-tcp:local-address>
+                                                        <bbf-vomci-func-grpcs-tcp:local-port>8100</bbf-vomci-func-grpcs-tcp:local-port>
+                                                    </bbf-vomci-func-grpcs-tcp:tcp-server-parameters>
+                                                </bbf-vomci-func-grpcs:grpc-server>
                                             </bbf-vomci-func:listen-endpoint>
                                         </bbf-vomci-func:listen>
                                     </bbf-vomci-func:nf-server>
-
-                                </bbf-vomci-func:remote-network-function>
+                                </bbf-vomci-func:remote-nf>
                             </bbf-vomci-func:vomci>
                         </root>
                     </network-function>

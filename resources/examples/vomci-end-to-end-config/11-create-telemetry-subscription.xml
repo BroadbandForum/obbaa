@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   ~ Copyright 2023 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1081">
+    <ietf-action:action xmlns:ietf-action="urn:ietf:params:xml:ns:yang:1">
+        <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+            <network-functions>
+                <network-function>
+                    <name>bbf-vomci</name>
+                    <root>
+                        <bbf-vomci-func:vomci xmlns:bbf-vomci-func="urn:bbf:yang:bbf-vomci-function">
+                            <bbf-vomci-func:managed-onus>
+                                <bbf-vomci-func:managed-onu>
+                                    <bbf-vomci-func:name>ont1</bbf-vomci-func:name>
+                                    <bbf-obbaa-vomci-telm:establish-subscription xmlns:bbf-obbaa-vomci-telm="urn:bbf:yang:bbf-obbaa-vomci-telemetry">
+                                        <bbf-obbaa-vomci-telm:updates>
+                                            <bbf-obbaa-vomci-telm:name>subscription1</bbf-obbaa-vomci-telm:name>
+                                            <bbf-obbaa-vomci-telm:xpaths xmlns:if="urn:ietf:params:xml:ns:yang:ietf-interfaces">if:interfaces-state</bbf-obbaa-vomci-telm:xpaths>
+                                            <bbf-obbaa-vomci-telm:mode>periodic</bbf-obbaa-vomci-telm:mode>
+                                            <bbf-obbaa-vomci-telm:interval>10</bbf-obbaa-vomci-telm:interval>
+                                        </bbf-obbaa-vomci-telm:updates>
+                                    </bbf-obbaa-vomci-telm:establish-subscription>
+                                </bbf-vomci-func:managed-onu>
+                            </bbf-vomci-func:managed-onus>
+                        </bbf-vomci-func:vomci>
+                    </root>
+                </network-function>
+            </network-functions>
+        </network-manager>
+    </ietf-action:action>
+</rpc>

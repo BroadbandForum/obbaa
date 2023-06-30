@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.broadband_forum.obbaa.pm.service.DataHandlerService;
 import org.broadband_forum.obbaa.pm.service.IpfixDataHandler;
+import org.broadband_forum.obbaa.pm.service.OnuPMDataHandler;
 import org.broadband_forum.obbaa.pmcollection.nbi.NBIServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,26 +44,24 @@ import com.google.gson.JsonSyntaxException;
 /**
  * PMData handler.
  */
-public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
+public class PMDataHandler implements IpfixDataHandler, ThreadFactory, OnuPMDataHandler {
 
     private static final Logger LOG
-        = LoggerFactory.getLogger(PMDataHandler.class);
+            = LoggerFactory.getLogger(PMDataHandler.class);
 
     private final DataHandlerService m_dataHandlerService;
 
     private final DBInterface m_dbInterface;
-    private boolean m_dbOpen;
-
     private final HashMap<String, TSData> m_tsDataBuffer;
     private final HashMap<String, Long> m_tsDataBufferTime;
+    private final NBIServer m_grpcServer;
+    private boolean m_dbOpen;
     private long m_timeout;
     private int m_maxBufferedPoints;
     private int m_maxBufferedMeasurements;
     private ScheduledExecutorService m_scheduler;
     private ScheduledFuture<?> m_timerHandle;
     private Runnable m_timerTask;
-
-    private final NBIServer m_grpcServer;
     private boolean m_grpcServerRunning;
 
     private boolean m_running;
@@ -71,10 +70,10 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
      * Constructor.
      *
      * @param dataHandlerService IPFix message source
-     * @param dbInterface db implementation
+     * @param dbInterface        db implementation
      */
     public PMDataHandler(DataHandlerService dataHandlerService,
-        DBInterface dbInterface) {
+                         DBInterface dbInterface) {
         m_dataHandlerService = dataHandlerService;
         m_dbInterface = dbInterface;
         m_dbOpen = false;
@@ -120,7 +119,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
 
         m_scheduler = Executors.newScheduledThreadPool(1, this);
         m_timerHandle
-            = m_scheduler.scheduleAtFixedRate(m_timerTask, 0, 10, TimeUnit.SECONDS);
+                = m_scheduler.scheduleAtFixedRate(m_timerTask, 0, 10, TimeUnit.SECONDS);
 
         /*
         // start north bound interface
@@ -132,6 +131,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
         */
 
         m_dataHandlerService.registerIpfixDataHandler(this);
+        m_dataHandlerService.registerOnuPmDataHandler(this);
 
         m_running = true;
         LOG.info("PMDataHandler started.");
@@ -147,6 +147,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
         m_running = false;
 
         m_dataHandlerService.unregisterIpfixDataHandler(this);
+        m_dataHandlerService.unregisterOnuPmDataHandler(this);
 
         // stop north bound interface
         if (m_grpcServerRunning) {
@@ -162,16 +163,14 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
             if (success) { // all dead
                 LOG.debug("Nothing to cancel.");
                 m_scheduler.shutdownNow();
-            }
-            else {
+            } else {
                 try {
                     m_scheduler.shutdown();
                     success = m_scheduler.awaitTermination(2, TimeUnit.SECONDS);
                     if (!success) {
                         m_scheduler.shutdownNow();
                     }
-                }
-                catch (InterruptedException ex) {
+                } catch (InterruptedException ex) {
                     LOG.error("Caught exception: ", ex);
                 }
             }
@@ -188,7 +187,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
     }
 
     public List<TSData> query(String measurement, Instant startTime,
-            Instant stopTime, Map<String, List<String>> filter) {
+                              Instant stopTime, Map<String, List<String>> filter) {
         List<TSData> results = new ArrayList<>();
         m_dbInterface.executeQuery(measurement, startTime, stopTime, filter, results);
         return results;
@@ -212,6 +211,20 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
         }
     }
 
+    @Override
+    public void handleOnuPMData(String msgID, String senderName, String recipientName, String objectType, String objectName, String data) {
+        if (!m_running) {
+            LOG.error("PMDataHandler not running. Ignoring data.");
+            return;
+        }
+        // convert Json message to TSData object
+        TSData tsData = convertOnuPmData(msgID, senderName, recipientName, objectType, objectName, data);
+        if (tsData != null) {
+            // store data
+            storeData(tsData);
+        }
+    }
+
     /**
      * Convert IPFIX message in Json format to internal TSData object.
      *
@@ -225,10 +238,9 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
         JsonElement jsonTree;
         try {
             jsonTree = new JsonParser().parse(ipfixMessage);
-        }
-        catch (JsonSyntaxException e) {
+        } catch (JsonSyntaxException e) {
             LOG.error("Failed to parse ipfixMessage. error: {}, ipfixMsg: {}",
-                e.getMessage(), ipfixMessage);
+                    e.getMessage(), ipfixMessage);
             return null;
         }
         if (!jsonTree.isJsonObject()) {
@@ -263,8 +275,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
                     continue;
                 }
                 tags.put(key, obj.get(key).getAsString());
-            }
-            else {
+            } else {
                 LOG.error("Unsupported tag key '{}'", key);
                 return null;
             }
@@ -272,7 +283,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
         // if not all tags found, drop message
         if (tags.size() != TSData.TSPoint.TAG_NAMES.size()) {
             LOG.error("Only {} tags found. Expecting {}",
-                tags.size(), TSData.TSPoint.TAG_NAMES.size());
+                    tags.size(), TSData.TSPoint.TAG_NAMES.size());
             return null;
         }
 
@@ -287,11 +298,11 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
         // loop over all object and copy the information to fields.
         JsonArray arr = obj.getAsJsonArray("data");
         for (int i = 0; i < arr.size(); i++) {
-            JsonObject objectList = (JsonObject)arr.get(i);
+            JsonObject objectList = (JsonObject) arr.get(i);
             for (String key : objectList.keySet()) {
                 String fieldname = objectList.get("metric").getAsString();
                 TSData.MetricType mt
-                    = getMetricType(objectList.get("dataType").getAsString());
+                        = getMetricType(objectList.get("dataType").getAsString());
                 String value = objectList.get("value").getAsString();
                 if (fieldname != null && mt != null && value != null) {
                     switch (mt) {
@@ -308,15 +319,191 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
                         case T_boolean:
                             point.m_fields.put(fieldname, Boolean.parseBoolean(value));
                     }
-                }
-                else {
+                } else {
                     LOG.error("Wrong data format '{}' '{}' '{}'. Data ignored.",
-                        fieldname, mt, value);
+                            fieldname, mt, value);
                     break;
                 }
             }
         }
         return tsData;
+    }
+
+    private TSData convertOnuPmData(String msgID, String senderName, String recipientName,
+                                    String objectType, String objectName, String onuPmData) {
+        LOG.debug("Converting ONU telemetry data to TSData. Msg: '{}'", onuPmData);
+
+        // parse json message
+        JsonElement jsonTree;
+        try {
+            jsonTree = new JsonParser().parse(onuPmData);
+        } catch (JsonSyntaxException e) {
+            LOG.error("Failed to parse ONU telemetry data. error: {}, ipfixMsg: {}",
+                    e.getMessage(), onuPmData);
+            return null;
+        }
+        if (!jsonTree.isJsonObject()) {
+            LOG.error("No JsonObject in ONU telemetry data: {}", onuPmData);
+            return null;
+        }
+
+        long timestamp = 0;
+        Map<String, String> tags = new HashMap<>(TSData.TSPointForOnuTelemetry.TAG_NAMES.size());
+        tags.put("sender-name", senderName);
+        tags.put("recipient-name", recipientName);
+        tags.put("objct-type", objectType);
+        tags.put("object-name", objectName);
+        JsonObject obj = jsonTree.getAsJsonObject();
+        JsonObject interfaceStateObj = new JsonObject();
+        String onuName = null;
+        // loop over all header object and copy value to TSData tags
+        for (String key : obj.keySet()) {
+            JsonObject telemetryObj = obj.getAsJsonObject("bbf-obbaa-vomci-telemetry:telemetry-data");
+            if (telemetryObj == null) {
+                LOG.debug("No telemtry data found");
+                break;
+            }
+            for (String toKey : telemetryObj.keySet()) {
+                if (toKey.equals("collection-time")) {
+                    String timestampVal = telemetryObj.get("collection-time").getAsString();
+                    tags.put(toKey, timestampVal);
+                    // timestamp = Instant.parse(parsed.toLocalDateTime().toString()).getEpochSecond();
+                    timestamp = Instant.now().getEpochSecond();
+                    continue;
+                }
+                // check for known tags
+                if (toKey.equals("onu-name")) {
+                    onuName = telemetryObj.get(toKey).getAsString();
+                    tags.put(toKey, telemetryObj.get(toKey).getAsString());
+                    continue;
+                }
+                if (toKey.equals("subscription-id")) {
+                    tags.put(toKey, telemetryObj.get(toKey).getAsString());
+                    continue;
+                }
+                if (toKey.equals("values")) {
+                    JsonObject valuesObj = telemetryObj.getAsJsonObject(toKey);
+                    interfaceStateObj = valuesObj.getAsJsonObject("ietf-interfaces:interfaces-state");
+                }
+            }
+        }
+
+        TSData.TSPointForOnuTelemetry point = new TSData.TSPointForOnuTelemetry();
+        point.m_timestamp = (int) timestamp;
+        point.m_measurement = onuName + "_" + msgID;
+        point.m_fields = new HashMap<>();
+        point.m_tags = tags;
+        TSData tsDataOnu = new TSData();
+        tsDataOnu.m_tsPointsOnu.add(point);
+
+        point.m_fields.put(objectType, "object-type");
+
+        // loop over all object and copy the information to fields.
+        JsonArray interfaceArr = interfaceStateObj.getAsJsonArray("interface");
+        int interfaceCount = 0;
+        for (int i = 0; i < interfaceArr.size(); i++) {
+            JsonObject interfaceObj = (JsonObject) interfaceArr.get(i);
+            if (interfaceObj == null) {
+                LOG.debug("No interface deatils found");
+                break;
+            }
+            String name = null;
+            interfaceCount = interfaceCount + 1;
+            for (String interfaceKey : interfaceObj.keySet()) {
+                if (interfaceKey.equals("name")) {
+                    name = interfaceObj.get(interfaceKey).getAsString();
+                    tags.put("interface_" + interfaceCount + "-name",
+                            interfaceObj.get(interfaceKey).getAsString());
+                    continue;
+                }
+                if (interfaceKey.equals("type")) {
+                    tags.put("interface_" + interfaceCount + "-type",
+                            interfaceObj.get(interfaceKey).getAsString());
+                    continue;
+                }
+                if (interfaceKey.equals("bbf-interface-port-reference:port-layer-if")) {
+                    tags.put("interface_" + interfaceCount + "-port-layer",
+                            interfaceObj.get(interfaceKey).getAsString());
+                    continue;
+                }
+                if (interfaceKey.equals("admin-status")) {
+                    tags.put("interface_" + interfaceCount + "-admin-status",
+                            interfaceObj.get(interfaceKey).getAsString());
+                    continue;
+                }
+                if (interfaceKey.equals("oper-status")) {
+                    tags.put("interface_" + interfaceCount + "-oper-status",
+                            interfaceObj.get(interfaceKey).getAsString());
+                    continue;
+                }
+                if (interfaceKey.equals("bbf-interfaces-performance-management:performance")) {
+                    JsonObject performanceDataObj = interfaceObj.getAsJsonObject(interfaceKey);
+                    if (performanceDataObj != null) {
+                        JsonObject intervalsObj = performanceDataObj.getAsJsonObject("intervals-15min");
+                        if (intervalsObj != null) {
+                            JsonArray history = intervalsObj.getAsJsonArray("history");
+                            int historyArrayCount = 0;
+                            for (int historyCount = 0; historyCount < history.size(); historyCount++) {
+                                historyArrayCount++;
+                                JsonObject historyObj = (JsonObject) history.get(historyCount);
+                                for (String historyKey : historyObj.keySet()) {
+                                    if (historyKey.equals("interval-number")) {
+                                        tags.put("interface_" + interfaceCount + "-interval-number_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("invalid-data-flag")) {
+                                        tags.put("interface_" + interfaceCount + "-invalid-data-flag_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("measured-time")) {
+                                        tags.put("interface_" + interfaceCount + "-measured-time_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("in-broadcast-pkts")) {
+                                        tags.put("interface_" + interfaceCount + "-in-broadcast-pkts_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("in-multicast-pkts")) {
+                                        tags.put("interface_" + interfaceCount + "-in-multicast-pkts_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("in-octets")) {
+                                        tags.put("interface_" + interfaceCount + "-in-octets_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("out-broadcast-pkts")) {
+                                        tags.put("interface_" + interfaceCount + "-out-broadcast-pkts_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("out-multicast-pkts")) {
+                                        tags.put("interface_" + interfaceCount + "-out-multicast-pkts_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("out-octets")) {
+                                        tags.put("interface_" + interfaceCount + "-out-octets_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                        continue;
+                                    }
+                                    if (historyKey.equals("time-stamp")) {
+                                        tags.put("interface_" + interfaceCount + "-time-stamp_" + historyArrayCount,
+                                                historyObj.get(historyKey).getAsString());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return tsDataOnu;
     }
 
     /**
@@ -336,8 +523,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
                 m_tsDataBuffer.put(key, data);
                 m_tsDataBufferTime.put(key, Instant.now().getEpochSecond() + m_timeout);
                 tsData = data;
-            }
-            else { // if we have an entry for that key, add data to existing one.
+            } else { // if we have an entry for that key, add data to existing one.
                 tsData.m_tsPoints.addAll(data.m_tsPoints);
             }
             // if number of points of measurement exeeds the limit, remove from buffer
@@ -350,8 +536,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
                 LOG.debug("Max number of buffered measurements for key '{}' exceeded", key);
                 m_tsDataBuffer.remove(key);
                 m_tsDataBufferTime.remove(key);
-            }
-            else { // dont write to db, continue to fill buffer
+            } else { // dont write to db, continue to fill buffer
                 LOG.debug("Data stored in buffer.");
                 tsData = null;
             }
@@ -370,6 +555,9 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
      * @return key
      */
     private String buildKey(TSData tsData) {
+        if (tsData.getTSPoints().isEmpty()) {
+            return tsData.getTSPointsOnu().get(0).m_measurement;
+        }
         return tsData.getTSPoints().get(0).m_measurement;
     }
 
@@ -398,7 +586,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
             List<TSData> pointsTimedout = new ArrayList<>();
             synchronized (m_tsDataBuffer) {
                 for (Iterator<String> it = m_tsDataBufferTime.keySet().iterator();
-                        it.hasNext();) {
+                     it.hasNext(); ) {
                     String key = it.next();
                     long timeout = m_tsDataBufferTime.get(key);
                     if (timeout < now) {
@@ -407,20 +595,18 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
                         TSData tsData = m_tsDataBuffer.remove(key);
                         if (tsData != null) {
                             pointsTimedout.add(tsData);
-                        }
-                        else {
+                        } else {
                             LOG.error("No data for key '{}'", key);
                         }
                     }
                 }
             }
             if (!pointsTimedout.isEmpty()) {
-                for (TSData tsData: pointsTimedout) {
+                for (TSData tsData : pointsTimedout) {
                     m_dbInterface.executeStore(tsData);
                 }
             }
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             LOG.error("Caught exception: ", t);
         }
     }
@@ -443,10 +629,9 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
      * Create a new new thread instance. This is called by
      * ScheduledExecutorService and used to give threads a name.
      *
-     * @see ThreadFactory#newThread(java.lang.Runnable)
-     *
      * @param runnable threads runnable
      * @return new thread
+     * @see ThreadFactory#newThread(java.lang.Runnable)
      */
     @Override
     public Thread newThread(Runnable runnable) {
@@ -461,8 +646,7 @@ public class PMDataHandler implements IpfixDataHandler, ThreadFactory {
         Integer intVal;
         try {
             intVal = Integer.parseInt(envVar);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.error("Value '{}' of " + envName + " is not an integer number", envVar);
             throw e;
         }

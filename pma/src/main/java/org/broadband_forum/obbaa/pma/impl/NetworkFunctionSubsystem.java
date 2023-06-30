@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.AbstractSubSystem;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ActionException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ChangeNotification;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.FilterNode;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.GetAttributeException;
@@ -62,5 +64,11 @@ public class NetworkFunctionSubsystem extends AbstractSubSystem {
     @Override
     public void notifyPreCommitChange(List<ChangeNotification> changeNotificationList) throws SubSystemValidationException {
 
+    }
+
+    @Override
+    public List<Element> executeAction(ActionRequest actionRequest) throws ActionException {
+        LOGGER.info("Executing action on Network function subsystem");
+        return m_nas.executeAction(PmaServer.getCurrentNetworkFunction(), actionRequest);
     }
 }

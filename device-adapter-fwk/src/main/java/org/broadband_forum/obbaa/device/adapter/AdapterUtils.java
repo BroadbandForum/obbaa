@@ -54,12 +54,18 @@ public final class AdapterUtils {
 
     public static AdapterContext getAdapterContext(NetworkFunction networkFunction, AdapterManager adapterManager) {
         String adapterType;
+        String adapterVersion = "1.0";
         switch (networkFunction.getType()) {
             case "bbf-nf-types:vomci-function-type":
                 adapterType = "nf-vomci";
+                adapterVersion = "2.0";
                 break;
             case "bbf-nf-types:vomci-proxy-type":
                 adapterType = "nf-vproxy";
+                adapterVersion = "2.0";
+                break;
+            case "bbf-d-olt-nft:d-olt-pppoeia":
+                adapterType = "nf-d-olt-pppoe-ia";
                 break;
             default:
                 //unsupported type
@@ -67,7 +73,7 @@ public final class AdapterUtils {
                 return null;
         }
         DeviceAdapter deviceAdapter = AdapterBuilder.createAdapterBuilder()
-                .setDeviceAdapterId(new DeviceAdapterId(adapterType, "1.0", "standard", "BBF"))
+                .setDeviceAdapterId(new DeviceAdapterId(adapterType, adapterVersion, "standard", "BBF"))
                 .build();
         return getStandardAdapterContext(adapterManager, deviceAdapter);
     }

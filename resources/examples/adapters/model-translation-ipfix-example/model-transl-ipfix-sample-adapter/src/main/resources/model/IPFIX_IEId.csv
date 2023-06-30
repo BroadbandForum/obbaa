@@ -1,0 +1,41 @@
+ElementID,Name,Abstract Data Type,Data Type Semantics,Status,Description,Units,Range,References,Requester,Revision,Date
+0,Reserved,,,,,,,,,,
+1,/if:interfaces/if:interface/if:name,string,default,current,"A short name uniquely describing an interface, eg ""Eth1/0"".",,,See [RFC2863] for the definition of the ifName object.,,0,20-11-2019
+2,/if:interfaces/if:interface/if:description,string,default,current,"The description of an interface, eg ""FastEthernet 1/0"" or ""ISP 
+connection"".",,,See [RFC2863] for the definition of the ifDescr object.,,0,20-11-2019
+3,/if:interfaces/if:interface/if:type,string,default,current,"The type of an interface, eg """"",,,,,0,20-11-2019
+4,/if:interfaces/if:interface/if:enabled,boolean,default,current,"This leaf contains the configured, desired state of the  interface.",,,,,0,20-11-2019
+5,/if:interfaces-state/if:interface/if:admin-status,enumeration,default,current,The desired state of the interface.    This leaf has the same read semantics as ifAdminStatus.,,,,,0,20-11-2019
+6,/if:interfaces-state/if:interface/if:name,string,default,current,,,,,,0,20-11-2019
+7,/if:interfaces-state/if:interface/if:type,string,default,current,,,,,,0,20-11-2019
+8,/if:interfaces-state/if:interface/if:oper-status,enumeration,default,current,,,,,,0,20-11-2019
+9,/if:interfaces-state/if:interface/if:last-change,string,default,current,,,,,,0,20-11-2019
+10,/if:interfaces-state/if:interface/if:if-index,signed32,default,current,,,,,,0,20-11-2019
+11,/if:interfaces-state/if:interface/if:phys-address,string,default,current,,,,,,0,20-11-2019
+12,/if:interfaces-state/if:interface/if:higher-layer-if,string,default,current,,,,,,0,20-11-2019
+13,/if:interfaces-state/if:interface/if:lower-layer-if,string,default,current,,,,,,0,20-11-2019
+14,/if:interfaces-state/if:interface/if:speed,unsigned64,default,current,,,,,,0,20-11-2019
+15,/if:interfaces-state/if:interface/if:statistics/if:discontinuity-time,string,default,current,,,,,,0,20-11-2019
+16,/if:interfaces-state/if:interface/if:statistics/if:in-octets,unsigned64,default,current,,,,,,0,20-11-2019
+17,/if:interfaces-state/if:interface/if:statistics/if:in-unicast-pkts,unsigned64,default,current,,,,,,0,20-11-2019
+18,/if:interfaces-state/if:interface/if:statistics/if:in-broadcast-pkts,unsigned64,default,current,,,,,,0,20-11-2019
+19,/if:interfaces-state/if:interface/if:statistics/if:in-multicast-pkts,unsigned64,default,current,,,,,,0,20-11-2019
+20,/if:interfaces-state/if:interface/if:statistics/if:in-discards,unsigned32,default,current,,,,,,0,20-11-2019
+21,/if:interfaces-state/if:interface/if:statistics/if:in-errors,unsigned32,default,current,,,,,,0,20-11-2019
+22,/if:interfaces-state/if:interface/if:statistics/if:in-unknown-protos,unsigned32,default,current,,,,,,0,20-11-2019
+23,/if:interfaces-state/if:interface/if:statistics/if:out-octets,unsigned64,default,current,,,,,,0,20-11-2019
+24,/if:interfaces-state/if:interface/if:statistics/if:out-unicast-pkts,unsigned64,default,current,,,,,,0,20-11-2019
+25,/if:interfaces-state/if:interface/if:statistics/if:out-broadcast-pkts,unsigned64,default,current,,,,,,0,20-11-2019
+26,/if:interfaces-state/if:interface/if:statistics/if:out-multicast-pkts,unsigned64,default,current,,,,,,0,20-11-2019
+27,/if:interfaces-state/if:interface/if:statistics/if:out-discards,unsigned32,default,current,,,,,,0,20-11-2019
+28,/if:interfaces-state/if:interface/if:statistics/if:out-errors,unsigned32,default,current,,,,,,0,20-11-2019
+29,/if:interfaces/if:interface/bbf-fastdsl:line/bbf-fastdsl:supported-mode,string,default,current,,,,,,0,20-11-2019
+30,/if:interfaces/if:interface/bbf-fastdsl:line/bbf-fastdsl:configured-mode,string,default,current,,,,,,0,20-11-2019
+279,/if:interfaces-state/if:interface/if:statistics/if:in-errors,unsigned32,default,current,,,,,,0,21-11-2019
+278,/if:interfaces-state/if:interface/if:statistics/if:in-discards,unsigned32,default,current,,,,,,0,22-11-2019
+263,/if:interfaces-state/if:interface/if:name,string,default,current,,,,,,0,23-11-2019
+285,/if:interfaces-state/if:interface/if:statistics/if:out-discards,unsigned32,default,current,,,,,,0,24-11-2019
+286,/if:interfaces-state/if:interface/if:statistics/if:out-errors,unsigned32,default,current,,,,,,0,25-11-2019
+5002,/sys:system/sys:hostname,string,default,current,,,,,,0,26-11-2019
+8636,username,string,default,current,,,,,,0,27-11-2019
+8637,password,string,default,current,,,,,,0,28-11-2019

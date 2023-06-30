@@ -265,3 +265,36 @@ spec:
   resources:
     requests:
       storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: baa-mongo-pv
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /baa/mongo
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: baa-mongo-pvclaim
+    namespace: obbaa
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: baa-mongo-pvclaim
+  namespace: obbaa
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

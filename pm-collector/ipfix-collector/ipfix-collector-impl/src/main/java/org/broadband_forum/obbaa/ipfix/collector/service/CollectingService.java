@@ -19,8 +19,8 @@ package org.broadband_forum.obbaa.ipfix.collector.service;
 import java.util.Map;
 import java.util.Optional;
 
-import org.broadband_forum.obbaa.ipfix.collector.exception.CollectingProcessException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.NotEnoughBytesException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.CollectingProcessException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.NotEnoughBytesException;
 
 public interface CollectingService {
     Map.Entry<Optional<Long>, Optional<String>> collect(byte[] data, String remoteAddress, Optional<String> hostName)

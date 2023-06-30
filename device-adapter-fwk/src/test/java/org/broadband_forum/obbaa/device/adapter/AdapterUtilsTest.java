@@ -24,7 +24,9 @@ import static org.broadband_forum.obbaa.device.adapter.AdapterSpecificConstants.
 import static org.broadband_forum.obbaa.device.adapter.AdapterUtils.getStandardAdapterContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,9 +50,9 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockService;
 import org.broadband_forum.obbaa.netconf.mn.fwk.util.ReadWriteLockServiceImpl;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.EventAdmin;
 
@@ -178,9 +180,26 @@ public class AdapterUtilsTest {
     }
 
     @Test
-    @Ignore
+    public void testGetStdAdapterContextWhenStdAdapterContextRegistryIsNull() {
+        //Error case when no standard adapter installed for the device type
+        Map<String, AdapterContext> emptyMap = new HashMap<>();
+        m_device = setDeviceAttributes("DPU", "8LT", "2.0", "VENDOR2");
+        when(m_adapterManager.getStdAdapterContextRegistry()).thenReturn(emptyMap);
+        try {
+            m_adapterManager.undeploy(m_deviceAdapter);
+            getStandardAdapterContext(m_adapterManager, AdapterUtils.getAdapter(m_device, m_adapterManager));
+            fail("Expected an Exception");
+        } catch (Exception e) {
+            assertEquals("no standard adapter found for this type of device : DPU", e.getMessage());
+        }
+    }
+
+    @Test
     public void testGetStdAdapterContextWhenStdAdapterContextIsNull() {
         //Error case when no standard adapter installed for the device type
+        Map<String, AdapterContext> mockedMap = Mockito.mock(Map.class);
+        when(m_adapterManager.getStdAdapterContextRegistry()).thenReturn(mockedMap);
+        when(mockedMap.containsKey(anyString())).thenReturn(true);
         m_device = setDeviceAttributes("DPU", "8LT", "2.0", "VENDOR2");
         try {
             m_adapterManager.undeploy(m_deviceAdapter);

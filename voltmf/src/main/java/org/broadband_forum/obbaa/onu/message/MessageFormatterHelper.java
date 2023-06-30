@@ -44,7 +44,7 @@ import org.w3c.dom.Element;
  * <p>
  * Utility class to help MessageFormatter
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 19/05/2021.
+ * Created by Filipe Claudio (Altice Labs) on 19/05/2021.
  */
 final class MessageFormatterHelper {
 

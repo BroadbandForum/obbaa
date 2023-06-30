@@ -1,0 +1,58 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: onu-pm-collector
+  namespace: obbaa
+spec:
+  selector:
+    matchLabels:
+      app: onu-pm-collector
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: onu-pm-collector
+    spec:
+      hostname: onu-pm-collector
+      containers:
+        - name: onu-pm-collector
+          image: broadbandforum/onu-pm-collector:latest
+          env:
+            - name: ONU_PM_COLLECTOR_PORT
+              value: "4495"
+            - name: IONU_PM_COLLECTOR_MAX_CONNECTION
+              value: "10000"
+            - name: BAA_HOST
+              value: "baa"
+            - name: BAA_SSH_PORT
+              value: "9292"
+            - name: BAA_USERNAME
+              value: "admin"
+            - name: BAA_PASSWORD
+              value: "password"
+            - name: DEBUG
+              value: "true"
+            - name: INFLUXDB_ORGANISATION
+              value: "broadband_forum"
+            - name: INFLUXDB_BUCKETID
+              value: "onu-pm-collection"
+            - name: INFLUXDB_API_URL
+              value: "http://obbaa-influxdb:9999"
+            - name: INFLUXDB_TOKEN
+              value: "_6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g=="
+            - name: PMD_MAX_BUFFERED_POINTS
+              value: "5000"
+            - name: PMD_MAX_BUFFERED_MEASUREMENTS
+              value: "100"
+            - name: PMD_TIMEOUT_BUFFERED_POINTS
+              value: "60"
+            - name: PMD_NBI_PORT
+              value: "5051"
+            - name: KAFKA_TELEMETRY_TOPICS
+              value: "vomci1-telemetry"
+          ports:
+            - containerPort: 9005
+              name: port9005
+            - containerPort: 4495
+              name: port4495
+      restartPolicy: Always

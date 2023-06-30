@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.broadband-forum.obbaa.pm-collector.pm-data-handler</groupId>
@@ -44,9 +44,11 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>${protobuf-maven-plugin.version}</version>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
+                    </protocArtifact>
                     <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
+                    </pluginArtifact>
                 </configuration>
                 <executions>
                     <execution>
@@ -56,7 +58,7 @@
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
                         </goals>
-                      </execution>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -83,7 +85,9 @@
                         <INFLUXDB_ORGANISATION>broadband_forum</INFLUXDB_ORGANISATION>
                         <INFLUXDB_BUCKETID>pm-collection</INFLUXDB_BUCKETID>
                         <INFLUXDB_API_URL>http://localhost:9999</INFLUXDB_API_URL>
-                        <INFLUXDB_TOKEN>_6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==</INFLUXDB_TOKEN>
+                        <INFLUXDB_TOKEN>
+                            _6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
+                        </INFLUXDB_TOKEN>
                         <PMD_MAX_BUFFERED_POINTS>5000</PMD_MAX_BUFFERED_POINTS>
                         <PMD_MAX_BUFFERED_MEASUREMENTS>100</PMD_MAX_BUFFERED_MEASUREMENTS>
                         <PMD_TIMEOUT_BUFFERED_POINTS>60</PMD_TIMEOUT_BUFFERED_POINTS>
@@ -116,49 +120,49 @@
             <version>${protobuf.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.grpc</groupId>
-          <artifactId>grpc-api</artifactId>
-          <version>${grpc.version}</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.grpc</groupId>
-          <artifactId>grpc-auth</artifactId>
-          <version>${grpc.version}</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-auth</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.grpc</groupId>
-          <artifactId>grpc-core</artifactId>
-          <version>${grpc.version}</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.grpc</groupId>
-          <artifactId>grpc-context</artifactId>
-          <version>${grpc.version}</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-context</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.grpc</groupId>
-          <artifactId>grpc-netty</artifactId>
-          <version>${grpc.version}</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.grpc</groupId>
-          <artifactId>grpc-okhttp</artifactId>
-          <version>${grpc.version}</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-okhttp</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.grpc</groupId>
-          <artifactId>grpc-protobuf</artifactId>
-          <version>${grpc.version}</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.grpc</groupId>
-          <artifactId>grpc-stub</artifactId>
-          <version>${grpc.version}</version>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
-          <groupId>io.netty</groupId>
-          <artifactId>netty-all</artifactId>
-          <version>${netty.version}</version>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -247,8 +251,8 @@
         </plugins>
     </reporting>
     <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <maven.compiler.source>1.8</maven.compiler.source>
-      <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 </project>

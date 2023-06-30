@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: onu-pm-collector
+  namespace: obbaa
+spec:
+  selector:
+    app: onu-pm-collector
+  ports:
+    - name: port9005
+      protocol: TCP
+      port: 9005
+      targetPort: 9005
+      nodePort: 31985  #external port
+    - name: port4495
+      protocol: TCP
+      port: 4495
+      targetPort: 4495
+      nodePort: 31495  #external port
+  type: NodePort

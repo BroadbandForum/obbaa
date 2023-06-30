@@ -1,33 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration monitorInterval="30">
-  <Appenders>
-    <Console name="STDOUT" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{DEFAULT} %-5level{WARN=WARN, DEBUG=DEBUG, ERROR=ERROR, TRACE=TRACE, INFO=INFO} [%t] [%c.%M():%L] - %m%n"/>
-    </Console>
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%d{DEFAULT} %-5level{WARN=WARN, DEBUG=DEBUG, ERROR=ERROR, TRACE=TRACE, INFO=INFO} [%t] [%c.%M():%L] - %m%n"/>
+        </Console>
 
-    <RollingFile name="LogFile"
-      fileName="./log/pmDataHandler.log"
-      filePattern="./log/pmDataHandler-%i.log">
-      <PatternLayout pattern="%d{DEFAULT} %-5level{WARN=WARN, DEBUG=DEBUG, ERROR=ERROR, TRACE=TRACE, INFO=INFO} [%t] [%c.%M():%L] - %m%n"/>
-        <Policies>
-          <SizeBasedTriggeringPolicy size="5MB"/>
-        </Policies>
-      <DefaultRolloverStrategy max="5"/>
-    </RollingFile>
-  </Appenders>
+        <RollingFile name="LogFile"
+                     fileName="./log/pmDataHandler.log"
+                     filePattern="./log/pmDataHandler-%i.log">
+            <PatternLayout
+                    pattern="%d{DEFAULT} %-5level{WARN=WARN, DEBUG=DEBUG, ERROR=ERROR, TRACE=TRACE, INFO=INFO} [%t] [%c.%M():%L] - %m%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
+    </Appenders>
 
-  <Loggers>
-    <Root level="info">
-      <AppenderRef ref="LogFile"/>
-    </Root>
-    <Logger name="org.broadband_forum.obbaa.pmcollection.nbi.NBIServer" level="info" additivity="false">
-      <AppenderRef ref="LogFile"/>
-    </Logger>
-    <Logger name="org.broadband_forum.obbaa.pmcollection.pmdatahandler.Config" level="info" additivity="false">
-      <AppenderRef ref="LogFile"/>
-    </Logger>
-    <Logger name="org.broadband_forum.obbaa.pmcollection.pmdatahandler.PMDataHandler" level="info" additivity="false">
-      <AppenderRef ref="LogFile"/>
-    </Logger>
-  </Loggers>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="LogFile"/>
+        </Root>
+        <Logger name="org.broadband_forum.obbaa.pmcollection.nbi.NBIServer" level="info" additivity="false">
+            <AppenderRef ref="LogFile"/>
+        </Logger>
+        <Logger name="org.broadband_forum.obbaa.pmcollection.pmdatahandler.Config" level="info" additivity="false">
+            <AppenderRef ref="LogFile"/>
+        </Logger>
+        <Logger name="org.broadband_forum.obbaa.pmcollection.pmdatahandler.PMDataHandler" level="info"
+                additivity="false">
+            <AppenderRef ref="LogFile"/>
+        </Logger>
+    </Loggers>
 </Configuration>

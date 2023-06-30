@@ -30,12 +30,17 @@ public interface ONUConstants {
     String ONU_UNDETECTED = "undetect";
     String CREATE_ONU = "create-onu";
     String DELETE_ONU = "delete-onu";
+    String DELETE_STATE_DATA = "delete-state-data";
+    String XPON_ONU_TYPE = "xpon-onu-type";
+    String BBF_VOMCI_TYPE_XMLNS_PREFIX = "xmlns:bbf-vomcit";
+    String BBF_VOMCI_TYPE_PREFIX = "bbf-vomcit";
+    String BBF_VOMCI_TYPE_NS = "urn:bbf:yang:bbf-vomci-types";
     String MANAGED_ONUS = "managed-onus";
     String MANAGED_ONU = "managed-onu";
     String SET_ONU_COMMUNICATION = "set-onu-communication";
     String SET_ONU_COMM_AVAILABLE = "onu-communication-available";
-    String OLT_REMOTE_NAME = "olt-remote-endpoint-name";
-    String VOLTMF_REMOTE_NAME = "voltmf-remote-endpoint-name";
+    String OLT_REMOTE_ENDPOINT = "olt-remote-endpoint";
+    String VOLTMF_REMOTE_ENDPOINT = "voltmf-remote-endpoint";
     String TERMINATION_POINT_A = "termination-point-a";
     String TERMINATION_POINT_B = "termination-point-b";
     String ONU_ATTACHMENT_POINT = "onu-attachment-point";
@@ -168,11 +173,11 @@ public interface ONUConstants {
     String GET_FILTER = "{\"network-manager:device-management\":{\"device-state\":{\"bbf-obbaa-onu-management:onu-state-info\""
             + ":{\"equipment-id\":\"\",\"software-images\":{\"software-image\":{}}}}}}";
     String VOLTMF_LOCAL_ENDPOINT_NAME = "KAFKA_LOCAL_ENDPOINT_NAME";
-    String VOMCI_FUNCTION_REMOTE_ENDPOINT = "vomci-function-remote-endpoint-name";
+    String VOMCI_FUNCTION_REMOTE_ENDPOINT = "vomci-function-remote-endpoint";
 
     //Gpb notification
-    String VOMCI_FUNC_ONU_ALIGNMENT_STATUS_JSON_KEY = "bbf-vomci-function:onu-alignment-status";
-    String ALIGNMENT_STATUS_JSON_KEY = "alignment-status";
+    String VOMCI_FUNC_ONU_ALIGNMENT_RESULT_JSON_KEY = "bbf-vomci-function:onu-alignment-result";
+    String ALIGNMENT_STATE_JSON_KEY = "alignment-state";
     String EVENT_TIME_JSON_KEY = "event-time";
     String UNALIGNED = "unaligned";
     String ALIGNED = "aligned";
@@ -291,5 +296,7 @@ public interface ONUConstants {
     String ONU_MGMT_MODE_MISMATCH_WITH_VANI = "baa-xpon-onu-types:onu-management-mode-mismatch-with-v-ani";
     String BAA_XPON_ONU_NAME_MISMATCH_WITH_VANI = "baa-xpon-onu-types:onu-name-mismatch-with-v-ani";
     String UNDETERMINED_ERROR = "baa-xpon-onu-types:undetermined-error";
+
+    String VOMCI = "vomci";
 
 }

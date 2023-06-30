@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.broadband_forum.obbaa.ipfix.collector.service.CollectingService;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixConstants;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

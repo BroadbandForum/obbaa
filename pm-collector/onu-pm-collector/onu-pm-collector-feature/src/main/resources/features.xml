@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright 2023 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="onu-pm-collector-features">
+
+    <repository>mvn:org.opendaylight.yangtools/features-yangtools/${opendaylight-yangtools.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/enterprise/${apache.karaf.version}/xml/features</repository>
+    <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax-jdbc.version}/xml/features</repository>
+
+    <feature name="onu-pm-feature" version="${project.version}" description="ONU PM Collector feature">
+        <feature version="${project.version}">pm-data-handler-feature</feature>
+        <feature version="${project.version}">onu-pm-third-party-libs</feature>
+        <bundle>mvn:org.broadband-forum.obbaa/pm-service/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.pm-collector.pm-data-handler/pm-data-handler-example/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.pm-collector/onu-pm-collector-impl/${project.version}</bundle>
+    </feature>
+
+    <feature name="onu-pm-third-party-libs" version="${project.version}" description="Third party Libraries">
+        <feature version="${jpa.version}">jpa</feature>
+        <feature version="${transaction.version}">transaction</feature>
+        <feature version="${transaction-api.version}">transaction-api</feature>
+        <bundle><![CDATA[wrap:mvn:org.apache.kafka/kafka-clients/${kafka.client.version}$Bundle-SymbolicName=kafka-client&Bundle-Version=${kafka.client.version}]]></bundle>
+    </feature>
+
+    <feature name="pm-data-handler-feature" version="${project.version}" description="PM Data Handler">
+        <bundle>wrap:mvn:org.broadband-forum.obbaa.pm-collector.pm-data-handler.persistent-data-handler/db-interface/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.pm-collector.pm-data-handler.persistent-data-handler/influxdb-impl/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa.pm-collector.pm-data-handler.persistent-data-handler/pm-data-handler-impl/${project.version}</bundle>
+        <feature version="${project.version}">third-party-libs-pm-data-handler-feature</feature>
+    </feature>
+
+    <feature name="netty-feature" version="${project.version}" description="Netty dependencies">
+        <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec-http/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-codec-http2/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-resolver/${netty.version}</bundle>
+        <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+    </feature>
+
+    <feature name="grpc-feature" version="${project.version}" description="gRPC dependencies">
+        <feature version="${project.version}">netty-feature</feature>
+
+        <bundle>wrap:mvn:com.google.auth/google-auth-library-credentials/${google-auth.version}$Bundle-SymbolicName=com.google.auth.google-auth-library-credentials&amp;Bundle-Version=${google-auth.version}</bundle>
+        <bundle>wrap:mvn:com.google.auth/google-auth-library-oauth2-http/${google-auth.version}$Bundle-SymbolicName=com.google.auth.google-auth-library-oauth2-http&amp;Bundle-Version=${google-auth.version}</bundle>
+
+        <bundle>wrap:mvn:io.grpc/grpc-api/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-api&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc;version=${grpc.version}&amp;SPI-Consumer=*</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-auth/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-auth&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.auth;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-context/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-context&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-core/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-core&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.inprocess,io.grpc.util,io.grpc.internal;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version}&amp;SPI-Provider=*</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-netty/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-netty&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.netty;version=${grpc.version}&amp;Import-Package=io.grpc,io.grpc.internal;version=${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-okhttp/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-okhttp&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.okhttp,io.grpc.okhttp.internal;version=${grpc.version}&amp;Import-Package=io.grpc,io.grpc.internal,io.grpc.okhttp.internal;version=${grpc.version}&amp;SPI-Provider=*</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-protobuf/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-protobuf&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.protobuf;version=${grpc.version},io.grpc.protobuf.services;version=${grpc.version},io.grpc.services;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version},io.grpc.stub;version=${grpc.version}</bundle>
+        <bundle>wrap:mvn:io.grpc/grpc-stub/${grpc.version}$Bundle-SymbolicName=io.grpc.grpc-stub&amp;Bundle-Version=${grpc.version}&amp;Export-Package=io.grpc.stub.*;version=${grpc.version};version=${grpc.version},io.grpc.stub.annotations;version=${grpc.version}&amp;Import-Package=io.grpc;version=${grpc.version}</bundle>
+    </feature>
+
+    <feature name="third-party-libs-pm-data-handler-feature" version="${project.version}" description="Third party dependencies for PM Data Handler">
+        <feature version="${project.version}">netty-feature</feature>
+        <feature version="${project.version}">grpc-feature</feature>
+
+        <bundle>mvn:org.json/json/${json.version}</bundle>
+        <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
+        <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
+
+        <bundle>wrap:mvn:com.influxdb/influxdb-client-core/${influxdb-client.version}</bundle>
+        <bundle>wrap:mvn:com.influxdb/influxdb-client-java/${influxdb-client.version}</bundle>
+        <bundle>wrap:mvn:com.squareup.okhttp3/okhttp/3.13.1</bundle>
+        <bundle>wrap:mvn:com.squareup.okhttp3/logging-interceptor/3.13.1</bundle>
+        <bundle>wrap:mvn:com.squareup.okio/okio/1.17.3</bundle>
+        <bundle>wrap:mvn:com.squareup.retrofit2/retrofit/2.5.0</bundle>
+        <bundle>wrap:mvn:com.squareup.retrofit2/converter-scalars/2.5.0</bundle>
+        <bundle>wrap:mvn:com.squareup.retrofit2/converter-gson/2.5.0</bundle>
+        <bundle>wrap:mvn:io.gsonfire/gson-fire/1.8.0</bundle>
+        <bundle>wrap:mvn:io.reactivex.rxjava2/rxjava/2.2.6</bundle>
+        <bundle>wrap:mvn:org.reactivestreams/reactive-streams/1.0.2</bundle>
+    </feature>
+
+</features>

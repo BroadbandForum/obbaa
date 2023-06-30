@@ -1,0 +1,244 @@
+syntax = "proto3";
+
+//********************************************************************
+// TR-451 vOMCI NBI Message Protocol Buffer Schema
+//
+//  Copyright (c) 2021, Broadband Forum
+//
+//  Redistribution and use in source and binary forms, with or
+//   without modification, are permitted provided that the following
+//   conditions are met:
+//
+//   1. Redistributions of source code must retain the above copyright
+//      notice, this list of conditions and the following disclaimer.
+//
+//   2. Redistributions in binary form must reproduce the above
+//      copyright notice, this list of conditions and the following
+//      disclaimer in the documentation and/or other materials
+//      provided with the distribution.
+//
+//   3. Neither the name of the copyright holder nor the names of its
+//      contributors may be used to endorse or promote products
+//      derived from this software without specific prior written
+//      permission.
+//
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+//   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+//   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+//   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+//   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+//   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+//   STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+//   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//   The above license is used as a license under copyright only.
+//   Please reference the Forum IPR Policy for patent licensing terms
+//   <https://www.broadband-forum.org/ipr-policy>.
+//
+//   Any moral rights which are necessary to exercise under the above
+//   license grant are also deemed granted under this license.
+//
+// | Version           | Name                   | Date       |
+// | TR-451 1.0.0      | vOMCI Specification    | TBD, 2021  |
+//
+// BBF software release registry: http://www.broadband-forum.org/software
+//********************************************************************
+
+package tr451_vomci_nbi_message.v1;
+
+option java_multiple_files = true;
+option java_package = "org.broadband_forum.obbaa.onu.message.gpb.message";
+
+
+message Msg {
+  Header header = 1;
+  Body body = 2;
+}
+
+
+message Header {
+  string msg_id = 1;         // Message identifier to
+                             // 1) Identify requests and notifications
+                             // 2) Correlate requests and response
+  string sender_name = 2;    // Unique name of the entity that
+                             // originated the message
+  string recipient_name = 3; // The name of the entity that is to
+                             // receive the request
+  OBJECT_TYPE object_type = 4; // The type of the object or
+                               // resource that is subject of the message
+  string object_name = 5;    // The  name of the object or resource
+
+  enum OBJECT_TYPE  {
+    ONU = 0;
+    VOMCI_FUNCTION = 1;
+    VOMCI_PROXY = 2;
+    VOLTMF = 3;
+    VOMCI_FUNCTION_TYPE = 4; //Category of vOMCI function instances
+  }
+}
+
+message Body {
+  oneof msg_body {
+    Request request = 1;
+    Response response = 2;
+    Notification notification = 3;
+  }
+}
+
+
+message Request {
+  oneof req_type {
+    Hello hello = 2;
+    GetData get_data = 3;
+    ReplaceConfig replace_config = 4;
+    UpdateConfig update_config = 5;
+    RPC rpc = 6;
+    Action action = 7;
+  }
+}
+
+message Response {
+  oneof resp_type {
+    HelloResp hello_resp = 3;
+    GetDataResp get_resp = 4;
+    ReplaceConfigResp replace_config_resp = 5;
+    UpdateConfigResp update_config_resp = 6;
+    RPCResp rpc_resp = 7;
+    ActionResp action_resp = 8;
+  }
+}
+
+message Hello {
+  string service_endpoint_name = 1; //The service endpoint the client
+                                    // used to establish the session
+}
+
+message NFInformation {
+  map<string, string> nf_types = 1; //Valid Key types: 
+                                    // usage-category, vendor-name,
+                                    // software-version
+  repeated NFCapability capabilities = 2;
+  enum NFCapability  {
+    NO_CAPABILITY_REPORTED = 0;
+    ONU_STATE_ONLY_SUPPORT = 1;
+    ONU_CONFIG_REPLICA_SUPPORT = 2;
+  }
+}
+
+message HelloResp {
+  string service_endpoint_name = 1; //The service endpoint the server
+                                    //used to listen on the session
+  repeated NFInformation network_function_info = 2;
+                                      // The type information and
+                                      // capabilities supported by
+                                      // the network function
+}
+
+message GetData {
+  repeated bytes filter = 1;
+}
+
+message GetDataResp {
+  Status status_resp = 1;
+  bytes data = 2;
+  string datastore_tag = 3;       // Optional: Datastore tag used to
+                                  // synchronize the config datastore
+}
+
+message ReplaceConfig {
+  bytes  config_inst = 1;          // Full configuration instance to
+                                   // be used as a replacement of what
+                                   // exists for the target
+  string datastore_tag = 2;        // Optional: Datastore tag used to
+                                   // synchronize the config datastore
+}
+
+message ReplaceConfigResp {
+  Status status_resp = 1;
+}
+
+message UpdateConfigReplica {
+  bytes delta_config = 1;         // List of Node changes with the
+                                  // associated operation to apply to
+                                  // the node
+}
+
+message UpdateConfigInstance {
+  bytes current_config_inst = 1;  // Full current configuration
+                                  // instance
+  bytes delta_config = 2;         // List of Node changes with the
+                                  // associated operation to apply to
+                                  // the node
+}
+
+message UpdateConfig {
+  oneof req_type {
+    UpdateConfigInstance update_config_inst = 1;
+    UpdateConfigReplica update_config_replica = 2;
+  }
+  string datastore_tag = 3;       // Optional: Datastore tag used to
+                                  // synchronize the config store
+}
+
+message UpdateConfigResp {
+  Status status_resp = 1;
+}
+
+message RPC {
+  bytes input_data = 1;
+  string datastore_tag = 2;       // Optional: Datastore tag used to
+                                  // synchronize the config datastore
+}
+
+message RPCResp {
+  Status status_resp = 1;
+  bytes output_data = 2;
+}
+
+message Action {
+  bytes input_data = 1;
+  string datastore_tag = 2;       // Optional: Datastore tag used to
+                                  // synchronize the config datastore
+}
+
+message ActionResp {
+  Status status_resp = 1;
+  bytes output_data = 2;
+}
+
+
+message Notification {
+  string event_timestamp = 1;
+  bytes data = 2;
+}
+
+
+
+message Error {           //Type of error as defined in RFC 6241 section 4.3
+  string error_type = 1;     // Error type defined in RFC 6241
+                             // Appendix B
+  string error_tag = 2;      // Error tag defined in RFC 6241
+                             // Appendix B
+  string error_severity = 3; // Error severity defined in RFC 6241
+                             // Appendix B
+  string error_app_tag = 4;  // Error app tag defined in RFC 6241
+                             // Appendix B
+  string error_path = 5;     // Error path defined in RFC 6241
+                             // Appendix B
+  string error_message = 6;    // Error message defined in RFC 6241
+                               // Appendix B
+}
+
+message Status {
+  enum StatusCode  {
+    OK = 0;
+    ERROR_GENERAL = 1;
+  }
+  StatusCode status_code = 1;
+  repeated Error error = 2; //Optional: Error information
+}

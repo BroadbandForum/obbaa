@@ -36,7 +36,7 @@ import io.grpc.StatusRuntimeException;
 public class NBIClient {
 
     private static final Logger LOG
-        = LoggerFactory.getLogger(NBIClient.class);
+            = LoggerFactory.getLogger(NBIClient.class);
 
     private final ManagedChannel m_channel;
     private final PMDataRequestGrpc.PMDataRequestBlockingStub m_blockingStub;
@@ -50,10 +50,10 @@ public class NBIClient {
      */
     public NBIClient(String host, int port) {
         this(ManagedChannelBuilder.forAddress(host, port)
-            // Channels are secure by default (via SSL/TLS). For now we
-            // disable TLS to avoid needing certificates.
-            .usePlaintext()
-            .build());
+                // Channels are secure by default (via SSL/TLS). For now we
+                // disable TLS to avoid needing certificates.
+                .usePlaintext()
+                .build());
     }
 
     /**
@@ -66,6 +66,28 @@ public class NBIClient {
         m_channel = channel;
         m_blockingStub = PMDataRequestGrpc.newBlockingStub(channel);
         m_streamBlockingStub = PMDataStreamGrpc.newBlockingStub(channel);
+    }
+
+    /**
+     * main.
+     *
+     * @param args
+     * @throws java.lang.Exception
+     */
+    public static void main(String[] args) throws Exception {
+        // Access service running on local machine port 5051
+        NBIClient client = new NBIClient("localhost", 5051);
+        try {
+            String measurement = "267";
+            if (args.length > 0) {
+                measurement = args[0]; // Use the arg as the measurement name to query
+            }
+            Instant startTime = Instant.now().minus(10, ChronoUnit.MINUTES);
+            Instant stopTime = Instant.now();
+            client.query(measurement, startTime, stopTime, null);
+        } finally {
+            client.shutdown();
+        }
     }
 
     public void shutdown() throws InterruptedException {
@@ -101,14 +123,14 @@ public class NBIClient {
      * @param filter
      */
     public void query(String measurement, Instant startTime, Instant stopTime,
-        Map<Integer, List<String>> filter) {
+                      Map<Integer, List<String>> filter) {
         int records = 0;
         int queryReplies = 0;
         LOG.info("Will try to query measurement {}...", measurement);
         QueryRequest.Builder b = QueryRequest.newBuilder()
-            .setMeasurement(measurement)
-            .setStartTime((int) startTime.getEpochSecond())
-            .setStopTime((int) stopTime.getEpochSecond());
+                .setMeasurement(measurement)
+                .setStartTime((int) startTime.getEpochSecond())
+                .setStopTime((int) stopTime.getEpochSecond());
         if (filter != null && !filter.isEmpty()) {
             b.setFilter(_createFilter(filter));
         }
@@ -123,29 +145,29 @@ public class NBIClient {
                 QueryReply reply = response.next();
                 for (TimeSeriesPoint ts : reply.getTsPointsList()) {
                     LOG.info("measurement: {} timestamp: {}",
-                        ts.getMeasurement(), ts.getTimestamp());
+                            ts.getMeasurement(), ts.getTimestamp());
                     ts.getTagsMap().keySet().forEach((key) -> {
                         LOG.info("tag key: {}, tag value: {}",
-                            key, ts.getTagsMap().get(key));
+                                key, ts.getTagsMap().get(key));
                     });
                     ts.getFieldsMap().keySet().forEach((key) -> {
                         ValueUnion v = ts.getFieldsMap().get(key);
                         switch (v.getValueCase()) {
                             case LVALUE:
                                 LOG.info("field key: {}, field value: {}",
-                                    key, ts.getFieldsMap().get(key).getLvalue());
+                                        key, ts.getFieldsMap().get(key).getLvalue());
                                 break;
                             case DVALUE:
                                 LOG.info("field key: {}, field value: {}",
-                                    key, ts.getFieldsMap().get(key).getDvalue());
+                                        key, ts.getFieldsMap().get(key).getDvalue());
                                 break;
                             case SVALUE:
                                 LOG.info("field key: {}, field value: {}",
-                                    key, ts.getFieldsMap().get(key).getSvalue());
+                                        key, ts.getFieldsMap().get(key).getSvalue());
                                 break;
                             case BVALUE:
                                 LOG.info("field key: {}, field value: {}",
-                                    key, ts.getFieldsMap().get(key).getBvalue());
+                                        key, ts.getFieldsMap().get(key).getBvalue());
                                 break;
                         }
                     });
@@ -153,8 +175,7 @@ public class NBIClient {
                 }
                 queryReplies++;
             }
-        }
-        catch (StatusRuntimeException e) {
+        } catch (StatusRuntimeException e) {
             LOG.warn("RPC failed: {}", e.getStatus());
             return;
         }
@@ -170,15 +191,15 @@ public class NBIClient {
      * @param filter
      */
     public void queryStream(String measurement, Instant startTime,
-        Instant stopTime, Map<Integer, List<String>> filter) {
+                            Instant stopTime, Map<Integer, List<String>> filter) {
         int records = 0;
         int queryReplies = 0;
         LOG.info("Will try to query measurement {}...", measurement);
 
         QueryRequest.Builder b = QueryRequest.newBuilder()
-            .setMeasurement(measurement)
-            .setStartTime((int) startTime.getEpochSecond())
-            .setStopTime((int) stopTime.getEpochSecond());
+                .setMeasurement(measurement)
+                .setStartTime((int) startTime.getEpochSecond())
+                .setStopTime((int) stopTime.getEpochSecond());
         if (filter != null && !filter.isEmpty()) {
             b.setFilter(_createFilter(filter));
         }
@@ -194,29 +215,29 @@ public class NBIClient {
                 QueryReply reply = response.next();
                 for (TimeSeriesPoint ts : reply.getTsPointsList()) {
                     LOG.info("measurement: {} timestamp: {}",
-                        ts.getMeasurement(), ts.getTimestamp());
+                            ts.getMeasurement(), ts.getTimestamp());
                     ts.getTagsMap().keySet().forEach((key) -> {
                         LOG.info("tag key: {}, tag value: {}",
-                            key, ts.getTagsMap().get(key));
+                                key, ts.getTagsMap().get(key));
                     });
                     ts.getFieldsMap().keySet().forEach((key) -> {
                         ValueUnion v = ts.getFieldsMap().get(key);
                         switch (v.getValueCase()) {
                             case LVALUE:
                                 LOG.info("field key: {}, field value: {}",
-                                    key, ts.getFieldsMap().get(key).getLvalue());
+                                        key, ts.getFieldsMap().get(key).getLvalue());
                                 break;
                             case DVALUE:
                                 LOG.info("field key: {}, field value: {}",
-                                    key, ts.getFieldsMap().get(key).getDvalue());
+                                        key, ts.getFieldsMap().get(key).getDvalue());
                                 break;
                             case SVALUE:
                                 LOG.info("field key: {}, field value: {}",
-                                    key, ts.getFieldsMap().get(key).getSvalue());
+                                        key, ts.getFieldsMap().get(key).getSvalue());
                                 break;
                             case BVALUE:
                                 LOG.info("field key: {}, field value: {}",
-                                    key, ts.getFieldsMap().get(key).getBvalue());
+                                        key, ts.getFieldsMap().get(key).getBvalue());
                                 break;
                         }
                     });
@@ -224,34 +245,10 @@ public class NBIClient {
                 }
                 queryReplies++;
             }
-        }
-        catch (StatusRuntimeException e) {
+        } catch (StatusRuntimeException e) {
             LOG.warn("RPC failed: {}", e.getStatus());
             return;
         }
         LOG.info("got {} queryReplies and {} records.", queryReplies, records);
-    }
-
-    /**
-     * main.
-     *
-     * @param args
-     * @throws java.lang.Exception
-     */
-    public static void main(String[] args) throws Exception {
-        // Access service running on local machine port 5051
-        NBIClient client = new NBIClient("localhost", 5051);
-        try {
-            String measurement = "267";
-            if (args.length > 0) {
-                measurement = args[0]; // Use the arg as the measurement name to query
-            }
-            Instant startTime = Instant.now().minus(10, ChronoUnit.MINUTES);
-            Instant stopTime = Instant.now();
-            client.query(measurement, startTime, stopTime, null);
-        }
-        finally {
-            client.shutdown();
-        }
     }
 }

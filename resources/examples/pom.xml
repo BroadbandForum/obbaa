@@ -34,6 +34,7 @@
         <module>adapters</module>
         <module>dpu-config</module>
         <module>olt-config</module>
+        <module>nbi-abstract-model</module>
     </modules>
 </project>
 

@@ -70,30 +70,30 @@ public class VOLTMgmtRequestCreationUtilTest {
 
     @Test
     public void testPrepareCreateOnuRequest() throws IOException, SAXException {
-        ActionRequest vomciRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(ONU_NAME, false);
+        ActionRequest vomciRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(ONU_NAME, "gpon",  false);
         assertNotNull(vomciRequest);
         assertXMLEquals(TestUtil.loadAsXml(createOnuRequestToVomci), vomciRequest);
-        ActionRequest proxyRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(ONU_NAME, true);
+        ActionRequest proxyRequest = VOLTMgmtRequestCreationUtil.prepareCreateOnuRequest(ONU_NAME, "gpon", true);
         assertNotNull(proxyRequest);
         assertXMLEquals(TestUtil.loadAsXml(createOnuRequestToProxy), proxyRequest);
     }
 
     @Test
     public void testPrepareDeleteOnuRequest() throws IOException, SAXException {
-        ActionRequest deleteOnuVomci = VOLTMgmtRequestCreationUtil.prepareDeleteOnuRequest(ONU_NAME, false);
+        ActionRequest deleteOnuVomci = VOLTMgmtRequestCreationUtil.prepareDeleteOnuRequest(ONU_NAME, "gpon", false);
         assertNotNull(deleteOnuVomci);
         assertXMLEquals(TestUtil.loadAsXml(deleteOnuRequestTovomci), deleteOnuVomci);
-        ActionRequest deleteOnuProxy = VOLTMgmtRequestCreationUtil.prepareDeleteOnuRequest(ONU_NAME, true);
+        ActionRequest deleteOnuProxy = VOLTMgmtRequestCreationUtil.prepareDeleteOnuRequest(ONU_NAME, "gpon", true);
         assertNotNull(deleteOnuProxy);
         assertXMLEquals(TestUtil.loadAsXml(deleteOnuRequestToProxy), deleteOnuProxy);
     }
 
     @Test
     public void testPrepareSetOnuCommunicationRequest() throws IOException, SAXException {
-        ActionRequest setOnuCommVomciAction = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(ONU_NAME, true, OLT_NAME, CHANNEL_TERM_REF, ONU_ID, "vOLTMF_Kafka", "proxy-grpc-1", false);
+        ActionRequest setOnuCommVomciAction = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(ONU_NAME, "gpon",true, OLT_NAME, CHANNEL_TERM_REF, ONU_ID, "vOLTMF_Kafka", "proxy-grpc-1", false);
         assertNotNull(setOnuCommVomciAction);
         assertXMLEquals(TestUtil.loadAsXml(setOnuCommVomci), setOnuCommVomciAction);
-        ActionRequest setOnuCommproxyAction = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(ONU_NAME, true, OLT_NAME, CHANNEL_TERM_REF, ONU_ID, "vOMCi-grpc-1", OLT_NAME, true);
+        ActionRequest setOnuCommproxyAction = VOLTMgmtRequestCreationUtil.prepareSetOnuCommunicationRequest(ONU_NAME, "gpon", true, OLT_NAME, CHANNEL_TERM_REF, ONU_ID, "vOMCi-grpc-1", OLT_NAME, true);
         assertNotNull(setOnuCommproxyAction);
         assertXMLEquals(TestUtil.loadAsXml(setOnuCommProxy), setOnuCommproxyAction);
     }

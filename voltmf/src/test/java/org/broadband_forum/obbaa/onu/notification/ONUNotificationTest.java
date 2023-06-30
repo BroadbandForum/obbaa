@@ -69,13 +69,13 @@ public class ONUNotificationTest {
     @Test
     public void test_1_0_NotificationFormat() throws NetconfMessageBuilderException {
         notification = getDetectNotificationFor_1_0();
-        messageFormatter = new JsonFormatter();
+        messageFormatter = new GpbFormatter();
         onuNotification = new ONUNotification(notification, deviceName,messageFormatter);
         assertEquals(onuNotification.getSerialNo(), serialNum);
         assertEquals(onuNotification.getChannelTermRef(), chanTermRef);
         assertEquals(onuNotification.getOnuId(), onuId);
         assertEquals(onuNotification.getOnuState(), onuPresentAndUnexpectedState);
-        assertEquals(onuNotification.getMappedEvent(), ONUConstants.NOT_APPLICABLE);
+        assertEquals(onuNotification.getMappedEvent(), ONUConstants.CREATE_ONU);
         assertFalse(DocumentUtils.documentToPrettyString(onuNotification.getNotificationElement()).contains(DETERMINED_ONU_MANAGEMENT_MODE));
         assertFalse(DocumentUtils.documentToPrettyString(onuNotification.getNotificationElement()).contains("detected-loid"));
     }

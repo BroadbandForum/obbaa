@@ -15,7 +15,7 @@ ENV https_proxy $https_proxy
 
 RUN apk add --no-cache bash
 
-ARG JAR_FILE=target/micro-services-discovery-1.0.0.jar
+ARG JAR_FILE=target/micro-services-discovery-6.0.0.jar
 
 # Add the application's jar to the container
 ADD ${JAR_FILE} micro-services-discovery.jar

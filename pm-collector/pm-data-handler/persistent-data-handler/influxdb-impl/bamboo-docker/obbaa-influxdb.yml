@@ -16,22 +16,22 @@
 version: "3.5"
 
 services:
-    influxdb:
-        image: broadbandforum/influxdb:2.0.0-beta.2-3
-        container_name: obbaa-influxdb
-        command: --bolt-path /var/opt/influxdb/influxd.bolt --engine-path /var/opt/influxdb/engine --reporting-disabled
-        restart: on-failure
-        ports:
-            - "0.0.0.0:9999:9999"
-        environment:
-            - DEBUG=true
-            - INFLUX_INIT=false
-            - INFLUX_USER=influxdb
-            - INFLUX_PW=influxdb
-            - INFLUX_ORG=broadband_forum
-            - INFLUX_BUCKET=pm-collection
-            - INFLUX_RETENTION=720
-            - INFLUX_PORT=9999
-            - INFLUX_ROOT=/var/opt/influxdb
-        volumes:
-            - /baa/stores/influxdb:/var/opt/influxdb
+  influxdb:
+    image: broadbandforum/influxdb:2.0.0-beta.2-3
+    container_name: obbaa-influxdb
+    command: --bolt-path /var/opt/influxdb/influxd.bolt --engine-path /var/opt/influxdb/engine --reporting-disabled
+    restart: on-failure
+    ports:
+      - "0.0.0.0:9999:9999"
+    environment:
+      - DEBUG=true
+      - INFLUX_INIT=false
+      - INFLUX_USER=influxdb
+      - INFLUX_PW=influxdb
+      - INFLUX_ORG=broadband_forum
+      - INFLUX_BUCKET=pm-collection
+      - INFLUX_RETENTION=720
+      - INFLUX_PORT=9999
+      - INFLUX_ROOT=/var/opt/influxdb
+    volumes:
+      - /baa/stores/influxdb:/var/opt/influxdb

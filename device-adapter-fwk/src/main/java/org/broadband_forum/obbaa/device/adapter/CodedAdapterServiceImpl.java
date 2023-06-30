@@ -124,7 +124,7 @@ public class CodedAdapterServiceImpl implements CodedAdapterService {
         URL ipfixMappingResource = m_bundle.getResource(DEFAULT_IPFIX_MAPPING_FILE_PATH);
         if (ipfixMappingResource != null) {
             StringBuffer deviceAdapter = new StringBuffer();
-            try {
+            try (InputStream inputStream = ipfixMappingResource.openStream()) {
                 DeviceAdapterId adapterId = CommonFileUtil.parseAdapterXMLFile(ADAPTER_XML_PATH, m_bundle);
                 deviceAdapter = deviceAdapter.append(adapterId.getVendor())
                         .append(AdapterSpecificConstants.DASH).append(adapterId.getType())
@@ -138,7 +138,7 @@ public class CodedAdapterServiceImpl implements CodedAdapterService {
                     throw new RuntimeException(ipfixMappingFileDir + " is not a directory");
                 }
                 File ipfixMappingFile = new File(ipfixMappingFileDir, DEFAULT_IPFIX_MAPPING_FILE);
-                Files.copy(ipfixMappingResource.openStream(), ipfixMappingFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(inputStream, ipfixMappingFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (Exception e) {
                 LOGGER.error("Error while copying IPFIX IE mapping file of adapter:" + deviceAdapter, e);
             }

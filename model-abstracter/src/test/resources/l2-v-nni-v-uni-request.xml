@@ -1,0 +1,63 @@
+<!--
+  ~   Copyright 2023 Broadband Forum
+  ~
+  ~   Licensed under the Apache License, Version 2.0 (the "License");
+  ~   you may not use this file except in compliance with the License.
+  ~   You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~   Unless required by applicable law or agreed to in writing, software
+  ~   distributed under the License is distributed on an "AS IS" BASIS,
+  ~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~   See the License for the specific language governing permissions and
+  ~   limitations under the License.
+  ~
+  -->
+
+<networks xmlns="urn:ietf:params:xml:ns:yang:ietf-network" xmlns:bbf-l2t="urn:bbf:yang:obbaa:l2-topology"
+          xmlns:l2t="urn:ietf:params:xml:ns:yang:ietf-l2-topology"
+          xmlns:bbf-an-nw-topology="urn:bbf:yang:obbaa:an-network-topology"
+          xmlns:nt="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+   <network>
+      <network-id>network-fan1</network-id>
+      <node>
+         <node-id>onu1</node-id>
+         <nt:termination-point>
+            <nt:tp-id>l2-v-uni1</nt:tp-id>
+            <nt:supporting-termination-point>
+               <nt:network-ref>network-fan1</nt:network-ref>
+               <nt:node-ref>onu1</nt:node-ref>
+               <nt:tp-ref>v-nni1</nt:tp-ref>
+            </nt:supporting-termination-point>
+            <bbf-an-nw-topology:tp-type xmlns:bbf-tp-types="urn:bbf:yang:obbaa:tp-types">bbf-tp-types:l2-v-uni</bbf-an-nw-topology:tp-type>
+            <l2t:l2-termination-point-attributes>
+               <bbf-l2t:l2-access-attributes>
+                  <bbf-l2t:vlan-translation>
+                     <bbf-l2t:translation-profile>vlan-trans-profile-2</bbf-l2t:translation-profile>
+                  </bbf-l2t:vlan-translation>
+               </bbf-l2t:l2-access-attributes>
+            </l2t:l2-termination-point-attributes>
+         </nt:termination-point>
+      </node>
+      <node>
+         <node-id>OLT1</node-id>
+         <nt:termination-point>
+            <nt:tp-id>l2-v-nni1</nt:tp-id>
+            <nt:supporting-termination-point>
+               <nt:network-ref>network-fan1</nt:network-ref>
+               <nt:node-ref>OLT1</nt:node-ref>
+               <nt:tp-ref>nni1</nt:tp-ref>
+            </nt:supporting-termination-point>
+            <bbf-an-nw-topology:tp-type xmlns:bbf-tp-types="urn:bbf:yang:obbaa:tp-types">bbf-tp-types:l2-v-nni</bbf-an-nw-topology:tp-type>
+            <l2t:l2-termination-point-attributes>
+               <bbf-l2t:l2-access-attributes>
+                  <bbf-l2t:vlan-translation>
+                     <bbf-l2t:translation-profile>vlan-trans-profile-3</bbf-l2t:translation-profile>
+                  </bbf-l2t:vlan-translation>
+               </bbf-l2t:l2-access-attributes>
+            </l2t:l2-termination-point-attributes>
+         </nt:termination-point>
+      </node>
+   </network>
+</networks>

@@ -39,13 +39,27 @@ import io.grpc.stub.StreamObserver;
 public class NBIServer {
 
     private static final Logger LOG
-        = LoggerFactory.getLogger(NBIServer.class);
-
-    private Server m_server;
+            = LoggerFactory.getLogger(NBIServer.class);
     private final PMDataHandler m_pmDataHandler;
+    private Server m_server;
 
     public NBIServer(PMDataHandler pmDataHandler) {
         m_pmDataHandler = pmDataHandler;
+    }
+
+    private static Map<String, List<String>> convertFilter(Filter filter) {
+        Map<Integer, FilterValues> map = filter.getFilterExpressionsMap();
+        Map<String, List<String>> internalFilter = new HashMap<>();
+        for (Integer key : map.keySet()) {
+            FilterValues filterValues = map.get(key);
+            List<String> valu =
+                    new ArrayList<>(filterValues.getFilterItemValuesCount());
+            for (String filterValue : filterValues.getFilterItemValuesList()) {
+                valu.add(filterValue);
+            }
+            internalFilter.put(TSPoint.TAG_NAMES.get(key), valu);
+        }
+        return internalFilter;
     }
 
     public boolean start() {
@@ -58,23 +72,21 @@ public class NBIServer {
         }
         try {
             port = Integer.parseInt(envVar);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.error("Value '{}' of PMD_MAX_BUFFERED_POINTS is not an integer number", envVar);
             return false;
         }
 
         // build server
         m_server = ServerBuilder.forPort(port)
-            .addService(new PMDataRequestImpl(m_pmDataHandler))
-            .addService(new PMDataStreamImpl(m_pmDataHandler))
-            .build();
+                .addService(new PMDataRequestImpl(m_pmDataHandler))
+                .addService(new PMDataStreamImpl(m_pmDataHandler))
+                .build();
 
         // start server
         try {
             m_server.start();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             LOG.error("Caught exception: {}", ex.getMessage());
             return false;
         }
@@ -88,28 +100,12 @@ public class NBIServer {
             m_server.shutdown();
             try {
                 m_server.awaitTermination();
-            }
-            catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 LOG.debug("Caught exception: ", ex);
             }
             m_server = null;
             LOG.info("NBIServer stopped.");
         }
-    }
-
-    private static Map<String, List<String>> convertFilter(Filter filter) {
-        Map<Integer, FilterValues> map = filter.getFilterExpressionsMap();
-        Map<String, List<String>> internalFilter = new HashMap<>();
-        for (Integer key : map.keySet()) {
-            FilterValues filterValues = map.get(key);
-            List<String> valu =
-                new ArrayList<>(filterValues.getFilterItemValuesCount());
-            for (String filterValue : filterValues.getFilterItemValuesList()) {
-                valu.add(filterValue);
-            }
-            internalFilter.put(TSPoint.TAG_NAMES.get(key), valu);
-        }
-        return internalFilter;
     }
 
     static class PMDataRequestImpl extends PMDataRequestGrpc.PMDataRequestImplBase {
@@ -122,35 +118,35 @@ public class NBIServer {
 
         @Override
         public void query(QueryRequest req,
-                StreamObserver<QueryReply> responseObserver) {
+                          StreamObserver<QueryReply> responseObserver) {
             if (m_pmDataHandler == null) { // stand alone nbi test mode
                 LOG.info("measurement: {}", req.getMeasurement());
                 LOG.info("filter: \"{}\"", req.getFilter());
 
                 TimeSeriesPoint ts = TimeSeriesPoint.newBuilder()
-                    .setMeasurement(req.getMeasurement())
-                    .setTimestamp((int) (System.currentTimeMillis() / 1000))
-                    .putTags("sourceIP", "192.168.1.1")
-                    .putTags("hostName", "dpu1")
-                    .putTags("deviceAdapter", "sample-DPU-modeltls-1.0")
-                    .putTags("templateID", "1")
-                    .putTags("observationDomain", "2")
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:statistics/if:in-errors",
-                        ValueUnion.newBuilder().setLvalue(0).build())
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:statistics/if:in-discards",
-                        ValueUnion.newBuilder().setLvalue(1).build())
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:statistics/if:out-errors",
-                        ValueUnion.newBuilder().setLvalue(2).build())
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:statistics/if:out-discards",
-                        ValueUnion.newBuilder().setLvalue(3).build())
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:name",
-                        ValueUnion.newBuilder().setSvalue("DSL1").build())
-                    .build();
+                        .setMeasurement(req.getMeasurement())
+                        .setTimestamp((int) (System.currentTimeMillis() / 1000))
+                        .putTags("sourceIP", "192.168.1.1")
+                        .putTags("hostName", "dpu1")
+                        .putTags("deviceAdapter", "sample-DPU-modeltls-1.0")
+                        .putTags("templateID", "1")
+                        .putTags("observationDomain", "2")
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:statistics/if:in-errors",
+                                ValueUnion.newBuilder().setLvalue(0).build())
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:statistics/if:in-discards",
+                                ValueUnion.newBuilder().setLvalue(1).build())
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:statistics/if:out-errors",
+                                ValueUnion.newBuilder().setLvalue(2).build())
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:statistics/if:out-discards",
+                                ValueUnion.newBuilder().setLvalue(3).build())
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:name",
+                                ValueUnion.newBuilder().setSvalue("DSL1").build())
+                        .build();
                 QueryReply reply = QueryReply.newBuilder().addTsPoints(ts).build();
                 responseObserver.onNext(reply);
                 responseObserver.onCompleted();
@@ -170,8 +166,8 @@ public class NBIServer {
             for (TSData tsData : tsDataList) {
                 for (TSPoint point : tsData.m_tsPoints) {
                     TimeSeriesPoint.Builder tsBuilder = TimeSeriesPoint.newBuilder()
-                        .setMeasurement(point.getMeasurementName())
-                        .setTimestamp(point.getTimestamp());
+                            .setMeasurement(point.getMeasurementName())
+                            .setTimestamp(point.getTimestamp());
                     for (String tag : point.getTags().keySet()) {
                         tsBuilder.putTags(tag, point.getTags().get(tag));
                     }
@@ -179,24 +175,24 @@ public class NBIServer {
                         Object value = point.getFields().get(field);
                         if (value instanceof Long) {
                             tsBuilder
-                                .putFields(field, ValueUnion.newBuilder()
-                                .setLvalue((Long) value)
-                                .build());
+                                    .putFields(field, ValueUnion.newBuilder()
+                                            .setLvalue((Long) value)
+                                            .build());
                         } else if (value instanceof Double) {
                             tsBuilder
-                                .putFields(field, ValueUnion.newBuilder()
-                                .setDvalue((Double) value)
-                                .build());
+                                    .putFields(field, ValueUnion.newBuilder()
+                                            .setDvalue((Double) value)
+                                            .build());
                         } else if (value instanceof String) {
                             tsBuilder
-                                .putFields(field, ValueUnion.newBuilder()
-                                .setSvalue((String) value)
-                                .build());
+                                    .putFields(field, ValueUnion.newBuilder()
+                                            .setSvalue((String) value)
+                                            .build());
                         } else if (value instanceof Boolean) {
                             tsBuilder
-                                .putFields(field, ValueUnion.newBuilder()
-                                .setBvalue((Boolean) value)
-                                .build());
+                                    .putFields(field, ValueUnion.newBuilder()
+                                            .setBvalue((Boolean) value)
+                                            .build());
                         }
                     }
                     builder.addTsPoints(tsBuilder.build());
@@ -220,35 +216,35 @@ public class NBIServer {
 
         @Override
         public void queryStream(QueryRequest req,
-                StreamObserver<QueryReply> responseObserver) {
+                                StreamObserver<QueryReply> responseObserver) {
             if (m_pmDataHandler == null) { // stand alone nbi test mode
                 LOG.info("measurement: {}", req.getMeasurement());
                 LOG.info("filter: \"{}\"", req.getFilter());
 
                 TimeSeriesPoint ts = TimeSeriesPoint.newBuilder()
-                    .setMeasurement("1")
-                    .setTimestamp((int) (System.currentTimeMillis() / 1000))
-                    .putTags("sourceIP", "192.168.1.1")
-                    .putTags("hostName", "dpu1")
-                    .putTags("deviceAdapter", "sample-DPU-modeltls-1.0")
-                    .putTags("templateID", "1")
-                    .putTags("observationDomain", "2")
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:statistics/if:in-errors",
-                        ValueUnion.newBuilder().setLvalue(0).build())
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:statistics/if:in-discards",
-                        ValueUnion.newBuilder().setLvalue(1).build())
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:statistics/if:out-errors",
-                        ValueUnion.newBuilder().setLvalue(2).build())
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:statistics/if:out-discards",
-                        ValueUnion.newBuilder().setLvalue(3).build())
-                    .putFields(
-                        "/if:interfaces-state/if:interface/if:name",
-                        ValueUnion.newBuilder().setSvalue("DSL1").build())
-                    .build();
+                        .setMeasurement("1")
+                        .setTimestamp((int) (System.currentTimeMillis() / 1000))
+                        .putTags("sourceIP", "192.168.1.1")
+                        .putTags("hostName", "dpu1")
+                        .putTags("deviceAdapter", "sample-DPU-modeltls-1.0")
+                        .putTags("templateID", "1")
+                        .putTags("observationDomain", "2")
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:statistics/if:in-errors",
+                                ValueUnion.newBuilder().setLvalue(0).build())
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:statistics/if:in-discards",
+                                ValueUnion.newBuilder().setLvalue(1).build())
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:statistics/if:out-errors",
+                                ValueUnion.newBuilder().setLvalue(2).build())
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:statistics/if:out-discards",
+                                ValueUnion.newBuilder().setLvalue(3).build())
+                        .putFields(
+                                "/if:interfaces-state/if:interface/if:name",
+                                ValueUnion.newBuilder().setSvalue("DSL1").build())
+                        .build();
                 QueryReply reply = QueryReply.newBuilder().addTsPoints(ts).build();
                 responseObserver.onNext(reply);
                 responseObserver.onCompleted();
@@ -262,14 +258,14 @@ public class NBIServer {
             Instant startTime = Instant.ofEpochSecond(req.getStartTime());
             Instant stopTime = Instant.ofEpochSecond(req.getStopTime());
             List<TSData> tsDataList = m_pmDataHandler.query(req.getMeasurement(),
-                startTime, stopTime, convertFilter(req.getFilter()));
+                    startTime, stopTime, convertFilter(req.getFilter()));
 
             QueryReply.Builder builder = QueryReply.newBuilder();
             for (TSData tsData : tsDataList) {
                 for (TSPoint point : tsData.m_tsPoints) {
                     TimeSeriesPoint.Builder tsBuilder = TimeSeriesPoint.newBuilder()
-                        .setMeasurement(point.getMeasurementName())
-                        .setTimestamp(point.getTimestamp());
+                            .setMeasurement(point.getMeasurementName())
+                            .setTimestamp(point.getTimestamp());
                     for (String tag : point.getTags().keySet()) {
                         tsBuilder.putTags(tag, point.getTags().get(tag));
                     }
@@ -277,24 +273,24 @@ public class NBIServer {
                         Object value = point.getFields().get(field);
                         if (value instanceof Long) {
                             tsBuilder
-                                .putFields(field, ValueUnion.newBuilder()
-                                .setLvalue((Long) value)
-                                .build());
+                                    .putFields(field, ValueUnion.newBuilder()
+                                            .setLvalue((Long) value)
+                                            .build());
                         } else if (value instanceof Double) {
                             tsBuilder
-                                .putFields(field, ValueUnion.newBuilder()
-                                .setDvalue((Double) value)
-                                .build());
+                                    .putFields(field, ValueUnion.newBuilder()
+                                            .setDvalue((Double) value)
+                                            .build());
                         } else if (value instanceof String) {
                             tsBuilder
-                                .putFields(field, ValueUnion.newBuilder()
-                                .setSvalue((String) value)
-                                .build());
+                                    .putFields(field, ValueUnion.newBuilder()
+                                            .setSvalue((String) value)
+                                            .build());
                         } else if (value instanceof Boolean) {
                             tsBuilder
-                                .putFields(field, ValueUnion.newBuilder()
-                                .setBvalue((Boolean) value)
-                                .build());
+                                    .putFields(field, ValueUnion.newBuilder()
+                                            .setBvalue((Boolean) value)
+                                            .build());
                         }
                     }
                     builder.addTsPoints(tsBuilder.build());

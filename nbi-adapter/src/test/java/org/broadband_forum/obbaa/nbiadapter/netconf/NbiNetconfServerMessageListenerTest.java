@@ -201,7 +201,7 @@ public class NbiNetconfServerMessageListenerTest {
 
     @Test
     public void onAction() throws Exception {
-        Document reqDoc = DocumentUtils.stringToDocument("<rpc/>");
+        Document reqDoc = DocumentUtils.stringToDocument("<network-manager xmlns='urn:bbf:yang:obbaa:network-manager'/>");
         ActionRequest req = new ActionRequest();
         ActionResponse resp = new ActionResponse();
         req.setActionTreeElement(reqDoc.getDocumentElement());
@@ -209,6 +209,28 @@ public class NbiNetconfServerMessageListenerTest {
         listener.onAction(client, req, resp);
 
         assertTrue(resp.isOk());
+    }
+
+    @Test
+    public void onActionWithOutputElements() throws Exception {
+        final String respData =
+                "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"  message-id=\"1\" >" +
+                  "<element1 xmlns=\"dummy\" />" +
+                  "<element2 xmlns=\"dummy\" />" +
+                "</rpc-reply>";
+
+        Document reqDoc = DocumentUtils.stringToDocument("<network-manager xmlns='urn:bbf:yang:obbaa:network-manager' message-id=\"1\"/>");
+        Document expectedResp = DocumentUtils.stringToDocument(respData);
+
+        ActionRequest req = new ActionRequest();
+        ActionResponse resp = new ActionResponse();
+        req.setActionTreeElement(reqDoc.getDocumentElement());
+
+        when(aggregator.dispatchRequest(anyObject(), anyObject())).thenReturn(respData);
+
+        listener.onAction(client, req, resp);
+
+        assertTrue(expectedResp.toString().equals(resp.getResponseDocument().toString()));
     }
 
     @Test

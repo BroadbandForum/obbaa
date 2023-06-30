@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.broadband_forum.obbaa.pm.service.DataHandlerService;
 import org.broadband_forum.obbaa.pm.service.IpfixDataHandler;
+import org.broadband_forum.obbaa.pm.service.OnuPMDataHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,36 +40,22 @@ import com.google.gson.JsonObject;
 /**
  * Dummy IPFIXCollector implementation to test PMDataHandler.
  */
-public class IPFIXCollector implements DataHandlerService, ThreadFactory {
-
-    class Data {
-        public String m_ip;
-        public String[] m_counterNames;
-        public long[] m_counterValues;
-        public long m_observationDomain;
-
-        public Data() {
-        }
-    }
+public class IPFIXCollector implements DataHandlerService, ThreadFactory, OnuPMDataHandler {
 
     private static final Logger LOG
-        = LoggerFactory.getLogger(IPFIXCollector.class);
-
+            = LoggerFactory.getLogger(IPFIXCollector.class);
     private final static int NUM_DEVICES = 10000;
     private final static int NUM_THREADS = 100;
     private final static int NUM_DEV_PER_THREAD = NUM_DEVICES / NUM_THREADS;
-
     private final Map<String, Data> m_countersPerDpu;
-
     private final List<IpfixDataHandler> m_messageReceiver;
-
-    private ScheduledExecutorService m_scheduler;
     private final ArrayList<ScheduledFuture<?>> m_timerHandles;
     private final ThreadGroup m_threadGroup;
+    private final Object m_mutex = new Object();
+    private ScheduledExecutorService m_scheduler;
     private int m_threadNum;
 
     private int m_records;
-    private final Object m_mutex = new Object();
 
     public IPFIXCollector() {
         m_messageReceiver = new ArrayList<>(1);
@@ -81,11 +68,11 @@ public class IPFIXCollector implements DataHandlerService, ThreadFactory {
             String dev = "dpu" + i;
             IPFIXCollector.Data data = new Data();
             data.m_ip = "192.168.1." + i;
-            data.m_counterNames = new String[] {
-                "/if:interfaces-state/if:interface/if:statistics/if:in-errors",
-                "/if:interfaces-state/if:interface/if:statistics/if:in-discards",
-                "/if:interfaces-state/if:interface/if:statistics/if:out-errors",
-                "/if:interfaces-state/if:interface/if:statistics/if:out-discards"
+            data.m_counterNames = new String[]{
+                    "/if:interfaces-state/if:interface/if:statistics/if:in-errors",
+                    "/if:interfaces-state/if:interface/if:statistics/if:in-discards",
+                    "/if:interfaces-state/if:interface/if:statistics/if:out-errors",
+                    "/if:interfaces-state/if:interface/if:statistics/if:out-discards"
             };
             data.m_counterValues = new long[]{0L, 0L, 0L, 0L};
             data.m_observationDomain = 1;
@@ -99,17 +86,17 @@ public class IPFIXCollector implements DataHandlerService, ThreadFactory {
         m_scheduler = Executors.newScheduledThreadPool(NUM_THREADS, this);
         for (int i = 0; i < NUM_THREADS; i++) {
             Runnable timerTask = _createTimerTask(i * NUM_DEV_PER_THREAD,
-                i * NUM_DEV_PER_THREAD + NUM_DEV_PER_THREAD - 1);
+                    i * NUM_DEV_PER_THREAD + NUM_DEV_PER_THREAD - 1);
             int timeout = 1;
             m_timerHandles.add(
-                m_scheduler.scheduleAtFixedRate(timerTask, 0, timeout, TimeUnit.SECONDS));
+                    m_scheduler.scheduleAtFixedRate(timerTask, 0, timeout, TimeUnit.SECONDS));
         }
     }
 
     private Runnable _createTimerTask(final int minDevice, final int maxDevice) {
         Runnable timerTask = () -> {
             LOG.debug("Starting handler notification for device {} to {}.",
-                minDevice, maxDevice);
+                    minDevice, maxDevice);
             for (int i = minDevice; i <= maxDevice; i++) {
                 String dev = "dpu" + i;
                 try {
@@ -123,8 +110,7 @@ public class IPFIXCollector implements DataHandlerService, ThreadFactory {
                             handler.handleIpfixData(msg);
                         });
                     }
-                }
-                catch (Throwable e) {
+                } catch (Throwable e) {
                     LOG.error("Caught exception: ", e);
                 }
             }
@@ -158,8 +144,7 @@ public class IPFIXCollector implements DataHandlerService, ThreadFactory {
             if (!success) {
                 m_scheduler.shutdownNow();
             }
-        }
-        catch (InterruptedException ex) {
+        } catch (InterruptedException ex) {
             LOG.error("Caught exception: ", ex);
         }
         LOG.info("records: {}", m_records);
@@ -211,23 +196,23 @@ public class IPFIXCollector implements DataHandlerService, ThreadFactory {
         json.addProperty("templateID", 267);
         json.addProperty("observationDomain", data.m_observationDomain);
         json.addProperty("timestamp",
-            ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT));
+                ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT));
 
         JsonArray ipfixElements = new JsonArray();
         JsonObject ipfixElement;
         for (int i = 0; i < data.m_counterNames.length; i++) {
             ipfixElement = new JsonObject();
             data.m_counterValues[i]
-                = data.m_counterValues[i] + Math.round(10.0 * Math.random());
+                    = data.m_counterValues[i] + Math.round(10.0 * Math.random());
             ipfixElement.addProperty("metric", data.m_counterNames[i]);
             ipfixElement.addProperty("dataType", "unsigned32");
-            ipfixElement.addProperty("value", 
-                Long.toString(data.m_counterValues[i]));
+            ipfixElement.addProperty("value",
+                    Long.toString(data.m_counterValues[i]));
             ipfixElements.add(ipfixElement);
         }
         ipfixElement = new JsonObject();
         ipfixElement.addProperty("metric",
-            "/if:interfaces-state/if:interface/if:name");
+                "/if:interfaces-state/if:interface/if:name");
         ipfixElement.addProperty("dataType", "string");
         ipfixElement.addProperty("value", "DSL1");
         ipfixElements.add(ipfixElement);
@@ -252,14 +237,44 @@ public class IPFIXCollector implements DataHandlerService, ThreadFactory {
     }
 
     @Override
+    public void registerOnuPmDataHandler(OnuPMDataHandler onuPMDataHandler) {
+
+    }
+
+    @Override
+    public void unregisterOnuPmDataHandler(OnuPMDataHandler onuPMDataHandler) {
+
+    }
+
+    @Override
+    public void handleOnuPMData(String msgID, String senderName, String recipientName, String objectType, String objectName, String data) {
+
+    }
+
+    @Override
     public Thread newThread(Runnable r) {
         String threadName = String.format("IPFIX-Worker-%02d", m_threadNum++);
         return new Thread(m_threadGroup, r, threadName);
     }
 
     @Override
-    public List<IpfixDataHandler> getDataHandlers() {
+    public List<IpfixDataHandler> getIpfixDataHandlers() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    class Data {
+        public String m_ip;
+        public String[] m_counterNames;
+        public long[] m_counterValues;
+        public long m_observationDomain;
+
+        public Data() {
+        }
+    }
+
+    @Override
+    public List<OnuPMDataHandler> getOnuPmDataHandlers() {
+        return null;
     }
 }
 

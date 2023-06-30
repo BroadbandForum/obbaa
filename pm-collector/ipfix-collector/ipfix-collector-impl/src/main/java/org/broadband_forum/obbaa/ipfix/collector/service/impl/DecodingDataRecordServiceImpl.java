@@ -25,24 +25,24 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixFieldSpecifier;
-import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixMessage;
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElement;
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElementType;
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.decode.IpfixDataRecordDecodeMethod;
-import org.broadband_forum.obbaa.ipfix.collector.entities.logging.IpfixDecodedData;
-import org.broadband_forum.obbaa.ipfix.collector.entities.record.AbstractTemplateRecord;
-import org.broadband_forum.obbaa.ipfix.collector.entities.record.IpfixDataRecord;
-import org.broadband_forum.obbaa.ipfix.collector.entities.set.IpfixDataSet;
-import org.broadband_forum.obbaa.ipfix.collector.exception.DataTypeLengthMismatchException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.DecodingException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.MissingAbstractDataTypeException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.UtilityException;
 import org.broadband_forum.obbaa.ipfix.collector.service.DecodingDataRecordService;
 import org.broadband_forum.obbaa.ipfix.collector.service.DeviceCacheService;
 import org.broadband_forum.obbaa.ipfix.collector.service.InformationElementService;
-import org.broadband_forum.obbaa.ipfix.collector.service.ie.DecodeMethodFactory;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
+import org.broadband_forum.obbaa.ipfix.entities.IpfixFieldSpecifier;
+import org.broadband_forum.obbaa.ipfix.entities.exception.DataTypeLengthMismatchException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.DecodingException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.MissingAbstractDataTypeException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.UtilityException;
+import org.broadband_forum.obbaa.ipfix.entities.ie.InformationElement;
+import org.broadband_forum.obbaa.ipfix.entities.ie.InformationElementType;
+import org.broadband_forum.obbaa.ipfix.entities.ie.IpfixDataRecordDecodeMethod;
+import org.broadband_forum.obbaa.ipfix.entities.message.IpfixMessage;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixDecodedData;
+import org.broadband_forum.obbaa.ipfix.entities.record.AbstractTemplateRecord;
+import org.broadband_forum.obbaa.ipfix.entities.record.IpfixDataRecord;
+import org.broadband_forum.obbaa.ipfix.entities.service.ie.DecodeMethodFactory;
+import org.broadband_forum.obbaa.ipfix.entities.set.IpfixDataSet;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +66,7 @@ public class DecodingDataRecordServiceImpl implements DecodingDataRecordService 
 
     @Override
     public Set<IpfixDecodedData> decodeDataSet(String deviceName, long obsvDomain, IpfixDataSet set, IpfixMessage ipfixMessage,
-                                                CollectingServiceImpl.TemplateProvider templateProvider) throws DecodingException {
+                                               CollectingServiceImpl.TemplateProvider templateProvider) throws DecodingException {
         if (Objects.isNull(set)) {
             throw new DecodingException("Data set is invalid for decoding process.");
         }
@@ -84,7 +84,7 @@ public class DecodingDataRecordServiceImpl implements DecodingDataRecordService 
     }
 
     private Set<IpfixDecodedData> decodeDataSetWithTemplate(String deviceName, AbstractTemplateRecord blueprint,
-                                                                long obsvDomain, IpfixDataSet set, IpfixMessage ipfixMessage)
+                                                            long obsvDomain, IpfixDataSet set, IpfixMessage ipfixMessage)
             throws DecodingException {
         Set<IpfixDecodedData> decodedDataPerField = new HashSet<>();
         String deviceFamily = StringUtils.isEmpty(deviceName) ? null : m_deviceFamilyCacheService.getDeviceFamily(deviceName);
@@ -189,7 +189,7 @@ public class DecodingDataRecordServiceImpl implements DecodingDataRecordService 
                     return EMPTY;
                 }
                 // Plus one byte for full message length: Byte of size + Byte of data
-                fieldLength ++;
+                fieldLength++;
             } else {
                 data = getData(data, fieldLength);
             }

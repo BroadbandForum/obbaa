@@ -37,14 +37,14 @@ import org.slf4j.LoggerFactory;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PMDataHandlerTest {
+    public static final Object CONDITION = new Object();
     private final static Logger LOG =
-        LoggerFactory.getLogger(PMDataHandlerTest.class);
-    private static IPFIXCollector ipfixCollector;
-    private static InfluxDBImpl db;
+            LoggerFactory.getLogger(PMDataHandlerTest.class);
     public static PMDataHandler pmDataHandler;
     public static IPFIXGUI ipfixgui;
     public static boolean withGUI = false;
-    public static final Object CONDITION = new Object();
+    private static IPFIXCollector ipfixCollector;
+    private static InfluxDBImpl db;
 
     public PMDataHandlerTest() {
     }
@@ -59,9 +59,9 @@ public class PMDataHandlerTest {
                 ipfixgui = new IPFIXGUI();
             });
             try {
-              synchronized (CONDITION) {
-                CONDITION.wait();
-              }
+                synchronized (CONDITION) {
+                    CONDITION.wait();
+                }
             } catch (InterruptedException ex) {
             }
             withGUI = false;

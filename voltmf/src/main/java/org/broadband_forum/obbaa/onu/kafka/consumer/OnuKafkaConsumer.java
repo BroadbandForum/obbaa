@@ -24,7 +24,7 @@ import org.broadband_forum.obbaa.nf.entities.KafkaTopic;
  * <p>
  * Provides APIs to Kafka Consumer
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public interface OnuKafkaConsumer<T> {
 

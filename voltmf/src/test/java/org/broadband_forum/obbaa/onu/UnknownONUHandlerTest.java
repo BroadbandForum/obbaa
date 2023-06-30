@@ -44,7 +44,6 @@ import static org.mockito.Mockito.when;
  * </p>
  * Created by Ranjitha.B.R (Nokia) on 22/07/2020.
  */
-@Ignore
 public class UnknownONUHandlerTest {
 
     @Mock
@@ -76,7 +75,7 @@ public class UnknownONUHandlerTest {
         //verify(m_manager).create(m_unknownOnu);
     }
 
-    @Ignore
+    @Ignore("since some flows are commented")
     @Test
     public void testFindUnknownOnuEntityWithSerialNumber() {
         Map<String, Object> matchValue = new HashMap<String, Object>();
@@ -88,7 +87,7 @@ public class UnknownONUHandlerTest {
         assertEquals(m_serialNum, onu.getSerialNumber());
     }
 
-    @Ignore
+    @Ignore("since some flows are commented")
     @Test
     public void testFindUnknownOnuEntityWithRegId() {
         Map<String, Object> matchValue = new HashMap<String, Object>();
@@ -100,7 +99,7 @@ public class UnknownONUHandlerTest {
         assertEquals(m_regId, onu.getRegistrationId());
     }
 
-    @Ignore
+    @Ignore("since some flows are commented")
     @Test
     public void testFindUnknownOnuEntityWithSNAndRegId() {
         Map<String, Object> matchValue = new HashMap<String, Object>();

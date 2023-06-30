@@ -97,10 +97,10 @@ public class DeviceCacheServiceImpl implements DeviceCacheService {
             if (document != null) {
                 Element rpcReplyElement = document.getDocumentElement();
                 Element managedDevices = DocumentUtils.getChildElement(rpcReplyElement, MANAGED_DEVICES);
-                List<Element> deviceList =  DocumentUtils.getDirectChildElements(managedDevices, DEVICE_TAG, NETWORK_MANAGER_NAMESPACE);
+                List<Element> deviceList = DocumentUtils.getDirectChildElements(managedDevices, DEVICE_TAG, NETWORK_MANAGER_NAMESPACE);
                 for (Element device : deviceList) {
-                    String deviceName =  getNodeValue(device, DEVICE_NAME_TAG, NETWORK_MANAGER_NAMESPACE);
-                    Element deviceManagement = DocumentUtils.getChildElement(device,DEVICE_MANAGEMENT);
+                    String deviceName = getNodeValue(device, DEVICE_NAME_TAG, NETWORK_MANAGER_NAMESPACE);
+                    Element deviceManagement = DocumentUtils.getChildElement(device, DEVICE_MANAGEMENT);
                     String family = extractDeviceFamilyFromElement(deviceManagement);
                     if (deviceName != null && family != null) {
                         m_deviceFamilyCache.put(deviceName, family);
@@ -111,7 +111,7 @@ public class DeviceCacheServiceImpl implements DeviceCacheService {
     }
 
     private String getNodeValue(Element parent, String name, String namespace) {
-        Element node =  DocumentUtils.getDirectChildElement(parent, name, namespace);
+        Element node = DocumentUtils.getDirectChildElement(parent, name, namespace);
         if (node != null) {
             return node.getTextContent();
         }

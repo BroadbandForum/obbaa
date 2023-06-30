@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -95,6 +96,7 @@ import org.broadband_forum.obbaa.nf.dao.NetworkFunctionDao;
 import org.broadband_forum.obbaa.nf.entities.KafkaTopic;
 import org.broadband_forum.obbaa.nm.devicemanager.DeviceManager;
 import org.broadband_forum.obbaa.onu.MediatedDeviceNetconfSession;
+import org.broadband_forum.obbaa.onu.MediatedNetworkFunctionNetconfSession;
 import org.broadband_forum.obbaa.onu.ONUConstants;
 import org.broadband_forum.obbaa.onu.UnknownONUHandler;
 import org.broadband_forum.obbaa.onu.entity.UnknownONU;
@@ -128,6 +130,7 @@ import org.broadband_forum.obbaa.onu.util.VOLTMgmtRequestCreationUtil;
 import org.broadband_forum.obbaa.onu.util.VoltMFTestConstants;
 import org.broadband_forum.obbaa.pma.PmaRegistry;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -151,6 +154,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.protobuf.ByteString;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * <p>
@@ -164,9 +169,9 @@ public class VOLTManagementImplTest {
 
     @Mock
     public static GetRequest m_getRequestOne;
-    String getResponse = "{\"olt-name\":\"OLT1\",\"payload\":\"{\\\"identifier\\\":\\\"0\\\",\\\"operation\\\":\\\"get\\\",\\\"data\\\":{\\\"network-manager:device-management\\\":{\\\"device-state\\\":{\\\"bbf-obbaa-onu-management:onu-state-info\\\":{\\\"equipment-id\\\":\\\"test1\\\",\\\"software-images\\\":{\\\"software-image\\\":[{\\\"id\\\":\\\"1\\\",\\\"version\\\":\\\"1111\\\",\\\"is-committed\\\":\\\"false\\\",\\\"is-active\\\":\\\"false\\\",\\\"is-valid\\\":\\\"true\\\",\\\"product-code\\\":\\\"test1111\\\",\\\"hash\\\":\\\"11\\\"},{\\\"id\\\":\\\"0\\\",\\\"version\\\":\\\"0000\\\",\\\"is-committed\\\":\\\"true\\\",\\\"is-active\\\":\\\"true\\\",\\\"is-valid\\\":\\\"true\\\",\\\"product-code\\\":\\\"test\\\",\\\"hash\\\":\\\"00\\\"}]}}}}},\\\"status\\\":\\\"OK\\\"}\",\"onu-name\":\"onu\",\"channel-termination-ref\":\"channeltermination.1\",\"event\": \"response\",\"onu-id\": \"1\"}";
-    String getResponseNOK = "{\"olt-name\":\"OLT1\",\"payload\":\"{\\\"identifier\\\":\\\"0\\\",\\\"operation\\\":\\\"get\\\",\\\"data\\\":{\\\"network-manager:device-management\\\":{\\\"device-state\\\":{\\\"bbf-obbaa-onu-management:onu-state-info\\\":{\\\"equipment-id\\\":\\\"test1\\\",\\\"software-images\\\":{\\\"software-image\\\":[{\\\"id\\\":\\\"1\\\",\\\"version\\\":\\\"1111\\\",\\\"is-committed\\\":\\\"false\\\",\\\"is-active\\\":\\\"false\\\",\\\"is-valid\\\":\\\"true\\\",\\\"product-code\\\":\\\"test1111\\\",\\\"hash\\\":\\\"11\\\"},{\\\"id\\\":\\\"0\\\",\\\"version\\\":\\\"0000\\\",\\\"is-committed\\\":\\\"true\\\",\\\"is-active\\\":\\\"true\\\",\\\"is-valid\\\":\\\"true\\\",\\\"product-code\\\":\\\"test\\\",\\\"hash\\\":\\\"00\\\"}]}}}}},\\\"status\\\":\\\"NOK\\\"}\",\"onu-name\":\"onu\",\"channel-termination-ref\":\"channeltermination.1\",\"event\": \"response\",\"onu-id\": \"1\"}";
-    String emptyGetResponse = "{\"olt-name\":\"OLT1\",\"payload\":\"{\\\"identifier\\\":\\\"0\\\",\\\"operation\\\":\\\"get\\\",\\\"data\\\":{\\\"network-manager:device-management\\\":{\\\"device-state\\\":{\\\"bbf-obbaa-onu-management:onu-state-info\\\":{\\\"software-images\\\":{\\\"software-image\\\":[]}}}}},\\\"status\\\":\\\"OK\\\"}\",\"onu-name\":\"onu\",\"channel-termination-ref\":\"channeltermination.1\",\"event\": \"response\",\"onu-id\": \"1\"}";
+
+    String getResponse = "{\"ietf-hardware-state:hardware\":{\"component\":[{\"name\":\"ont1\",\"class\":\"iana-hardware:chassis\",\"hardware-rev\":\"HWREV_1\",\"mfg-name\":\"manufacturer1\",\"model-name\":\"EqptModelName_1\",\"serial-num\":\"ABCD12345678\"}]},\"ietf-hardware:hardware\":{\"component\":[{\"name\":\"ont1\",\"bbf-software-management:software\":{\"software\":[{\"name\":\"model1-software\",\"revisions\":{\"maximum-number-of-revisions\":2,\"revision\":[{\"id\":1,\"alias\":\"model1-software-rev1\",\"state\":\"in-use\",\"last-changed\":\"2022-01-09T13:53:36+00:00\",\"version\":\"1.0.0\",\"product-code\":\"pcode\",\"hash\":\"123456789\",\"is-valid\":true,\"is-active\":true,\"is-committed\":true},{\"id\":2,\"alias\":\"model1-software-rev2\",\"state\":\"available\",\"last-changed\":\"2022-01-09T13:55:36+00:00\",\"version\":\"2.0.0\",\"product-code\":\"pcode\",\"hash\":\"134323233\",\"is-valid\":true,\"is-active\":false,\"is-committed\":false}]}}]}}]},\"ietf-interfaces:interfaces-state\":{\"interface\":[{\"name\":\"ont1_uni1\",\"oper-status\":\"up\"}]}}";
+
     @Mock
     KafkaTopic m_kafkaTopic;
     @Mock
@@ -240,6 +245,8 @@ public class VOLTManagementImplTest {
     private Object m_notificationResponse;
     @Mock
     private GpbFormatter m_gpbFormatter;
+    @Mock
+    private DataSchemaNode m_schemaNode;
     public static final String GET_RESPONSE = "/get-response.xml";
     public static final String GET_REQUEST = "/internal-get-request-filter.xml";
     private static final AtomicLong m_messageId = new AtomicLong(1000);
@@ -255,6 +262,14 @@ public class VOLTManagementImplTest {
     NetconfRpcError m_netconfRpcError;
     @Mock
     private NbiNetconfServerMessageListener m_nbiNetconfServerMessageListener;
+    @Mock
+    private MediatedNetworkFunctionNetconfSession m_networkFunctionNetconfSession;
+    @Mock
+    private NodeList m_nodeList;
+    @Mock
+    private Node m_node;
+    @Mock
+    private Element m_element;
 
     Element m_dataElement = DocumentUtils.stringToDocument(TestUtil.loadAsString(GET_RESPONSE)).getDocumentElement();
 
@@ -283,7 +298,7 @@ public class VOLTManagementImplTest {
         m_unknownOnu = new UnknownONU();
         m_softwareImages = new SoftwareImages();
         m_txService = new TxService();
-        m_messageFormatter = new JsonFormatter();
+        m_messageFormatter = new GpbFormatter();
         m_voltManagement = new VOLTManagementImpl(m_txService, m_deviceManager, m_alarmService, m_kafkaProducerJson, m_unknownOnuHandler,
                 m_connectionManager, m_modelNodeDSM, m_notificationService, m_adapterManager, m_pmaRegistry, m_schemaRegistry, m_messageFormatter,
                 m_networkFunctionDao, m_deviceDao, m_nbiNetconfServerMessageListener);
@@ -291,6 +306,8 @@ public class VOLTManagementImplTest {
         when(m_vonuDevice.getDeviceName()).thenReturn(deviceName);
         when(m_deviceManager.getDevice(deviceName)).thenReturn(m_vonuDevice);
         PowerMockito.mockStatic(JsonUtil.class);
+
+        m_unknownOnu.setOnuState("onu-present-and-on-intended-channel-termination");
 
         m_kafkaCommunicationPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
         m_voltManagement.init();
@@ -308,7 +325,12 @@ public class VOLTManagementImplTest {
     }
 
     @Test
-    public void testOnuDeviceAddedForUnknownOnuPresent() throws MessageFormatterException {
+    public void testOnuDeviceAddedForUnknownOnuPresent() throws MessageFormatterException, NetconfMessageBuilderException {
+        Module module = Mockito.mock(Module.class);
+        QNameModule qNameModule = PowerMockito.mock(QNameModule.class);
+        Optional<Revision> revision = PowerMockito.mock(Optional.class);
+        SchemaPathBuilder schemaPathBuilder = Mockito.mock(SchemaPathBuilder.class);
+        SchemaPath schemaPath = Mockito.mock(SchemaPath.class);
         when(m_deviceManager.getDevice(deviceName)).thenReturn(m_vonuDevice);
         when(m_vonuDevice.getDeviceManagement()).thenReturn(m_deviceMgmt);
         when(m_deviceMgmt.getDeviceState()).thenReturn(m_deviceState);
@@ -317,6 +339,7 @@ public class VOLTManagementImplTest {
         when(m_deviceState.getDeviceNodeId()).thenReturn("");
         when(m_onuConfigInfo.getExpectedSerialNumber()).thenReturn(VoltMFTestConstants.SERIAL_NUMBER);
         when(m_onuConfigInfo.getExpectedRegistrationId()).thenReturn(VoltMFTestConstants.REGISTER_NUMBER);
+        when(m_onuConfigInfo.getXponTechnology()).thenReturn("bbf-xpon-types:gpon");
         when(m_onuConfigInfo.getExpectedAttachmentPoints()).thenReturn(m_expectedAttachmentPoints);
         when(m_expectedAttachmentPoints.getExpectedAttachmentPointSet()).thenReturn(m_expectedAttachmentPointSet);
         when(m_expectedAttachmentPointSet.iterator()).thenReturn(m_expectedAttachmentPointIterator);
@@ -325,45 +348,34 @@ public class VOLTManagementImplTest {
         when(m_attachmentPoint.getChannelPartitionName()).thenReturn("CT");
         when(m_vonuDevice.isMediatedSession()).thenReturn(true);
         when(m_unknownOnuHandler.findUnknownOnuEntity(anyString(), anyString())).thenReturn(m_unknownOnu);
+        OnuManagementChain chain1 = new OnuManagementChain();
+        chain1.setNfName("vomci1");
+        OnuManagementChain chain2 = new OnuManagementChain();
+        chain2.setNfName("olt1");
+        OnuManagementChain[] managementChains = {chain1, chain2};
+        when(m_deviceDao.getOnuManagementChains(deviceName)).thenReturn(managementChains);
+        when(m_schemaRegistry.getModuleByNamespace("urn:bbf:yang:bbf-vomci-function")).thenReturn(module);
+        when(m_schemaRegistry.getModuleNameByNamespace(VoltMFTestConstants.NETWORK_MANAGER_NAMESPACE)).thenReturn(ONUConstants.NETWORK_MANAGER);
+
+        when(module.getQNameModule()).thenReturn(qNameModule);
+        when(qNameModule.getRevision()).thenReturn(revision);
+        when(schemaPathBuilder.build()).thenReturn(schemaPath);
+
+        DataSchemaNode dataSchemaNode = getDataSchemaNode();
+
+        PowerMockito.when(JsonUtil.convertFromXmlToJson(any(), any(), any(), any())).thenReturn(VoltMFTestConstants.FILTER_JSON_STRING);
+
+
+        when(m_schemaRegistry.getDataSchemaNode(any(SchemaPath.class))).thenReturn(dataSchemaNode);
         Set<SoftwareImage> emptySwSet = Collections.emptySet();
         m_softwareImages.setSoftwareImagesId("swImages_id1");
         m_softwareImages.setSoftwareImage(emptySwSet);
         m_unknownOnu.setSoftwareImages(m_softwareImages);
         m_voltManagement.deviceAdded(deviceName);
         m_voltManagement.waitForNotificationTasks();
-        verify(m_kafkaProducerJson, times(1)).sendNotification(anyString(), anyString());
+        verify(m_kafkaProducerJson, never()).sendNotification(anyString(), anyString());
+        verify(m_deviceManager, times(3)).getDevice(anyString());
         verify(m_unknownOnuHandler, times(1)).deleteUnknownOnuEntity(m_unknownOnu);
-
-    }
-
-    @Test
-    public void testOnuDeviceAddedForUnknownOnuPresentWithJsonFormatter() throws MessageFormatterException {
-        when(m_deviceManager.getDevice(deviceName)).thenReturn(m_vonuDevice);
-        when(m_vonuDevice.getDeviceManagement()).thenReturn(m_deviceMgmt);
-        when(m_deviceMgmt.getDeviceState()).thenReturn(m_deviceState);
-        when(m_deviceMgmt.getDeviceType()).thenReturn(VoltMFTestConstants.ONU_DEVICE_TYPE);
-        when(m_deviceMgmt.getOnuConfigInfo()).thenReturn(m_onuConfigInfo);
-        when(m_deviceState.getDeviceNodeId()).thenReturn("");
-        when(m_onuConfigInfo.getExpectedSerialNumber()).thenReturn(VoltMFTestConstants.SERIAL_NUMBER);
-        when(m_onuConfigInfo.getExpectedRegistrationId()).thenReturn(VoltMFTestConstants.REGISTER_NUMBER);
-        when(m_onuConfigInfo.getExpectedAttachmentPoints()).thenReturn(m_expectedAttachmentPoints);
-        when(m_expectedAttachmentPoints.getExpectedAttachmentPointSet()).thenReturn(m_expectedAttachmentPointSet);
-        when(m_expectedAttachmentPointSet.iterator()).thenReturn(m_expectedAttachmentPointIterator);
-        when(m_expectedAttachmentPointIterator.hasNext()).thenReturn(true, false);
-        when(m_expectedAttachmentPointIterator.next()).thenReturn(m_expectedAttachmentPoint);
-        when(m_attachmentPoint.getChannelPartitionName()).thenReturn("CT");
-        when(m_vonuDevice.isMediatedSession()).thenReturn(true);
-        when(m_unknownOnuHandler.findUnknownOnuEntity(anyString(), anyString())).thenReturn(m_unknownOnu);
-        Set<SoftwareImage> emptySwSet = Collections.emptySet();
-        m_softwareImages.setSoftwareImagesId("swImages_id1");
-        m_softwareImages.setSoftwareImage(emptySwSet);
-        m_unknownOnu.setSoftwareImages(m_softwareImages);
-        m_voltManagement.deviceAdded(deviceName);
-        m_voltManagement.waitForNotificationTasks();
-        verify(m_kafkaProducerJson, times(1)).sendNotification(anyString(), anyString());
-        verify(m_unknownOnuHandler, times(1)).deleteUnknownOnuEntity(m_unknownOnu);
-        verify(m_deviceDao, never()).getVomciFunctionName(deviceName);
-        verify(m_networkFunctionDao, never()).getKafkaConsumerTopics(anyString());
     }
 
     @Test
@@ -411,6 +423,7 @@ public class VOLTManagementImplTest {
         when(m_deviceState.getOnuStateInfo()).thenReturn(m_onuStateInfo);
         when(m_onuStateInfo.getActualAttachmentPoint()).thenReturn(m_actualAttachmentPoint);
         when(m_onuConfigInfo.getExpectedAttachmentPoints()).thenReturn(m_expectedAttachmentPoints);
+        when(m_onuConfigInfo.getXponTechnology()).thenReturn("bbf-xpon-types:gpon");
         when(m_expectedAttachmentPoints.getExpectedAttachmentPointSet()).thenReturn(m_expectedAttachmentPointSet);
         when(m_vonuDevice.getDeviceManagement().getDeviceState().getOnuStateInfo().getActualAttachmentPoint()).thenReturn(m_actualAttachmentPoint);
         when(m_actualAttachmentPoint.getOltName()).thenReturn("OLT1");
@@ -469,6 +482,7 @@ public class VOLTManagementImplTest {
         when(m_deviceState.getOnuStateInfo()).thenReturn(m_onuStateInfo);
         when(m_onuStateInfo.getActualAttachmentPoint()).thenReturn(m_actualAttachmentPoint);
         when(m_onuConfigInfo.getExpectedAttachmentPoints()).thenReturn(m_expectedAttachmentPoints);
+        when(m_onuConfigInfo.getXponTechnology()).thenReturn("bbf-xpon-types:gpon");
         when(m_expectedAttachmentPoints.getExpectedAttachmentPointSet()).thenReturn(m_expectedAttachmentPointSet);
         when(m_vonuDevice.getDeviceManagement().getDeviceState().getOnuStateInfo().getActualAttachmentPoint()).thenReturn(m_actualAttachmentPoint);
         when(m_actualAttachmentPoint.getOltName()).thenReturn("OLT1");
@@ -641,26 +655,32 @@ public class VOLTManagementImplTest {
 
 
     @Test
-    @Ignore
     public void testInternalOKGetResponseCreatedONU() {
+        String serialNumber = "ABCD12345678";
+        String ontDeviceName = "ont1";
+        String getResponseString = prepareJsonResponseFromFile(internalGetResponseJson);
+        Msg msg = prepareGetResponseGpb(getResponseString);
         JSONObject jsonResponse = new JSONObject(getResponse);
-        when(m_deviceManager.getDevice(deviceName)).thenReturn(m_vonuDevice);
+        m_messageFormatter = new JsonFormatter();
+        when(m_deviceManager.getDevice(ontDeviceName)).thenReturn(m_vonuDevice);
         when(m_deviceMgmt.getDeviceState()).thenReturn(m_deviceState);
         when(m_deviceDao.getDeviceState(deviceName)).thenReturn(m_deviceState);
         when(m_deviceState.getOnuStateInfo()).thenReturn(m_onuStateInfo);
         when(m_connectionManager.getMediatedDeviceSession(deviceName)).thenReturn(m_mediatedDeviceNCsession);
         when(m_deviceState.getOnuStateInfo().getEquipmentId()).thenReturn("");
         when(m_deviceDao.getDeviceState(deviceName)).thenReturn(m_deviceState);
-        String eqptId = getEqptId(jsonResponse);
-        Set<SoftwareImage> swSet = prepareSwImageSet(null);
-        m_voltManagement.processResponse(jsonResponse);
+        when(m_vonuDevice.getDeviceManagement()).thenReturn(m_deviceMgmt);
+        when(m_deviceMgmt.getOnuConfigInfo()).thenReturn(m_onuConfigInfo);
+        when(m_onuConfigInfo.getExpectedSerialNumber()).thenReturn(serialNumber);
+        String eqptId = getModelName(jsonResponse);
+        m_voltManagement.processResponse(msg);
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        verify(m_deviceManager, times(1)).updateEquipmentIdInOnuStateInfo(eq(deviceName), eq(eqptId));
-        verify(m_deviceManager, times(1)).updateSoftwareImageInOnuStateInfo(eq(deviceName), any());
+        verify(m_deviceManager, times(1)).updateEquipmentIdInOnuStateInfo(eq(ontDeviceName), eq(eqptId));
+        verify(m_deviceManager, times(1)).updateSoftwareImageInOnuStateInfo(eq(ontDeviceName), any());
     }
 
     @Test
@@ -806,33 +826,13 @@ public class VOLTManagementImplTest {
         verify(m_deviceManager, never()).updateSoftwareImageInOnuStateInfo(eq(deviceName), eq(softwareImageSet));
     }
 
-
     @Test
-    @Ignore
     public void testInternalGetResponseUnknownONU() {
         JSONObject jsonResponse = new JSONObject(getResponse);
-        String eqptId = getEqptId(jsonResponse);
-        when(m_deviceMgmt.getDeviceState()).thenReturn(m_deviceState);
-        when(m_deviceState.getOnuStateInfo()).thenReturn(m_onuStateInfo);
         when(m_deviceManager.getDevice(deviceName)).thenReturn(null);
-        UnknownONU matchedUnknownONU = new UnknownONU();
-        matchedUnknownONU.setChannelTermRef("channeltermination.1");
-        matchedUnknownONU.setOnuID("1");
-        matchedUnknownONU.setOltDeviceName("OLT1");
-        matchedUnknownONU.setSerialNumber("ABCD12345678");
-        matchedUnknownONU.setRegistrationId("ABCD1234");
-        when(m_unknownOnuHandler.findMatchingUnknownOnu("OLT1", "channeltermination.1", "1")).thenReturn(matchedUnknownONU);
-        String parentId = "onu_ABCD12345678";
         m_voltManagement.processResponse(jsonResponse);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        assertEquals(eqptId, matchedUnknownONU.getEquipmentId());
-        assertEquals(parentId, matchedUnknownONU.getSoftwareImages().getSoftwareImagesId());
-        assertTrue(prepareSwImageSet(parentId).equals(matchedUnknownONU.getSoftwareImages().getSoftwareImage()));
-
+        verify(m_mediatedDeviceNCsession, never()).processResponse(anyString(), anyString(), anyString(), anyString());
+        verify(m_networkFunctionNetconfSession, never()).processResponse(anyString(), anyString(), anyString(), anyString());
     }
 
     // Not finished yet
@@ -860,8 +860,7 @@ public class VOLTManagementImplTest {
 
     /* test will be enabled after vomci has the get request & response handling feature */
     @Test
-    @Ignore
-    public void testSendGetRequestToUnknowONU() throws MessageFormatterException {
+    public void testSendGetRequestToUnknowONULegacyOLT() throws MessageFormatterException {
         Notification notification;
         ONUNotification onuNotification = null;
         String serialNum = "ABCD12345678";
@@ -870,6 +869,7 @@ public class VOLTManagementImplTest {
         String vaniRef = "onu_1";
         String onuId = "1";
         String onuState = "onu-present-and-on-intended-channel-termination";
+        String oltName = "OLT1";
         try {
             notification = getDetectNotification(serialNum, regId, chanTermRef, vaniRef, onuId, onuState);
             onuNotification = new ONUNotification(notification, "OLT1", m_messageFormatter);
@@ -878,9 +878,49 @@ public class VOLTManagementImplTest {
         }
         when(m_deviceManager.getDeviceWithSerialNumber(serialNum)).thenReturn(null);
         when(m_unknownOnuHandler.findUnknownOnuEntity(serialNum, regId)).thenReturn(m_unknownOnu);
-        m_voltManagement.onuNotificationProcess(onuNotification, "OLT1");
-        verify(m_kafkaProducerJson, times(1)).sendNotification(eq(ONUConstants.ONU_REQUEST_KAFKA_TOPIC), anyString());  //TO-DO : add expectedGetRequest post merging (internal get request changes)with develop branch.
+        m_voltManagement.onuNotificationProcess(onuNotification, oltName);
+        verify(m_kafkaProducerJson, never()).sendNotification(eq(ONUConstants.ONU_REQUEST_KAFKA_TOPIC), anyString());  //TO-DO : add expectedGetRequest post merging (internal get request changes)with develop branch.
+    }
 
+    @Test
+    public void testSendGetRequestToUnknowONUNonLegacyOLT() throws MessageFormatterException, ExecutionException, InterruptedException {
+        String serialNum = "ABCD12345678";
+        String regId = "ABCD1234";
+        String onuName = "ont1";
+        String serialNumber = "ABCD12345678";
+        String registrationId = "REG123";
+        String oltName = "OLT1";
+        String channelPartition = "CT_1";
+        String vaniName = "vomci-use";
+        String onuId = "1";
+
+        when(m_deviceManager.getDeviceWithSerialNumber(serialNum)).thenReturn(null);
+        when(m_deviceManager.getDevice(oltName)).thenReturn(m_oltDevice);
+        when(m_oltDevice.getDeviceName()).thenReturn(oltName);
+        when(m_unknownOnuHandler.findUnknownOnuEntity(serialNum, regId)).thenReturn(m_unknownOnu);
+        String onuAuthStatus = ONU_PRESENT_AND_ON_INTENDED_CHANNEL_TERMINATION;
+        when(m_onuNotification.getOltDeviceName()).thenReturn(oltName);
+        when(m_onuNotification.getChannelTermRef()).thenReturn(channelPartition);
+        when(m_onuNotification.getOnuId()).thenReturn(onuId);
+        when(m_onuNotification.getSerialNo()).thenReturn(serialNumber);
+        when(m_onuNotification.getRegId()).thenReturn(registrationId);
+        when(m_onuNotification.getVAniRef()).thenReturn(vaniName);
+        when(m_onuNotification.getOnuState()).thenReturn(onuAuthStatus);
+        when(m_onuNotification.getDeterminedOnuManagementMode()).thenReturn(RELYING_ON_VOMCI);
+        when(m_onuNotification.getMappedEvent()).thenReturn(ONUConstants.ONU_DETECTED);
+        when(m_connectionManager.executeNetconf(any(Device.class), any(GetRequest.class))).thenReturn(m_responseFuture);
+        when(m_responseFuture.get()).thenReturn(m_netConfResponse);
+        when(m_netConfResponse.getData()).thenReturn(m_element);
+        when(m_element.getElementsByTagName(anyString())).thenReturn(m_nodeList);
+        when(m_nodeList.item(0)).thenReturn(m_node);
+        when(m_node.getFirstChild()).thenReturn(m_node);
+        when(m_node.getNodeValue()).thenReturn(onuName);
+        when(m_netConfResponse.getMessageId()).thenReturn("1001");
+        when(m_getRequestOne.getMessageId()).thenReturn("10");
+        m_voltManagement.onuNotificationProcess(m_onuNotification, oltName);
+        Thread.sleep(2000);
+        verify(m_deviceManager, times(1)).getDeviceWithSerialNumber(serialNum);
+        verify(m_notificationService, times(1)).sendNotification(anyString(), any(Notification.class));
     }
 
     @Test
@@ -1233,8 +1273,16 @@ public class VOLTManagementImplTest {
         String onuId = "1";
         String onuName = "ONU1";
         String onuType = "ONU";
+        String vomciFunctionNamespace = "urn:bbf:yang:bbf-vomci-function";
+        String vomciProxyNamespace = "urn:bbf:yang:bbf-vomci-proxy";
+        Module module = Mockito.mock(Module.class);
+        QNameModule qNameModule = PowerMockito.mock(QNameModule.class);
+        Optional<Revision> revision = PowerMockito.mock(Optional.class);
+        SchemaPathBuilder schemaPathBuilder = Mockito.mock(SchemaPathBuilder.class);
+        SchemaPath schemaPath = Mockito.mock(SchemaPath.class);
         when(m_onuNotification.getSerialNo()).thenReturn(serialNumber);
         when(m_onuNotification.getDeterminedOnuManagementMode()).thenReturn("");
+        when(m_onuNotification.getOnuState()).thenReturn("onu-present-and-on-intended-channel-termination");
         when(m_deviceManager.getDeviceWithSerialNumber(ONU_SERIAL_NUMBER)).thenReturn(m_vonuDevice);
         when(m_vonuDevice.isMediatedSession()).thenReturn(true);
         when(m_onuNotification.getMappedEvent()).thenReturn(CREATE_ONU);
@@ -1256,6 +1304,13 @@ public class VOLTManagementImplTest {
         when(m_actualAttachmentPoint.getOltName()).thenReturn(oltName);
         when(m_onuConfigInfo.getExpectedSerialNumber()).thenReturn(serialNumber);
         when(m_onuConfigInfo.getExpectedRegistrationId()).thenReturn(registrationId);
+        when(m_onuConfigInfo.getXponTechnology()).thenReturn("bbf-xpon-types:gpon");
+        when(m_schemaRegistry.getModuleByNamespace(vomciFunctionNamespace)).thenReturn(module);
+        when(m_schemaRegistry.getModuleByNamespace(vomciProxyNamespace)).thenReturn(module);
+        when(module.getQNameModule()).thenReturn(qNameModule);
+        when(qNameModule.getRevision()).thenReturn(revision);
+        when(schemaPathBuilder.build()).thenReturn(schemaPath, schemaPath);
+        PowerMockito.when(JsonUtil.convertFromXmlToJson(any(), any(), any(), any())).thenReturn(VoltMFTestConstants.FILTER_JSON_STRING);
 
         OnuManagementChain[] onuManagementChainArray = new OnuManagementChain[3];
         OnuManagementChain onuManagementChain1 = new OnuManagementChain();
@@ -1271,6 +1326,7 @@ public class VOLTManagementImplTest {
         onuManagementChainArray[1] = onuManagementChain2;
         onuManagementChainArray[2] = onuManagementChain3;
         when(m_deviceDao.getOnuManagementChains(onuName)).thenReturn(onuManagementChainArray);
+        when(m_schemaRegistry.getDataSchemaNode(any(SchemaPath.class))).thenReturn(m_schemaNode);
 
         m_voltManagement.onuNotificationProcess(m_onuNotification, oltName);
         verify(m_notificationService, never()).sendNotification(any(), any());
@@ -1439,13 +1495,11 @@ public class VOLTManagementImplTest {
         return softwareImageSet;
     }
 
-    private String getEqptId(JSONObject jsonResponse) {
-        JSONObject payloadJson = new JSONObject(jsonResponse.getString(ONUConstants.PAYLOAD_JSON_KEY));
-        String data = payloadJson.optString(ONUConstants.DATA_JSON_KEY);
-        JSONObject dataJson = new JSONObject(data);
-        return dataJson.getJSONObject(ONUConstants.NETWORK_MANAGER_JSON_KEY)
-                .getJSONObject(ONUConstants.DEVICE_STATE_JSON_KEY).getJSONObject(ONUConstants.ONU_STATE_INFO_JSON_KEY)
-                .optString(ONUConstants.EQPT_ID_JSON_KEY);
+    private String getModelName(JSONObject jsonResponse) {
+        JSONObject hardwareStateData = jsonResponse.getJSONObject(ONUConstants.IETF_HARDWARE_STATE_JSON_KEY);
+        JSONArray component = hardwareStateData.getJSONArray(ONUConstants.COMPONENT_JSON_KEY);
+        String modelName = component.getJSONObject(0).optString(ONUConstants.MODEL_NAME_JSON_KEY);
+        return modelName;
     }
 
     private String prepareJsonResponseFromFile(String name) {

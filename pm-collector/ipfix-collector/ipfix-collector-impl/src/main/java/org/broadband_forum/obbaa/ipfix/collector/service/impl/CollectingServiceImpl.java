@@ -31,25 +31,28 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixMessageNotification;
-import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixSetHeader;
-import org.broadband_forum.obbaa.ipfix.collector.entities.logging.IpfixDecodedData;
-import org.broadband_forum.obbaa.ipfix.collector.entities.logging.IpfixLogging;
-import org.broadband_forum.obbaa.ipfix.collector.entities.logging.IpfixLoggingDataSet;
-import org.broadband_forum.obbaa.ipfix.collector.entities.record.AbstractTemplateRecord;
-import org.broadband_forum.obbaa.ipfix.collector.entities.set.IpfixDataSet;
-import org.broadband_forum.obbaa.ipfix.collector.entities.set.IpfixOptionTemplateSet;
-import org.broadband_forum.obbaa.ipfix.collector.entities.set.IpfixTemplateSet;
-import org.broadband_forum.obbaa.ipfix.collector.exception.CollectingProcessException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.DecodingException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.NotEnoughBytesException;
 import org.broadband_forum.obbaa.ipfix.collector.service.CollectingService;
 import org.broadband_forum.obbaa.ipfix.collector.service.DecodingDataRecordService;
 import org.broadband_forum.obbaa.ipfix.collector.service.DeviceCacheService;
-import org.broadband_forum.obbaa.ipfix.collector.service.IpfixCachingService;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixConstants;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
+import org.broadband_forum.obbaa.ipfix.entities.adapter.IpfixAdapterInterface;
+import org.broadband_forum.obbaa.ipfix.entities.exception.CollectingProcessException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.DecodingException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.NotEnoughBytesException;
+import org.broadband_forum.obbaa.ipfix.entities.header.IpfixSetHeader;
+import org.broadband_forum.obbaa.ipfix.entities.message.IpfixMessage;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixDecodedData;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixLogging;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixLoggingDataSet;
+import org.broadband_forum.obbaa.ipfix.entities.message.set.IpfixOptionTemplateSet;
+import org.broadband_forum.obbaa.ipfix.entities.message.set.IpfixTemplateSet;
+import org.broadband_forum.obbaa.ipfix.entities.record.AbstractTemplateRecord;
+import org.broadband_forum.obbaa.ipfix.entities.service.IpfixCachingService;
+import org.broadband_forum.obbaa.ipfix.entities.set.IpfixDataSet;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixConstants;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixDeviceInterfaceUtil;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.broadband_forum.obbaa.pm.service.DataHandlerService;
 import org.broadband_forum.obbaa.pm.service.IpfixDataHandler;
 import org.slf4j.Logger;
@@ -62,36 +65,64 @@ import com.google.gson.GsonBuilder;
 public class CollectingServiceImpl implements CollectingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectingServiceImpl.class);
-    private static long m_acceptantPastTimeGap;
-    private static long m_acceptantFutureTimeGap;
     private static final long DEFAULT_PAST_TIME_GAP = TimeUnit.HOURS.toMinutes(1L);
     private static final long DEFAULT_FUTURE_TIME_GAP = TimeUnit.MINUTES.toMinutes(1L);
     private static final String IPFIX_FE_ACCEPTANCE_PAST_TIME_GAP = "IPFIX_FE_ACCEPTANCE_PAST_TIME_GAP";
     private static final String IPFIX_FE_ACCEPTANCE_FUTURE_TIME_GAP = "IPFIX_FE_ACCEPTANCE_FUTURE_TIME_GAP";
-
+    private static long m_acceptantPastTimeGap;
+    private static long m_acceptantFutureTimeGap;
     private DeviceCacheService m_deviceCacheService;
     private DecodingDataRecordService m_decodingDataRecordService;
     private IpfixCachingService m_cachingService;
     private DataHandlerService m_dataHandlerService;
+    private IpfixDeviceInterfaceUtil m_ipfixDeviceInterfaceUtil;
 
     private AtomicInteger m_decodeFailureCount = new AtomicInteger(0);
     private AtomicInteger m_processedMessageCount = new AtomicInteger(0);
     private AtomicInteger m_authenFailureCount = new AtomicInteger(0);
 
     public CollectingServiceImpl(DecodingDataRecordService decodingDataRecordService, IpfixCachingService cachingService,
-                                 DataHandlerService dataHandlerService, DeviceCacheService deviceCacheService) {
+                                 DataHandlerService dataHandlerService, DeviceCacheService deviceCacheService,
+                                 IpfixDeviceInterfaceUtil ipfixDeviceInterfaceUtil) {
         m_decodingDataRecordService = decodingDataRecordService;
         m_cachingService = cachingService;
         m_dataHandlerService = dataHandlerService;
         m_deviceCacheService = deviceCacheService;
         m_acceptantPastTimeGap = loadTimeRangeConfig(IPFIX_FE_ACCEPTANCE_PAST_TIME_GAP, DEFAULT_PAST_TIME_GAP);
         m_acceptantFutureTimeGap = loadTimeRangeConfig(IPFIX_FE_ACCEPTANCE_FUTURE_TIME_GAP, DEFAULT_FUTURE_TIME_GAP);
+        m_ipfixDeviceInterfaceUtil = ipfixDeviceInterfaceUtil;
+    }
+
+    private static boolean isMessageInThePast(Instant now, Instant exportTime) {
+        return exportTime.compareTo(now) < 0;
+    }
+
+    private static boolean isMessageInTheFuture(Instant now, Instant exportTime) {
+        return exportTime.compareTo(now) > 0;
+    }
+
+    private static long loadTimeRangeConfig(String envName, long defaultValue) {
+        String value = System.getenv(envName);
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
+        return defaultValue;
+    }
+
+    private static boolean isAcceptGap(Duration between, boolean isPast) {
+        if (isPast) {
+            return m_acceptantPastTimeGap > Math.abs(between.toMinutes());
+        }
+        return m_acceptantFutureTimeGap > Math.abs(between.toMinutes());
+    }
+
+    private IpfixAdapterInterface getIpifixAdapterInterface(String deviceFamily) {
+        return m_ipfixDeviceInterfaceUtil.getDeviceInterface(deviceFamily);
     }
 
     @Override
     public Map.Entry<Optional<Long>, Optional<String>> collect(byte[] data, String remoteAddress, Optional<String> optionalHostName)
             throws NotEnoughBytesException, CollectingProcessException {
-
         final Optional<String>[] arrOptHostNames = new Optional[]{optionalHostName};
         String deviceName = null;
         if (optionalHostName.isPresent()) {
@@ -168,71 +199,156 @@ public class CollectingServiceImpl implements CollectingService {
             rawDataSets.addAll(ipfixMessage.getDataSets());
         }
 
-        for (IpfixDataSet set : rawDataSets) {
-            Set<IpfixDecodedData> decodeDataSet;
-            try {
-                decodeDataSet = m_decodingDataRecordService.decodeDataSet(arrOptHostNames[0].orElse(""), obsvDomain,
-                        set, ipfixMessage, templateProvider);
-            } catch (DecodingException e) {
-                throw new CollectingProcessException("Error while decoding data set.", e);
-            }
+        String deviceFamily = StringUtils.isEmpty(deviceName) ? null : m_deviceCacheService.getDeviceFamily(deviceName);
+        if (deviceFamily != null && deviceFamily.contains(IpfixConstants.BBF) && deviceFamily.contains(IpfixConstants.STANDARD)) {
+            LOGGER.info("Decoding IPFIX message in IPFIX collector for standard adapter: " + deviceFamily);
+            for (IpfixDataSet set : rawDataSets) {
+                Set<IpfixDecodedData> decodeDataSet;
+                try {
+                    decodeDataSet = m_decodingDataRecordService.decodeDataSet(arrOptHostNames[0].orElse(""), obsvDomain,
+                            set, ipfixMessage, templateProvider);
+                } catch (DecodingException e) {
+                    throw new CollectingProcessException("Error while decoding data set.", e);
+                }
 
-            // Logging
-            boolean isOptionTemplateSet = false;
-            if (decodeDataSet != null) {
-                isOptionTemplateSet = true;
-            }
-            IpfixSetHeader setHeader = set.getHeader();
-            IpfixLoggingDataSet ipfixLoggingDataSet = new IpfixLoggingDataSet(setHeader);
-            ipfixLoggingDataSet.setDataRecords(set.getRecords(), isOptionTemplateSet);
+                // Logging
+                boolean isOptionTemplateSet = false;
+                if (decodeDataSet != null) {
+                    isOptionTemplateSet = true;
+                }
+                IpfixSetHeader setHeader = set.getHeader();
+                IpfixLoggingDataSet ipfixLoggingDataSet = new IpfixLoggingDataSet(setHeader);
+                ipfixLoggingDataSet.setDataRecords(set.getRecords(), isOptionTemplateSet);
 
-            AbstractTemplateRecord abstractTemplateRecord = templateProvider.get(setHeader.getId());
-            if (abstractTemplateRecord != null) {
-                ipfixLoggingDataSet.setTemplateRecords(abstractTemplateRecord.getFieldSpecifiers());
-            }
-            ipfixLogging.addToSetMessages(ipfixLoggingDataSet);
+                AbstractTemplateRecord abstractTemplateRecord = templateProvider.get(setHeader.getId());
+                if (abstractTemplateRecord != null) {
+                    ipfixLoggingDataSet.setTemplateRecords(abstractTemplateRecord.getFieldSpecifiers());
+                }
+                ipfixLogging.addToSetMessages(ipfixLoggingDataSet);
 
-            if (decodeDataSet != null && !decodeDataSet.isEmpty()) {
-                int templateID = set.getHeader().getId();
-                LOGGER.debug(String.format("Data set decoded successfully (Observation domain: %s, Set id: %s)", obsvDomain, templateID));
-                LOGGER.info("Decoded ipfix message for " + deviceName + " is: " + ipfixLogging.convertToLog());
-                if (isAuthenticateDataSet(decodeDataSet)) {
-                    // DataSet for OptionTemplateSet
-                    String hostName = "";
-                    for (IpfixDecodedData decodedData : decodeDataSet) {
-                        if (decodedData.getCounterName().equalsIgnoreCase(IpfixConstants.HOSTNAME_IE_KEY)) {
-                            hostName = decodedData.getDecodedValue();
+                if (decodeDataSet != null && !decodeDataSet.isEmpty()) {
+                    int templateID = set.getHeader().getId();
+                    LOGGER.debug(String.format("Data set decoded successfully (Observation domain: %s, Set id: %s)",
+                            obsvDomain, templateID));
+                    LOGGER.info("Decoded ipfix message for " + deviceName + " is: " + ipfixLogging.convertToLog());
+                    if (isAuthenticateDataSet(decodeDataSet)) {
+                        // DataSet for OptionTemplateSet
+                        String hostName = "";
+                        for (IpfixDecodedData decodedData : decodeDataSet) {
+                            if (decodedData.getCounterName().equalsIgnoreCase(IpfixConstants.HOSTNAME_IE_KEY)) {
+                                hostName = decodedData.getDecodedValue();
+                            }
+                        }
+
+                        // In case user manually update hostname, we need to check & update the cache accordingly
+                        if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().equals(hostName)) {
+                            m_cachingService.updateHostName(obsvDomain, arrOptHostNames[0].get(), hostName);
+                        }
+                        if (hostName.isEmpty()) {
+                            throw new CollectingProcessException("Missing hostname");
+                        }
+                        arrOptHostNames[0] = Optional.of(hostName);
+                        notificationMessage.setHostName(hostName);
+                    } else {
+                        // DataSet for TemplateSet
+                        if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().isEmpty()) {
+                            handleDataSetForTemplateSet(arrOptHostNames[0].get(), decodeDataSet, templateID, notificationMessage);
+                        } else {
+                            LOGGER.error(String.format("Couldn't find hostname so data set %s will be ignored", set.toString()));
+                            break;
                         }
                     }
-
-                    // In case user manually update hostname, we need to check & update the cache accordingly
-                    if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().equals(hostName)) {
-                        m_cachingService.updateHostName(obsvDomain, arrOptHostNames[0].get(), hostName);
+                    if (arrOptHostNames[0].isPresent()) {
+                        deviceName = arrOptHostNames[0].get();
                     }
-                    if (hostName.isEmpty()) {
-                        throw new CollectingProcessException("Missing hostname");
-                    }
-                    arrOptHostNames[0] = Optional.of(hostName);
-                    notificationMessage.setHostName(hostName);
                 } else {
-                    // DataSet for TemplateSet
-                    if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().isEmpty()) {
-                        handleDataSetForTemplateSet(arrOptHostNames[0].get(), decodeDataSet, templateID, notificationMessage);
+                    LOGGER.debug(String.format("Buffering data set (Observation domain: %s, Set id: %s)",
+                            obsvDomain, set.getHeader().getId()));
+                    if (arrOptHostNames[0].isPresent()) {
+                        m_cachingService.cacheIpfixDataSet(obsvDomain, arrOptHostNames[0].get(), set);
                     } else {
-                        LOGGER.error(String.format("Couldn't find hostname so data set %s will be ignored", set.toString()));
-                        break;
+                        LOGGER.info(String.format("Couldn't find hostname so data set %s will be ignored", set.toString()));
                     }
                 }
-                if (arrOptHostNames[0].isPresent()) {
-                    deviceName = arrOptHostNames[0].get();
+            }
+        } else {
+            LOGGER.info("Sending IPFIX message to adapter " + deviceFamily + " to decode");
+            IpfixAdapterInterface ipfixAdapterInterface = getIpifixAdapterInterface(deviceFamily);
+            List<Set<IpfixDecodedData>> decodeDataSetList = new ArrayList<>();
+            if (ipfixAdapterInterface != null) {
+                decodeDataSetList = ipfixAdapterInterface.decodeIpfixMessage(rawDataSets, arrOptHostNames, ipfixMessage,
+                        ipfixLogging, deviceFamily);
+            } else {
+                throw new CollectingProcessException("IPFIX device interface is missing in the map");
+            }
+
+            if (decodeDataSetList.size() == rawDataSets.size()) {
+                for (int arrayIndex = 0; arrayIndex < decodeDataSetList.size(); arrayIndex++) {
+                    // Logging
+                    boolean isOptionTemplateSet = false;
+                    if (decodeDataSetList.get(arrayIndex) != null) {
+                        isOptionTemplateSet = true;
+                    }
+                    IpfixSetHeader setHeader = rawDataSets.get(arrayIndex).getHeader();
+                    IpfixLoggingDataSet ipfixLoggingDataSet = new IpfixLoggingDataSet(setHeader);
+                    ipfixLoggingDataSet.setDataRecords(rawDataSets.get(arrayIndex).getRecords(), isOptionTemplateSet);
+
+                    AbstractTemplateRecord abstractTemplateRecord = templateProvider.get(setHeader.getId());
+                    if (abstractTemplateRecord != null) {
+                        ipfixLoggingDataSet.setTemplateRecords(abstractTemplateRecord.getFieldSpecifiers());
+                    }
+                    ipfixLogging.addToSetMessages(ipfixLoggingDataSet);
+
+                    if (decodeDataSetList.get(arrayIndex) != null && !decodeDataSetList.get(arrayIndex).isEmpty()) {
+                        int templateID = rawDataSets.get(arrayIndex).getHeader().getId();
+                        LOGGER.debug(String.format("Data set decoded successfully (Observation domain: %s, Set id: %s)",
+                                obsvDomain, templateID));
+                        LOGGER.info("Decoded ipfix message for " + deviceName + " is: " + ipfixLogging.convertToLog());
+                        if (isAuthenticateDataSet(decodeDataSetList.get(arrayIndex))) {
+                            // DataSet for OptionTemplateSet
+                            String hostName = "";
+                            for (IpfixDecodedData decodedData : decodeDataSetList.get(arrayIndex)) {
+                                if (decodedData.getCounterName().equalsIgnoreCase(IpfixConstants.HOSTNAME_IE_KEY)) {
+                                    hostName = decodedData.getDecodedValue();
+                                }
+                            }
+
+                            // In case user manually update hostname, we need to check & update the cache accordingly
+                            if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().equals(hostName)) {
+                                m_cachingService.updateHostName(obsvDomain, arrOptHostNames[0].get(), hostName);
+                            }
+                            if (hostName.isEmpty()) {
+                                throw new CollectingProcessException("Missing hostname");
+                            }
+                            arrOptHostNames[0] = Optional.of(hostName);
+                            notificationMessage.setHostName(hostName);
+                        } else {
+                            // DataSet for TemplateSet
+                            if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().isEmpty()) {
+                                handleDataSetForTemplateSet(arrOptHostNames[0].get(),
+                                        decodeDataSetList.get(arrayIndex), templateID, notificationMessage);
+                            } else {
+                                LOGGER.error(String.format("Couldn't find hostname so data set %s will be ignored",
+                                        rawDataSets.get(arrayIndex).toString()));
+                                break;
+                            }
+                        }
+                        if (arrOptHostNames[0].isPresent()) {
+                            deviceName = arrOptHostNames[0].get();
+                        }
+                    } else {
+                        LOGGER.debug(String.format("Buffering data set (Observation domain: %s, Set id: %s)",
+                                obsvDomain, rawDataSets.get(arrayIndex).getHeader().getId()));
+                        if (arrOptHostNames[0].isPresent()) {
+                            m_cachingService.cacheIpfixDataSet(obsvDomain, arrOptHostNames[0].get(), rawDataSets.get(arrayIndex));
+                        } else {
+                            LOGGER.info(String.format("Couldn't find hostname so data set %s will be ignored",
+                                    rawDataSets.get(arrayIndex).toString()));
+                        }
+                    }
                 }
             } else {
-                LOGGER.debug(String.format("Buffering data set (Observation domain: %s, Set id: %s)", obsvDomain, set.getHeader().getId()));
-                if (arrOptHostNames[0].isPresent()) {
-                    m_cachingService.cacheIpfixDataSet(obsvDomain, arrOptHostNames[0].get(), set);
-                } else {
-                    LOGGER.info(String.format("Couldn't find hostname so data set %s will be ignored", set.toString()));
-                }
+                LOGGER.error("Error occured while decoding IPFIX message, IPFIX message set and decoded message set's are not equal");
             }
         }
 
@@ -255,7 +371,7 @@ public class CollectingServiceImpl implements CollectingService {
         notificationMessage.setData(decodedDataSet);
         String ipfixMessage = gsonBuilder.toJson(notificationMessage, notificationMessage.getClass());
 
-        List<IpfixDataHandler> dataHandlers = m_dataHandlerService.getDataHandlers();
+        List<IpfixDataHandler> dataHandlers = m_dataHandlerService.getIpfixDataHandlers();
         for (IpfixDataHandler dataHandler : dataHandlers) {
             dataHandler.handleIpfixData(ipfixMessage);
         }
@@ -332,43 +448,20 @@ public class CollectingServiceImpl implements CollectingService {
         // to avoid users confusing about deviceName is null, split into 2 cases
         LOGGER.error(String.format("Too big gap between the timestamp received the IPFIX message %s from deviceId "
                         + "%s hostIP %s and the current timestamp at the collector %s. The duration is %s", exportTime,
-                    deviceName, remoteAddress, now, between));
+                deviceName, remoteAddress, now, between));
         throw new CollectingProcessException("Too big gap detected in IPFIX message: " + between.toMinutes() + "M");
     }
 
     private void handleLogsForEarlyMessage(Instant now, Instant exportTime, Duration between, String remoteAddress,
                                            String deviceName) throws CollectingProcessException {
         LOGGER.error(String.format("Received message in future %s from deviceId: %s, hostIP: %s, the current timestamp "
-                + "at the collector %s. The duration is %s",exportTime, deviceName, remoteAddress, now, between));
+                + "at the collector %s. The duration is %s", exportTime, deviceName, remoteAddress, now, between));
         throw new CollectingProcessException("IPFIX message comes early: " + Math.abs(between.toMinutes()) + "M");
     }
 
     //For UT
     protected Instant getCurrentTime() {
         return Instant.now();
-    }
-
-    private static boolean isMessageInThePast(Instant now, Instant exportTime) {
-        return exportTime.compareTo(now) < 0;
-    }
-
-    private static boolean isMessageInTheFuture(Instant now, Instant exportTime) {
-        return exportTime.compareTo(now) > 0;
-    }
-
-    private static long loadTimeRangeConfig(String envName, long defaultValue) {
-        String value = System.getenv(envName);
-        if (value == null || value.isEmpty()) {
-            return defaultValue;
-        }
-        return defaultValue;
-    }
-
-    private static boolean isAcceptGap(Duration between, boolean isPast) {
-        if (isPast) {
-            return m_acceptantPastTimeGap > Math.abs(between.toMinutes());
-        }
-        return m_acceptantFutureTimeGap > Math.abs(between.toMinutes());
     }
 
     protected IpfixMessage createIpfixMessage(byte[] data) throws NotEnoughBytesException {

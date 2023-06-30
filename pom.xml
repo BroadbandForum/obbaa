@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2018 Broadband Forum
+  ~ Copyright 2018-2022 Broadband Forum
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.broadband-forum.obbaa</groupId>
     <artifactId>baa-root-pom</artifactId>
-    <version>5.1.0</version>
+    <version>6.0.0</version>
     <packaging>pom</packaging>
     <name>Broadband Access Abstraction</name>
 
@@ -42,10 +42,11 @@
         <module>baa-maven-plugin</module>
         <module>pm-collector</module>
         <module>microservices-discovery</module>
+        <module>model-abstracter</module>
     </modules>
 
     <properties>
-        <obbaa-release.version>5.1.0</obbaa-release.version>
+        <obbaa-release.version>6.0.0</obbaa-release.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <java.source.version>1.8</java.source.version>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
@@ -125,10 +126,15 @@
         <maven.plugin.annotations.version>3.2</maven.plugin.annotations.version>
         <maven-plugin-plugin.version>3.5</maven-plugin-plugin.version>
         <maven-sonar-plugin.version>3.6.0.1398</maven-sonar-plugin.version>
-        <jacoco.maven.plugin>0.7.7.201606060606</jacoco.maven.plugin>
-        <jacoco.agent.version>0.7.7.201606060606</jacoco.agent.version>
-        <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <jacoco.maven.plugin>0.8.1</jacoco.maven.plugin>
+        <jacoco.agent.version>0.8.1</jacoco.agent.version>
+        <!--sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin-->
+        <sonar.language>java</sonar.language>
+        <sonar.surefire.reportsPath>target/surefire-reports/</sonar.surefire.reportsPath>
+        <sonar.skippedModules>plugin.tests</sonar.skippedModules>
+        <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
+        <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>
         <flatten-maven-plugin.version>1.0.1</flatten-maven-plugin.version>
         <javacsv.version>2.0</javacsv.version>
         <ehcache.version>2.10.3</ehcache.version>
@@ -151,6 +157,8 @@
         <kafka.client.version>2.5.0</kafka.client.version>
         <kafka-json-serializer.version>5.5.1</kafka-json-serializer.version>
         <bouncy.castle.version>1.67</bouncy.castle.version>
+        <lombok.version>1.18.24</lombok.version>
+        <freemarker.version>2.3.28</freemarker.version>
     </properties>
 
     <dependencyManagement>
@@ -426,6 +434,16 @@
                 <artifactId>org.jacoco.agent</artifactId>
                 <version>${jacoco.agent.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -552,18 +570,29 @@
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco.maven.plugin}</version>
-                        <configuration>
-                            <includes>
-                                <include>org.broadband-forum.obbaa.*</include>
-                            </includes>
-                            <destFile>${sonar.jacoco.reportPath}</destFile>
-                            <propertyName>jacoco.agent.argLine</propertyName>
-                        </configuration>
                         <executions>
                             <execution>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>org.broadband_forum.obbaa.*</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <phase>test</phase>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>**/*.zip</exclude>
+                                        <exclude>**/*.xlsx</exclude>
+                                    </excludes>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -571,12 +600,13 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <argLine>-Xms512m -Xmx3072m
+                            <argLine> -Xms512m -Xmx3072m
                                 -XX:MaxPermSize=512m
                                 -XX:PermSize=256m
                                 -XX:-UseSplitVerifier
-                                ${jacoco.agent.argLine}
+                                ${argLine}
                             </argLine>
+                            <jvm>/usr/lib/jvm/java-8-openjdk-amd64/bin/java</jvm>
                         </configuration>
                     </plugin>
                 </plugins>

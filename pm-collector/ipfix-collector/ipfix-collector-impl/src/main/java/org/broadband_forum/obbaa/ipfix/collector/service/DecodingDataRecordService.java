@@ -18,11 +18,11 @@ package org.broadband_forum.obbaa.ipfix.collector.service;
 
 import java.util.Set;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixMessage;
-import org.broadband_forum.obbaa.ipfix.collector.entities.logging.IpfixDecodedData;
-import org.broadband_forum.obbaa.ipfix.collector.entities.set.IpfixDataSet;
-import org.broadband_forum.obbaa.ipfix.collector.exception.DecodingException;
 import org.broadband_forum.obbaa.ipfix.collector.service.impl.CollectingServiceImpl;
+import org.broadband_forum.obbaa.ipfix.entities.exception.DecodingException;
+import org.broadband_forum.obbaa.ipfix.entities.message.IpfixMessage;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixDecodedData;
+import org.broadband_forum.obbaa.ipfix.entities.set.IpfixDataSet;
 
 public interface DecodingDataRecordService {
     Set<IpfixDecodedData> decodeDataSet(String hostName, long obsvDomain, IpfixDataSet set, IpfixMessage ipfixMessage,

@@ -80,7 +80,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
-    @Ignore
+    @Ignore("beans in test-application-context needs to be fixed")
     public void testDeviceNotPresentToDeleteDevice() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/data-missing-error-response.xml"), deleteDevice().responseToString());
@@ -88,7 +88,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
-    @Ignore
+    @Ignore("beans in test-application-context needs to be fixed")
     public void testDeviceAlreadyExistsErrorDuringCreateDevice() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/ok-response.xml"), createDevice().responseToString());
@@ -97,7 +97,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
-    @Ignore
+    @Ignore("beans in test-application-context needs to be fixed")
     public void testEmptyGetconfig() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/getConfigNoDeviceResponse.xml"), getConfig().responseToString());
@@ -105,7 +105,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
-    @Ignore
+    @Ignore("beans in test-application-context needs to be fixed")
     public void testCreateAndDeleteDevice() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/ok-response.xml"), createDevice().responseToString());
@@ -116,7 +116,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
-    @Ignore
+    @Ignore("beans in test-application-context needs to be fixed")
     public void testCreateAndDeleteSnmpV2Device() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/ok-response.xml"), createSnmpV2Device().responseToString());
@@ -126,7 +126,7 @@ public class TestCRUDBasedOnDMNCStack {
     }
 
     @Test
-    @Ignore
+    @Ignore("beans in test-application-context needs to be fixed")
     public void testCreateAndDeleteSnmpV3Device() {
         m_pmUtil.getEntityDataStoreManager().beginTransaction();
         assertEquals(load("/ok-response.xml"), createSnmpV3Device().responseToString());

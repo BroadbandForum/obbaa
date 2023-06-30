@@ -1,0 +1,368 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="6" >
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <network-manager xmlns="urn:bbf:yang:obbaa:network-manager">
+                <managed-devices>
+                    <device>
+                        <name>OLT1</name>
+                        <root>
+
+                            <hardware xmlns="urn:ietf:params:xml:ns:yang:ietf-hardware">
+                                <!-- onu-side chassis -->
+                                <component xc:operation="merge">
+                                    <name>ont1</name>
+                                    <class xmlns:ianahw="urn:ietf:params:xml:ns:yang:iana-hardware">ianahw:chassis</class>
+                                    <!-- <admin-state>unlocked</admin-state> -->
+                                    <parent-rel-pos>1</parent-rel-pos>
+                                </component>
+
+                                <!-- onu-side board -->
+                                <component xc:operation="merge">
+                                    <name>ontCard_ont1_1</name>
+                                    <class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:board</class>
+                                    <!-- <admin-state>unlocked</admin-state> -->
+                                    <parent>ont1</parent>
+                                    <parent-rel-pos>1</parent-rel-pos>
+                                </component>
+
+                                <!-- onu-side cage -->
+                                <component xc:operation="merge">
+                                    <name>ontCage_ont1</name>
+                                    <class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:cage</class>
+                                    <parent>ontCard_ont1_1</parent>
+                                    <parent-rel-pos>1</parent-rel-pos>
+                                </component>
+
+                                <!-- onu-side sfp -->
+                                <component xc:operation="merge">
+                                    <name>ontSfp_ont1</name>
+                                    <class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:transceiver</class>
+                                    <parent>ontCage_ont1</parent>
+                                    <parent-rel-pos>1</parent-rel-pos>
+                                </component>
+
+                                <!-- onu-side aniport sfp port-->
+                                <component xc:operation="merge">
+                                    <name>ontAniPort_ont1</name>
+                                    <class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:transceiver-link</class>
+                                    <parent>ontSfp_ont1</parent>
+                                    <parent-rel-pos>1</parent-rel-pos>
+                                </component>
+
+                                <!-- onu-side uni hardware -->
+                                <component xc:operation="merge">
+                                    <name>ontUni_ont1_1_1</name>
+                                    <class xmlns:bbf-hwt="urn:bbf:yang:bbf-hardware-types">bbf-hwt:transceiver-link</class>
+                                    <parent>ontCard_ont1_1</parent>
+                                    <parent-rel-pos>1</parent-rel-pos>
+                                </component>
+                            </hardware>
+
+                            <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+                                <!-- OLT Uplink Sub Interface network-->
+                                <interface xc:operation="merge">
+                                    <name>ont1_olt_uplink_vlan_network</name>
+                                    <type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</type>
+                                    <subif-lower-layer xmlns="urn:bbf:yang:bbf-sub-interfaces">
+                                        <interface>uplink_port_intf</interface>
+                                    </subif-lower-layer>
+                                    <interface-usage xmlns="urn:bbf:yang:bbf-interface-usage">
+                                        <interface-usage>network-port</interface-usage>
+                                    </interface-usage>
+                                    <enabled>true</enabled>
+                                    <inline-frame-processing xmlns="urn:bbf:yang:bbf-sub-interfaces">
+                                        <ingress-rule>
+                                            <rule>
+                                                <name>rule_1</name>
+                                                <priority>100</priority>
+                                                <flexible-match>
+                                                    <match-criteria xmlns="urn:bbf:yang:bbf-sub-interface-tagging">
+                                                        <tag>
+                                                            <index>0</index>
+                                                            <dot1q-tag>
+                                                                <tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:s-vlan</tag-type>
+                                                                <vlan-id>300</vlan-id>
+                                                                <pbit>any</pbit>
+                                                                <dei>any</dei>
+                                                            </dot1q-tag>
+                                                        </tag>
+                                                        <tag>
+                                                            <index>1</index>
+                                                            <dot1q-tag>
+                                                                <tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</tag-type>
+                                                                <vlan-id>115</vlan-id>
+                                                                <pbit>any</pbit>
+                                                                <dei>any</dei>
+                                                            </dot1q-tag>
+                                                        </tag>
+                                                    </match-criteria>
+                                                </flexible-match>
+                                                <ingress-rewrite>
+                                                    <pop-tags xmlns="urn:bbf:yang:bbf-sub-interface-tagging">1</pop-tags>
+                                                </ingress-rewrite>
+                                            </rule>
+                                        </ingress-rule>
+                                        <egress-rewrite>
+                                            <pop-tags xmlns="urn:bbf:yang:bbf-sub-interface-tagging">0</pop-tags>
+                                            <push-tag xmlns="urn:bbf:yang:bbf-sub-interface-tagging">
+                                                <index>0</index>
+                                                <dot1q-tag>
+                                                    <tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</tag-type>
+                                                    <vlan-id>300</vlan-id>
+                                                    <pbit-from-tag-index>0</pbit-from-tag-index>
+                                                    <dei-from-tag-index>0</dei-from-tag-index>
+                                                </dot1q-tag>
+                                            </push-tag>
+                                        </egress-rewrite>
+                                    </inline-frame-processing>
+                                </interface>
+
+                                <!-- olt-side vani -->
+                                <interface xc:operation="merge">
+                                    <name>vAni_ont1</name>
+                                        <enabled>true</enabled>
+                                        <type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:v-ani</type>
+                                        <v-ani xmlns="urn:bbf:yang:bbf-xponvani">
+                                            <channel-partition>CG_1.CPart_1</channel-partition>
+                                            <onu-id>1</onu-id>
+                                            <expected-serial-number>PTIN9170818F</expected-serial-number>
+                                            <preferred-channel-pair>CG_1.CPart_1.CPair_gpon</preferred-channel-pair>
+                                        </v-ani>
+                                </interface>
+
+                                <!-- olt-side venet -->
+                                <interface xc:operation="merge">
+                                    <name>venet_uni_ont1_1_1</name>
+                                        <type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:olt-v-enet</type>
+                                        <enabled>true</enabled>
+                                        <olt-v-enet xmlns="urn:bbf:yang:bbf-xponvani">
+                                            <lower-layer-interface>vAni_ont1</lower-layer-interface>
+                                        </olt-v-enet>
+                                </interface>
+
+                                <!-- OLT-ONT (VENET) VLAN Sub Interface -->
+                                <interface xc:operation="merge">
+                                    <name>ont1_venet_vlan_user</name>
+                                    <type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</type>
+                                    <subif-lower-layer xmlns="urn:bbf:yang:bbf-sub-interfaces">
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                    </subif-lower-layer>
+                                    <interface-usage xmlns="urn:bbf:yang:bbf-interface-usage">
+                                        <interface-usage>user-port</interface-usage>
+                                    </interface-usage>
+                                    <enabled>true</enabled>
+                                    <inline-frame-processing xmlns="urn:bbf:yang:bbf-sub-interfaces">
+                                        <ingress-rule>
+                                            <rule>
+                                                <name>rule_1</name>
+                                                <priority>100</priority>
+                                                <flexible-match>
+                                                    <match-criteria xmlns="urn:bbf:yang:bbf-sub-interface-tagging">
+                                                        <tag>
+                                                            <index>0</index>
+                                                            <dot1q-tag>
+                                                                <tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</tag-type>
+                                                                <vlan-id>115</vlan-id>
+                                                                <pbit>any</pbit>
+                                                                <dei>any</dei>
+                                                            </dot1q-tag>
+                                                        </tag>
+                                                    </match-criteria>
+                                                </flexible-match>
+                                            </rule>
+                                        </ingress-rule>
+                                    </inline-frame-processing>
+
+                                    <!-- olt-side vlan sub-interface dhcp relay profile association -->
+                                    <l2-dhcpv4-relay xmlns="urn:bbf:yang:bbf-l2-dhcpv4-relay">
+                                        <enable>true</enable>
+                                        <trusted-port>false</trusted-port>
+                                        <profile-ref>DHCP_Default</profile-ref>
+                                    </l2-dhcpv4-relay>
+
+                                    <!-- olt-side vlan sub-interface  qos -->
+                                    <ingress-qos-policy-profile xmlns="urn:bbf:yang:bbf-qos-policies">IPP0</ingress-qos-policy-profile>
+                                    <egress-qos-policy-profile xmlns="urn:bbf:yang:bbf-qos-policies">QPP0</egress-qos-policy-profile>
+                                    <egress-tm-objects xmlns="urn:bbf:yang:bbf-qos-enhanced-scheduling">
+                                        <root-if-name>CG_1.CPart_1</root-if-name>
+                                        <scheduler-node-name>NODE_DEF</scheduler-node-name>
+                                    </egress-tm-objects>
+                                </interface>
+
+                                <!-- onu-side ani -->
+                                <interface xc:operation="merge">
+                                    <name>ontAni_ont1</name>
+                                        <type xmlns:bbf-xponift="urn:bbf:yang:bbf-xpon-if-type">bbf-xponift:ani</type>
+                                        <enabled>true</enabled>
+                                        <hardware-component xmlns="urn:bbf:yang:bbf-hardware">
+                                          <port-layer-if>ontAniPort_ont1</port-layer-if>
+                                        </hardware-component>
+                                        <ani xmlns="urn:bbf:yang:bbf-xponani">
+                                            <management-gemport-aes-indicator>false</management-gemport-aes-indicator>
+                                            <upstream-fec>true</upstream-fec>
+                                            <onu-id>1</onu-id>
+                                        </ani>
+                                </interface>
+
+                                <!-- onu-side uni interface -->
+                                <interface xc:operation="merge">
+                                    <name>enet_uni_ont1_1_1</name>
+                                    <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+                                    <enabled>true</enabled>
+                                    <hardware-component xmlns="urn:bbf:yang:bbf-hardware">
+                                      <port-layer-if>ontUni_ont1_1_1</port-layer-if>
+                                    </hardware-component>
+                                </interface>
+
+                                <!-- onu-side sub-interface  -->
+                                <interface xc:operation="merge">
+                                    <name>enet_vlan_ont1</name>
+                                    <type xmlns:bbfift="urn:bbf:yang:bbf-if-type">bbfift:vlan-sub-interface</type>
+                                    <enabled>true</enabled>
+                                    <subif-lower-layer xmlns="urn:bbf:yang:bbf-sub-interfaces">
+                                        <interface>enet_uni_ont1_1_1</interface>
+                                    </subif-lower-layer>
+                                    <inline-frame-processing xmlns="urn:bbf:yang:bbf-sub-interfaces">
+                                        <ingress-rule>
+                                            <rule>
+                                                <name>rule_1</name>
+                                                <priority>100</priority>
+                                                <flexible-match>
+                                                    <match-criteria xmlns="urn:bbf:yang:bbf-sub-interface-tagging">
+                                                        <untagged/>
+                                                    </match-criteria>
+                                                </flexible-match>
+                                                <ingress-rewrite>
+                                                    <pop-tags xmlns="urn:bbf:yang:bbf-sub-interface-tagging">0</pop-tags>
+                                                    <push-tag xmlns="urn:bbf:yang:bbf-sub-interface-tagging">
+                                                        <index>0</index>
+                                                        <dot1q-tag>
+                                                            <tag-type xmlns:bbf-dot1qt="urn:bbf:yang:bbf-dot1q-types">bbf-dot1qt:c-vlan</tag-type>
+                                                            <vlan-id>115</vlan-id>
+                                                            <pbit-from-tag-index>0</pbit-from-tag-index>
+                                                            <dei-from-tag-index>0</dei-from-tag-index>
+                                                        </dot1q-tag>
+                                                    </push-tag>
+                                                </ingress-rewrite>
+                                            </rule>
+                                        </ingress-rule>
+                                        <egress-rewrite>
+                                            <pop-tags xmlns="urn:bbf:yang:bbf-sub-interface-tagging">1</pop-tags>
+                                        </egress-rewrite>
+                                    </inline-frame-processing>
+                                    <!-- onu-side  sub-interface Qos -->
+                                    <ingress-qos-policy-profile xmlns="urn:bbf:yang:bbf-qos-policies">IPP0</ingress-qos-policy-profile>
+                                </interface>
+                            </interfaces>
+
+                            <!-- olt-side tcont and gemport-->
+                            <xpongemtcont xmlns="urn:bbf:yang:bbf-xpongemtcont">
+                                <tconts>
+                                    <tcont xc:operation="merge">
+                                        <name>tcont_ont1</name>
+                                        <alloc-id>1024</alloc-id>
+                                        <interface-reference>vAni_ont1</interface-reference>
+                                        <traffic-descriptor-profile-ref>TDP0</traffic-descriptor-profile-ref>
+                                    </tcont>
+                                </tconts>
+                                <gemports>
+                                    <gemport xc:operation="merge">
+                                        <name>gem_ont1_1</name>
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                        <tcont-ref>tcont_ont1</tcont-ref>
+                                        <traffic-class>0</traffic-class>
+                                        <gemport-id>1024</gemport-id>
+                                    </gemport>
+                                    <gemport xc:operation="merge">
+                                        <name>gem_ont1_2</name>
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                        <tcont-ref>tcont_ont1</tcont-ref>
+                                        <traffic-class>1</traffic-class>
+                                        <gemport-id>1025</gemport-id>
+                                    </gemport>
+                                    <gemport xc:operation="merge">
+                                        <name>gem_ont1_3</name>
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                        <tcont-ref>tcont_ont1</tcont-ref>
+                                        <traffic-class>2</traffic-class>
+                                        <gemport-id>1026</gemport-id>
+                                    </gemport>
+                                    <gemport xc:operation="merge">
+                                        <name>gem_ont1_4</name>
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                        <tcont-ref>tcont_ont1</tcont-ref>
+                                        <traffic-class>3</traffic-class>
+                                        <gemport-id>1027</gemport-id>
+                                    </gemport>
+                                    <gemport xc:operation="merge">
+                                        <name>gem_ont1_5</name>
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                        <tcont-ref>tcont_ont1</tcont-ref>
+                                        <traffic-class>4</traffic-class>
+                                        <gemport-id>1028</gemport-id>
+                                    </gemport>
+                                    <gemport xc:operation="merge">
+                                        <name>gem_ont1_6</name>
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                        <tcont-ref>tcont_ont1</tcont-ref>
+                                        <traffic-class>5</traffic-class>
+                                        <gemport-id>1029</gemport-id>
+                                    </gemport>
+                                    <gemport xc:operation="merge">
+                                        <name>gem_ont1_7</name>
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                        <tcont-ref>tcont_ont1</tcont-ref>
+                                        <traffic-class>6</traffic-class>
+                                        <gemport-id>1030</gemport-id>
+                                    </gemport>
+                                    <gemport xc:operation="merge">
+                                        <name>gem_ont1_8</name>
+                                        <interface>venet_uni_ont1_1_1</interface>
+                                        <tcont-ref>tcont_ont1</tcont-ref>
+                                        <traffic-class>7</traffic-class>
+                                        <gemport-id>1031</gemport-id>
+                                    </gemport>
+                                </gemports>
+                            </xpongemtcont>
+
+                            <!-- olt-side l2fwd forwarder -->
+                            <forwarding xmlns="urn:bbf:yang:bbf-l2-forwarding">
+                                <forwarders>
+                                    <forwarder xc:operation="merge">
+                                        <name>ont1_600_11</name>
+                                        <ports>
+                                            <port>
+                                                <name>fwd_user_port_ont1</name>
+                                                <sub-interface>ont1_venet_vlan_user</sub-interface>
+                                            </port>
+                                            <port>
+                                                <name>fwd_net_port_ont1</name>
+                                                <sub-interface>ont1_olt_uplink_vlan_network</sub-interface>
+                                            </port>
+                                        </ports>
+                                    </forwarder>
+                                </forwarders>
+                            </forwarding>
+
+                            <!-- ani<->vani linktable -->
+                            <link-table xmlns="urn:bbf:yang:bbf-link-table">
+                                <link-table xc:operation="merge">
+                                    <from-interface>ontAni_ont1</from-interface>
+                                    <to-interface>vAni_ont1</to-interface>
+                                </link-table>
+                                <link-table xc:operation="merge">
+                                    <from-interface>enet_uni_ont1_1_1</from-interface>
+                                    <to-interface>venet_uni_ont1_1_1</to-interface>
+                                </link-table>
+                            </link-table>
+
+                        </root>
+                    </device>
+                </managed-devices>
+            </network-manager>
+        </config>
+    </edit-config>
+</rpc>

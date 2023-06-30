@@ -52,8 +52,8 @@ public class IPFIXGUI extends JFrame implements ActionListener, WindowListener {
         m_textField = new JTextField();
         JPanel msgPanel = new JPanel(new BorderLayout());
         msgPanel.add(new JScrollPane(m_textArea,
-            ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
         JPanel recordsPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
@@ -91,8 +91,7 @@ public class IPFIXGUI extends JFrame implements ActionListener, WindowListener {
                 if (PMDataHandlerTest.start()) {
                     m_textArea.append("Started.\n");
                     m_startTime = System.currentTimeMillis() / 1000;
-                }
-                else {
+                } else {
                     if (m_startTime == 0) {
                         m_textArea.append("Failed to start.\n");
                     } else {
@@ -103,8 +102,7 @@ public class IPFIXGUI extends JFrame implements ActionListener, WindowListener {
             case "Stop":
                 if (m_startTime == 0) {
                     m_textArea.append("Test not running. Stopping anyway.\n");
-                }
-                else {
+                } else {
                     m_textArea.append("Stopped.\n");
                 }
                 if (m_startTime != 0) {

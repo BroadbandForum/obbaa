@@ -2,7 +2,7 @@ package org.broadband_forum.obbaa.ipfix.collector.entities;
 
 import java.util.Set;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.logging.IpfixDecodedData;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixDecodedData;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -57,16 +57,16 @@ public class IpfixMessageNotification {
         return m_observationDomain;
     }
 
+    public void setObservationDomain(long observationDomain) {
+        this.m_observationDomain = observationDomain;
+    }
+
     public String getDeviceAdapter() {
         return m_deviceAdapter;
     }
 
     public void setDeviceAdapter(String deviceAdapter) {
         this.m_deviceAdapter = deviceAdapter;
-    }
-
-    public void setObservationDomain(long observationDomain) {
-        this.m_observationDomain = observationDomain;
     }
 
     public String getTimestamp() {

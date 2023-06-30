@@ -37,15 +37,23 @@ import org.broadband_forum.obbaa.dmyang.entities.DeviceManagerNSConstants;
 import org.broadband_forum.obbaa.dmyang.tx.TXTemplate;
 import org.broadband_forum.obbaa.dmyang.tx.TxService;
 import org.broadband_forum.obbaa.netconf.api.messages.AbstractNetconfRequest;
+import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.CopyConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigElement;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcError;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorSeverity;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorTag;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcErrorType;
+import org.broadband_forum.obbaa.netconf.api.messages.NetconfRpcResponse;
 import org.broadband_forum.obbaa.netconf.api.util.NetconfMessageBuilderException;
 import org.broadband_forum.obbaa.netconf.api.util.Pair;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ActionException;
 import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
 import org.broadband_forum.obbaa.nm.nwfunctionmgr.NetworkFunctionManager;
 import org.broadband_forum.obbaa.pma.NetconfNetworkFunctionAlignmentService;
+import org.w3c.dom.Element;
 
 
 /**
@@ -166,8 +174,8 @@ public class NetconfNetworkFunctionAlignmentServiceImpl implements NetconfNetwor
                                     break;
                                 } else {
                                     if (LOGGER.isDebugEnabled()) {
-                                        LOGGER.debug(String.format("Successfully sent edit %s to device %s", request.requestToString(),
-                                                networkFunctionName));
+                                        LOGGER.debug(String.format("Successfully sent edit %s to Network Function %s",
+                                                request.requestToString(), networkFunctionName));
                                     }
                                     iterator.remove();
                                 }
@@ -199,7 +207,7 @@ public class NetconfNetworkFunctionAlignmentServiceImpl implements NetconfNetwor
     private void markNetworkFunctionInError(String networkFunctionInfo, List queueForDevice,
                                             String request, NetConfResponse response) {
         LOGGER.error(String.format("Edit failure/timeout on network function %s,"
-                        + " edit request %s , response %s, remaining requests won't be sent to the device",
+                        + " edit request %s , response %s, remaining requests won't be sent to the Network Function",
                 networkFunctionInfo, request, response != null ? response.responseToString() : null));
 
         queueForDevice.clear();
@@ -282,6 +290,41 @@ public class NetconfNetworkFunctionAlignmentServiceImpl implements NetconfNetwor
                 return null;
             }
         });
+    }
+
+    @Override
+    public List<Element> executeAction(NetworkFunction networkFunction, ActionRequest actionRequest) throws ActionException {
+        Future<NetConfResponse> future = null;
+        String networkFunctionName = networkFunction.getNetworkFunctionName();
+
+        //No adapters yet, devices use the adapter deviceInterface here
+        try {
+            if (m_ncm.isConnected(networkFunction)) {
+                future = m_ncm.executeNetconf(networkFunction, actionRequest);
+            } else {
+                throw new ActionException(new NetconfRpcError(
+                        NetconfRpcErrorTag.OPERATION_FAILED, NetconfRpcErrorType.Application,
+                        NetconfRpcErrorSeverity.Error, String.format("NetworkFunction not connected %s", networkFunctionName)));
+            }
+
+            NetConfResponse response = future.get();
+            if (response == null) {
+                LOGGER.error(String.format("Error executing action - null response"));
+                throw new ActionException(new NetconfRpcError(
+                        NetconfRpcErrorTag.OPERATION_FAILED, NetconfRpcErrorType.Application,
+                        NetconfRpcErrorSeverity.Error, "No response."));
+            } else if (response.getErrors().size() > 0) {
+                LOGGER.error(String.format("Error executing action %s: ", response));
+                throw new ActionException(response.getErrors().get(0));
+            }
+            return ((NetconfRpcResponse) response).getRpcOutputElements();
+        } catch (Exception e) {
+            LOGGER.error(String.format("Error while executing action with the network function %s - %s",
+                    networkFunctionName, e.getMessage()));
+            throw new ActionException(new NetconfRpcError(
+                    NetconfRpcErrorTag.OPERATION_FAILED, NetconfRpcErrorType.Application,
+                    NetconfRpcErrorSeverity.Error, e.getMessage()));
+        }
     }
 
     @Override

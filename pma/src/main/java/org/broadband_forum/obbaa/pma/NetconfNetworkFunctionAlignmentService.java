@@ -19,9 +19,12 @@ package org.broadband_forum.obbaa.pma;
 import java.util.List;
 
 
+import org.broadband_forum.obbaa.netconf.api.messages.ActionRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.EditConfigRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
+import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ActionException;
 import org.broadband_forum.obbaa.nf.entities.NetworkFunction;
+import org.w3c.dom.Element;
 
 /**
  * <p>
@@ -38,4 +41,5 @@ public interface NetconfNetworkFunctionAlignmentService extends NetworkFunctionA
 
     void forceAlign(NetworkFunction networkFunction, NetConfResponse getConfigResponse);
 
+    List<Element> executeAction(NetworkFunction networkFunction, ActionRequest actionRequest) throws ActionException;
 }

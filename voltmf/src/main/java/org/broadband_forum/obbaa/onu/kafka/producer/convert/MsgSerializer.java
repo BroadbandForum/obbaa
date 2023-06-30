@@ -23,7 +23,7 @@ import org.broadband_forum.obbaa.onu.message.gpb.message.Msg;
  * <p>
  * Serializes messages to be sent by KafkaProducerGpb
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public class MsgSerializer implements Serializer<Msg> {
 

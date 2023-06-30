@@ -24,9 +24,10 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
-import org.broadband_forum.obbaa.ipfix.collector.exception.DataTypeLengthMismatchException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.MissingAbstractDataTypeException;
-import org.broadband_forum.obbaa.ipfix.collector.exception.UtilityException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.DataTypeLengthMismatchException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.MissingAbstractDataTypeException;
+import org.broadband_forum.obbaa.ipfix.entities.exception.UtilityException;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.junit.Test;
 
 public class IpfixUtilititesTest {

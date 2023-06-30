@@ -46,7 +46,7 @@ import org.osgi.framework.Bundle;
  * <p>
  * Abstract class for Kafka Consumer, contains the generic functions of the kafka consumer.
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public abstract class AbstractOnuKafkaConsumer<T> implements OnuKafkaConsumer<T> {
 
@@ -74,11 +74,11 @@ public abstract class AbstractOnuKafkaConsumer<T> implements OnuKafkaConsumer<T>
         boolean isChanged = false;
         for (KafkaTopic kafkaTopic : kafkaTopicSet) {
             if (kafkaTopic.getPurpose().equals(KafkaTopicPurpose.VOMCI_NOTIFICATION.toString())
-                && !m_callbackFunctions.contains(kafkaTopic.getTopicName())) {
+                    && !m_callbackFunctions.contains(kafkaTopic.getTopicName())) {
                 m_callbackFunctions.put(kafkaTopic.getTopicName(), m_callback::processNotification);
                 isChanged = true;
             } else if (kafkaTopic.getPurpose().equals(KafkaTopicPurpose.VOMCI_RESPONSE.toString())
-                       && !m_callbackFunctions.contains(kafkaTopic.getTopicName())) {
+                    && !m_callbackFunctions.contains(kafkaTopic.getTopicName())) {
                 m_callbackFunctions.put(kafkaTopic.getTopicName(), m_callback::processResponse);
                 isChanged = true;
             }
@@ -114,9 +114,8 @@ public abstract class AbstractOnuKafkaConsumer<T> implements OnuKafkaConsumer<T>
 
     private void deleteTopics(List<String> kafkaTopicList) {
         Properties properties = loadKafkaConfig();
-        AdminClient kafkaAdminClient = KafkaAdminClient.create(properties);
-        kafkaAdminClient.deleteTopics(kafkaTopicList);
-        try {
+        try (AdminClient kafkaAdminClient = KafkaAdminClient.create(properties)) {
+            kafkaAdminClient.deleteTopics(kafkaTopicList);
             //Waiting to finish kafkaAdminClient.deleteTopics(kafkaTopicList) execution.
             Thread.sleep(5000);
         } catch (InterruptedException ex) {
@@ -133,8 +132,7 @@ public abstract class AbstractOnuKafkaConsumer<T> implements OnuKafkaConsumer<T>
 
     Properties loadKafkaConfig() {
         Properties config = new Properties();
-        try {
-            InputStream stream = m_bundle.getResource("kafka_config.properties").openStream();
+        try (InputStream stream = m_bundle.getResource("kafka_config.properties").openStream()) {
             config.load(stream);
             config.put("client.id", InetAddress.getLocalHost().getHostName());
         } catch (IOException e) {
@@ -158,7 +156,7 @@ public abstract class AbstractOnuKafkaConsumer<T> implements OnuKafkaConsumer<T>
         Set<String> nfFunctionNamesSet = new HashSet<>();
         for (Device device : devicesList) {
             if (device.getDeviceManagement().getDeviceType().equals(DeviceManagerNSConstants.DEVICE_TYPE_ONU)
-                && device.isMediatedSession()) {
+                    && device.isMediatedSession()) {
                 String nwFunctionName = device.getDeviceManagement().getOnuConfigInfo().getVomciOnuManagement().getVomciFunction();
                 if (nwFunctionName != null) {
                     nfFunctionNamesSet.add(nwFunctionName);

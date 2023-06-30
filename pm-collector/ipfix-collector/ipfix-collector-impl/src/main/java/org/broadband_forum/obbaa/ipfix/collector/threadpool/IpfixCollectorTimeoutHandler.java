@@ -20,7 +20,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixConstants;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -4,6 +4,12 @@ APP_NAME=BAA
 #we need this to go back on exit
 RUNNING_DIR=`pwd`
 
+echo "Model Abstracter status ${MODEL_ABSTRACTER_STATUS}"
+if [ "${MODEL_ABSTRACTER_STATUS}" != "Enable" ]; then
+  echo "Disabling Model Abstracter"
+  find /baa/baa-dist/system/ -name baa-feature*.xml | xargs -I{} sed -i -E "/<bundle>mvn:org.broadband-forum.obbaa\/model-abstracter\/.+<\/bundle>/d" {}
+fi
+
 setScriptPath () {
     SCRIPT_PATH="${BASH_SOURCE[0]}";
     if ([ -h "${SCRIPT_PATH}" ]) then

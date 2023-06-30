@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2022 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0"
+           xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.2.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+    <jpa:enable/>
+    <tx:enable-annotations/>
+
+    <reference id="deviceManager" interface="org.broadband_forum.obbaa.nm.devicemanager.DeviceManager"
+               availability="mandatory"/>
+    <reference id="pmaRegistry" interface="org.broadband_forum.obbaa.pma.PmaRegistry" availability="mandatory"/>
+    <reference id="aggregator" interface="org.broadband_forum.obbaa.aggregator.api.Aggregator" availability="mandatory"/>
+
+    <bean id="networksConverter"
+          class="org.broadband_forum.obbaa.modelabstracter.converter.NetworksConverter">
+    </bean>
+    <bean id="lineBandwidthProfilesConverter"
+          class="org.broadband_forum.obbaa.modelabstracter.converter.LineBandwidthProfilesConverter">
+    </bean>
+    <bean id="lineProfilesConverter"
+          class="org.broadband_forum.obbaa.modelabstracter.converter.LineProfilesConverter">
+    </bean>
+    <bean id="serviceProfilesConverter"
+          class="org.broadband_forum.obbaa.modelabstracter.converter.ServiceProfilesConverter">
+    </bean>
+    <bean id="vlanFwdProfileConverter"
+          class="org.broadband_forum.obbaa.modelabstracter.converter.VlanFwdProfileConverter">
+    </bean>
+    <bean id="vlanTransProfilesConverter"
+          class="org.broadband_forum.obbaa.modelabstracter.converter.VlanTransProfilesConverter">
+    </bean>
+
+    <bean id="converterFactory"
+          class="org.broadband_forum.obbaa.modelabstracter.converter.ConverterFactory">
+        <property name="m_mapping">
+            <map>
+                <entry key="networks" value-ref="networksConverter"/>
+                <entry key="line-bandwidth-profiles" value-ref="lineBandwidthProfilesConverter"/>
+                <entry key="line-profiles" value-ref="lineProfilesConverter"/>
+                <entry key="service-profiles" value-ref="serviceProfilesConverter"/>
+                <entry key="vlan-forwarding-profiles" value-ref="vlanFwdProfileConverter"/>
+                <entry key="vlan-translation-profiles" value-ref="vlanTransProfilesConverter"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="modelAbstracterAdapter" class="org.broadband_forum.obbaa.modelabstracter.impl.ModelAbstracterAdapter"
+          init-method="init"
+          destroy-method="destroy">
+        <argument ref="aggregator"/>
+        <argument ref="modelAbstracterManagerImpl"/>
+    </bean>
+    <bean id="modelAbstracterManagerImpl"
+          class="org.broadband_forum.obbaa.modelabstracter.impl.ModelAbstracterManagerImpl">
+        <property name="m_pmaRegistry" ref="pmaRegistry"/>
+        <property name="m_converterFactory" ref="converterFactory"/>
+    </bean>
+    <service ref="modelAbstracterManagerImpl"
+             interface="org.broadband_forum.obbaa.modelabstracter.ModelAbstracterManager"/>
+</blueprint>

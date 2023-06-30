@@ -41,6 +41,7 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ModelNodeId;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeDataStoreManager;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.datastore.ModelNodeKeyBuilder;
 import org.broadband_forum.obbaa.netconf.server.RequestScope;
+import org.broadband_forum.obbaa.onu.ONUConstants;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -67,9 +68,11 @@ import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.Int16TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.Int32TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.Int64TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.Int8TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.Uint16TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.Uint32TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.Uint64TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.Uint8TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
 import org.w3c.dom.Document;
@@ -432,9 +435,12 @@ public final class JsonUtil {
         if (type instanceof Int8TypeDefinition
                 || type instanceof Int16TypeDefinition
                 || type instanceof Int32TypeDefinition
+                || type instanceof Int64TypeDefinition
                 || type instanceof Uint8TypeDefinition
                 || type instanceof Uint16TypeDefinition
-                || type instanceof Uint32TypeDefinition) {
+                || type instanceof Uint32TypeDefinition
+                || type instanceof Uint64TypeDefinition
+        ) {
             return getIntegerValueForJson(textContent, type, schemaRegistry, currentModuleName);
         } else if (type instanceof IdentityrefTypeDefinition) {
             String localName = textContent;
@@ -466,7 +472,7 @@ public final class JsonUtil {
                     return returnValue;
                 }
             }
-        } else if (type instanceof InstanceIdentifierTypeDefinition) {
+        } else if ((type instanceof InstanceIdentifierTypeDefinition) || (type instanceof SchemaNode)) {
             if (textContent.startsWith("/")) {
                 List<PathNodeValue> pnvList = new ArrayList<>();
                 String[] splitBySlash = textContent.split("/(?=[^\\]]*(\\[|$))");
@@ -499,6 +505,13 @@ public final class JsonUtil {
                         returnValue.append(splitBySlash[i]);
                     }
                 }
+                return returnValue;
+            } else if (type instanceof SchemaNode) {
+                StringBuilder returnValue = new StringBuilder();
+                StringBuilder prefix = new StringBuilder();
+                List<PathNodeValue> pnvList = new ArrayList<>();
+                schemaRegistry = addContentAndGetSchemaRegistry(textContent, prefix, schemaRegistry, xml,
+                        pnvList, returnValue, false, modelNodeDSM);
                 return returnValue;
             }
         } else if (type instanceof EmptyTypeDefinition) {
@@ -548,7 +561,14 @@ public final class JsonUtil {
                     addPnv(namespace, module, prefix.toString(), pnvList, isKey, keyValue, localName);
                     returnValue.append(module.getName() + COLON + content.split(":")[1]);
                 } else {
-                    LOGGER.error("Could not find module for namespace: " + namespace);
+                    //workaround: ietf-interfaces is not part of the vOMCI NF adapter
+                    if (namespace.equals(ONUConstants.IETF_INTERFACES_NS)) {
+                        LOGGER.info("Using default mapping of " + namespace + " to module name: "
+                                + ONUConstants.IETF_INTERFACES);
+                        returnValue.append(ONUConstants.IETF_INTERFACES + COLON + content.split(":")[1]);
+                    } else {
+                        LOGGER.error("Could not find module for namespace: " + namespace);
+                    }
                 }
 
             } else {

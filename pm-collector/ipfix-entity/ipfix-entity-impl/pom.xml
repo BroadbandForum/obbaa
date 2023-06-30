@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2023 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>ipfix-entity</artifactId>
+        <groupId>org.broadband-forum.obbaa</groupId>
+        <version>${revision}</version>
+    </parent>
+
+    <name>OB-BAA/PM Collector/IPFIX Collector/IPFIX Entity</name>
+    <artifactId>ipfix-entity-impl</artifactId>
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito-all.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>${ehcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-model-api</artifactId>
+            <version>3.0.16</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xmlbeans-maven-plugin</artifactId>
+                    <version>2.3.3</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>xmlbeans</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <schemaDirectory>src/main/xsd</schemaDirectory>
+                        <!-- fixed Java version is needed here,
+                                   see http://stackoverflow.com/questions/7631439/maven2list-return-type-methods-not-getting-generated-from-xsd-files-while-usin -->
+                        <javaSource>1.5</javaSource>
+                        <noJavac>false</noJavac>
+                        <quiet>false</quiet>
+                        <classGenerationDirectory>
+                            ${project.build.directory}/generated-resources
+                        </classGenerationDirectory>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xmlbeans-maven-plugin</artifactId>
+                <configuration>
+                    <schemaDirectory>src/main/xsd</schemaDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
+                <extensions>true</extensions>
+                <inherited>true</inherited>
+                <configuration>
+                    <instructions>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
+                        <Import-Package>*</Import-Package>
+                        <Export-Package>org.broadband_forum.obbaa.ipfix.entities.*</Export-Package>
+                        <!--<Include-Resource></Include-Resource>-->
+                        <_removeheaders>Import-Service,Export-Service</_removeheaders>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

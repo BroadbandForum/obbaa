@@ -25,7 +25,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * <p>
  * Deserialize messages received by KafkaConsumerGpb
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public class MsgDeserializer implements Deserializer<Msg> {
 

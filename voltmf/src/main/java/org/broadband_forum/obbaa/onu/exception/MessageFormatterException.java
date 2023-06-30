@@ -20,7 +20,7 @@ package org.broadband_forum.obbaa.onu.exception;
  * <p>
  * Used when something goes wrong during the process of formatting a message
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public class MessageFormatterException extends Exception {
 

@@ -24,20 +24,23 @@ import org.broadband_forum.obbaa.nf.entities.NetworkFunctionNSConstants;
  * <p>
  * Enum to help convert the object type between proto data and NetworkWideTag object
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 19/05/2021.
+ * Created by Filipe Claudio (Altice Labs) on 19/05/2021.
  * Updated by Miguel Melo (Altice Labs) on 25/01/2022.
  */
 public enum ObjectType {
     ONU(0),
     VOMCI_FUNCTION(1),
     VOMCI_PROXY(2),
-    VOLTMF(3);
+    VOLTMF(3),
+    D_OLT_VNF(4);
 
     private int m_code;
     private static final String YANG_ONU = NetworkFunctionNSConstants.ONU_FUNCTION;
     private static final String YANG_VOMCI_FUNCTION = NetworkFunctionNSConstants.VOMCI_FUNCTION;
     private static final String YANG_VOMCI_PROXY = NetworkFunctionNSConstants.PROXY_FUNCTION;
     private static final String YANG_VOLTMF = NetworkFunctionNSConstants.VOLTMF_FUNCTION;
+
+    private static final String YANG_PPPOE_IA = NetworkFunctionNSConstants.PPPOE_IA;
 
     ObjectType(int code) {
         this.m_code = code;
@@ -82,6 +85,8 @@ public enum ObjectType {
                 return ObjectType.VOMCI_PROXY;
             case YANG_VOLTMF:
                 return ObjectType.VOLTMF;
+            case YANG_PPPOE_IA:
+                return ObjectType.D_OLT_VNF;
             default:
                 return null;
         }

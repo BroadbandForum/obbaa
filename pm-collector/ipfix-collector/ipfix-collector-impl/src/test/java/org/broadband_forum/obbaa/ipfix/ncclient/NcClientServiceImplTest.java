@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -145,7 +144,7 @@ public class NcClientServiceImplTest {
     }
 
     @Test
-    public void testPerformNcRequest_Get() throws Exception{
+    public void testPerformNcRequest_Get() throws Exception {
         m_response.setData(DocumentUtils.stringToDocument(getRpc).getDocumentElement());
         NetconfResponseFuture futureResponse = mock(NetconfResponseFuture.class);
         when(futureResponse.get()).thenReturn(m_response);
@@ -191,4 +190,4 @@ public class NcClientServiceImplTest {
         m_ncClientServiceImpl = null;
     }
 
-    }
+}

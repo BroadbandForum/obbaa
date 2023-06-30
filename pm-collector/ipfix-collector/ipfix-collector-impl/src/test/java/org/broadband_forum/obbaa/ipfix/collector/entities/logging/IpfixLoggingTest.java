@@ -24,10 +24,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixFieldSpecifier;
-import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixMessageHeader;
-import org.broadband_forum.obbaa.ipfix.collector.exception.NotEnoughBytesException;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
+import org.broadband_forum.obbaa.ipfix.entities.IpfixFieldSpecifier;
+import org.broadband_forum.obbaa.ipfix.entities.exception.NotEnoughBytesException;
+import org.broadband_forum.obbaa.ipfix.entities.message.header.IpfixMessageHeader;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixLogging;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixLoggingDataRecord;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixLoggingDataSet;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixLoggingTemplateRecord;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixLoggingTemplateSet;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixLoggingWrapper;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.junit.Test;
 
 public class IpfixLoggingTest {

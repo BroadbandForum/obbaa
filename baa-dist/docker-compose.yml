@@ -1,5 +1,5 @@
 ###########################################################################
-# Copyright 2018 Broadband Forum
+# Copyright 2018-2022 Broadband Forum
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ services:
             - PMA_SESSION_FACTORY_TYPE=REGULAR
             - MAXIMUM_ALLOWED_ADAPTER_VERSIONS=3
             - VOLTMF_NAME=vOLTMF
+            # Enable Model Abstracter or Disable Model Abstracter, Default value is Disable
+            - MODEL_ABSTRACTER_STATUS=Disable
             # Below tag shall be set as false if the BAA is going to be tested for Scalability/Performance
             - NC_ENABLE_POST_EDIT_DS_VALIDATION_SUPPORT=True
         volumes:
@@ -50,63 +52,6 @@ services:
         depends_on:
           - kafka
           - zookeeper
-
-    ipfix-collector:
-        image: ipfix-collector
-        container_name: ipfix-collector
-        restart: always
-        ports:
-            - "8005:5005"
-            - "4494:4494"
-            - "5051:5051"
-        environment:
-            - IPFIX_COLLECTOR_PORT=4494
-            - IPFIX_IE_MAPPING_DIR=/ipfix/ie-mapping/
-            - IPFIX_COLLECTOR_MAX_CONNECTION=10000
-            - BAA_HOST=baa
-            - BAA_SSH_PORT=9292
-            - BAA_USERNAME=admin
-            - BAA_PASSWORD=password
-            - DEBUG=true
-            - INFLUXDB_ORGANISATION=broadband_forum
-            - INFLUXDB_BUCKETID=pm-collection
-            - INFLUXDB_API_URL=http://obbaa-influxdb:9999
-            - INFLUXDB_TOKEN=_6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
-            - PMD_MAX_BUFFERED_POINTS=5000
-            - PMD_MAX_BUFFERED_MEASUREMENTS=100
-            - PMD_TIMEOUT_BUFFERED_POINTS=60
-            - PMD_NBI_PORT=5051
-        volumes:
-            - /baa/stores/ipfix:/ipfix/ie-mapping/
-        depends_on:
-            - baa
-        networks:
-            - baadist_default
-        tty: true
-        stdin_open: true
-
-    influxdb:
-        image: broadbandforum/influxdb:2.0.0-beta.2-3
-        container_name: obbaa-influxdb
-        command: --bolt-path /var/opt/influxdb/influxd.bolt --engine-path /var/opt/influxdb/engine --reporting-disabled
-        restart: on-failure
-        ports:
-            - "0.0.0.0:9999:9999"
-        environment:
-            - DEBUG=true
-            - INFLUX_USER=influxdb
-            - INFLUX_PW=influxdb
-            - INFLUX_ORG=broadband_forum
-            - INFLUX_BUCKET=pm-collection
-            - INFLUX_RETENTION=720
-            - INFLUX_PORT=9999
-            - INFLUX_ROOT=/var/opt/influxdb
-        volumes:
-            - /baa/stores/influxdb:/var/opt/influxdb
-        depends_on:
-            - baa
-        networks:
-            - baadist_default
 
     zookeeper:
       image: confluentinc/cp-zookeeper:5.5.0
@@ -137,81 +82,6 @@ services:
       networks:
         - baadist_default
 
-    vomci:
-      image: obbaa-vomci
-      hostname: obbaa-vomci
-      container_name: obbaa-vomci
-      ports:
-        - 8801:8801
-        - 58433:58433
-      environment:
-        GRPC_SERVER_NAME: vOMCi-grpc-1
-        LOCAL_GRPC_SERVER_PORT: 58433
-        # Kafka bootstrap server, please provide only one address
-        KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
-        # List of Consumer topics, seperated by spaces
-        KAFKA_REQUEST_TOPICS: "vomci1-request" # if message formatter is JSON "OBBAA_ONU_REQUEST"
-        KAFKA_RESPONSE_TOPICS: 'vomci1-response' # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
-        KAFKA_NOTIFICATION_TOPICS: "vomci1-notification" # if message formatter is Json "OBBAA_ONU_NOTIFICATION"
-        VOMCI_KAFKA_SENDER_NAME: "bbf-vomci"
-        VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
-      networks:
-        - baadist_default
-      volumes:
-        - /baa/stores/vomci-function-db:/db
-      depends_on:
-        - zookeeper
-        - kafka
 
-    vproxy:
-      image: obbaa-vproxy
-      hostname: obbaa-vproxy
-      container_name: obbaa-vproxy
-      ports:
-        - 8433:8433
-      environment:
-        GRPC_CLIENT_NAME: proxy-grpc-1
-        GRPC_SERVER_NAME: proxy-grpc-2
-        LOCAL_GRPC_SERVER_PORT: 8433
-        REMOTE_GRPC_SERVER_PORT: 58433
-        REMOTE_GRPC_SERVER_ADDR: obbaa-vomci
-        # Kafka bootstrap server, please provide only one address
-        KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
-        # List of Consumer topics, seperated by spaces
-        KAFKA_REQUEST_TOPICS: "vomci-proxy-request"
-        KAFKA_RESPONSE_TOPICS: 'vomci-proxy-response'
-        KAFKA_NOTIFICATION_TOPICS: "vomci-proxy-notification"
-        VOMCI_KAFKA_SENDER_NAME: "bbf-vproxy"
-        VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
-      networks:
-        - baadist_default
-      volumes:
-        - /baa/stores/vomci-vproxy-db:/db
-      depends_on:
-        - vomci
 
-    control_relay:
-      image: obbaa-control-relay
-      container_name: obbaa-control-relay
-      restart: always
-      ports:
-        - "50052:50052"
-        - "50055:50055"
-      environment:
-        - CONTROL_RELAY_HELLO_NAME=control_relay_service
-        - PLUGIN_PORT=50052
-        - SDN_MC_SERVER_PORT=
-        - SDN_MC_SERVER_LIST=
-        - CONTROL_RELAY_PORT=50055
-        - OBBAA_ADDRESS=baa
-        - OBBAA_PORT=9292
-        - SSH_USER=admin
-        - SSH_PASSWORD=password
-        - SHARED_FOLDER=./plugin-repo
-        - PRIVATE_FOLDER=./plugin-enabled
-      volumes:
-        - /baa/control-relay/plugins:/control_relay/plugin-repo
-      networks:
-        - baadist_default
-      depends_on:
-        - baa
+

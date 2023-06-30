@@ -19,6 +19,9 @@ package org.broadband_forum.obbaa.onu.util;
 import static org.broadband_forum.obbaa.onu.ONUConstants.AUTH_SCCESSFULL;
 import static org.broadband_forum.obbaa.onu.ONUConstants.BAA_XPON_ONU_AUTH;
 import static org.broadband_forum.obbaa.onu.ONUConstants.BAA_XPON_ONU_TYPES_WITH_XMLNS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.BBF_VOMCI_TYPE_NS;
+import static org.broadband_forum.obbaa.onu.ONUConstants.BBF_VOMCI_TYPE_PREFIX;
+import static org.broadband_forum.obbaa.onu.ONUConstants.BBF_VOMCI_TYPE_XMLNS_PREFIX;
 import static org.broadband_forum.obbaa.onu.ONUConstants.CHANNEL_TERMINATION;
 import static org.broadband_forum.obbaa.onu.ONUConstants.CHANNEL_TERMINATION_NS;
 import static org.broadband_forum.obbaa.onu.ONUConstants.IETF_ALARMS_ALARM_LIST;
@@ -36,6 +39,7 @@ import static org.broadband_forum.obbaa.onu.ONUConstants.REQUESTED_ONU_MGMT_MODE
 import static org.broadband_forum.obbaa.onu.ONUConstants.ROOT;
 import static org.broadband_forum.obbaa.onu.ONUConstants.SERIAL_NUMBER_ONU;
 import static org.broadband_forum.obbaa.onu.ONUConstants.V_ANI;
+import static org.broadband_forum.obbaa.onu.ONUConstants.XML_NS;
 
 import java.util.HashMap;
 
@@ -57,47 +61,68 @@ public final class VOLTMgmtRequestCreationUtil {
         //Not Called
     }
 
-    public static ActionRequest prepareCreateOnuRequest(String onuDeviceName, boolean isMsgToProxy) {
+    public static ActionRequest prepareCreateOnuRequest(String onuDeviceName, String onuType, boolean isMsgToProxy) {
         Document document = DocumentUtils.createDocument();
         String elementNS = ONUConstants.BBF_VOMCI_FUNCTION_NS;
         if (isMsgToProxy) {
             elementNS = ONUConstants.BBF_VOMCI_PROXY_NS;
         }
-        Element managedOnus = document.createElementNS(elementNS, ONUConstants.MANAGED_ONUS);
         Element nameLeaf = document.createElementNS(elementNS, ONUConstants.NAME);
         nameLeaf.setTextContent(onuDeviceName);
         Element createOnuNode = document.createElementNS(elementNS, ONUConstants.CREATE_ONU);
+        Element xponOnuType = document.createElementNS(elementNS, ONUConstants.XPON_ONU_TYPE);
+        xponOnuType.setAttributeNS(XML_NS, BBF_VOMCI_TYPE_XMLNS_PREFIX, BBF_VOMCI_TYPE_NS);
+        xponOnuType.setTextContent(deriveOnuType(onuType));
         createOnuNode.appendChild(nameLeaf);
+        Element managedOnus = document.createElementNS(elementNS, ONUConstants.MANAGED_ONUS);
         managedOnus.appendChild(createOnuNode);
-        document.appendChild(managedOnus);
+        createOnuNode.appendChild(xponOnuType);
+        Element vomci = document.createElementNS(elementNS, ONUConstants.VOMCI);
+        vomci.appendChild(managedOnus);
+        document.appendChild(vomci);
         ActionRequest request = new ActionRequest();
         request.setActionTreeElement(document.getDocumentElement());
         return request;
     }
 
-    public static ActionRequest prepareDeleteOnuRequest(String onuDeviceName, boolean isMsgToProxy) {
+
+    public static ActionRequest prepareDeleteOnuRequest(String onuDeviceName, String onuType, boolean isMsgToProxy) {
         Document document = DocumentUtils.createDocument();
         String elementNS = ONUConstants.BBF_VOMCI_FUNCTION_NS;
         if (isMsgToProxy) {
             elementNS = ONUConstants.BBF_VOMCI_PROXY_NS;
         }
-        Element managedOnus = document.createElementNS(elementNS, ONUConstants.MANAGED_ONUS);
-        Element managedOnu = document.createElementNS(elementNS, ONUConstants.MANAGED_ONU);
         Element nameLeaf = document.createElementNS(elementNS, ONUConstants.NAME);
         nameLeaf.setTextContent(onuDeviceName);
+        Element xponOnuType = document.createElementNS(elementNS, ONUConstants.XPON_ONU_TYPE);
+        xponOnuType.setAttributeNS(XML_NS, BBF_VOMCI_TYPE_XMLNS_PREFIX, BBF_VOMCI_TYPE_NS);
+        xponOnuType.setTextContent(deriveOnuType(onuType));
+        Element managedOnu = document.createElementNS(elementNS, ONUConstants.MANAGED_ONU);
         managedOnu.appendChild(nameLeaf);
+        managedOnu.appendChild(xponOnuType);
+        Element managedOnus = document.createElementNS(elementNS, ONUConstants.MANAGED_ONUS);
         managedOnus.appendChild(managedOnu);
         Element deleteOnuNode = document.createElementNS(elementNS, ONUConstants.DELETE_ONU);
+        Element deleteStateData = document.createElementNS(elementNS,  ONUConstants.DELETE_STATE_DATA);
+        deleteStateData.setTextContent("true");
+        deleteOnuNode.appendChild(deleteStateData);
         managedOnu.appendChild(deleteOnuNode);
-        document.appendChild(managedOnus);
+        Element vomci = document.createElementNS(elementNS, ONUConstants.VOMCI);
+        vomci.appendChild(managedOnus);
+        document.appendChild(vomci);
         ActionRequest request = new ActionRequest();
         request.setActionTreeElement(document.getDocumentElement());
         return request;
     }
 
-    public static ActionRequest prepareSetOnuCommunicationRequest(String onuDeviceName, boolean isCommunicationAvailable, String oltName,
-                                                                  String channelTermName, String onuId, String voltmfRemoteEpName,
-                                                                  String oltRemoteEpName, boolean isMsgToProxy) {
+    public static String deriveOnuType(String onuType) {
+        return BBF_VOMCI_TYPE_PREFIX.concat(":").concat(onuType);
+    }
+
+    public static ActionRequest prepareSetOnuCommunicationRequest(String onuDeviceName, String onuType, boolean isCommunicationAvailable,
+                                                                  String oltName, String channelTermName, String onuId,
+                                                                  String voltmfRemoteEpName, String oltRemoteEpName,
+                                                                  boolean isMsgToProxy) {
         Document document = DocumentUtils.createDocument();
         String elementNS = ONUConstants.BBF_VOMCI_FUNCTION_NS;
         if (isMsgToProxy) {
@@ -113,27 +138,34 @@ public final class VOLTMgmtRequestCreationUtil {
         managedOnu.appendChild(setOnuCommunication);
         appendElement(elementNS, document, setOnuCommunication, ONUConstants.SET_ONU_COMM_AVAILABLE,
                 String.valueOf(isCommunicationAvailable));
-        appendElement(elementNS, document, setOnuCommunication, ONUConstants.OLT_REMOTE_NAME, oltRemoteEpName);
+        appendElement(elementNS, document, setOnuCommunication, ONUConstants.OLT_REMOTE_ENDPOINT, oltRemoteEpName);
+        Element xponOnuType = document.createElementNS(elementNS, ONUConstants.XPON_ONU_TYPE);
+        xponOnuType.setAttributeNS(XML_NS, BBF_VOMCI_TYPE_XMLNS_PREFIX, BBF_VOMCI_TYPE_NS);
+        xponOnuType.setTextContent(deriveOnuType(onuType));
         String nbRemoteEndpoint;
         if (isMsgToProxy) {
             nbRemoteEndpoint = ONUConstants.VOMCI_FUNCTION_REMOTE_ENDPOINT;
         } else {
-            nbRemoteEndpoint = ONUConstants.VOLTMF_REMOTE_NAME;
+            nbRemoteEndpoint = ONUConstants.VOLTMF_REMOTE_ENDPOINT;
         }
         appendElement(elementNS, document, setOnuCommunication, nbRemoteEndpoint, voltmfRemoteEpName);
         Element onuAttachmentPoint = document.createElementNS(elementNS, ONUConstants.ONU_ATTACHMENT_POINT);
         appendElement(elementNS, document, onuAttachmentPoint, ONUConstants.OLT_NAME_JSON_KEY, oltName);
         appendElement(elementNS, document, onuAttachmentPoint, ONUConstants.CHANNEL_TERMINATION_NAME, channelTermName);
         appendElement(elementNS, document, onuAttachmentPoint, ONUConstants.ONU_ID_JSON_KEY, onuId);
+        setOnuCommunication.appendChild(xponOnuType);
         setOnuCommunication.appendChild(onuAttachmentPoint);
-        document.appendChild(managedOnus);
+        Element vomci = document.createElementNS(elementNS, ONUConstants.VOMCI);
+        vomci.appendChild(managedOnus);
+        document.appendChild(vomci);
         ActionRequest request = new ActionRequest();
         request.setActionTreeElement(document.getDocumentElement());
         return request;
     }
 
     public static ActionRequest prepareOnuAuthenicationReportActionRequest(String onuDeviceName, boolean isAuthSuccessful, String vaniName,
-                                                 String requestedOnuMgmtMode, String onuSerialNumber, String channelTerminationName) {
+                                                                           String requestedOnuMgmtMode, String onuSerialNumber,
+                                                                           String channelTerminationName) {
         Document document = DocumentUtils.createDocument();
 
         Element interfacesState = document.createElementNS(IETF_INTERFACES_NS, INTERFACES_STATE);

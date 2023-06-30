@@ -43,9 +43,28 @@ dependencies:
     condition: ipfix-collector.enabled,global.ipfix-collector.enabled
     tags:
       - bbf
+  - name: onu-pm-collector
+    repository: http://127.0.0.1:8879/charts
+    version: R4.0.0
+    condition: onu-pm-collector.enabled,global.onu-pm-collector.enabled
+    tags:
+      - bbf
   - name: control-relay
     repository: http://127.0.0.1:8879/charts
     version: R4.0.0
     condition: control-relay.enabled,global.control-relay.enabled
     tags:
       - bbf
+  - name: pppoe-ia
+    repository: http://127.0.0.1:8879/charts
+    version: R6.0.0
+    condition: pppoe-ia.enabled, global.pppoe-ia.enabled
+    tags:
+      - bbf
+  - name: mongo
+    repository: http://127.0.0.1:8879/charts
+    version: 6.0
+    condition: mongo.enabled, global.mongo.enabled
+    tags: 
+      - bbf
+  

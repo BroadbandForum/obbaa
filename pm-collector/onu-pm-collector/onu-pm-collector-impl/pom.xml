@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2023 Broadband Forum
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>org.broadband-forum.obbaa</groupId>
+        <artifactId>onu-pm-collector</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.broadband-forum.obbaa.pm-collector</groupId>
+    <artifactId>onu-pm-collector-impl</artifactId>
+    <name>OB-BAA/PM Collector/ONU PM Collector Impl</name>
+    <packaging>bundle</packaging>
+    <version>${revision}</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>${hsql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-core</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.18.2-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.snmp4j</groupId>
+            <artifactId>snmp4j</artifactId>
+            <version>${snmp4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.broadband-forum.obbaa</groupId>
+            <artifactId>pm-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.broadband-forum.obbaa.pm-collector.pm-data-handler</groupId>
+            <artifactId>pm-data-handler-example</artifactId>
+            <version>6.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Test-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <version>${xmlunit.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito-all.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xmlbeans-maven-plugin</artifactId>
+                    <version>2.3.3</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>xmlbeans</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <schemaDirectory>src/main/xsd</schemaDirectory>
+                        <!-- fixed Java version is needed here,
+                                   see http://stackoverflow.com/questions/7631439/maven2list-return-type-methods-not-getting-generated-from-xsd-files-while-usin -->
+                        <javaSource>1.5</javaSource>
+                        <noJavac>false</noJavac>
+                        <quiet>false</quiet>
+                        <classGenerationDirectory>
+                            ${project.build.directory}/generated-resources
+                        </classGenerationDirectory>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xmlbeans-maven-plugin</artifactId>
+                <configuration>
+                    <schemaDirectory>src/main/xsd</schemaDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
+                <extensions>true</extensions>
+                <inherited>true</inherited>
+                <configuration>
+                    <instructions>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-ManifestVersion>2.0</Bundle-ManifestVersion>
+                        <Import-Package>*, org.apache.kafka.clients.consumer.*</Import-Package>
+                        <!--<Include-Resource></Include-Resource>-->
+                        <_removeheaders>Import-Service,Export-Service</_removeheaders>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

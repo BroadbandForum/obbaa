@@ -21,11 +21,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixMessageHeader;
-import org.broadband_forum.obbaa.ipfix.collector.entities.record.IpfixOptionTemplateRecord;
-import org.broadband_forum.obbaa.ipfix.collector.entities.set.IpfixOptionTemplateSet;
-import org.broadband_forum.obbaa.ipfix.collector.exception.NotEnoughBytesException;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
+import org.broadband_forum.obbaa.ipfix.entities.IpfixFieldSpecifier;
+import org.broadband_forum.obbaa.ipfix.entities.exception.NotEnoughBytesException;
+import org.broadband_forum.obbaa.ipfix.entities.message.IpfixMessage;
+import org.broadband_forum.obbaa.ipfix.entities.message.header.IpfixMessageHeader;
+import org.broadband_forum.obbaa.ipfix.entities.message.set.IpfixOptionTemplateSet;
+import org.broadband_forum.obbaa.ipfix.entities.record.IpfixOptionTemplateRecord;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.junit.Test;
 
 public class IpfixMessageTest {

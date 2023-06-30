@@ -47,14 +47,13 @@ import com.influxdb.query.FluxTable;
  */
 public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEvent> {
     private static final Logger LOG =
-        LoggerFactory.getLogger(InfluxDBImpl.class);
-
+            LoggerFactory.getLogger(InfluxDBImpl.class);
+    private final Object m_busyMutex = new Object();
     private InfluxDBClient m_dbClient;
     private WriteApi m_writeApi;
     private String m_organisation;
     private String m_bucketId;
     private ListenerRegistration m_registration;
-    private final Object m_busyMutex = new Object();
     private Boolean m_busy = false;
 
     public InfluxDBImpl() {
@@ -75,8 +74,7 @@ public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEve
                     LOG.error("Waiting");
                     m_busyMutex.wait();
                     LOG.error("Waiting has an end.");
-                }
-                catch (InterruptedException ex) {
+                } catch (InterruptedException ex) {
                     LOG.error("Waiting for busy mutex interrupted.", ex);
                     return;
                 }
@@ -87,8 +85,38 @@ public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEve
         long numberOfPoints = 0;
         for (TSPoint p : tsData.getTSPoints()) {
             Point point = Point
-                .measurement(p.m_measurement)
-                .time((long)p.m_timestamp, WritePrecision.S);
+                    .measurement(p.m_measurement)
+                    .time((long) p.m_timestamp, WritePrecision.S);
+            p.m_tags.keySet().forEach((key) -> {
+                point.addTag(key, p.m_tags.get(key));
+            });
+            if (p.m_fields == null) { // we must have at least one field
+                continue;
+            }
+            p.m_fields.keySet().forEach((String key) -> {
+                Object val = p.m_fields.get(key);
+                if (val instanceof Long) {
+                    point.addField(key, (Long) val);
+                } else if (val instanceof Double) {
+                    point.addField(key, (Double) val);
+                } else if (val instanceof Float) {
+                    point.addField(key, (Number) val);
+                } else if (val instanceof String) {
+                    point.addField(key, (String) val);
+                } else if (val instanceof Boolean) {
+                    point.addField(key, (Boolean) val);
+                } else if (val != null) {
+                    LOG.error("Type of field not supported: {}", val.getClass());
+                }
+            });
+            m_writeApi.writePoint(m_bucketId, m_organisation, point);
+            numberOfPoints++;
+        }
+
+        for (TSData.TSPointForOnuTelemetry p : tsData.getTSPointsOnu()) {
+            Point point = Point
+                    .measurement(p.m_measurement)
+                    .time((long)p.m_timestamp, WritePrecision.S);
             p.m_tags.keySet().forEach((key) -> {
                 point.addTag(key, p.m_tags.get(key));
             });
@@ -126,12 +154,12 @@ public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEve
             // calculate elapsed time
             long elapsedTime = System.currentTimeMillis() - startTime;
             LOG.debug("Added {} points in {} milliseconds.",
-                numberOfPoints, elapsedTime);
+                    numberOfPoints, elapsedTime);
         }
     }
 
     private void appendFilter(Map<String, List<String>> filter,
-        StringBuilder query) {
+                              StringBuilder query) {
         if (filter == null || filter.isEmpty()) {
             return;
         }
@@ -150,7 +178,7 @@ public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEve
 
     @Override
     public void executeQuery(String measurement, Instant startTime, Instant stopTime,
-        Map<String, List<String>> filter, List<TSData> results) {
+                             Map<String, List<String>> filter, List<TSData> results) {
         long startQueryTime = 0;
         if (LOG.isDebugEnabled()) {
             // record start time
@@ -159,15 +187,15 @@ public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEve
 
         // build query filter
         StringBuilder query = new StringBuilder()
-            .append("from(bucket: \"").append(m_bucketId).append("\") ")
-            .append("|> range(start: ").append(startTime).append(", stop: ").append(stopTime).append(") ")
-            .append("|> filter(fn: (r) => r._measurement == \"").append(measurement).append("\")");
+                .append("from(bucket: \"").append(m_bucketId).append("\") ")
+                .append("|> range(start: ").append(startTime).append(", stop: ").append(stopTime).append(") ")
+                .append("|> filter(fn: (r) => r._measurement == \"").append(measurement).append("\")");
         appendFilter(filter, query);
         LOG.debug("filter: {}", query.toString());
 
         // excecute query
         List<FluxTable> tables =
-            m_dbClient.getQueryApi().query(query.toString(), m_organisation);
+                m_dbClient.getQueryApi().query(query.toString(), m_organisation);
         LOG.debug("result: {} tables", tables.size());
 
         // parse result
@@ -176,47 +204,42 @@ public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEve
             for (FluxRecord fluxRecord : table.getRecords()) {
                 TSPoint point = new TSPoint();
                 point.m_measurement =
-                    (String)fluxRecord.getValueByKey("_measurement");
+                        (String) fluxRecord.getValueByKey("_measurement");
                 Instant time = fluxRecord.getTime();
                 if (time != null) {
-                    point.m_timestamp = (int)time.getEpochSecond();
-                }
-                else {
+                    point.m_timestamp = (int) time.getEpochSecond();
+                } else {
                     point.m_timestamp = 0;
                     LOG.error("Timestamp from DB is null");
                 }
                 Object val = fluxRecord.getValueByKey("_value");
                 point.m_fields = new HashMap<>(1);
                 if (val instanceof Long) {
-                    point.m_fields.put((String)fluxRecord.getValueByKey("_field"),
-                        (Long)val);
-                }
-                else if (val instanceof Double) {
-                    point.m_fields.put((String)fluxRecord.getValueByKey("_field"),
-                        (Double)val);
-                }
-                else if (val instanceof String) {
-                    point.m_fields.put((String)fluxRecord.getValueByKey("_field"),
-                        (String)val);
-                }
-                else if (val instanceof Boolean) {
-                    point.m_fields.put((String)fluxRecord.getValueByKey("_field"),
-                        (Boolean)val);
-                }
-                else if (val != null) {
+                    point.m_fields.put((String) fluxRecord.getValueByKey("_field"),
+                            val);
+                } else if (val instanceof Double) {
+                    point.m_fields.put((String) fluxRecord.getValueByKey("_field"),
+                            val);
+                } else if (val instanceof String) {
+                    point.m_fields.put((String) fluxRecord.getValueByKey("_field"),
+                            val);
+                } else if (val instanceof Boolean) {
+                    point.m_fields.put((String) fluxRecord.getValueByKey("_field"),
+                            val);
+                } else if (val != null) {
                     LOG.error("Unsupported value type {}", val.getClass());
                 }
 
                 point.m_tags.put("deviceAdapter",
-                    (String)fluxRecord.getValueByKey("deviceAdapter"));
+                        (String) fluxRecord.getValueByKey("deviceAdapter"));
                 point.m_tags.put("hostName",
-                    (String)fluxRecord.getValueByKey("hostName"));
+                        (String) fluxRecord.getValueByKey("hostName"));
                 point.m_tags.put("sourceIP",
-                    (String)fluxRecord.getValueByKey("sourceIP"));
+                        (String) fluxRecord.getValueByKey("sourceIP"));
                 point.m_tags.put("templateID",
-                    (String)fluxRecord.getValueByKey("templateID"));
+                        (String) fluxRecord.getValueByKey("templateID"));
                 point.m_tags.put("observationDomain",
-                    (String)fluxRecord.getValueByKey("observationDomain"));
+                        (String) fluxRecord.getValueByKey("observationDomain"));
                 tsData.m_tsPoints.add(point);
             }
             results.add(tsData);
@@ -276,8 +299,7 @@ public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEve
                     LOG.debug("Waiting");
                     m_busyMutex.wait();
                     LOG.debug("Waiting has an end.");
-                }
-                catch (InterruptedException ex) {
+                } catch (InterruptedException ex) {
                     LOG.error("Waiting for busy mutex interrupted.", ex);
                     return;
                 }
@@ -295,14 +317,11 @@ public class InfluxDBImpl implements DBInterface, EventListener<AbstractWriteEve
     public void onEvent(AbstractWriteEvent value) {
         if (value instanceof WriteSuccessEvent) {
             //value.logEvent();
-        }
-        else if (value instanceof WriteErrorEvent) {
+        } else if (value instanceof WriteErrorEvent) {
             value.logEvent();
-        }
-        else if (value instanceof WriteRetriableErrorEvent) {
+        } else if (value instanceof WriteRetriableErrorEvent) {
             value.logEvent();
-        }
-        else if (value instanceof BackpressureEvent) {
+        } else if (value instanceof BackpressureEvent) {
             value.logEvent();
         }
         synchronized (m_busyMutex) {

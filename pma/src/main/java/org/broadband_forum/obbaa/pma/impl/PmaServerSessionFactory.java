@@ -143,12 +143,18 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
     //TODO obbaa-366 NetworkFunction has no getNetworkFunctionManagement() method (see createPmaServer above ^)
     private PmaServer createPmaServer(NetworkFunction networkFunction) {
         String adapterType;
+        String adapterVersion = "1.0";
         switch (networkFunction.getType()) {
             case "bbf-nf-types:vomci-function-type":
                 adapterType = "nf-vomci";
+                adapterVersion = "2.0";
                 break;
             case "bbf-nf-types:vomci-proxy-type":
                 adapterType = "nf-vproxy";
+                adapterVersion = "2.0";
+                break;
+            case "bbf-d-olt-nft:d-olt-pppoeia":
+                adapterType = "nf-d-olt-pppoe-ia";
                 break;
             default:
                 //unsupported type
@@ -157,7 +163,8 @@ public class PmaServerSessionFactory extends PmaSessionFactory {
         }
         //TODO obbaa-366 create network function specific adapters, for now, create one along side the device adapters
         DeviceAdapter deviceAdapter = AdapterBuilder.createAdapterBuilder()
-                .setDeviceAdapterId(new DeviceAdapterId(adapterType, "1.0", "standard", "BBF"))
+                // As part of OBBAA-656, only 2.0 version of std adapters(for nw functions) are available from R6.0 onwards.
+                .setDeviceAdapterId(new DeviceAdapterId(adapterType, adapterVersion, "standard", "BBF"))
                 .build();
         return new PmaServerImplNf(networkFunction, m_netconfServer, getNsmAndStore(networkFunction, deviceAdapter),
                 getStandardAdapterContext(m_adapterManager,

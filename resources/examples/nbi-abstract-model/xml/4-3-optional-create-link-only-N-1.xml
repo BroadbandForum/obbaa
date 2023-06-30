@@ -1,0 +1,44 @@
+<!--
+   ~ Copyright 2022 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="15">
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <networks xmlns="urn:ietf:params:xml:ns:yang:ietf-network" xmlns:nt="urn:ietf:params:xml:ns:yang:ietf-network-topology" xmlns:bbf-an-nw-topology="urn:bbf:yang:obbaa:an-network-topology">
+                <network>
+                    <network-id>network-fan1</network-id>
+                    <nt:link>
+                        <nt:link-id>l2-v-uni2-l2-vlan300</nt:link-id>
+                        <nt:source>
+                            <nt:source-node>onu-1</nt:source-node>
+                            <nt:source-tp>l2-v-uni1</nt:source-tp>
+                        </nt:source>
+                        <nt:destination>
+                            <nt:dest-node>olt-1</nt:dest-node>
+                            <nt:dest-tp>l2-vlan300</nt:dest-tp>
+                        </nt:destination>
+                        <bbf-an-nw-topology:access-link-attributes>
+                            <bbf-an-nw-topology:link-direction>bidirectional</bbf-an-nw-topology:link-direction>
+                        </bbf-an-nw-topology:access-link-attributes>
+                    </nt:link>
+                </network>
+            </networks>
+        </config>
+    </edit-config>
+</rpc>

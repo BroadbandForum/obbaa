@@ -41,13 +41,10 @@ import io.netty.channel.socket.SocketChannelConfig;
 
 public class IpfixCollectorClientInitializerTest {
 
-    private CollectingService m_collectingService;
-
-    private AtomicLong m_clientConnectedCount;
-
     private static final int MAX_CONNECTION = 10;
-
     private static final int INCOMING_CONNECTION = 20;
+    private CollectingService m_collectingService;
+    private AtomicLong m_clientConnectedCount;
 
     @Before
     public void setup() {

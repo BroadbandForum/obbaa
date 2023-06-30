@@ -23,6 +23,8 @@ global:
   #enabled: true
   ipfix-collector:
   #enabled: true
+  onu-pm-collector:
+  #enabled: true
   control-relay:
   #enabled: true
   microservices-discovery:
@@ -58,10 +60,12 @@ baa:
       PMA_SESSION_FACTORY_TYPE: REGULAR
       MAXIMUM_ALLOWED_ADAPTER_VERSIONS: 3
       VOLTMF_NAME: vOLTMF
+      # Enable Model Abstracter or Disable Model Abstracter, Default value is Disable
+      MODEL_ABSTRACTER_STATUS: Disable
       BAA_MICRO_SERVICE_DISCOVERY_API_ADDRESS: "microservices-discovery:8093"
       BAA_KUBERNETES_NAMESPACE: obbaa
       # Below tag shall be set as false if the BAA is going to be tested for Scalability/Performance
-      NC_ENABLE_POST_EDIT_DS_VALIDATION_SUPPORT: True
+      NC_ENABLE_POST_EDIT_DS_VALIDATION_SUPPORT: "True"
   resources:
     requests:
       cpu: 0.2
@@ -105,6 +109,7 @@ vomci:
       KAFKA_REQUEST_TOPICS: "vomci1-request" # if message formatter is JSON "OBBAA_ONU_REQUEST"
       KAFKA_RESPONSE_TOPICS: 'vomci1-response' # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
       KAFKA_NOTIFICATION_TOPICS: "vomci1-notification" # if message formatter is Json "OBBAA_ONU_NOTIFICATION"
+      KAFKA_TELEMETRY_TOPICS: "vomci1-telemetry"
       VOMCI_KAFKA_SENDER_NAME: "bbf-vomci"
       VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
       BBF_OBBAA_VNF_NAME: "BBF-VOMCI"
@@ -195,6 +200,36 @@ ipfix-collector:
       INFLUXDB_ORGANISATION: broadband_forum
       INFLUXDB_BUCKETID: pm-collection
       INFLUXDB_API_URL: http://influxdb:9999
+      INFLUXDB_TOKEN: _6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
+      PMD_MAX_BUFFERED_POINTS: 5000
+      PMD_MAX_BUFFERED_MEASUREMENTS: 100
+      PMD_TIMEOUT_BUFFERED_POINTS: 60
+      PMD_NBI_PORT: 5051
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 0.5Gi
+
+onu-pm-collector:
+  #enabled: true
+  image:
+    registry: #broadbandforum
+    #repository: #onu-pm-collector
+    tag: latest
+  service:
+    type: NodePort
+  env:
+    open:
+      IPFIX_COLLECTOR_PORT: 4495
+      IPFIX_COLLECTOR_MAX_CONNECTION: 10000
+      BAA_HOST: baa
+      BAA_SSH_PORT: 9292
+      BAA_USERNAME: admin
+      BAA_PASSWORD: password
+      DEBUG: true
+      INFLUXDB_ORGANISATION: broadband_forum
+      INFLUXDB_BUCKETID: onu-pm-collection
+      INFLUXDB_API_URL: http://obbaa-influxdb:9999
       INFLUXDB_TOKEN: _6Mb0Td0U5pbKecnJZ0ajSSw3uGJZggVpLmr9WDdAbXsTDImNZI3pO3zj5OgJtoiGXV6-1HGD5E8xi_4GwFw-g==
       PMD_MAX_BUFFERED_POINTS: 5000
       PMD_MAX_BUFFERED_MEASUREMENTS: 100

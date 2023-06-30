@@ -64,7 +64,7 @@ import com.google.protobuf.ByteString;
  * <p>
  * Formatting messages to GPB format from XML or from GPB Format to XML
  * </p>
- * Created by Ranjitha.B.R (Nokia) on 13/05/2021. Updated by Filipe Cláudio (Altice Labs) on 19/05/2021
+ * Created by Ranjitha.B.R (Nokia) on 13/05/2021. Updated by Filipe Claudio (Altice Labs) on 19/05/2021
  * Updated by Miguel Melo (Altice Labs) on 23/12/2020
  */
 public class GpbFormatter implements MessageFormatter<Msg> {
@@ -154,6 +154,10 @@ public class GpbFormatter implements MessageFormatter<Msg> {
                 msg = getFormattedNFMessageForCopyConfig((CopyConfigRequest) request,
                         networkFunction, adapterManager,modelNodeDsm);
                 break;
+            case NetconfResources.ACTION:
+                msg = getFormattedNFMessageForAction((ActionRequest) request,
+                        networkFunction, adapterManager,modelNodeDsm);
+                break;
             default:
                 LOGGER.warn("GpbFormatter didn't recognize the operation: " + operationType);
                 break;
@@ -207,12 +211,39 @@ public class GpbFormatter implements MessageFormatter<Msg> {
         return msg;
     }
 
+    private Msg getFormattedNFMessageForAction(ActionRequest request,
+                                                   NetworkFunction networkFunction,
+                                                   AdapterManager adapterManager,
+                                                   ModelNodeDataStoreManager modelNodeDsm)
+            throws NetconfMessageBuilderException, MessageFormatterException {
+
+        SchemaRegistry schemaRegistry = AdapterUtils.getAdapterContext(networkFunction,adapterManager).getSchemaRegistry();
+
+        String payload = XmlUtil.convertXmlToJson(schemaRegistry, modelNodeDsm,
+                DocumentUtils.documentToPrettyString(request.getActionTreeElement()));
+
+        Msg msg = Msg.newBuilder()
+                .setHeader(Header.newBuilder()
+                        .setMsgId(request.getMessageId())
+                        .setSenderName(SENDER_NAME)
+                        .setRecipientName(networkFunction.getNetworkFunctionName())
+                        .setObjectType(nfType2ObjType(networkFunction.getType()))
+                        .setObjectName(networkFunction.getNetworkFunctionName())
+                        .build())
+                .setBody(Body.newBuilder().setRequest(buildActionRequest(payload)).build())
+                .build();
+        return msg;
+    }
+
     private OBJECT_TYPE nfType2ObjType(String networkFunctionType) {
         switch (networkFunctionType) {
             case "bbf-nf-types:vomci-function-type":
                 return OBJECT_TYPE.VOMCI_FUNCTION;
             case "bbf-nf-types:vomci-proxy-type":
                 return OBJECT_TYPE.VOMCI_PROXY;
+            case "bbf-d-olt-nft:d-olt-pppoeia":
+                //we are reusing the TR-451 protocol. There is no PPPoE object...
+                return OBJECT_TYPE.VOMCI_FUNCTION;
             default:
                 LOGGER.error("Unrecognized network function type: " + networkFunctionType);
         }
@@ -361,7 +392,7 @@ public class GpbFormatter implements MessageFormatter<Msg> {
     @Override
     public Msg getFormattedHelloRequest(String msgId, String vomciName,
                                         ObjectType type, String localEndpointName) throws MessageFormatterException {
-        if (type != ObjectType.VOMCI_FUNCTION && type != ObjectType.VOMCI_PROXY) {
+        if (type != ObjectType.VOMCI_FUNCTION && type != ObjectType.VOMCI_PROXY && type != ObjectType.D_OLT_VNF) {
             LOGGER.error("The message type must be VOMCI-FUNCTION or VOMCI-PROXY. Received: " + type.toString());
             throw new MessageFormatterException("The message type must be VOMCI-FUNCTION or VOMCI-PROXY!");
         }

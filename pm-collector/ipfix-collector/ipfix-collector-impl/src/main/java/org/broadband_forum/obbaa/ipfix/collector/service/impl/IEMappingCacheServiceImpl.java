@@ -30,7 +30,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.broadband_forum.obbaa.ipfix.collector.service.IEMappingCacheService;
 import org.broadband_forum.obbaa.ipfix.collector.service.InformationElementService;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixConstants;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixConstants;
 import org.broadband_forum.obbaa.ipfix.ncclient.api.NetConfClientException;
 import org.broadband_forum.obbaa.netconf.api.messages.GetRequest;
 import org.broadband_forum.obbaa.netconf.api.messages.NetConfResponse;
@@ -140,7 +140,7 @@ public class IEMappingCacheServiceImpl implements IEMappingCacheService {
             String model = getNodeValue(deviceAdapter, DEVICE_MODEL, NETWORK_MANAGER_NAMESPACE);
             String vendor = getNodeValue(deviceAdapter, DEVICE_VENDOR, NETWORK_MANAGER_NAMESPACE);
             if (model != null && vendor != null && type != null && interfaceVersion != null) {
-                deviceFamily =  vendor + "-" + type + "-" + model + "-" + interfaceVersion;
+                deviceFamily = vendor + "-" + type + "-" + model + "-" + interfaceVersion;
                 deviceFamilies.add(deviceFamily);
             }
         }
@@ -149,7 +149,7 @@ public class IEMappingCacheServiceImpl implements IEMappingCacheService {
     }
 
     private String getNodeValue(Element parent, String name, String namespace) {
-        Element node =  DocumentUtils.getDirectChildElement(parent, name, namespace);
+        Element node = DocumentUtils.getDirectChildElement(parent, name, namespace);
         if (node != null) {
             return node.getTextContent();
         }

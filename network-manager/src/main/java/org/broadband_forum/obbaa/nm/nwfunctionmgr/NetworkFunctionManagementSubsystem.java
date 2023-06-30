@@ -57,7 +57,6 @@ import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.AbstractSubSystem;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ChangeNotification;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.EditConfigChangeNotification;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.FilterNode;
-import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.GetAttributeException;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ModelNodeChangeType;
 import org.broadband_forum.obbaa.netconf.mn.fwk.server.model.ModelNodeId;
 import org.json.JSONArray;
@@ -108,7 +107,7 @@ public class NetworkFunctionManagementSubsystem extends AbstractSubSystem {
 
     @Override
     protected Map<ModelNodeId, List<Element>> retrieveStateAttributes(Map<ModelNodeId, Pair<List<QName>,
-            List<FilterNode>>> attributes) throws GetAttributeException {
+            List<FilterNode>>> attributes) {
         Map<ModelNodeId, List<Element>> stateInfo = new HashMap<>();
         for (Map.Entry<ModelNodeId, Pair<List<QName>, List<FilterNode>>> entry : attributes.entrySet()) {
             if (attributes.entrySet().toString().contains(VIRTUAL_NETWORK_FUNCTION_INSTANCE)) {
@@ -125,13 +124,12 @@ public class NetworkFunctionManagementSubsystem extends AbstractSubSystem {
     }
 
     private String getNetworkFunctionDetails() {
-        CloseableHttpClient client = HttpClients.createDefault();
         HttpGet request = new HttpGet(HTTP + SystemPropertyUtils.getInstance()
                 .getFromEnvOrSysProperty(BAA_MICRO_SERVICE_DISCOVERY_API_ADDRESS)
                 + GET_NETWORK_FUNCTION_URI_PATH);
         CloseableHttpResponse response = null;
         String responseString = null;
-        try {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
             response = client.execute(request);
             responseString = EntityUtils.toString(response.getEntity());
         } catch (IOException e) {
@@ -141,13 +139,12 @@ public class NetworkFunctionManagementSubsystem extends AbstractSubSystem {
     }
 
     private String getNetworkFunctionInstanceDetails() {
-        CloseableHttpClient client = HttpClients.createDefault();
         HttpGet request = new HttpGet(HTTP + SystemPropertyUtils.getInstance()
                 .getFromEnvOrSysProperty(BAA_MICRO_SERVICE_DISCOVERY_API_ADDRESS)
                 + GET_NETWORK_FUNCTION_INSTANCES_URI_PATH);
         CloseableHttpResponse response = null;
         String responseString = null;
-        try {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
             response = client.execute(request);
             responseString = EntityUtils.toString(response.getEntity());
         } catch (IOException e) {

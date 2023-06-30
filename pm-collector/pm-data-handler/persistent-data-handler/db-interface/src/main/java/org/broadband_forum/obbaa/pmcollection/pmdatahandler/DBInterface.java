@@ -29,7 +29,7 @@ public interface DBInterface {
     void executeStore(TSData tsData);
 
     void executeQuery(String metric, Instant startTime, Instant stopTime,
-        Map<String, List<String>> filter, List<TSData> results);
+                      Map<String, List<String>> filter, List<TSData> results);
 
     void shutdownDB();
 }

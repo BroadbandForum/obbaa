@@ -315,6 +315,7 @@
                 <value>/yangs/ietf-datastores@2017-08-17.yang</value>
                 <value>/yangs/bbf-device-types.yang</value>
                 <value>/yangs/bbf-network-function-types.yang</value>
+                <value>/yangs/bbf-d-olt-network-function-types.yang</value>
                 <value>/yangs/bbf-xpon-types.yang</value>
                 <value>/yangs/bbf-yang-types.yang</value>
                 <value>/yangs/bbf-vomci-types.yang</value>

@@ -26,10 +26,10 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElement;
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElementType;
 import org.broadband_forum.obbaa.ipfix.collector.service.IEMappingCacheService;
-import org.broadband_forum.obbaa.ipfix.collector.service.ie.InformationElementCache;
+import org.broadband_forum.obbaa.ipfix.entities.ie.InformationElement;
+import org.broadband_forum.obbaa.ipfix.entities.ie.InformationElementType;
+import org.broadband_forum.obbaa.ipfix.entities.service.ie.impl.InformationElementCacheImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,13 +39,11 @@ import org.mockito.MockitoAnnotations;
 
 public class InformationElementServiceImplTest {
 
-    private InformationElementServiceImpl m_informationElementService;
-
-    @Mock
-    private InformationElementCache m_cache;
-
     @Rule
     public final EnvironmentVariables envVar = new EnvironmentVariables();
+    private InformationElementServiceImpl m_informationElementService;
+    @Mock
+    private InformationElementCacheImpl m_cache;
 
     @Before
     public void setUp() {

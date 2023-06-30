@@ -29,7 +29,7 @@ import org.osgi.framework.Bundle;
  * <p>
  * Abstract class for Kafka Producer, contains the generic functions of the kafka producer.
  * </p>
- * Created by Filipe Cláudio (Altice Labs) on 09/06/2021.
+ * Created by Filipe Claudio (Altice Labs) on 09/06/2021.
  */
 public abstract class AbstractOnuKafkaProducer implements OnuKafkaProducer {
 
@@ -40,21 +40,6 @@ public abstract class AbstractOnuKafkaProducer implements OnuKafkaProducer {
         m_bundle = bundle;
     }
 
-    @Override
-    public abstract void sendNotification(String kafkaTopicName, Object notification) throws MessageFormatterException;
-
-    Properties loadKafkaConfig() {
-        Properties config = new Properties();
-        try {
-            InputStream stream = m_bundle.getResource("kafka_config.properties").openStream();
-            config.load(stream);
-            config.put("client.id", InetAddress.getLocalHost().getHostName());
-        } catch (IOException e) {
-            LOGGER.error("KafkaConfigReadException", e);
-        }
-        return config;
-    }
-
     public static String checkTopicName(final String topic) {
         String returnString = topic;
         if (returnString.indexOf(".") != -1) {
@@ -62,5 +47,19 @@ public abstract class AbstractOnuKafkaProducer implements OnuKafkaProducer {
             LOGGER.error("Found illegal characters in topic '" + topic + "' and deleted them");
         }
         return returnString;
+    }
+
+    @Override
+    public abstract void sendNotification(String kafkaTopicName, Object notification) throws MessageFormatterException;
+
+    Properties loadKafkaConfig() {
+        Properties config = new Properties();
+        try (InputStream stream = m_bundle.getResource("kafka_config.properties").openStream()) {
+            config.load(stream);
+            config.put("client.id", InetAddress.getLocalHost().getHostName());
+        } catch (IOException e) {
+            LOGGER.error("KafkaConfigReadException", e);
+        }
+        return config;
     }
 }

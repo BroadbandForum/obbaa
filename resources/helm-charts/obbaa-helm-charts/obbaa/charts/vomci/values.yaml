@@ -26,6 +26,7 @@ env:
     KAFKA_REQUEST_TOPICS: "vomci1-request" # if message formatter is JSON "OBBAA_ONU_REQUEST"
     KAFKA_RESPONSE_TOPICS: 'vomci1-response' # if message formatter is JSON 'OBBAA_ONU_RESPONSE'
     KAFKA_NOTIFICATION_TOPICS: "vomci1-notification" # if message formatter is JSON "OBBAA_ONU_NOTIFICATION"
+    KAFKA_TELEMETRY_TOPICS: "vomci1-telemetry"
     VOMCI_KAFKA_SENDER_NAME: "bbf-vomci"
     VOMCI_KAFKA_VOLTMF_NAME: "vOLTMF"
     BBF_OBBAA_VNF_NAME: "BBF-VOMCI"

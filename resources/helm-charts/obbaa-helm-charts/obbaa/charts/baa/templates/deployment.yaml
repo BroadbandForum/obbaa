@@ -51,13 +51,16 @@ spec:
               value: REGULAR
             - name: VOLTMF_NAME
               value: vOLTMF
+            # Enable Model Abstracter or Disable Model Abstracter, Default value is Disable
+            - name: MODEL_ABSTRACTER_STATUS
+              value: Disable
             - name: BAA_MICRO_SERVICE_DISCOVERY_API_ADDRESS
               value: "microservices-discovery:8093"
             - name: BAA_KUBERNETES_NAMESPACE
               value: obbaa
             # Below tag shall be set as false if the BAA is going to be tested for Scalability/Performance
             - name: NC_ENABLE_POST_EDIT_DS_VALIDATION_SUPPORT
-              value: True
+              value: "True"
 #          livenessProbe:
 #            httpGet:
 #              path: /

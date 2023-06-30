@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixMessagesWrapper;
 import org.broadband_forum.obbaa.ipfix.collector.util.IPFIXUtilTestHelper;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.junit.Test;
 
 import io.netty.buffer.ByteBuf;

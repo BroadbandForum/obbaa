@@ -19,9 +19,9 @@ package org.broadband_forum.obbaa.ipfix.collector.threadpool;
 import java.util.List;
 
 import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixMessagesWrapper;
-import org.broadband_forum.obbaa.ipfix.collector.entities.header.IpfixMessageHeader;
-import org.broadband_forum.obbaa.ipfix.collector.exception.UtilityException;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
+import org.broadband_forum.obbaa.ipfix.entities.exception.UtilityException;
+import org.broadband_forum.obbaa.ipfix.entities.message.header.IpfixMessageHeader;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +34,19 @@ public class IpfixMessageDecoder extends ByteToMessageDecoder {
     private static final String NUMBER_OF_MESSAGE_BUFFER_ENV = "NUMBER_OF_MESSAGE_BUFFER";
     private static final long NUMBER_OF_MESSAGE_BUFFER_DEFAULT = 1000;
     private static final long NUMBER_OF_MESSAGE_BUFFER = getNumberOfMessageBuffer();
+
+    private static long getNumberOfMessageBuffer() {
+        long noMessageBuffer = NUMBER_OF_MESSAGE_BUFFER_DEFAULT;
+        try {
+            String noMessageBufferAsString = System.getenv(NUMBER_OF_MESSAGE_BUFFER_ENV);
+            if (noMessageBufferAsString != null && !noMessageBufferAsString.isEmpty()) {
+                noMessageBuffer = Long.valueOf(noMessageBufferAsString);
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Error while retrieving environment set value for message buffer");
+        }
+        return noMessageBuffer;
+    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
@@ -57,7 +70,7 @@ public class IpfixMessageDecoder extends ByteToMessageDecoder {
             if (remainingByteAfterCheck.length < messageLengthAsInt) {
                 // Not enough bytes for data. Continue
                 LOGGER.debug(String.format("Checked bytes: %s is smaller than IPFIX message size. Keep waiting...",
-                            remainingByteAfterCheck.length, messageLengthAsInt));
+                        remainingByteAfterCheck.length, messageLengthAsInt));
                 break;
             }
             byte[] completedIpfixMsgAsByte = IpfixUtilities.copyByteArray(remainingByteAfterCheck, 0, messageLengthAsInt);
@@ -82,18 +95,5 @@ public class IpfixMessageDecoder extends ByteToMessageDecoder {
             LOGGER.debug(String.format("The wrapper message count: %s, remainingByteAfterCheck length: %s", out.size(),
                     remainingByteAfterCheck.length));
         }
-    }
-
-    private static long getNumberOfMessageBuffer() {
-        long noMessageBuffer = NUMBER_OF_MESSAGE_BUFFER_DEFAULT;
-        try {
-            String noMessageBufferAsString = System.getenv(NUMBER_OF_MESSAGE_BUFFER_ENV);
-            if (noMessageBufferAsString != null && !noMessageBufferAsString.isEmpty()) {
-                noMessageBuffer = Long.valueOf(noMessageBufferAsString);
-            }
-        } catch (Exception e) {
-            LOGGER.debug("Error while retrieving environment set value for message buffer");
-        }
-        return noMessageBuffer;
     }
 }

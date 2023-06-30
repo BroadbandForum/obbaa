@@ -1,0 +1,37 @@
+image:
+  repository: broadbandforum/pppoe-relay-vnf
+  tag: latest
+  imagePullPolicy: Always
+
+resources:
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+service:
+  type: ClusterIP
+  name: pppoe-relay-vnf
+  nodePort: 30300
+
+env: 
+  dbName: "pppoe_relay_vnf"
+  mongoHost: "mongo"
+  mongoPort: 27017
+
+  kafkaHost: "kafka"
+  kafkaPort: "9092"
+
+  socketGrpcAddress: "0.0.0.0"
+  socketGrpcPort: "50051"
+
+  discardOnError: "false"
+  vnfMode: "server"
+
+containerPort:
+  name: pppoeport
+  number: 9903
+
+ingress:
+  enabled: false
+
+command: [./vnf]

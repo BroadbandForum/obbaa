@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  ~ Copyright 2018 Broadband Forum
+  ~ Copyright 2018-2022 Broadband Forum
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@
         <bundle>mvn:org.broadband-forum.obbaa/network-manager/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/pma/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/aggregator/${project.version}</bundle>
+        <bundle>mvn:org.broadband-forum.obbaa/model-abstracter/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/nbi-adapter/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/library-consult/${project.version}</bundle>
         <bundle>mvn:org.broadband-forum.obbaa/voltmf/${project.version}</bundle>
@@ -79,6 +80,8 @@
         <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
         <bundle>mvn:joda-time/joda-time/${joda-time.version}</bundle>
         <bundle>mvn:org.apache.sshd/sshd-osgi/${mina.version}</bundle>
+        <bundle>mvn:org.freemarker/freemarker/${freemarker.version}</bundle>
+        <bundle><![CDATA[wrap:mvn:org.projectlombok/lombok/${lombok.version}$Bundle-SymbolicName=lombok&Bundle-Version=${lombok.version}]]></bundle>
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
         <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
         <bundle>mvn:commons-collections/commons-collections/${commons-collection.version}</bundle>

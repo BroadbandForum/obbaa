@@ -347,12 +347,75 @@
                             <bbf-xpongemtcont:xpongemtcont xmlns:bbf-xpongemtcont="urn:bbf:yang:bbf-xpongemtcont">
                                 <bbf-xpongemtcont:gemports>
                                     <bbf-xpongemtcont:gemport>
-                                        <bbf-xpongemtcont:name>gem_ont1</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:name>gem_ont1_1</bbf-xpongemtcont:name>
                                         <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
-                                        <bbf-xpongemtcont:gemport-id>3072</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:gemport-id>1024</bbf-xpongemtcont:gemport-id>
                                         <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
                                         <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
                                         <bbf-xpongemtcont:traffic-class>0</bbf-xpongemtcont:traffic-class>
+                                        <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
+                                    </bbf-xpongemtcont:gemport>
+                                    <bbf-xpongemtcont:gemport>
+                                        <bbf-xpongemtcont:name>gem_ont1_2</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
+                                        <bbf-xpongemtcont:gemport-id>1025</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
+                                        <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
+                                        <bbf-xpongemtcont:traffic-class>1</bbf-xpongemtcont:traffic-class>
+                                        <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
+                                    </bbf-xpongemtcont:gemport>
+                                    <bbf-xpongemtcont:gemport>
+                                        <bbf-xpongemtcont:name>gem_ont1_3</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
+                                        <bbf-xpongemtcont:gemport-id>1026</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
+                                        <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
+                                        <bbf-xpongemtcont:traffic-class>2</bbf-xpongemtcont:traffic-class>
+                                        <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
+                                    </bbf-xpongemtcont:gemport>
+                                    <bbf-xpongemtcont:gemport>
+                                        <bbf-xpongemtcont:name>gem_ont1_4</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
+                                        <bbf-xpongemtcont:gemport-id>1027</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
+                                        <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
+                                        <bbf-xpongemtcont:traffic-class>3</bbf-xpongemtcont:traffic-class>
+                                        <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
+                                    </bbf-xpongemtcont:gemport>
+                                    <bbf-xpongemtcont:gemport>
+                                        <bbf-xpongemtcont:name>gem_ont1_5</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
+                                        <bbf-xpongemtcont:gemport-id>1028</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
+                                        <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
+                                        <bbf-xpongemtcont:traffic-class>4</bbf-xpongemtcont:traffic-class>
+                                        <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
+                                    </bbf-xpongemtcont:gemport>
+                                    <bbf-xpongemtcont:gemport>
+                                        <bbf-xpongemtcont:name>gem_ont1_6</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
+                                        <bbf-xpongemtcont:gemport-id>1029</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
+                                        <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
+                                        <bbf-xpongemtcont:traffic-class>5</bbf-xpongemtcont:traffic-class>
+                                        <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
+                                    </bbf-xpongemtcont:gemport>
+                                    <bbf-xpongemtcont:gemport>
+                                        <bbf-xpongemtcont:name>gem_ont1_7</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
+                                        <bbf-xpongemtcont:gemport-id>1030</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
+                                        <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
+                                        <bbf-xpongemtcont:traffic-class>6</bbf-xpongemtcont:traffic-class>
+                                        <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
+                                    </bbf-xpongemtcont:gemport>
+                                    <bbf-xpongemtcont:gemport>
+                                        <bbf-xpongemtcont:name>gem_ont1_8</bbf-xpongemtcont:name>
+                                        <bbf-xpongemtcont:downstream-aes-indicator>false</bbf-xpongemtcont:downstream-aes-indicator>
+                                        <bbf-xpongemtcont:gemport-id>1031</bbf-xpongemtcont:gemport-id>
+                                        <bbf-xpongemtcont:interface>enet_uni_ont1_1_1</bbf-xpongemtcont:interface>
+                                        <bbf-xpongemtcont:tcont-ref>tcont_ont1</bbf-xpongemtcont:tcont-ref>
+                                        <bbf-xpongemtcont:traffic-class>7</bbf-xpongemtcont:traffic-class>
                                         <bbf-xpongemtcont:upstream-aes-indicator>false</bbf-xpongemtcont:upstream-aes-indicator>
                                     </bbf-xpongemtcont:gemport>
                                 </bbf-xpongemtcont:gemports>
@@ -419,7 +482,7 @@
                                         <dot1x:port-capabilities/>
                                     </dot1x:pae>
                                     <bbf-if-pm:performance xmlns:bbf-if-pm="urn:bbf:yang:bbf-interfaces-performance-management">
-                                        <bbf-if-pm:enable>false</bbf-if-pm:enable>
+                                        <bbf-if-pm:enable>true</bbf-if-pm:enable>
                                     </bbf-if-pm:performance>
                                     <bbf-qos-tm:tm-root xmlns:bbf-qos-tm="urn:bbf:yang:bbf-qos-traffic-mngt"/>
                                 </if:interface>

@@ -56,9 +56,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.annotations.VisibleForTesting;
 
 public class NcClientServiceImpl implements NcClientService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NcClientServiceImpl.class);
-
     public static final String PMA_HOST_STRING = "BAA_HOST";
+    public static final String HOSTKEY_SER = "hostkey.ser";
+    private static final Logger LOGGER = LoggerFactory.getLogger(NcClientServiceImpl.class);
     private static final String PMA_DEFAULT_HOST = "localhost";
     private static final String PMA_HOST = System.getenv(PMA_HOST_STRING);
     private static final String PMA_SSH_PORT = "BAA_SSH_PORT";
@@ -70,15 +70,10 @@ public class NcClientServiceImpl implements NcClientService {
     private static final String PMA_DEFAULT_PASSWORD = "pass";
     private static final String PMA_PASSWORD = "BAA_PASSWORD";
     private static final String PMA_PASSWORD_STRING = System.getenv(PMA_PASSWORD);
-
-    public static final String HOSTKEY_SER = "hostkey.ser";
     private static Set<String> CLIENTCAPS = new HashSet<>(Arrays.asList(NetconfResources.NETCONF_BASE_CAP_1_0,
             NetconfResources.NETCONF_BASE_CAP_1_1));
-
-    private NetconfClientDispatcher m_dispatcher = new NetconfClientDispatcherImpl(Executors.newCachedThreadPool());
-
     NetconfLoginProvider m_authorizationProvider = null;
-
+    private NetconfClientDispatcher m_dispatcher = new NetconfClientDispatcherImpl(Executors.newCachedThreadPool());
     private NetconfTransportOrder m_clientTransportOder;
 
     private NetconfClientConfiguration m_clientConfig;
@@ -128,6 +123,17 @@ public class NcClientServiceImpl implements NcClientService {
         }
     }
 
+    private static int getPmaSshPort() {
+        if (StringUtils.isNotEmpty(PMA_SSH_PORT_STRING)) {
+            try {
+                return Integer.parseInt(PMA_SSH_PORT_STRING);
+            } catch (Exception e) {
+                return PMA_DEFAULT_SSH_PORT;
+            }
+        }
+        return PMA_DEFAULT_SSH_PORT;
+    }
+
     private void createNetconfSession(String hostname, int port) throws ExecutionException,
             NetconfClientDispatcherException, InterruptedException {
         m_futureSession = m_dispatcher.createClient(m_clientConfig);
@@ -155,22 +161,11 @@ public class NcClientServiceImpl implements NcClientService {
         return StringUtils.isEmpty(PMA_HOST) ? PMA_DEFAULT_HOST : PMA_HOST;
     }
 
-    private static int getPmaSshPort() {
-        if (StringUtils.isNotEmpty(PMA_SSH_PORT_STRING)) {
-            try {
-                return Integer.parseInt(PMA_SSH_PORT_STRING);
-            } catch (Exception e) {
-                return PMA_DEFAULT_SSH_PORT;
-            }
-        }
-        return PMA_DEFAULT_SSH_PORT;
-    }
-
     @VisibleForTesting
     protected NetconfClientConfiguration getNetconfClientConfiguration() throws NetconfConfigurationBuilderException {
         return new NetconfClientConfigurationBuilder().setNetconfLoginProvider(m_authorizationProvider)
-        .setTransport(NetconfTransportFactory.makeNetconfTransport(m_clientTransportOder)).setConnectionTimeout(Long.MAX_VALUE)
-        .setCapabilities(CLIENTCAPS).build();
+                .setTransport(NetconfTransportFactory.makeNetconfTransport(m_clientTransportOder)).setConnectionTimeout(Long.MAX_VALUE)
+                .setCapabilities(CLIENTCAPS).build();
     }
 
     @VisibleForTesting

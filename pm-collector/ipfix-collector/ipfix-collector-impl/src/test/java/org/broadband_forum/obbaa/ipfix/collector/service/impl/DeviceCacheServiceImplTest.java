@@ -55,7 +55,7 @@ public class DeviceCacheServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void testGetDeviceFamilyInCache() throws NetconfMessageBuilderException, ExecutionException, NetConfClientException, InterruptedException {
 
         Map<String, String> cache = new HashMap<String, String>();

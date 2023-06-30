@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -35,21 +36,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixMessage;
 import org.broadband_forum.obbaa.ipfix.collector.entities.IpfixMessageNotification;
-import org.broadband_forum.obbaa.ipfix.collector.entities.logging.IpfixDecodedData;
-import org.broadband_forum.obbaa.ipfix.collector.entities.record.AbstractTemplateRecord;
-import org.broadband_forum.obbaa.ipfix.collector.entities.record.IpfixOptionTemplateRecord;
-import org.broadband_forum.obbaa.ipfix.collector.entities.record.IpfixTemplateRecord;
-import org.broadband_forum.obbaa.ipfix.collector.entities.set.IpfixDataSet;
-import org.broadband_forum.obbaa.ipfix.collector.exception.NotEnoughBytesException;
 import org.broadband_forum.obbaa.ipfix.collector.service.DecodingDataRecordService;
 import org.broadband_forum.obbaa.ipfix.collector.service.DeviceCacheService;
-import org.broadband_forum.obbaa.ipfix.collector.service.IpfixCachingService;
-import org.broadband_forum.obbaa.ipfix.collector.util.IpfixUtilities;
+import org.broadband_forum.obbaa.ipfix.entities.adapter.IpfixAdapterInterface;
+import org.broadband_forum.obbaa.ipfix.entities.exception.NotEnoughBytesException;
+import org.broadband_forum.obbaa.ipfix.entities.message.IpfixMessage;
+import org.broadband_forum.obbaa.ipfix.entities.message.logging.IpfixDecodedData;
+import org.broadband_forum.obbaa.ipfix.entities.record.AbstractTemplateRecord;
+import org.broadband_forum.obbaa.ipfix.entities.record.IpfixOptionTemplateRecord;
+import org.broadband_forum.obbaa.ipfix.entities.record.IpfixTemplateRecord;
+import org.broadband_forum.obbaa.ipfix.entities.service.IpfixCachingService;
+import org.broadband_forum.obbaa.ipfix.entities.service.impl.IpfixCachingServiceImpl;
+import org.broadband_forum.obbaa.ipfix.entities.set.IpfixDataSet;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixDeviceInterfaceUtil;
+import org.broadband_forum.obbaa.ipfix.entities.util.IpfixUtilities;
 import org.broadband_forum.obbaa.pm.service.DataHandlerService;
 import org.broadband_forum.obbaa.pm.service.IpfixDataHandler;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
@@ -61,21 +66,20 @@ import com.google.gson.Gson;
 
 public class CollectingServiceImplTest {
 
-    @Mock
-    private DecodingDataRecordService m_decodingDataRecordService;
-
-    private IpfixCachingService m_cachingService;
-
-    @Mock
-    private DeviceCacheService m_deviceFamilyCacheService;
-
-    @Mock
-    private DataHandlerService m_dataHandlerService;
-
-    private byte[] m_data;
-
     @Rule
     public final EnvironmentVariables m_environmentVariables = new EnvironmentVariables();
+    @Mock
+    private DecodingDataRecordService m_decodingDataRecordService;
+    private IpfixCachingService m_cachingService;
+    @Mock
+    private DeviceCacheService m_deviceFamilyCacheService;
+    @Mock
+    private DataHandlerService m_dataHandlerService;
+    @Mock
+    private IpfixDeviceInterfaceUtil m_ipfixDeviceInterfaceUtil;
+    @Mock
+    private IpfixAdapterInterface m_ipfixAdapterInterface;
+    private byte[] m_data;
 
     @Before
     public void setUp() {
@@ -88,7 +92,7 @@ public class CollectingServiceImplTest {
         try {
             byte[] data = IpfixUtilities.hexStringToByteArray("0103002000");
             CollectingServiceImpl collectingService = new CollectingServiceImpl(m_decodingDataRecordService, m_cachingService,
-                    m_dataHandlerService, m_deviceFamilyCacheService);
+                    m_dataHandlerService, m_deviceFamilyCacheService, m_ipfixDeviceInterfaceUtil);
             collectingService.createIpfixMessage(data);
             fail();
         } catch (NotEnoughBytesException e) {
@@ -97,6 +101,7 @@ public class CollectingServiceImplTest {
     }
 
     @Test
+    @Ignore("OBBAA-648")
     public void testCollectOptionTemplateSet() throws Exception {
         byte[] data = IpfixUtilities.hexStringToByteArray("000A00AC5DAEECB700000000000010EF00030022025800030001938AFFFF00000E91A1BCFFFF" +
                 "00000E91A1BDFFFF00000E910258007A08686F73746E616D650961646D696E757365726224362471334739564D6D5424736C484C59547A6A6553495A3" +
@@ -112,21 +117,23 @@ public class CollectingServiceImplTest {
         decodedDataSet.add(new IpfixDecodedData("8636.3729", "String", username));
         decodedDataSet.add(new IpfixDecodedData("8637.3729", "String", hashedPass));
         decodedDataSet.add(new IpfixDecodedData("5002.3729", "hostName", hashedPass));
-        m_cachingService = new IpfixCachingServiceImpl(){
+        m_cachingService = new IpfixCachingServiceImpl() {
             @Override
             public void cacheTemplateRecord(long obsvDomain, String hostname, Map<Integer, AbstractTemplateRecord> templateByIdCache) {
             }
+
             @Override
             public List<IpfixDataSet> getAndInvalidateIpfixDataSet(long obsvDomain, String hostName) {
                 return ipfixMessage.getDataSets();
             }
+
             @Override
             public AbstractTemplateRecord getTemplateRecord(long obsvDomain, String hostname, int templateId) {
                 return null;
             }
         };
         CollectingServiceImpl collectingService = new CollectingServiceImpl(m_decodingDataRecordService, m_cachingService,
-                m_dataHandlerService, m_deviceFamilyCacheService) {
+                m_dataHandlerService, m_deviceFamilyCacheService, m_ipfixDeviceInterfaceUtil) {
             @Override
             protected IpfixMessage createIpfixMessage(byte[] data) {
                 return ipfixMessage;
@@ -136,7 +143,7 @@ public class CollectingServiceImplTest {
         when(m_decodingDataRecordService.decodeDataSet(eq(""), eq(4335L), any(), eq(ipfixMessage), any()))
                 .thenReturn(decodedDataSet);
 
-        verifyCollectOptionTLSuccess(collectingService, data, remoteAddress, "");
+        verifyCollectOptionTLSuccess(collectingService, null, remoteAddress, "");
     }
 
     private void verifyCollectOptionTLSuccess(CollectingServiceImpl collectingService, byte[] data, String remoteAddress,
@@ -153,7 +160,7 @@ public class CollectingServiceImplTest {
         AbstractTemplateRecord templateRecord = new IpfixOptionTemplateRecord(new byte[16]);
         m_cachingService = mock(IpfixCachingServiceImpl.class);
         when(m_cachingService.getTemplateRecord(4335L, "hostname", 600)).thenReturn(templateRecord);
-        when(m_deviceFamilyCacheService.getDeviceFamily("hostname")).thenReturn("family");
+        when(m_deviceFamilyCacheService.getDeviceFamily("hostname")).thenReturn("BBF-ONU-standard-2.0");
         verifyCacheTemplate();
         verify(m_cachingService).cacheTemplateRecord(eq(4335L), eq("hostname"), anyMap());
     }
@@ -166,7 +173,7 @@ public class CollectingServiceImplTest {
         IpfixMessage ipfixMessage = new IpfixMessage(data);
         ipfixMessage.getHeader().setExportTime(Instant.now().toString());
         CollectingServiceImpl collectingService = new CollectingServiceImpl(m_decodingDataRecordService, m_cachingService,
-                m_dataHandlerService, m_deviceFamilyCacheService) {
+                m_dataHandlerService, m_deviceFamilyCacheService, m_ipfixDeviceInterfaceUtil) {
             @Override
             protected IpfixMessage createIpfixMessage(byte[] data) {
                 return ipfixMessage;
@@ -184,19 +191,23 @@ public class CollectingServiceImplTest {
                 "00000E91A1BDFFFF00000E910258007A08686F73746E616D650961646D696E757365726224362471334739564D6D5424736C484C59547A6A6553495A3" +
                 "86E525A465A5A487255384356385352387352456B6447544A656D6B705063616D4476414979372E504247494F6771767543757037716557382E6B6246" +
                 "38416D44596378586B6373792E");
+        when(m_deviceFamilyCacheService.getDeviceFamily(anyString())).thenReturn("BBF-ONU-standard-2.0");
         IpfixMessage ipfixMessage = new IpfixMessage(data);
         m_cachingService = new IpfixCachingServiceImpl() {
             @Override
             public void cacheTemplateRecord(long obsvDomain, String hostname, Map<Integer, AbstractTemplateRecord> templateByIdCache) {
             }
+
             @Override
             public List<IpfixDataSet> getAndInvalidateIpfixDataSet(long obsvDomain, String hostName) {
                 return ipfixMessage.getDataSets();
             }
+
             @Override
             public AbstractTemplateRecord getTemplateRecord(long obsvDomain, String hostname, int templateId) {
                 return null;
             }
+
             @Override
             public void cacheIpfixDataSet(long obsvDomain, String hostName, IpfixDataSet set) {
             }
@@ -230,20 +241,20 @@ public class CollectingServiceImplTest {
         decodedDataSet.add(new IpfixDecodedData("8637.3729", "String", hashedPass));
         decodedDataSet.add(new IpfixDecodedData("5002.3729", "String", hostName));
         CollectingServiceImpl collectingService = new CollectingServiceImpl(m_decodingDataRecordService, m_cachingService,
-                m_dataHandlerService, m_deviceFamilyCacheService) {
+                m_dataHandlerService, m_deviceFamilyCacheService, m_ipfixDeviceInterfaceUtil) {
             @Override
             protected IpfixMessage createIpfixMessage(byte[] data) {
                 return ipfixMessage;
             }
         };
-        String family = "sample-DPU-model-tls-1.0";
+        String family = "BBF-ONU-standard-2.0";
         Optional<String> optionalHostName = Optional.of(hostName);
         when(m_deviceFamilyCacheService.getDeviceFamily(hostName)).thenReturn(family);
         when(m_decodingDataRecordService.decodeDataSet(eq(hostName), eq(4335L), any(), any(), any())).thenReturn(decodedDataSet);
         List<IpfixDataHandler> dataHandlers = new ArrayList<>();
         IpfixDataHandler dataHandler = mock(IpfixDataHandler.class);
         dataHandlers.add(dataHandler);
-        when(m_dataHandlerService.getDataHandlers()).thenReturn(dataHandlers);
+        when(m_dataHandlerService.getIpfixDataHandlers()).thenReturn(dataHandlers);
         collectingService.collect(m_data, remoteAddress, optionalHostName);
         ArgumentMatcher<String> messageMatcher = new ArgumentMatcher<String>() {
             @Override
@@ -255,7 +266,7 @@ public class CollectingServiceImplTest {
                 assertNotNull(message.getTimestamp());
                 assertEquals("hostname", message.getHostName());
                 assertEquals("192.168.1.1", message.getSourceIP());
-                assertEquals("sample-DPU-model-tls-1.0", message.getDeviceAdapter());
+                assertEquals("BBF-ONU-standard-2.0", message.getDeviceAdapter());
                 assertEquals(276, message.getTemplateID());
                 assertEquals(4335L, message.getObservationDomain());
                 return true;

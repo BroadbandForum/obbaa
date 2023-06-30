@@ -21,13 +21,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.broadband_forum.obbaa.ipfix.collector.entities.ie.InformationElement;
+import org.broadband_forum.obbaa.ipfix.entities.ie.InformationElement;
+import org.broadband_forum.obbaa.ipfix.entities.service.ie.impl.InformationElementCacheImpl;
 import org.junit.Before;
 import org.junit.Test;
 
 public class InformationElementCacheTest {
 
-    private InformationElementCache m_informationElementCache = new InformationElementCache();
+    private InformationElementCacheImpl m_informationElementCache = new InformationElementCacheImpl();
 
     @Before
     public void testCacheIsAvailable() {

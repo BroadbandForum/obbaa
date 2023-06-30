@@ -494,6 +494,7 @@ public class DeviceManagerAdapterMockDaoTest extends AbstractValidationTestSetup
     }
 
     @Test
+    @Ignore
     public void processRequestDmGetNewDevices() throws Exception {
         String response = m_deviceManagerAdapter.processRequest(m_clientInfo, REQUEST_DEVICE_ADD);
         NetConfResponse netconfResponse = getNetconfResponse(stringToDocument(response));

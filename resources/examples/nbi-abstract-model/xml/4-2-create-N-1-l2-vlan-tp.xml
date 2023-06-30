@@ -1,0 +1,43 @@
+<!--
+   ~ Copyright 2022 Broadband Forum
+   ~
+   ~ Licensed under the Apache License, Version 2.0 (the "License");
+   ~ you may not use this file except in compliance with the License.
+   ~ You may obtain a copy of the License at
+   ~
+   ~ http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing, software
+   ~ distributed under the License is distributed on an "AS IS" BASIS,
+   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ~ See the License for the specific language governing permissions and
+   ~ limitations under the License.
+-->
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="14">
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <networks xmlns="urn:ietf:params:xml:ns:yang:ietf-network" xmlns:nt="urn:ietf:params:xml:ns:yang:ietf-network-topology" xmlns:bbf-l2t="urn:bbf:yang:obbaa:l2-topology" xmlns:l2t="urn:ietf:params:xml:ns:yang:ietf-l2-topology">
+                <network>
+                    <network-id>network-fan1</network-id>
+                    <node>
+                        <node-id>olt-1</node-id>
+                        <nt:termination-point>
+                            <nt:tp-id>l2-vlan300</nt:tp-id>
+                            <bbf-l2t:tp-type>l2-vlan</bbf-l2t:tp-type>
+                            <l2t:l2-termination-point-attributes>
+                                <bbf-l2t:forwarding-vlan>
+                                    <bbf-l2t:vlan-id>300</bbf-l2t:vlan-id>
+                                    <bbf-l2t:forwarding-profile>vlan-fwd-profile1</bbf-l2t:forwarding-profile>
+                                </bbf-l2t:forwarding-vlan>
+                            </l2t:l2-termination-point-attributes>
+                        </nt:termination-point>
+                    </node>
+                </network>
+            </networks>
+        </config>
+    </edit-config>
+</rpc>

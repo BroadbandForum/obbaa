@@ -39,6 +39,7 @@ public interface NetworkFunctionNSConstants {
     String VOMCI_FUNCTION = "vomci-function-type";
     String PROXY_FUNCTION = "vomci-proxy-type";
     String VOLTMF_FUNCTION = "voltmf-type";
+    String PPPOE_IA = "d-olt-pppoeia";
     String LISTEN = "listen";
     String IDLE_TIMEOUT = "idle-timeout";
     String LISTEN_ENDPOINT = "listen-endpoint";

@@ -15,15 +15,18 @@
   ~ limitations under the License.
   -->
 
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0"
+<blueprint xmlns:jpa="http://aries.apache.org/xmlns/jpa/v2.0.0"
            xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.2.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
            default-activation="eager">
     <jpa:enable/>
     <tx:enable-annotations/>
-    <reference id="dataHandlerService" interface="org.broadband_forum.obbaa.pm.service.DataHandlerService" availability="mandatory"/>
-    <reference id="influxDBService" interface="org.broadband_forum.obbaa.pmcollection.pmdatahandler.DBInterface" availability="mandatory"/>
+    <reference id="dataHandlerService" interface="org.broadband_forum.obbaa.pm.service.DataHandlerService"
+               availability="mandatory"/>
+    <reference id="influxDBService" interface="org.broadband_forum.obbaa.pmcollection.pmdatahandler.DBInterface"
+               availability="mandatory"/>
 
     <!-- pm data handler -->
     <bean id="pm-data-handler" class="org.broadband_forum.obbaa.pmcollection.pmdatahandler.PMDataHandler"
