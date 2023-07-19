@@ -38,7 +38,7 @@ OB-BAA:
 
 -   [Sample data on scale testing](scale/index.md)
 
--   [Running OB-BAA end-to-end test automation using robot framework](scale/index.md)
+-   [Running OB-BAA end-to-end test automation using robot framework](robot_framework/index.md)
 
 - [Deploying a PPPoE VNF embedded in OB-BAA](PPPoE_VNF/index.md)
 
