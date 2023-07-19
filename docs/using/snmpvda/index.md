@@ -103,7 +103,7 @@ functionality,
 
 SNMP trap receiver has the following components:
 <p align="center">
- <img width="1300px" height="800px" src="{{site.url}}/using/snmpvda/snmpvda_components.jpeg">
+ <img width="1300px" height="800px" src="snmpvda_components.jpeg">
 </p>
 
 #### Interfaces

@@ -12,30 +12,38 @@ maintain and operate the BAA layer and its associated resources. 
 In this release, the following topics are documented to help in using
 OB-BAA:
 
--   [Maintenance of Access Nodes](man/index.md#man)
+-   [Maintenance of Access Nodes](man/index.md)
 
--   [Examples for configuring Access Nodes](can/index.md#can)
+-   [Examples for configuring Access Nodes](can/index.md)
 
--   [Examples for managing ONUs via vOMCI](vomci_onu/index.md#vomci_onu)
+-   [Examples for managing ONUs via vOMCI](vomci_onu/index.md)
 
--   [Monitoring operations for Device Adapters](mda/index.md#mda)
+-   [Monitoring operations for Device Adapters](mda/index.md)
 
--   [Creation and deployment of Vendor Device Adapters](dvda/index.md#dvda)
-	-   [Create and deploy a SNMP Vendor Device Adapter](snmpvda/index.md#snmpvda)
-	-   [Dynamically create and deploy a Standard Device Adapter](sda/index.md#sda)
+-   [Creation and deployment of Vendor Device Adapters](dvda/index.md)
+	-   [Create and deploy a SNMP Vendor Device Adapter](snmpvda/index.md)
+	-   [Dynamically create and deploy a Standard Device Adapter](sda/index.md)
 
--   [Using NETCONF Event Notifications in the BAA layer](notif/index.md#notif)
+-   [Using NETCONF Event Notifications in the BAA layer](notif/index.md)
 
--   [Deployment of the IPFIX Performance Monitoring Collector and Data Handler](ipfixpm/index.md#ipfixpmc)
+-   [Deployment of the IPFIX Performance Monitoring Collector and Data Handler](ipfixpm/index.md)
 
--   [Integration of whitebox solutions](wbs/index.md#wbs)
+-   [Integration of whitebox solutions](wbs/index.md)
 
--   [Examples for using Control Adapters](control_relay/index.md#using_control_adapter)
+-   [Examples for using Control Adapters](control_relay/index.md)
 
--   [Examples for configuring the vOMCI function and vOMCI Proxy](vomci_func_proxy/index.md#vomci_func_proxy)
+-   [Examples for configuring the vOMCI function and vOMCI Proxy](vomci_func_proxy/index.md)
 
--   [Examples for Discovering micro-services](micro_discovery/index.md#micro_discovery)
+-   [Examples for Discovering micro-services](micro_discovery/index.md)
 
--   [Sample data on scale testing](scale/index.md#scale_testing)
+-   [Sample data on scale testing](scale/index.md)
+
+-   [Running OB-BAA end-to-end test automation using robot framework](scale/index.md)
+
+- [Deploying a PPPoE VNF embedded in OB-BAA](PPPoE_VNF/index.md)
+
+- [Processing and storing vONU telemetry data](vonu_telemetry_data_processing_and_storage/index.md)
+
+- [Model Abstracter](model_abstracter/index.md)
 
 [<--Installing OB-BAA](../installing/index.md#installing)

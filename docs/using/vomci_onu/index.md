@@ -32,7 +32,7 @@ The examples referred in this section can be found in
         request must match the IP address of the *polt-simulator* (Use
         the *docker inspect* command)
         <p align="left">
-         <img width="450px" height="115px" src="{{site.url}}/using/vomci_onu/polt_sim_ip.png">
+         <img width="450px" height="115px" src="polt_sim_ip.png">
         </p>
 * Configure infrastructure in OLT - *2-create-infra-std-2.1.xml*
 

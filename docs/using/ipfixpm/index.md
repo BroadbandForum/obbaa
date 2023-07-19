@@ -283,7 +283,7 @@ Vendor adapters should include the PM model or information elements mapping file
 While creating the adapter, the IPFIX_IEId.csv file must be placed in the directory structure as shown below:
 
 <p align="center">
- <img width="400px" height="400px" src="{{site.url}}/using/ipfixpm/pmie_location.png">
+ <img width="400px" height="400px" src="pmie_location.png">
 </p>
 
 While deploying the adapter, BAA will place IPFIX_IEId.csv file in the common mount point under a folder by name \<vendor\>-\<type\>-\<model\>-\<interfaceVersion\>. If the IPFIX_IEId.csv file is missing when IPFIX collector is decoding messages, then the collector will log an error message that the mapping file for the IPFIX messages from the device is missing.
@@ -315,8 +315,7 @@ public interface IpfixDataHandler{
 ## Developing a PM Data Handler
 In this release, OB-BAA provides a [IPFIX PM Data Handler](./index.md#ipfixpmdm) and an example PM Data Handler that registers to IPFIX collector and logs the IPFIX messages received. This example is located in /obbaa/pm-collector/pm-data-handler/pm-data-handler-example. It follows the below structure:
 
-<p align="center">
- <img width="400px" height="400px" src="{{site.url}}/using/ipfixpm/pm_data_handler_struct.png">
+<p align="center"/pm_data_handler_struct.png">
 </p>
 
 New PM Data handlers can be built as a separate karaf bundle. This module should be placed within PM Data Handler package of PM Collector.
@@ -647,14 +646,14 @@ The Web GUIs Data Explorer allows an easy interactive selection of the
 bucket and allows to define a filter. Data can be filtered by the
 following parameters:
 
-| Tag | Description |
-| :--- | :--- |
-|\_measurement|The \_measurement could be compared to a DB table in the relational DB world. The _measurement is created by the pm data handler when storing data. The value used to describe the measurement is the template ID from the IPFIX Message. The templateID defines the list of IPFIX Elements measured.|
-|deviceAdapter|The device type|
-|hostName|The hostname of the device from the YANG model|
-|observationDomain|The IPFIX observation domain|
-|sourceIP|The source IP address of the IPFIX message|
-|templateID|The IPFIX template ID defining the measurement|
+| Tag               | Description |
+|:------------------| :--- |
+| \_measurement     |The \_measurement could be compared to a DB table in the relational DB world. The _measurement is created by the pm data handler when storing data. The value used to describe the measurement is the template ID from the IPFIX Message. The templateID defines the list of IPFIX Elements measured.|
+| deviceAdapter     |The device type|
+| hostName          |The hostname of the device from the YANG model|
+| observationDomain |The IPFIX observation domain|
+| sourceIP          |The source IP address of the IPFIX message|
+| templateID        |The IPFIX template ID defining the measurement|
 
 
 Data could also be stored and queried using influx the CLI interface to

@@ -27,4 +27,6 @@ import org.broadband_forum.obbaa.ipfix.entities.set.IpfixDataSet;
 public interface DecodingDataRecordService {
     Set<IpfixDecodedData> decodeDataSet(String hostName, long obsvDomain, IpfixDataSet set, IpfixMessage ipfixMessage,
                                         CollectingServiceImpl.TemplateProvider templateProvider) throws DecodingException;
+
+    String decodeDeviceName(IpfixDataSet dataSet) throws DecodingException;
 }

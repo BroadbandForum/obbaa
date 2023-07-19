@@ -5,17 +5,17 @@
 
 Simulates the physical OLT for interactions between the OLT and the BAA layer.
 
-The pOLT simulator is a framework comprises the pOLT simulator and an
-ONU simulator which are two separate components at the time of writing.
-
-The pOLT simulator framework only contains basic ONU simulation
-capabilities that is only necessary to complement the pOLT interactions with the BAA layer (e.g., detect/undetect message handling). As such, the pOLT simulator framework doesn\'t contain a ONU simulator.
+The pOLT simulator is a framework comprising the pOLT simulation and a basic
+ONU simulation (that is distinct from the dedicated ONU simuator [here](OBBAA/obbaa-onu-simulator)). It contains only
+ONU simulation capabilities necessary to complement the pOLT interactions with the BAA layer (e.g., detect/undetect message handling). 
+As such, the pOLT simulator framework does not contain a full-fledged ONU simulator.
 
 ## Deployment
 
 The pOLT simulator code can be found at the [OBBAA/obbaa-polt-simulator](https://github.com/BroadbandForum/obbaa-polt-simulator) repository in Github.
+The ONU simulator code is located in the [OBBAA/obbaa-onu-simulator](https:/github.com/BroadbandForum/obbaa-onu-simulator) repository in Github.
 The code contains a Dockerfile to make sure the code is compiled correctly on any (Linux x64) platform.
-It also features a docker-compose file to make the process much more convenient.
+It also features a docker-compose file to make the process more convenient.
 The build process requires these tools that can be installed as follows:
 
 ### Docker:
@@ -50,7 +50,7 @@ docker-compose -version
 ### Clone obbaa-polt-simulator repo in your local:
 
 ```
-git clone https://github.com/BroadbandForum/obbaa-onu-simulator.git
+git clone https://github.com/BroadbandForum/obbaa-polt-simulator.git
 ```
 
 ### If not done already: generate vOMCI key and certificate:
@@ -77,7 +77,7 @@ You will then be asked to enter a few parameters, if you want to see the ones us
 * Update line \#14 of docker-compose.yml to **command:
 \[\"-dummy\_tr385\",\"-f\",\"/certificates/cli\_scripts/tr451.cli\"\]**
 
-After the compile and run step) the pOLT simulator is started successfully, ONU simulator must be attached to pOLT simulator for running TR451 flow.
+After the compile and run step, the pOLT simulator is started successfully. Now,  ONU simulator must be attached to pOLT simulator for running TR451 flow:
 
 ```
 docker attach polt-simulator_compose
@@ -132,7 +132,7 @@ Examples of POLT simulator commands for standard-OLT-adapter 2.1 can be found [h
 
 * Run command to start the polt simulator with the given image:
 ```
-docker-compose up -d  \--\>
+docker-compose up -d
 ```
 
 If you already built or pulled the image, \'docker-compose up\' is
@@ -474,6 +474,7 @@ vOMCI instance:
 ```
 docker exec -ti kafka kafka-console-consumer --bootstrap-server
 kafka:9092 --topic OBBAA_ONU_NOTIFICATION
+```
 
 and watch for the notification when you \"connect\" the virtual ONU.
 This is done by attaching to the simulator:

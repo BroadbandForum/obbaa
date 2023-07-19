@@ -200,6 +200,7 @@ public interface ONUConstants {
     String V_ANI_NAME = "v-ani-name";
     String OLT_LOCAL_ONU_NAME = "olt-local-onu-name";
     String IETF_INTERFACES_NS = "urn:ietf:params:xml:ns:yang:ietf-interfaces";
+    String IETF_INTERFACES_REVISION = "2018-02-20";
     String INTERFACES = "interfaces";
     String INTERFACES_STATE = "interfaces-state";
     String INTERFACE = "interface";

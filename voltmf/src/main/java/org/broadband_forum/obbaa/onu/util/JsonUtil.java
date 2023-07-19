@@ -100,6 +100,10 @@ public final class JsonUtil {
     private static final String INTEGER_TYPE = "^[+-]?(0x)?[0-9.]*$";
     private static final String HEX_INT_TYPE = "^(0x) {1}([0-9]*([a-f]*[A-F]*))+$";
 
+    private static final String IETF_YANG_TYPES_NS = "urn:ietf:params:xml:ns:yang:ietf-yang-types";
+
+    private static final String XPATH_TYPE = "xpath1.0";
+
     private static ThreadLocal<Boolean> c_ignoreEmptyLeaves = ThreadLocal.withInitial(() -> Boolean.FALSE);
     private static ThreadLocal<Boolean> c_appendActionInput = ThreadLocal.withInitial((Supplier<Boolean>) () -> Boolean.TRUE);
 
@@ -420,6 +424,16 @@ public final class JsonUtil {
         return null;
     }
 
+    private static boolean isXpathType(TypeDefinition<?> type) {
+        QName yangNode = type.getPath().getLastComponent();
+        if ((yangNode.getNamespace().toString().equals(IETF_YANG_TYPES_NS) == true)
+                && (yangNode.getLocalName().toString().equals(XPATH_TYPE))
+        ) {
+            return true;
+        }
+        return false;
+    }
+
     private static Object getValueForJson(Element xml, TypeDefinition<?> type, SchemaRegistry schemaRegistry,
                                           String currentModuleName, ModelNodeDataStoreManager modelNodeDSM) {
         String textContent = getTextContent(xml);
@@ -472,7 +486,7 @@ public final class JsonUtil {
                     return returnValue;
                 }
             }
-        } else if ((type instanceof InstanceIdentifierTypeDefinition) || (type instanceof SchemaNode)) {
+        } else if ((type instanceof InstanceIdentifierTypeDefinition) || (isXpathType(type))) {
             if (textContent.startsWith("/")) {
                 List<PathNodeValue> pnvList = new ArrayList<>();
                 String[] splitBySlash = textContent.split("/(?=[^\\]]*(\\[|$))");
@@ -506,7 +520,7 @@ public final class JsonUtil {
                     }
                 }
                 return returnValue;
-            } else if (type instanceof SchemaNode) {
+            } else if (isXpathType(type)) {
                 StringBuilder returnValue = new StringBuilder();
                 StringBuilder prefix = new StringBuilder();
                 List<PathNodeValue> pnvList = new ArrayList<>();
@@ -565,6 +579,8 @@ public final class JsonUtil {
                     if (namespace.equals(ONUConstants.IETF_INTERFACES_NS)) {
                         LOGGER.info("Using default mapping of " + namespace + " to module name: "
                                 + ONUConstants.IETF_INTERFACES);
+                        addPnv(namespace, ONUConstants.IETF_INTERFACES, ONUConstants.IETF_INTERFACES_REVISION, prefix.toString(),
+                                pnvList, isKey, keyValue, localName);
                         returnValue.append(ONUConstants.IETF_INTERFACES + COLON + content.split(":")[1]);
                     } else {
                         LOGGER.error("Could not find module for namespace: " + namespace);
@@ -593,6 +609,20 @@ public final class JsonUtil {
         if (!isKey) {
             QNameWithModuleInfo qnameWithPrefix = new QNameWithModuleInfo(qname, prefix, module.getName(), module.getRevision()
                     .get().toString());
+            PathNodeValue pnv = new PathNodeValue(qnameWithPrefix);
+            pnvList.add(pnv);
+        } else if (!pnvList.isEmpty()) {
+            PathNodeValue pnv = pnvList.get(pnvList.size() - 1);
+            pnv.addPathKey(qname, new ValueObject(keyValue));
+        }
+
+    }
+
+    private static void addPnv(String namespace, String moduleName, String moduleRevision, String prefix,
+                               List<PathNodeValue> pnvList, boolean isKey, String keyValue, String name) {
+        QName qname = QName.create(namespace, moduleRevision, name);
+        if (!isKey) {
+            QNameWithModuleInfo qnameWithPrefix = new QNameWithModuleInfo(qname, prefix, moduleName, moduleRevision);
             PathNodeValue pnv = new PathNodeValue(qnameWithPrefix);
             pnvList.add(pnv);
         } else if (!pnvList.isEmpty()) {

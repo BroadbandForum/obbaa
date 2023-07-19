@@ -88,7 +88,7 @@ public class ModelTranslIpfixDeviceInterface implements IpfixAdapterInterface {
     }
 
     @Override
-    public List<Set<IpfixDecodedData>> decodeIpfixMessage(List<IpfixDataSet> rawDataSets, Optional<String>[] arrOptHostNames,
+    public List<Set<IpfixDecodedData>> decodeIpfixMessage(IpfixDataSet rawDataSet, Optional<String>[] arrOptHostNames,
                             IpfixMessage ipfixMessage, IpfixLogging ipfixLogging, String deviceFamily) throws CollectingProcessException {
         LOGGER.info("IPFIX decoding started in " + deviceFamily + " adapter");
         long obsvDomain = ipfixMessage.getHeader().getObservationDomainId();
@@ -114,16 +114,14 @@ public class ModelTranslIpfixDeviceInterface implements IpfixAdapterInterface {
         };
 
         List<Set<IpfixDecodedData>> decodeDataSetList = new ArrayList<>();
-        for (IpfixDataSet set : rawDataSets) {
-            Set<IpfixDecodedData> decodeDataSet;
-            try {
-                decodeDataSet = decodeDataSet(arrOptHostNames[0].orElse(""), deviceFamily, obsvDomain,
-                        set, ipfixMessage, templateProvider);
-            } catch (DecodingException e) {
-                throw new CollectingProcessException("Error while decoding data set.", e);
-            }
-            decodeDataSetList.add(decodeDataSet);
+        Set<IpfixDecodedData> decodeDataSet;
+        try {
+            decodeDataSet = decodeDataSet(arrOptHostNames[0].orElse(""), deviceFamily, obsvDomain,
+                    rawDataSet, ipfixMessage, templateProvider);
+        } catch (DecodingException e) {
+            throw new CollectingProcessException("Error while decoding data set.", e);
         }
+        decodeDataSetList.add(decodeDataSet);
         return decodeDataSetList;
     }
 

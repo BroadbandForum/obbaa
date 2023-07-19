@@ -34,7 +34,7 @@ authentication is the process that binds the ONU that gets connected to
 its device instance in the list of expected ONUs.
 
 <p align="center">
- <img width="800px" height="400px" src="{{site.url}}/architecture/onu_auth/onu_auth_mgmt.png">
+ <img width="800px" height="400px" src="onu_auth_mgmt.png">
 </p>
 
 ## ONU authentication
@@ -78,7 +78,7 @@ their authority to the OLT.
 -	In a first scenario, the management entity, i.e. the vOLTMF, keeps direct authority for the authentication and management of ONUs:
 
   <p align="center">
-   <img width="800px" height="600px" src="{{site.url}}/architecture/onu_auth/voltmf_mgmt_auth.png">
+   <img width="800px" height="600px" src="voltmf_mgmt_auth.png">
   </p>
 
 In this deployment, the *TR-385 Separated NE mode* is used for the ONUs. The ONU authentication relies on the PMA, which holds a list of schema-mounted expected ONUs and their authorized credentials, keyed by a device "name" string. The expected credentials are stored in the ONU meta-data appended to the ONU mount-points.
@@ -88,7 +88,7 @@ In this deployment, the *TR-385 Separated NE mode* is used for the ONUs. The ONU
     OLT:
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture/onu_auth/voltmf_delegate_auth.png">
+ <img width="800px" height="600px" src="voltmf_delegate_auth.png">
 </p>
 
 In this deployment, the TR-385 Separated NE mode is also used for these ONU(s). In this case, the OLT is able to perform simple ONU authentication based on expected-serial-number and/or expected-registration-id credentials stored in the vANIs
@@ -96,7 +96,7 @@ In this deployment, the TR-385 Separated NE mode is also used for these ONU(s). 
 -	In a third scenario, the vOLTMF keeps the authority to authenticate the ONU but delegates its ONU management authority to the OLT:
 
 <p align="center">
- <img width="1000px" height="600px" src="{{site.url}}/architecture/onu_auth/voltmf_auth_delegate_mgmt.png">
+ <img width="1000px" height="600px" src="voltmf_auth_delegate_mgmt.png">
 </p>
 
 This deployment relies on the use for these ONUs of the *TR-385 Separated NE mode* in the vOLTMF and the *TR-385-Combined mode* in the OLT.
@@ -104,7 +104,7 @@ This deployment relies on the use for these ONUs of the *TR-385 Separated NE mod
 -	Finally in a fourth scenario, the vOLTMF delegates to the OLT its authority for both authentication and management of ONUs:
 
 <p align="center">
- <img width="1000px" height="600px" src="{{site.url}}/architecture/onu_auth/voltmf_delegate_mgmt_auth.png">
+ <img width="1000px" height="600px" src="voltmf_delegate_mgmt_auth.png">
 </p>
 
 In this deployment, the *TR-385 Combined NE mode* is used in the OLT for these ONUs. Very similar to how the PMA deals with ONUs, the OLT contains, embedded in its YANG configuration, a list of schema-mounted expected ONUs keyed by a device "name" string. The credentials of the expected ONUs are stored in the vANI and/or the ONU meta-data appended to the ONU mount-points.
@@ -126,7 +126,7 @@ The four deployments possibilities are summarized in the following
 table:
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture/onu_auth/OLT_BAA_Combinations.png">
+ <img width="800px" height="600px" src="OLT_BAA_Combinations.png">
 </p>
 
 ### Authenticating and managing an ONU: Deciding which entity is in charge - General Principle
@@ -144,7 +144,7 @@ In a simplified way, the coarse decision tree in the OLT to support the
 four Use Cases above is illustrated as follows:
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture/onu_auth/olt_mgmt_auth_flow.png">
+ <img width="800px" height="600px" src="olt_mgmt_auth_flow.png">
 </p>
 
 If the OLT is expected and able to authenticate the ONU, it will do so.
@@ -169,25 +169,25 @@ The following pictures illustrate each branch of the decision tree
 process:
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture/onu_auth/scen_4.png">
+ <img width="800px" height="600px" src="scen_4.png">
 </p>
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture/onu_auth/scen_2.png">
+ <img width="800px" height="600px" src="scen_2.png">
 </p>
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture/onu_auth/scen_3.png">
+ <img width="800px" height="600px" src="scen_3.png">
 </p>
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture/onu_auth/scen_1.png">
+ <img width="800px" height="600px" src="scen_1.png">
 </p>
 
 ### Mapping between notifications and sequences
 
 <p align="center">
- <img width="1200px" height="600px" src="{{site.url}}/architecture/onu_auth/pma_olt_events.png">
+ <img width="1200px" height="600px" src="pma_olt_events.png">
 </p>
 
 The notifications above don\'t exist as standalone identities. They are

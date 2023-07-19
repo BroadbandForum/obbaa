@@ -16,13 +16,16 @@ micro-services running in the same Kubernetes cluster of OB-BAA will be discover
 
 In this release, micro-services discoverable by OB-BAA must be deployed with the following environment variables:
 
-|Variable Name Description|Type|Description|
-|BBF_OBBAA_VNF_NAME|String up to 64 ASCII printable characters|Name of the VNF/micro-service|
-|BBF_OBBAA_VNF_TYPE|Enumeration(VOMCI, VPROXY, ACCESS-VNF)|VNF/micro-service Type. The values of the enumeration correspond to the identities currently available in bbf-network-function-types.yang. The available types may grow in the future. The type "ACCESS-VNF" can be used for functions that do not match any other values of the enumeration.|
-|BBF_OBBAA_VNF_VERSION|String up to 64 ASCII printable characters|Version of the VNF/micro-service|
-|BBF_OBBAA_VNF_VENDOR|String up to 64 ASCII printable characters|Vendor of the VNF/micro-service|
-|BBF_OBBAA_VNF_INSTANCE_NAME|String up to 64 ASCII printable characters|Instance name of the VNF/micro-service/micro-service|
-|BBF_OBBBA_VNF_ADMIN_STATE|Enumeration(UNKNOWN, LOCKED, SHUTTING-DOWN, UNLOCKED)|VNF/micro-service admin-state. The values of the enumeration correspond to the typedef currently available in bbf-node-types.yang. Currently we support only UNLOCKED by default as admin-state.|
+
+
+| Variable Name Description| Type| Description|
+|:---|:---|:----|
+| BBF_OBBAA_VNF_NAME|String up to 64 ASCII printable characters|Name of the VNF/micro-service|
+| BBF_OBBAA_VNF_TYPE|Enumeration(VOMCI, VPROXY, ACCESS-VNF)|VNF/micro-service Type. The values of the enumeration correspond to the identities currently available in bbf-network-function-types.yang. The available types may grow in the future. The type "ACCESS-VNF" can be used for functions that do not match any other values of the enumeration.|
+| BBF_OBBAA_VNF_VERSION|String up to 64 ASCII printable characters|Version of the VNF/micro-service|
+| BBF_OBBAA_VNF_VENDOR|String up to 64 ASCII printable characters|Vendor of the VNF/micro-service|
+| BBF_OBBAA_VNF_INSTANCE_NAME|String up to 64 ASCII printable characters|Instance name of the VNF/micro-service/micro-service|
+| BBF_OBBBA_VNF_ADMIN_STATE|Enumeration(UNKNOWN, LOCKED, SHUTTING-DOWN, UNLOCKED)|VNF/micro-service admin-state. The values of the enumeration correspond to the typedef currently available in bbf-node-types.yang. Currently we support only UNLOCKED by default as admin-state.|
 
 Below is a possible example for the environment variables section of the Helm Chart for deploying the vOMCI function (values.yaml):
 

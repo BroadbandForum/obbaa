@@ -32,7 +32,7 @@ System Functionality
 The high level functional diagram for the BAA layer is shown in the
 figure below.
 <p align="center">
- <img width="600px" height="300px" src="{{site.url}}/overview/system_description.png">
+ <img width="600px" height="300px" src="system_description.png">
 </p>
 
 BAA Core
@@ -181,7 +181,7 @@ control). In all cases the data is presented in a vendor and technology
 agnostic way toward the management systems for the type of access node.
 
 <p align="center">
- <img width="350px" height="275px" src="{{site.url}}/overview/baa_actuator.png">
+ <img width="350px" height="275px" src="baa_actuator.png">
 </p>
 
 [<--Introduction](../index.md#introduction)

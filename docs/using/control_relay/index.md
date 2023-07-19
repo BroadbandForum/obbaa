@@ -97,7 +97,7 @@ vlan-sub-interface.*"
 
 
 <p align="center">
- <img width="600px" height="200px" src="{{site.url}}/using/control_relay/tr-383-subinterface.png">
+ <img width="600px" height="200px" src="tr-383-subinterface.png">
 </p>
 
 **Sub-interface Example (from TR-383, figure 2)**

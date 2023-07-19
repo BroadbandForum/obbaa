@@ -26,13 +26,13 @@ For developers and users the easiest way to get started with OB-BAA is to downlo
 If developers require additional access to the source code, the source code can be downloaded and OB-BAA can be built using the instructions found [here](./#source).
 
 <a id="platform" />
-## Platform Requirements and Running OB-BAA
+
+##  Platform Requirements and Running OB-BAA
 
 This section of the document provides the platform requirements needed to run OB-BAA regardless if the developer requires source code access or simply downloads the BAA image from the docker artifactory.
 
 ### Platform Requirements
 #### Server Requirements
-
 OB-BAA can be deployed in either a Bare Metal or a VM.
 
 ##### Bare Metal based
@@ -147,18 +147,19 @@ version.BuildInfo{Version:"v3.2.4", GitCommit:"0ad800ef43d3b826f31a5ad8dfbb4fe05
 Note: The OB-BAA installation is verified with above said K8s, Minikube and Helm versions.
 
 <a id="artifactory" />
+
 ## Using OB-BAA micro-services from the Broadband Forum\'s public docker artifactory
 This section of the document provides information of how to deploy (pull and run) an OB-BAA distribution from the Broadband Forum\'s public docker registry.
 
-Obtain the OB-BAA source code:
+### Obtain the OB-BAA source code:
 Instructions for obtaining the OB-BAA source code can be found [here](./#source).
 
-Running OB-BAA micro-services from the public docker registry:
+### Running OB-BAA micro-services from the public docker registry:
 In this release, OB-BAA can be deployed in two ways:
   - Using a Docker Compose file
   - Using Helm Charts (K8s installation)
 
-### Using Docker Compose
+#### Using Docker Compose
 
 ```
 cd obbaa/resources
@@ -171,11 +172,21 @@ Note: As the ob-baa_setup.yml file now have ipfix-collector, influxDB, zookeeper
       vomci and vproxy microservices along with baa.
 
 ```
+##### Model Abstractor
+Model abstracter is an optional module for OBBAA. If a user wants to enable the Model Abstracter support in BAA, the environment variable MODEL_ABSTRACTER_STATUS must be set to Enable in the docker-compose file ob-baa_setup.yml before we start running the docker-compose command.
 
-### Using Helm Charts
+More details about the model abstracter feature can be found [here](../architecture/model_abstracter).
+
+<p align="left">
+ <img width="400px" height="400px" src="model_abstracter_1.png">
+</p>
+
+
+
+#### Using Helm Charts
 OB-BAA Helm Chart Hierarchy
 <p align="left">
- <img width="400px" height="400px" src="{{site.url}}/installing/env/helm_hierarchy.png">
+ <img width="400px" height="400px" src="helm_hierarchy.png">
 </p>
 
 ```
@@ -187,6 +198,7 @@ Note: As the we have run the helm install command from the parent chart, it will
 ```
 
 <a id="source" />
+
 ## Building OB-BAA Using the Source Code
 This section of the document describes how to obtain access to the source code repository for OB-BAA and then use the source code to build the baa image.
 
@@ -223,6 +235,7 @@ To install maven use the following command in a apt based system
 ```
   sudo apt-get install maven
 ```
+### Source Code Access
 
 #### Repositories
 
@@ -267,6 +280,11 @@ The code base is split across two repositories:
 ```
 **Note: ** The obbaa-yang-modules repository must be checked out to the same directory where obbaa repository is checked out. This step is applicable from R5.0.0 onwards.
 
+
+#### Clone OB-BAA TR-477 VNFs/CNFs repository
+~~~
+git clone https://github.com/BroadbandForum/obbaa-477.git
+~~~
 
 ### Build OB-BAA
 
@@ -317,27 +335,47 @@ mvn clean install
 
 The next step is to build docker images from the generated jars.
 
-```
-Build OBBAA Docker Image
+
+##### Build OBBAA Docker Image
+~~~
 	cd <obbaa>/baa-dist
 	docker build -t baa .
+~~~
 
-Build IPFIX-Collector Docker Image
-   cd <obbaa>/pm-collector/ipfix-collector/ipfix-collector-dist
+##### Build IPFIX-Collector Docker Image
+ ~~~  
+ cd <obbaa>/pm-collector/ipfix-collector/ipfix-collector-dist
 	docker build -t ipfix-collector .
+~~~
 
-Build vOMCI and vProxy Docker Images
+#### Build vOMCI and vProxy Docker Images
+~~~
    cd <obbaa-vomci>
    make docker-build
+~~~
 
 Note: The docker-build make command builds the docker images for
       obbaa-vomci and obbaa-vproxy.
 
-Build Control Relay Service Docker Image
+#### Build Control Relay Service Docker Image
+~~~
    cd <obbaa-fc-relay>/control-relay
+   ~~~
+
    Follow the instructions in the [BBF public github obbaa-fc-relay repository](https://github.com/BroadbandForum/obbaa-fc-relay) readme
    or use the following command:
+~~~
      docker build . -f single-command-build.dockerfile -t obbaa-control-relay
+~~~
+
+#### Build the PPPoE IA VNF
+
+~~~
+cd <obbaa-477>
+
+docker build -t pppoe-relay-vnf -f pppoe-relay-vnf/vnf.Dockerfile .
+~~~
+
 
    Contents of the file single-command-build.dockerfile:
 		FROM golang:1.14.4 AS builder
@@ -365,6 +403,4 @@ Build Control Relay Service Docker Image
 
 		CMD ["./control-relay"]    
 
-```
 
-[<--Installing](../index.md#installing)

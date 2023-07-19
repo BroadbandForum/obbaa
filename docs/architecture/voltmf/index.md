@@ -25,7 +25,7 @@ management systems. The following figure depicts the vOLTMF and ONU
 Adapter components that reside in the BAA microservice.
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/voltmf/voltmf_design.png">
+ <img width="600px" height="400px" src="voltmf_design.png">
 </p>
 
 The vOLTMF performs actions upon receiving notifications and requests
@@ -93,7 +93,7 @@ NETCONF requests to YANG messages using the same messages that the
 vOLTMF uses to communicate with the vOMCI function.
 
 <p align="center">
- <img width="1000px" height="1000px" src="{{site.url}}/architecture/voltmf/vomci_f_p_deployment.png">
+ <img width="1000px" height="1000px" src="vomci_f_p_deployment.png">
 </p>
 
 ## Network function management
@@ -109,7 +109,7 @@ NETCONF for management of the OLT. These entities use the messages
 associated with TR-413\'s Minf NBI interface for PNF of type OLT.
 
 <p align="center">
- <img width="800px" height="800px" src="{{site.url}}/architecture/voltmf/network_function_mgmt.png">
+ <img width="800px" height="800px" src="network_function_mgmt.png">
 </p>
 
 ### Use of Endpoints for Connectivity
@@ -139,7 +139,7 @@ exposed by the vomci-vendor-1 and proxy-1 as the vOLTMF\'s client
 remote-endpoints.
 
 <p align="center">
- <img width="600px" height="600px" src="{{site.url}}/architecture/voltmf/network_function_endpoints.png">
+ <img width="600px" height="600px" src="network_function_endpoints.png">
 </p>
 
 Note: The underlying connectivity between the entities has to be
@@ -155,7 +155,7 @@ vOLTMF\'s client list to the network-function from the vOLTMF\'s list of
 network functions.
 
 <p align="center">
- <img width="800px" height="800px" src="{{site.url}}/architecture/voltmf/network_manager_nfs.png">
+ <img width="800px" height="800px" src="network_manager_nfs.png">
 </p>
 
 ### Use of Endpoints for the ONU Management Chain
@@ -168,7 +168,7 @@ the endpoints and links when discovery of the topology is not possible
 as shown in the network-function-links node below:
 
 <p align="center">
- <img width="800px" height="1000px" src="{{site.url}}/architecture/voltmf/endpoint_topology.png">
+ <img width="800px" height="1000px" src="endpoint_topology.png">
 </p>
 
 ## Kafka topics for the vOMCI function and vOMCI Proxy
@@ -760,11 +760,11 @@ has below properties:
 
 -   vendor: BBF
 
--   version: 1.0
+-   version: 1.1
 
 ### ONU Creation
 
-ONU\'s can be created within the BAA layer either before an ONU is
+ONU's can be created within the BAA layer either before an ONU is
 detected (pre-provisioned) by an OLT or once an ONU has been detected by
 an OLT. When the ONU has been pre-provisioned within the BAA layer, the
 ONU device is created and persisted in the BAA layer\'s datastore.
@@ -994,7 +994,7 @@ device-info and software information.
 ```
 
 <p align="center">
- <img width="1000px" height="1000px" src="{{site.url}}/architecture/voltmf/onu_detect_notif.png">
+ <img width="1000px" height="1000px" src="onu_detect_notif.png">
 </p>
 
 #### ONU detected offline
@@ -1016,7 +1016,7 @@ including the ONU\'s current state.
 The following diagram depicts the flow when ONU goes offline:
 
 <p align="center">
- <img width="800px" height="800px" src="{{site.url}}/architecture/voltmf/onu_undetect_notif.png">
+ <img width="800px" height="800px" src="onu_undetect_notif.png">
 </p>
 
 
@@ -1031,7 +1031,7 @@ MediatedDeviceNetconfSession has been established then the Delete-ONU
 request is transmitted and the session is closed after the response to the request is received.
 
 <p align="center">
- <img width="800px" height="800px" src="{{site.url}}/architecture/voltmf/onu_delete.png">
+ <img width="800px" height="800px" src="onu_delete.png">
 </p>
 
 ### ONU Alarm handling via vOMCI
@@ -1039,7 +1039,7 @@ request is transmitted and the session is closed after the response to the reque
 The following picture depicts the general workflow for processing ONU alarms received through the vOMCI function. The alarms are forwarded to the SDN M&C using ietf-alarm (RFC8632) style notifications.
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture/voltmf/onu_alarm_handling_sequence.png">
+ <img width="800px" height="600px" src="onu_alarm_handling_sequence.png">
 </p>
 
 Details about the implemented alarms and the processing made in the vOMCI function can be found in [vOMCI - ONU alarm Handling](onu_alarm/index.md#onu_alarm).
@@ -1055,7 +1055,7 @@ introduced in the vOLTMF design.
 ### MessageFormatter
 
 <p align="center">
- <img width="700px" height="500px" src="{{site.url}}/architecture/voltmf/message_formatter.png">
+ <img width="700px" height="500px" src="message_formatter.png">
 </p>
 
 VOLTManagementImpl decides the Messageformatter to be used and creates a

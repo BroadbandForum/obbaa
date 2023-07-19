@@ -43,7 +43,7 @@ The figure below provides a high level overview of the PM Collection
 Framework:
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture//pm_collector/framework.png">
+ <img width="800px" height="600px" src="framework.png">
 </p>
 
 In this release, the PM data collection framework supports the IPFIX
@@ -52,13 +52,13 @@ TR-383 specification.
 
 ### IPFIX Collector
 
-The IPFIX PM Data Collector (IPFIX Collector) is based standardized
+The IPFIX PM Data Collector (IPFIX Collector) is standardized
 within the BBF\'s TR-383 Common YANG specification for Access Nodes
 and is based on the IETF\'s [RFC 7011](http://Specification) IPFIX
 protocol specification.
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture//pm_collector/collection_flow.png">
+ <img width="800px" height="600px" src="collection_flow.png">
 </p>
 
 Within RFC 7011, IPFIX supports multiple transport protocols (e.g., TCP,
@@ -119,19 +119,19 @@ The columns of this csv mapping file is similar to that specified in the
 IANA specific mapping file. Details of each column in the
 IPFIX\_IEid.csv is as follows:
 
-| Column name | Column description |
-| :--- | :--- |
-|ElementID|A numeric identifier of the Information Element (counter or metric) from the IPFIX stream.|
-|Name|A unique and meaningful name for the mapping of the Information Element. This name should be reference to the YANG leaf node preferably in xpath format.|
-|Abstract Data Type|Data type of the Information Element. One of the types listed in <https://tools.ietf.org/html/rfc7012#section-3.1>.|
-|Data Type Semantics|The integral types are qualified by additional semantic details. Valid values for the data type semantics are specified in <https://tools.ietf.org/html/rfc7012#section-3.2>.|
-|Status|The status of the specification of this Information Element. Allowed values are \'current\' and \'deprecated\'. All newly defined Information Elements have \'current\' status.|
-|Description|Description of the Information Element.|
-|Units|If the Information Element is a measure of some kind, the units of the measure
-Range|Some Information Elements may only be able to take on a restricted set of values that can be expressed as a range (e.g., 0 through 511, inclusive). If this is the case, the valid inclusive range SHOULD be specified; values for this Information Element outside the range are invalid and MUST NOT be exported.|
-|References|Identifies additional specifications that more precisely define this item or provide additional context for its use.|
-|Revision|The revision number of an Information Element, starting at 0 for Information Elements at time of definition and incremented by one for each revision.|
-|Date|The date of the entry of this revision of the Information Element into the registry.|
+| Column name         | Column description |
+|:--------------------| :--- |
+| ElementID           |A numeric identifier of the Information Element (counter or metric) from the IPFIX stream.|
+| Name                |A unique and meaningful name for the mapping of the Information Element. This name should be reference to the YANG leaf node preferably in xpath format.|
+| Abstract Data Type  |Data type of the Information Element. One of the types listed in <https://tools.ietf.org/html/rfc7012#section-3.1>.|
+| Data Type Semantics |The integral types are qualified by additional semantic details. Valid values for the data type semantics are specified in <https://tools.ietf.org/html/rfc7012#section-3.2>.|
+| Status              |The status of the specification of this Information Element. Allowed values are \'current\' and \'deprecated\'. All newly defined Information Elements have \'current\' status.|
+| Description         |Description of the Information Element.|
+| Units               |If the Information Element is a measure of some kind, the units of the measure|
+| Range               |Some Information Elements may only be able to take on a restricted set of values that can be expressed as a range (e.g., 0 through 511, inclusive). If this is the case, the valid inclusive range SHOULD be specified; values for this Information Element outside the range are invalid and MUST NOT be exported.|
+| References          |Identifies additional specifications that more precisely define this item or provide additional context for its use.|
+| Revision            |The revision number of an Information Element, starting at 0 for Information Elements at time of definition and incremented by one for each revision.|
+| Date                |The date of the entry of this revision of the Information Element into the registry.|
 
 ElementID, Name and Abstract Data Type are mandatory fields that needs
 to be filled for any particular Information element.
@@ -196,7 +196,8 @@ The following is a typical sequence of events for the collection of PM
 data.
 
 <p align="center">
- <img width="800px" height="600px" src="{{site.url}}/architecture//pm_collector/collection_sequence.png">
+ <img width="800px" height="600px" src="
+collection_sequence.png">
 </p>
 
 In this sequence diagram the BAA layer configures the pAN with the PM
@@ -271,31 +272,31 @@ set <https://tools.ietf.org/html/rfc7011#section-3> with examples
 presented in <https://tools.ietf.org/html/rfc7011#appendix-A>.
 
 <p align="center">
- <img width="600px" height="300px" src="{{site.url}}/architecture//pm_collector/ipfix_message.png">
+ <img width="600px" height="300px" src="ipfix_message.png">
 </p>
 
 ### Message Header
 
 <p align="center">
- <img width="500px" height="600px" src="{{site.url}}/architecture//pm_collector/ipfix_message_header.png">
+ <img width="500px" height="600px" src="ipfix_message_header.png">
 </p>
 
 ### Template Set Example
 
 <p align="center">
- <img width="600px" height="800px" src="{{site.url}}/architecture//pm_collector/ipfix_template_set.png">
+ <img width="600px" height="800px" src="ipfix_template_set.png">
 </p>
 
 ### Options Template Set Example
 
 <p align="center">
- <img width="600px" height="800px" src="{{site.url}}/architecture//pm_collector/ipfix_options_set.png">
+ <img width="600px" height="800px" src="ipfix_options_set.png">
 </p>
 
 ### Data Set Example
 
 <p align="center">
- <img width="600px" height="800px" src="{{site.url}}/architecture//pm_collector/ipfix_data_set.png">
+ <img width="600px" height="800px" src="ipfix_data_set.png">
 </p>
 
 [<--Architecture](../index.md#architecture)

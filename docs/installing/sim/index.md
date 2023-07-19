@@ -120,13 +120,13 @@ and can easily be compromised if used in real deployments. Do not use these cert
 	```
 
 <p align="center">
- <img width="600px" height="200px" src="{{site.url}}/installing/sim/generateCertificates.jpg">
+ <img width="600px" height="200px" src="generateCertificates.jpg">
 </p>
 
 Upon running the script the certificates will be generated under a new folder with the provided DUID (e.g., DPU1).
 
 <p align="center">
- <img width="600px" height="200px" src="{{site.url}}/installing/sim/generateCertificates.jpg">
+ <img width="600px" height="200px" src="generateCertificates.jpg">
 </p>
 
 -   Start the sysrepo netopeer2 docker service as discussed in the
@@ -146,7 +146,7 @@ Upon running the script the certificates will be generated under a new folder wi
 ```
 
 <p align="center">
- <img width="600px" height="100px" src="{{site.url}}/installing/sim/deviceCerts.jpg">
+ <img width="600px" height="100px" src="deviceCerts.jpg">
 </p>
 
 -   From netopeer2-cli in the sysrepo docker container connect to
@@ -160,7 +160,7 @@ Upon running the script the certificates will be generated under a new folder wi
 ```
 
 <p align="center">
- <img width="600px" height="100px" src="{{site.url}}/installing/sim/deviceCerts.jpg">
+ <img width="600px" height="100px" src="deviceCerts.jpg">
 </p>
 
 -   From netopeer2-cli in the sysrepo docker container, load the server
@@ -370,7 +370,7 @@ KBKGYUlmDh7SJaQO0x3fGwFz84IQhgZvxA==</certificate>
 openssl x509 -noout -fingerprint -sha256 -inform pem -in /obbaa/baa-dist/src/main/assembly/conf/tls/certchain.crt
 ```
 <p align="center">
- <img width="700px" height="40px" src="{{site.url}}/installing/sim/finger-print.jpg">
+ <img width="700px" height="40px" src="finger-print.jpg">
 </p>
 This is a SHA256 fingerprint and we need to specify it by prefixing 04 in the <fingerprint> leaf.
 
@@ -503,7 +503,7 @@ the Atom editor and the initial exchange with OB-BAA server is shown
 below.
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/installing/sim/atom_simulator.png">
+ <img width="600px" height="400px" src="atom_simulator.png">
 </p>
 
 Once the connection is established, additional NETCONF commands can be
@@ -580,7 +580,7 @@ request command of each use-case into a dedicated xml file and execute
 it from Atom NETCONF editor (illustration below).
 
 <p align="center">
- <img width="200px" height="400px" src="{{site.url}}/installing/sim/atom_obbaa.png">
+ <img width="200px" height="400px" src="atom_obbaa.png">
 </p>
 
 ### Create Device
@@ -912,4 +912,4 @@ This will result in the following notification in the NETCONF client (ex: netope
 </notification>
 ```
 
-[<--Installing](../index.md#installing)
+[<--Installing](../index.md)

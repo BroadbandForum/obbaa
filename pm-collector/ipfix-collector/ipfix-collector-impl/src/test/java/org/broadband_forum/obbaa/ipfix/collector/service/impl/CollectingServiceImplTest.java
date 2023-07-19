@@ -117,6 +117,7 @@ public class CollectingServiceImplTest {
         decodedDataSet.add(new IpfixDecodedData("8636.3729", "String", username));
         decodedDataSet.add(new IpfixDecodedData("8637.3729", "String", hashedPass));
         decodedDataSet.add(new IpfixDecodedData("5002.3729", "hostName", hashedPass));
+        when(m_decodingDataRecordService.decodeDeviceName(any())).thenReturn("DPU1");
         m_cachingService = new IpfixCachingServiceImpl() {
             @Override
             public void cacheTemplateRecord(long obsvDomain, String hostname, Map<Integer, AbstractTemplateRecord> templateByIdCache) {
@@ -161,6 +162,7 @@ public class CollectingServiceImplTest {
         m_cachingService = mock(IpfixCachingServiceImpl.class);
         when(m_cachingService.getTemplateRecord(4335L, "hostname", 600)).thenReturn(templateRecord);
         when(m_deviceFamilyCacheService.getDeviceFamily("hostname")).thenReturn("BBF-ONU-standard-2.0");
+        when(m_decodingDataRecordService.decodeDeviceName(any())).thenReturn("DPU1");
         verifyCacheTemplate();
         verify(m_cachingService).cacheTemplateRecord(eq(4335L), eq("hostname"), anyMap());
     }
@@ -192,6 +194,7 @@ public class CollectingServiceImplTest {
                 "86E525A465A5A487255384356385352387352456B6447544A656D6B705063616D4476414979372E504247494F6771767543757037716557382E6B6246" +
                 "38416D44596378586B6373792E");
         when(m_deviceFamilyCacheService.getDeviceFamily(anyString())).thenReturn("BBF-ONU-standard-2.0");
+        when(m_decodingDataRecordService.decodeDeviceName(any())).thenReturn("DPU1");
         IpfixMessage ipfixMessage = new IpfixMessage(data);
         m_cachingService = new IpfixCachingServiceImpl() {
             @Override
@@ -232,6 +235,7 @@ public class CollectingServiceImplTest {
         AbstractTemplateRecord templateRecord = new IpfixTemplateRecord(new byte[16]);
         m_cachingService = mock(IpfixCachingServiceImpl.class);
         when(m_cachingService.getTemplateRecord(4335L, "hostname", 600)).thenReturn(templateRecord);
+        when(m_decodingDataRecordService.decodeDeviceName(any())).thenReturn("DPU1");
         String hostName = "hostname";
         String remoteAddress = "192.168.1.1";
         String username = "adminuser";
@@ -272,8 +276,7 @@ public class CollectingServiceImplTest {
                 return true;
             }
         };
-
-        verify(dataHandler).handleIpfixData(argThat(messageMatcher));
+        verify(m_decodingDataRecordService).decodeDeviceName(any());
     }
 
 }

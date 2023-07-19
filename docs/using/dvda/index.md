@@ -98,7 +98,7 @@ created as Karaf kar file.
 
 
 <p align="center">
- <img width="400px" height="600px" src="{{site.url}}/using/dvda/protocol-translation-example.png">
+ <img width="400px" height="600px" src="protocol-translation-example.png">
 </p>
 
 #### VDA Adapter Bundle artifact
@@ -370,7 +370,7 @@ Sample response: See that the SDAs are deployed:
     features module:
 
 <p align="center">
- <img width="840px" height="180px" src="{{site.url}}/using/dvda/karaf-kar-file.png">
+ <img width="840px" height="180px" src="karaf-kar-file.png">
 </p>
 
 -   Use the above generated Karaf kar file for deployment of bundle.

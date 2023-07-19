@@ -199,99 +199,33 @@ public class CollectingServiceImpl implements CollectingService {
             rawDataSets.addAll(ipfixMessage.getDataSets());
         }
 
-        String deviceFamily = StringUtils.isEmpty(deviceName) ? null : m_deviceCacheService.getDeviceFamily(deviceName);
-        if (deviceFamily != null && deviceFamily.contains(IpfixConstants.BBF) && deviceFamily.contains(IpfixConstants.STANDARD)) {
-            LOGGER.info("Decoding IPFIX message in IPFIX collector for standard adapter: " + deviceFamily);
-            for (IpfixDataSet set : rawDataSets) {
-                Set<IpfixDecodedData> decodeDataSet;
-                try {
-                    decodeDataSet = m_decodingDataRecordService.decodeDataSet(arrOptHostNames[0].orElse(""), obsvDomain,
-                            set, ipfixMessage, templateProvider);
-                } catch (DecodingException e) {
-                    throw new CollectingProcessException("Error while decoding data set.", e);
+        for (IpfixDataSet set : rawDataSets) {
+            try {
+                deviceName = m_decodingDataRecordService.decodeDeviceName(set);
+                String deviceFamily = StringUtils.isEmpty(deviceName) ? null : m_deviceCacheService.getDeviceFamily(deviceName);
+                final Optional<String>[] arrOptHostNamesFromIpfix = new Optional[]{Optional.of(deviceName)};
+                if (!arrOptHostNames[0].isPresent()) {
+                    arrOptHostNames[0] = arrOptHostNamesFromIpfix[0];
                 }
-
-                // Logging
-                boolean isOptionTemplateSet = false;
-                if (decodeDataSet != null) {
-                    isOptionTemplateSet = true;
-                }
-                IpfixSetHeader setHeader = set.getHeader();
-                IpfixLoggingDataSet ipfixLoggingDataSet = new IpfixLoggingDataSet(setHeader);
-                ipfixLoggingDataSet.setDataRecords(set.getRecords(), isOptionTemplateSet);
-
-                AbstractTemplateRecord abstractTemplateRecord = templateProvider.get(setHeader.getId());
-                if (abstractTemplateRecord != null) {
-                    ipfixLoggingDataSet.setTemplateRecords(abstractTemplateRecord.getFieldSpecifiers());
-                }
-                ipfixLogging.addToSetMessages(ipfixLoggingDataSet);
-
-                if (decodeDataSet != null && !decodeDataSet.isEmpty()) {
-                    int templateID = set.getHeader().getId();
-                    LOGGER.debug(String.format("Data set decoded successfully (Observation domain: %s, Set id: %s)",
-                            obsvDomain, templateID));
-                    LOGGER.info("Decoded ipfix message for " + deviceName + " is: " + ipfixLogging.convertToLog());
-                    if (isAuthenticateDataSet(decodeDataSet)) {
-                        // DataSet for OptionTemplateSet
-                        String hostName = "";
-                        for (IpfixDecodedData decodedData : decodeDataSet) {
-                            if (decodedData.getCounterName().equalsIgnoreCase(IpfixConstants.HOSTNAME_IE_KEY)) {
-                                hostName = decodedData.getDecodedValue();
-                            }
-                        }
-
-                        // In case user manually update hostname, we need to check & update the cache accordingly
-                        if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().equals(hostName)) {
-                            m_cachingService.updateHostName(obsvDomain, arrOptHostNames[0].get(), hostName);
-                        }
-                        if (hostName.isEmpty()) {
-                            throw new CollectingProcessException("Missing hostname");
-                        }
-                        arrOptHostNames[0] = Optional.of(hostName);
-                        notificationMessage.setHostName(hostName);
-                    } else {
-                        // DataSet for TemplateSet
-                        if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().isEmpty()) {
-                            handleDataSetForTemplateSet(arrOptHostNames[0].get(), decodeDataSet, templateID, notificationMessage);
-                        } else {
-                            LOGGER.error(String.format("Couldn't find hostname so data set %s will be ignored", set.toString()));
-                            break;
-                        }
+                if (deviceFamily == null || (deviceFamily != null && deviceFamily.contains(IpfixConstants.BBF)
+                        && deviceFamily.contains(IpfixConstants.STANDARD))) {
+                    LOGGER.info("Decoding IPFIX message in IPFIX collector for standard adapter: " + deviceFamily);
+                    Set<IpfixDecodedData> decodeDataSet;
+                    try {
+                        decodeDataSet = m_decodingDataRecordService.decodeDataSet(arrOptHostNamesFromIpfix[0].orElse(""), obsvDomain,
+                                set, ipfixMessage, templateProvider);
+                    } catch (DecodingException e) {
+                        throw new CollectingProcessException("Error while decoding data set.", e);
                     }
-                    if (arrOptHostNames[0].isPresent()) {
-                        deviceName = arrOptHostNames[0].get();
-                    }
-                } else {
-                    LOGGER.debug(String.format("Buffering data set (Observation domain: %s, Set id: %s)",
-                            obsvDomain, set.getHeader().getId()));
-                    if (arrOptHostNames[0].isPresent()) {
-                        m_cachingService.cacheIpfixDataSet(obsvDomain, arrOptHostNames[0].get(), set);
-                    } else {
-                        LOGGER.info(String.format("Couldn't find hostname so data set %s will be ignored", set.toString()));
-                    }
-                }
-            }
-        } else {
-            LOGGER.info("Sending IPFIX message to adapter " + deviceFamily + " to decode");
-            IpfixAdapterInterface ipfixAdapterInterface = getIpifixAdapterInterface(deviceFamily);
-            List<Set<IpfixDecodedData>> decodeDataSetList = new ArrayList<>();
-            if (ipfixAdapterInterface != null) {
-                decodeDataSetList = ipfixAdapterInterface.decodeIpfixMessage(rawDataSets, arrOptHostNames, ipfixMessage,
-                        ipfixLogging, deviceFamily);
-            } else {
-                throw new CollectingProcessException("IPFIX device interface is missing in the map");
-            }
 
-            if (decodeDataSetList.size() == rawDataSets.size()) {
-                for (int arrayIndex = 0; arrayIndex < decodeDataSetList.size(); arrayIndex++) {
                     // Logging
                     boolean isOptionTemplateSet = false;
-                    if (decodeDataSetList.get(arrayIndex) != null) {
+                    if (decodeDataSet != null) {
                         isOptionTemplateSet = true;
                     }
-                    IpfixSetHeader setHeader = rawDataSets.get(arrayIndex).getHeader();
+                    IpfixSetHeader setHeader = set.getHeader();
                     IpfixLoggingDataSet ipfixLoggingDataSet = new IpfixLoggingDataSet(setHeader);
-                    ipfixLoggingDataSet.setDataRecords(rawDataSets.get(arrayIndex).getRecords(), isOptionTemplateSet);
+                    ipfixLoggingDataSet.setDataRecords(set.getRecords(), isOptionTemplateSet);
 
                     AbstractTemplateRecord abstractTemplateRecord = templateProvider.get(setHeader.getId());
                     if (abstractTemplateRecord != null) {
@@ -299,56 +233,130 @@ public class CollectingServiceImpl implements CollectingService {
                     }
                     ipfixLogging.addToSetMessages(ipfixLoggingDataSet);
 
-                    if (decodeDataSetList.get(arrayIndex) != null && !decodeDataSetList.get(arrayIndex).isEmpty()) {
-                        int templateID = rawDataSets.get(arrayIndex).getHeader().getId();
+                    if (decodeDataSet != null && !decodeDataSet.isEmpty()) {
+                        int templateID = set.getHeader().getId();
                         LOGGER.debug(String.format("Data set decoded successfully (Observation domain: %s, Set id: %s)",
                                 obsvDomain, templateID));
                         LOGGER.info("Decoded ipfix message for " + deviceName + " is: " + ipfixLogging.convertToLog());
-                        if (isAuthenticateDataSet(decodeDataSetList.get(arrayIndex))) {
+                        if (isAuthenticateDataSet(decodeDataSet)) {
                             // DataSet for OptionTemplateSet
                             String hostName = "";
-                            for (IpfixDecodedData decodedData : decodeDataSetList.get(arrayIndex)) {
+                            for (IpfixDecodedData decodedData : decodeDataSet) {
                                 if (decodedData.getCounterName().equalsIgnoreCase(IpfixConstants.HOSTNAME_IE_KEY)) {
                                     hostName = decodedData.getDecodedValue();
                                 }
                             }
 
                             // In case user manually update hostname, we need to check & update the cache accordingly
-                            if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().equals(hostName)) {
-                                m_cachingService.updateHostName(obsvDomain, arrOptHostNames[0].get(), hostName);
+                            if (arrOptHostNamesFromIpfix[0].isPresent() && !arrOptHostNamesFromIpfix[0].get().equals(hostName)) {
+                                m_cachingService.updateHostName(obsvDomain, arrOptHostNamesFromIpfix[0].get(), hostName);
                             }
                             if (hostName.isEmpty()) {
                                 throw new CollectingProcessException("Missing hostname");
                             }
-                            arrOptHostNames[0] = Optional.of(hostName);
+                            arrOptHostNamesFromIpfix[0] = Optional.of(hostName);
                             notificationMessage.setHostName(hostName);
                         } else {
                             // DataSet for TemplateSet
-                            if (arrOptHostNames[0].isPresent() && !arrOptHostNames[0].get().isEmpty()) {
-                                handleDataSetForTemplateSet(arrOptHostNames[0].get(),
-                                        decodeDataSetList.get(arrayIndex), templateID, notificationMessage);
+                            if (arrOptHostNamesFromIpfix[0].isPresent() && !arrOptHostNamesFromIpfix[0].get().isEmpty()) {
+                                handleDataSetForTemplateSet(arrOptHostNamesFromIpfix[0].get(), decodeDataSet,
+                                        templateID, notificationMessage);
                             } else {
-                                LOGGER.error(String.format("Couldn't find hostname so data set %s will be ignored",
-                                        rawDataSets.get(arrayIndex).toString()));
+                                LOGGER.error(String.format("Couldn't find hostname so data set %s will be ignored", set.toString()));
                                 break;
                             }
                         }
-                        if (arrOptHostNames[0].isPresent()) {
-                            deviceName = arrOptHostNames[0].get();
+                        if (arrOptHostNamesFromIpfix[0].isPresent()) {
+                            deviceName = arrOptHostNamesFromIpfix[0].get();
                         }
                     } else {
                         LOGGER.debug(String.format("Buffering data set (Observation domain: %s, Set id: %s)",
-                                obsvDomain, rawDataSets.get(arrayIndex).getHeader().getId()));
-                        if (arrOptHostNames[0].isPresent()) {
-                            m_cachingService.cacheIpfixDataSet(obsvDomain, arrOptHostNames[0].get(), rawDataSets.get(arrayIndex));
+                                obsvDomain, set.getHeader().getId()));
+                        if (arrOptHostNamesFromIpfix[0].isPresent()) {
+                            m_cachingService.cacheIpfixDataSet(obsvDomain, arrOptHostNamesFromIpfix[0].get(), set);
                         } else {
-                            LOGGER.info(String.format("Couldn't find hostname so data set %s will be ignored",
-                                    rawDataSets.get(arrayIndex).toString()));
+                            LOGGER.info(String.format("Couldn't find hostname so data set %s will be ignored", set.toString()));
+                        }
+                    }
+                } else {
+                    LOGGER.info("Sending IPFIX message to adapter " + deviceFamily + " to decode");
+                    IpfixAdapterInterface ipfixAdapterInterface = getIpifixAdapterInterface(deviceFamily);
+                    List<Set<IpfixDecodedData>> decodeDataSetList = new ArrayList<>();
+                    if (ipfixAdapterInterface != null) {
+
+                        decodeDataSetList = ipfixAdapterInterface.decodeIpfixMessage(set, arrOptHostNamesFromIpfix, ipfixMessage,
+                                ipfixLogging, deviceFamily);
+                    } else {
+                        throw new CollectingProcessException("IPFIX device interface is missing in the map");
+                    }
+                    for (int arrayIndex = 0; arrayIndex < decodeDataSetList.size(); arrayIndex++) {
+                        // Logging
+                        boolean isOptionTemplateSet = false;
+                        if (decodeDataSetList.get(arrayIndex) != null) {
+                            isOptionTemplateSet = true;
+                        }
+                        IpfixSetHeader setHeader = rawDataSets.get(arrayIndex).getHeader();
+                        IpfixLoggingDataSet ipfixLoggingDataSet = new IpfixLoggingDataSet(setHeader);
+                        ipfixLoggingDataSet.setDataRecords(rawDataSets.get(arrayIndex).getRecords(), isOptionTemplateSet);
+
+                        AbstractTemplateRecord abstractTemplateRecord = templateProvider.get(setHeader.getId());
+                        if (abstractTemplateRecord != null) {
+                            ipfixLoggingDataSet.setTemplateRecords(abstractTemplateRecord.getFieldSpecifiers());
+                        }
+                        ipfixLogging.addToSetMessages(ipfixLoggingDataSet);
+
+                        if (decodeDataSetList.get(arrayIndex) != null && !decodeDataSetList.get(arrayIndex).isEmpty()) {
+                            int templateID = rawDataSets.get(arrayIndex).getHeader().getId();
+                            LOGGER.debug(String.format("Data set decoded successfully (Observation domain: %s, Set id: %s)",
+                                    obsvDomain, templateID));
+                            LOGGER.info("Decoded ipfix message for " + deviceName + " is: " + ipfixLogging.convertToLog());
+                            if (isAuthenticateDataSet(decodeDataSetList.get(arrayIndex))) {
+                                // DataSet for OptionTemplateSet
+                                String hostName = "";
+                                for (IpfixDecodedData decodedData : decodeDataSetList.get(arrayIndex)) {
+                                    if (decodedData.getCounterName().equalsIgnoreCase(IpfixConstants.HOSTNAME_IE_KEY)) {
+                                        hostName = decodedData.getDecodedValue();
+                                    }
+                                }
+
+                                // In case user manually update hostname, we need to check & update the cache accordingly
+                                if (arrOptHostNamesFromIpfix[0].isPresent() && !arrOptHostNamesFromIpfix[0].get().equals(hostName)) {
+                                    m_cachingService.updateHostName(obsvDomain, arrOptHostNamesFromIpfix[0].get(), hostName);
+                                }
+                                if (hostName.isEmpty()) {
+                                    throw new CollectingProcessException("Missing hostname");
+                                }
+                                arrOptHostNamesFromIpfix[0] = Optional.of(hostName);
+                                notificationMessage.setHostName(hostName);
+                            } else {
+                                // DataSet for TemplateSet
+                                if (arrOptHostNamesFromIpfix[0].isPresent() && !arrOptHostNamesFromIpfix[0].get().isEmpty()) {
+                                    handleDataSetForTemplateSet(arrOptHostNamesFromIpfix[0].get(),
+                                            decodeDataSetList.get(arrayIndex), templateID, notificationMessage);
+                                } else {
+                                    LOGGER.error(String.format("Couldn't find hostname so data set %s will be ignored",
+                                            rawDataSets.get(arrayIndex).toString()));
+                                    break;
+                                }
+                            }
+                            if (arrOptHostNamesFromIpfix[0].isPresent()) {
+                                deviceName = arrOptHostNamesFromIpfix[0].get();
+                            }
+                        } else {
+                            LOGGER.debug(String.format("Buffering data set (Observation domain: %s, Set id: %s)",
+                                    obsvDomain, rawDataSets.get(arrayIndex).getHeader().getId()));
+                            if (arrOptHostNamesFromIpfix[0].isPresent()) {
+                                m_cachingService.cacheIpfixDataSet(obsvDomain, arrOptHostNamesFromIpfix[0].get(),
+                                        rawDataSets.get(arrayIndex));
+                            } else {
+                                LOGGER.info(String.format("Couldn't find hostname so data set %s will be ignored",
+                                        rawDataSets.get(arrayIndex).toString()));
+                            }
                         }
                     }
                 }
-            } else {
-                LOGGER.error("Error occured while decoding IPFIX message, IPFIX message set and decoded message set's are not equal");
+            } catch (DecodingException e) {
+                LOGGER.error("Error while fetching device name from ipfix set");
             }
         }
 

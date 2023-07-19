@@ -17,7 +17,7 @@ The reference architecture with the relevant interfaces is depicted
 below:
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/control_relay/control-relay-service.png">
+ <img width="600px" height="400px" src="control-relay-service.png">
 </p>
 
 The relevant reference for the control relay is the following:
@@ -83,7 +83,7 @@ Control Relay NB Protocol Adapter for a SDN M&C application A while
 providing the Standard and Vendor Control Adapters in the SB layer.
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/control_relay/control-relay-deployment.png">
+ <img width="600px" height="400px" src="control-relay-deployment.png">
 </p>
 
 In the deployment diagram above the following architectural components:
@@ -193,7 +193,7 @@ Application Endpoint would establish a session with the Control Relay
 service as a gRPC client:
 
 <p align="center">
- <img width="1000px" height="1100px" src="{{site.url}}/architecture/control_relay/sdn_client_sequence.png">
+ <img width="1000px" height="1100px" src="sdn_client_sequence.png">
 </p>
 
 In the diagram above the access node establishes a gRPC session to the
@@ -216,7 +216,7 @@ the Control Relay service forwards the GPB message to the access node.
 ### Access Node to BAA layer Session Establishment and Packet Relay: SDN M&C as a gRPC server
 
 <p align="center">
- <img width="1000px" height="1100px" src="{{site.url}}/architecture/control_relay/sdn_server_sequence.png">
+ <img width="1000px" height="1100px" src="sdn_server_sequence.png">
 </p>
 
 In the diagram above the access node establishes a gRPC session to the
@@ -255,7 +255,7 @@ formulate the message to the SDN Application endpoint.
 **Info:** Currently the "Device Name" is the only common attribute for all device and connection types that uniquely allows identification of an access node. For this reason, packets relayed through the SCA must include the "Device Name".
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/control_relay/an-packet-receive.png">
+ <img width="600px" height="400px" src="an-packet-receive.png">
 </p>
 
 #### SDN M&C Application Endpoint Packet Transmit Interaction
@@ -272,7 +272,7 @@ Framework](../../architecture/device_adapter/index.md#device_adapter) section.
 **Info:** Currently the "Device Name" is the only common attribute for all device and connection types that uniquely allows identification of an access node. For this reason, packets relayed through the SCA must include the "Device Name".
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/control_relay/an-packet-transmit.png">
+ <img width="600px" height="400px" src="an-packet-transmit.png">
 </p>
 
 [<--Architecture](../index.md#architecture)

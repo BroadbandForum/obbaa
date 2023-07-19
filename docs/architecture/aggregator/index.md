@@ -2133,7 +2133,7 @@ The following is the component diagram with the component that interact
 with the Aggregator component.
 
 <p align="center">
- <img width="400px" height="400px" src="{{site.url}}/architecture/aggregator/aggregator_component.png">
+ <img width="400px" height="400px" src="aggregator_component.png">
 </p>
 
 Class diagram
@@ -2143,7 +2143,7 @@ The following is the class diagram for classes relevant (implemented or
 uses) to the Aggregator component.
 
 <p align="center">
- <img width="800px" height="800px" src="{{site.url}}/architecture/aggregator/aggregator_class.png">
+ <img width="800px" height="800px" src="aggregator_class.png">
 </p>
 
 Sequence diagram
@@ -2153,7 +2153,7 @@ The following is a sequence diagram that describes the important
 interactions of the Aggregator component.
 
 <p align="center">
- <img width="1000px" height="700px" src="{{site.url}}/architecture/aggregator/aggregator_seq.png">
+ <img width="1000px" height="700px" src="aggregator_seq.png">
 </p>
 
 Adaptation of request processors

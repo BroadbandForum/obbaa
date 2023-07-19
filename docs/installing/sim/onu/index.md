@@ -3,6 +3,8 @@
 
 # ONU Simulator
 
+The ONU simulator can be  used for simulating ONU functionality related to processing and responding to OMCI messages, as well as to test the scale of the BAA layer.
+
 The ONU simulator, at the time of writing, is designed to interact with the pOLT simulator through using UDP.
 Each instance runs in it\'s
 container being able to simulate one or more ONU in a single channel
@@ -55,7 +57,7 @@ onusim.py -p 50000 -n CT\_1 -i 1 -I 50
 
 **Connect with pOLT simulator**
 
-After the ONU simulator is on place, set the connection in the pOLT
+After the ONU simulator is in place, set the connection in the pOLT
 simulator.\
 If the pOLT simulator is not yet running, launch it.
 

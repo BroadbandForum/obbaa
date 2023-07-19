@@ -1,4 +1,24 @@
-# OB-BAA R5.1.0 Release Notes (11 November 2022)
+# OB-BAA R6.0.0 Release Notes (5 July 2023)
+
+<a name="rel_6_0_0"></a>
+
+Release 6.0.0 Highlights:
+=========================
+
+This release provides enhancements and fixes to the existing OB-BAA software that provides:
+
+- an automation test suite based on open source Robot Framework
+- telemetry of ONT data via vOMCI function based on Kafka and storage+visualisation of this data 
+- a D-OLT (WT-477) PPPoE IA embedded in the OB-BAA layer
+- a configurable ONU simulator for vOMCI testing
+- vOMCI solution aligned with latest WT-451 annex 1
+- a proprietary sample L2-L3 abstraction on the NB interface
+- an IPFIX (vendor) adapter framework
+
+Two repositories have been added in  this release
+
+- a repository containing the code that allows to run a WT-477 PPPoE IA VNF in OB-BAA SW layer
+- a repository that contains the code required to run the automation test suite
 
 <a name="rel_5_1_0"></a>
 

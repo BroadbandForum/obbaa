@@ -97,8 +97,11 @@ public class IpfixCachingServiceImpl implements IpfixCachingService {
 
     @Override
     public AbstractTemplateRecord getTemplateRecord(long obsvDomain, String hostname, int templateId) {
-        return (AbstractTemplateRecord) m_ipfixTemplateRecordCache.get(
-                IpfixConstants.buildCacheKey(obsvDomain, hostname, templateId)).getObjectValue();
+        if (m_ipfixTemplateRecordCache.get(IpfixConstants.buildCacheKey(obsvDomain, hostname, templateId)) != null) {
+            return (AbstractTemplateRecord) m_ipfixTemplateRecordCache.get(
+                    IpfixConstants.buildCacheKey(obsvDomain, hostname, templateId)).getObjectValue();
+        }
+        return null;
     }
 
     @Override

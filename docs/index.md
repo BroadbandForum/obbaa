@@ -80,6 +80,10 @@
 
 ## Revision History
 
+### Release 6
+
+* [OB-BAA release 6.0.0 (July 2023)]({{ site.obbaa_readme }}#rel_6_0_0)
+
 ### Release 5
 
 * [OB-BAA release 5.0.0 (April 2022)]({{ site.obbaa_readme }}#rel_5_0_0)
@@ -94,7 +98,7 @@
 
 * [OB-BAA release 3.0.0 (February 2020)]({{ site.obbaa_readme }}#rel_3_0_0)
 
-### Release 2
+A### Release 2
 
 * [OB-BAA release 2.0.0 (February 2019)]({{ site.obbaa_readme }}#rel_2_0_0)
 * [OB-BAA release 2.1.0 (July 2019)]({{ site.obbaa_readme }}#rel_2_1_0)
@@ -151,12 +155,14 @@ Third Party Tools and License
 -----------------------------
 The following tools are used by the OB-BAA project:
 
-| Software Name| Purpose | Vendor | Paid/Open Source | License | Details |
-| :--- | :--- | :--- | :--- |:--- | :--- |
-|Netopeer2|NETCONF device simulator|CESNET|Open Source|BSD-3|<a href="https://github.com/CESNET/Netopeer2">Github link</a>|
-|Atom|NETCONF client text editor|Atom|Open Source|MIT|<a href="https://atom.io">Documentation link</a>|
-|atom-netconf|NETCONF package for the Atom editor|Nokia|Open Source|MIT|<a href="https://github.com/nokia/atom-netconf">Github link</a>|
-|protoc|Protocol Buffer Compiler|gRPC Authors|Open Source|BSD-style|<a href="https://github.com/protocolbuffers/protobuf">Github link</a>|
+| Software Name   | Purpose                             | Vendor             | Paid/Open Source | License            | Details                                                                    |
+|:----------------|:------------------------------------|:-------------------|:-----------------|:-------------------|:---------------------------------------------------------------------------|
+| Netopeer2       | NETCONF device simulator            | CESNET             | Open Source      | BSD-3              | <a href="https://github.com/CESNET/Netopeer2">Github link</a>              |
+| Atom            | NETCONF client text editor          | Atom               | Open Source      | MIT                | <a href="https://atom.io">Documentation link</a>                           |
+| atom-netconf    | NETCONF package for the Atom editor | Nokia              | Open Source      | MIT                | <a href="https://github.com/nokia/atom-netconf">Github link</a>            |
+| protoc          | Protocol Buffer Compiler            | gRPC Authors       | Open Source      | BSD-style          | <a href="https://github.com/protocolbuffers/protobuf">Github link</a>      |
+| Robot Framework | Test Automation Framework           | Robot Framework ua | Open Source      | Apache License 2.0 | <a href="https://github.com/robotframework/robotframework">Github link</a> |
+
 
 The following tools are used in and delivered by the OB-BAA project:
 

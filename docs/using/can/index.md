@@ -42,7 +42,7 @@ The following figure summarizes the VLAN operations configured in step 3
 and 4:
 
 <p align="center">
- <img width="900px" height="600px" src="{{site.url}}/using/can/dpu.png">
+ <img width="900px" height="600px" src="dpu.png">
 </p>
 
 Legend:
@@ -96,7 +96,7 @@ The following figure summarizes the operations configured in step 5,6
 and 7:
 
 <p align="center">
- <img width="900px" height="600px" src="{{site.url}}/using/can/olt_1_1.png">
+ <img width="900px" height="600px" src="olt_1_1.png">
 </p>
 
 Legend:
@@ -132,7 +132,7 @@ The following figure summarizes the operations configured in step 5,6
 and 7:
 
 <p align="center">
- <img width="900px" height="600px" src="{{site.url}}/using/can/olt_n_1.png">
+ <img width="900px" height="600px" src="olt_n_1.png">
 </p>
 
 Legend:

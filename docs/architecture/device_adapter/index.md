@@ -139,14 +139,14 @@ event into a representation supported by the pAN device type. The flow
 is depicted in the diagram below:
 
 <p align="center">
- <img width="1000px" height="700px" src="{{site.url}}/architecture/device_adapter/adapter_frmk_at_work.png">
+ <img width="1000px" height="700px" src="adapter_frmk_at_work.png">
 </p>
 
 The diagram below provides an example of an \"Edit Configuration\"
 command as it processes through the Adapter Framework:
 
 <p align="center">
- <img width="1000px" height="700px" src="{{site.url}}/architecture/device_adapter/adapter_frmk_command.png">
+ <img width="1000px" height="700px" src="adapter_frmk_command.png">
 </p>
 
 ## Vendor Device Adapter Interface<a name="VDAInterface"></a>

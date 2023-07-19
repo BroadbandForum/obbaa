@@ -57,7 +57,7 @@ The vOMCI architecture diagram below depicts the vOMCI function and
 vOMCI Proxy microservices:
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/voltmf/voltmf_design.png">
+ <img width="600px" height="400px" src="voltmf_design.png">
 </p>
 
 
@@ -383,6 +383,324 @@ The vOMCI function receives the ONU alarm's status then to send notifications th
 Everytime an alarm message is received from the ONU, the vOMCI function checks all the ONU's alarms status received and verifies which alarms have changed its state. Then, the notification with the alarms that changed are sent to vOLTMF
 
 [For more information about the ONU alarm Handling](/voltmf/onu_alarm/index.md#onu_alarm)
+
+
+## Subscribing to vOMCI function for receiving telemetry data of ONUs
+The vOMCI function is able to periodically fetch some specified telemetry data from ONUs and push the collected data to the given collection point.
+
+### Establishing telemetry subscriptions
+The ONU telemetry data, which is specified as a YANG path, and the time interval for pushing data are registered to the vOMCI function through sending a telemetry subscription request, as follows:
+~~~
+Msg {
+    header {
+        msg_id: "1"
+        sender_name: "vOLTMF"
+        recipient_name: "vomci-vendor-1"
+        object_type: "VOMCI_FUNCTION"
+        object_name: "vomci-vendor-1"
+    }
+    body {
+        request {
+            action{
+                input_data: <data>
+            }
+        }
+    }
+}
+~~~
+
+where \<data> consists of subscription information as follows:
+
+~~~
+{
+    "bbf-vomci-function:vomci": {
+        "managed-onus": {
+            "managed-onu": [
+                {
+                    "name": "ont1",
+                    "bbf-obbaa-vomci-telemetry:establish-subscription": {
+                        "updates": [
+                            {
+                                "name": "pm",
+                                "xpaths": [
+                                    "ietf-interfaces:interfaces-state"
+                                ],
+                                "mode": "periodic",
+                                "interval": 900
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}
+~~~
+If the vOMCI succeeds to register such a subscription it replies with the id associated to this subscription (which can be later used to refer to this subscription), as follows:
+
+
+~~~
+Msg {
+  header {
+    msg_id: "1"
+    sender_name: "vomci-vendor-1"
+    recipient_name: "vOLTMF"
+    object_type: VOMCI_FUNCTION
+    object_name: "vomci-vendor-1"
+  }
+  body {
+    response {
+      action_resp {
+        status_resp {
+           status_code=0
+        }
+        output_data: "{\"bbf-obbaa-vomci-telemetry:subscription-id\": 1}"
+      }
+    }
+  }
+}
+~~~
+
+Note: Telemetry subscription response from vOMCI function Expand source
+All the telemetry subscriptions are persistently stored, such that in case of any failure in the vOMCI function these subscriptions are restored and continue working after vOMCI recovery.
+
+Note: Currently, vOMCI function is able to stream PM counters of ethernet interfaces. Accordingly, before making telemetry subscriptions, these PM counters must be first enabled, through the ONU YANG configurations.
+
+
+
+### Streaming telemetry data
+
+As soon as a telemetry subscription is registered, vOMCI function starts to periodically stream the specified ONU's data on a Kafka topic, which is initially configured as an environment variable. The telemetry data are pushed as notifications, as follows:
+~~~
+Msg {
+    header {
+        msg_id: "1"
+        sender_name: "vomci-vendor-1"
+        recipient_name: "vOLTMF"
+        object_type: ONU
+        object_name: "ont1"
+    }
+    body {
+        notification {        
+            data: <data>
+        }
+    }
+}
+~~~
+where \<data> consists of telemetry data as follows:
+~~~
+{
+    "bbf-obbaa-vomci-telemetry:telemetry-data": {
+        "subscription-id": 1,
+        "onu-name": "ont1",
+        "collection-time": "2023-04-14 11:31:42.363270",
+        "last-message": "true",
+        "values": {
+            "ietf-interfaces:interfaces-state": {
+                "interface": [
+                    {
+                        "name": "enet_uni_ont1_1_1",
+                        "type": "iana-if-type:ethernetCsmacd",
+                        "bbf-interface-port-reference:port-layer-if": [
+                            "ontUni_ont1_1_1"
+                        ],
+                        "admin-status": "up",
+                        "oper-status": "up",
+                        "bbf-interfaces-performance-management:performance": {
+                            "intervals-15min": {
+                                "history": [
+                                    {
+                                        "interval-number": 1,
+                                        "invalid-data-flag": "false",
+                                        "measured-time": 900,
+                                        "in-broadcast-pkts": 21,
+                                        "in-multicast-pkts": 22,
+                                        "in-octets": 20,
+                                        "out-broadcast-pkts": 11,
+                                        "out-multicast-pkts": 12,
+                                        "out-octets": 10,
+                                        "time-stamp": "2023-04-14 11:31:42.363177"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "enet_uni_ont1_1_2",
+                        "type": "iana-if-type:ethernetCsmacd",
+                        "bbf-interface-port-reference:port-layer-if": [
+                            "ontUni_ont1_1_2"
+                        ],
+                        "admin-status": "up",
+                        "oper-status": "up",
+                        "bbf-interfaces-performance-management:performance": {
+                            "intervals-15min": {
+                                "history": [
+                                    {
+                                        "interval-number": 1,
+                                        "invalid-data-flag": "false",
+                                        "measured-time": 900,
+                                        "in-broadcast-pkts": 0,
+                                        "in-multicast-pkts": 0,
+                                        "in-octets": 0,
+                                        "out-broadcast-pkts": 0,
+                                        "out-multicast-pkts": 0,
+                                        "out-octets": 0,
+                                        "time-stamp": "2023-04-14 11:31:42.363230"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "ontAni_ont1",
+                        "type": "bbf-xpon-if-type:ani",
+                        "admin-status": "up",
+                        "oper-status": "up"
+                    }
+                ]
+            }
+        }
+    }
+}
+~~~
+### Retrieving telemetry subscriptions
+This list of telemetry subscriptions made in vOMCI function can be retrieved by sending a GET request toward vOMCI function, as follows:
+
+~~~
+Msg {
+    header {
+        msg_id: "2"
+        sender_name: "vOLTMF"
+        recipient_name: "vomci-vendor-1"
+        object_type: "VOMCI_FUNCTION"
+        object_name: "vomci-vendor-1"
+    }
+    body {
+        request {
+            get_data {
+                filter: <data>
+            }
+        }
+    }
+}
+~~~
+where \<data> consists of requested subscriptions as follows:
+
+~~~
+{
+    "bbf-vomci-function:vomci": {
+        "managed-onus": {
+            "managed-onu": [
+                {
+                    "name": "ont1",
+                    "bbf-obbaa-vomci-telemetry:established-subscriptions": {}
+                }
+            ]
+        }
+    }
+}
+~~~
+
+The response is as follows:
+~~~
+Msg {
+  header {
+    msg_id: "3"
+    sender_name: "vomci-vendor-1"
+    recipient_name: "vOLTMF"
+    object_type: VOMCI_FUNCTION
+    object_name: "vomci-vendor-1"
+  }
+  body {
+    response {
+      get_resp {
+        data: <data>
+      }
+    }
+  }
+}
+~~~
+
+where \<data> consists of the telemetry subscriptions:
+
+~~~
+{
+    "bbf-vomci-function:vomci": {
+        "managed-onus": {
+            "managed-onu": [
+                {
+                    "name": "ont1",
+                    "bbf-obbaa-vomci-telemetry:established_subscriptions": [
+                        {
+                            "subscription-id": 1,
+                            "updates": [
+                                {
+                                    "name": "pm1",
+                                    "xpaths": [
+                                        "ietf-interfaces:interfaces-state"
+                                    ],
+                                    "interval": 900
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+~~~
+### Deleting telemetry subscriptions
+A telemetry subscription can be removed from vOMCI function through its subscription ID, as follows:
+
+~~~
+Msg {
+    header {
+        msg_id: "3"
+        sender_name: "vOLTMF"
+        recipient_name: "vomci-vendor-1"
+        object_type: "VOMCI_FUNCTION"
+        object_name: "vomci-vendor-1"
+    }
+    body {
+        request {
+            action {
+                input_data: <data>
+            }
+        }
+    }
+}
+~~~
+where \<data> consists of subscriptions which should be removed as follows:
+
+~~~
+{
+    "bbf-vomci-function:managed-onus": {
+        "managed-onu": [
+            {
+                "name": "ont1",
+                "bbf-obbaa-vomci-telemetry:delete-subscription": {
+                    subscription_id: 1
+                }
+            }
+        ]
+    }
+}
+~~~
+
+The response of the vOMCI function on the subscription request is as follows:
+~~~
+response {
+    action_resp {
+        status_resp {}
+        output_data: "{\"bbf-obbaa-vomci-telemetry:subscription-id\": 1}"
+    }
+}
+~~~
+Note: The vOMCI function removes all the telemetry subscriptions of an ONU, when it receives a onu-delete request for that ONU.
+
+
 
 ## vOMCI function Communication with the OLT
 

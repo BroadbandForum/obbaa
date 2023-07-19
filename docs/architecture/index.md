@@ -15,7 +15,7 @@ access control to restrict access to parts of the AN.
 While most northbound interfaces used by OB-BAA are standardized, several interfaces (e.g., M<sub>fc_L2-3</sub>) are used that haven't been standardized or are in the process of standardization.
 
 <p align="center">
- <img width="800px" height="500px" src="{{site.url}}/architecture/system_interfaces.png">
+ <img width="800px" height="500px" src="system_interfaces.png">
 </p>
 
 ANs interact with the BAA layer through the adapters of the SBI. These
@@ -30,7 +30,7 @@ A high-level software architecture is depicted below that implements the
 logical system architecture described in the previous section.
 
 <p align="center">
- <img width="1100px" height="1000px" src="{{site.url}}/architecture/system_architecture.png">
+ <img width="1100px" height="1000px" src="system_architecture.png">
 </p>
 
 The roles and responsibilities of each of these components are as
@@ -355,12 +355,28 @@ and SDN M&C application endpoint is configurable through the M<sub>fc-conf</sub>
 
 [For more information on the Control Relay Service](control_relay/index.md#control_relay)
 
+
+### PPPoE IA VNF
+The PPPoE IA VNF implements the PPPoE IA (Intermediate Agent) as a VNF running alongside 
+OBBAA in cloud separated from the physical OLT. The VNF design and interactions follow conventions 
+as specified in WT.477 and used the Control relay service for receiving/sending Control messages (Mfc) 
+to/from physical devices.
+
+[For more information on PPPoE IA VNF](pppoe/index.md#pppoe)
+
 ### Service Discovery
 
 The Service discovery is used to retrieve VNF details from Container management tool. In this release Kubernetes is the supported container orchestrator. This service allows OBBAA user to query the list of VNFs, their status & details. The Module uses the orchestrator API (for Kubernetes its REST API) to retrieve the requested details.
 
-[For more information on Discovering micro-services](/using/micro_discovery/index.md#micro_discovery)
+[For more information on Discovering micro-services](../using/micro_discovery/index.md)
 
+
+### Model Abstracter
+OBBAA supports model abstracter which will be helpful in abstraction of technology specifics
+and provide common yang instructions. The Model Abstracter module is a completely optional module 
+that can enabled/disable as part of OB-BAA start up.
+
+[For more information on the Model Abstracter](model_abstracter/index.md)
 
 [<--Overview](../overview/index.md#overview)
 

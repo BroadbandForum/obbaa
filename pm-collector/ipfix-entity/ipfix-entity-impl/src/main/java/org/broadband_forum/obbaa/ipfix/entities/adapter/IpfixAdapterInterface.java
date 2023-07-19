@@ -29,7 +29,7 @@ import org.broadband_forum.obbaa.ipfix.entities.set.IpfixDataSet;
 
 public interface IpfixAdapterInterface {
 
-    List<Set<IpfixDecodedData>> decodeIpfixMessage(List<IpfixDataSet> rawDataSets, Optional<String>[] optionalHostNames,
+    List<Set<IpfixDecodedData>> decodeIpfixMessage(IpfixDataSet rawDataSets, Optional<String>[] optionalHostNames,
                  IpfixMessage ipfixMessage, IpfixLogging ipfixLogging, String deviceFamily) throws CollectingProcessException;
 
 }

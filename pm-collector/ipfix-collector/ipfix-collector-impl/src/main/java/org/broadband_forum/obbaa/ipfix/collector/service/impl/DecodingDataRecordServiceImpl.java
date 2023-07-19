@@ -128,7 +128,8 @@ public class DecodingDataRecordServiceImpl implements DecodingDataRecordService 
      * @return deviceName in string value
      * @throws DecodingException when could not decode devicename with {@param dataSet}
      */
-    private String decodeDeviceName(IpfixDataSet dataSet) throws DecodingException {
+    @Override
+    public String decodeDeviceName(IpfixDataSet dataSet) throws DecodingException {
         byte[] data = dataSet.getRawData();
         try {
             int fieldLength = getVariableLength(data);

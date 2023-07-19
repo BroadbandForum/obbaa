@@ -6,7 +6,7 @@
 The BAA layer provides the capability to receive alarms from pANs, adapt the alarm into the standard alarm as defined in the IETF YANG Alarm module (ietf-alarm) [RFC 8632](https://tools.ietf.org/html/rfc8632) and then forward the alarm based on subscriptions created by SDN M&C clients to the BAA layer.
 
 <p align="center">
- <img width="600px" height="400px" src="{{site.url}}/architecture/alarm/subscribe.png">
+ <img width="600px" height="400px" src="subscribe.png">
 </p>
 
 The BAA layer uses the **alarm-list** and the
@@ -107,7 +107,7 @@ Notification callback.
 The alarm forwarding sequence is described below:
 
 <p align="center">
- <img width="1000px" height="600px" src="{{site.url}}/architecture/alarm/forwarding.png">
+ <img width="1000px" height="600px" src="forwarding.png">
 </p>
 
 he device notification listener receives notifications from the pANs. A
