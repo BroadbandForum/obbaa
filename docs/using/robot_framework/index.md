@@ -12,7 +12,7 @@ Robot framework and required tools must be installed. Details of the robot frame
 ## How to Run automated tests using Robot framework
 1. Robot fwk and required tools must be installed
 2. Checkout the obbaa-test-automation code
-3. git clone checkout [ssh://git@code.broadband-forum.org:7999/obbaa/obbaa-test-automation.git](ssh://git@code.broadband-forum.org:7999/obbaa/obbaa-test-automation.git)
+3. git clone checkout git@github.com:BroadbandForum/obbaa-test-automation.git
 4. checkout to the required branch. (ex. develop branch)
 5. Navigate to the obbaa-test-automation directory
 6. Run command make run-robot-tests (This will run all the tests in the sequential order)
